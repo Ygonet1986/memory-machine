@@ -98,6 +98,7 @@ class Machine:
         )
         if save:
             self.save()
+            self._update_session_meta()
         return {
             "ok": True,
             "record": record.to_dict(),
@@ -389,6 +390,8 @@ class Machine:
         if sessions_dir_for(self.root) is None:
             return
         summary = self.whiteboard.metacognition or self.whiteboard.subject
+        if not summary:
+            summary = "; ".join(r.summary for r in self.tape.read()[:3] if r.summary)
         try:
             save_session_meta(self.root, session_id=self.root.name, summary=summary)
         except OSError:

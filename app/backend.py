@@ -14,11 +14,11 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from memory_machine import documents as documents_mod
 from memory_machine.config import Config
 from memory_machine.coordinator import Machine
 from memory_machine.llm import LLMClient
 
-from . import documents as documents_mod
 from . import router, topics as topics_mod
 from . import websearch
 from .settings import load_settings, save_settings

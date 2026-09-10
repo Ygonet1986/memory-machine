@@ -53,6 +53,12 @@ python3 -m memory_machine run \
 | `status` | Show tape / groups / agents / whiteboard state |
 | `whiteboard` | Print the whiteboard |
 | `context` | Print the main chatbot's conversation context |
+| `recall Q [--cross-session]` | Run memory agents for a question (JSON); optionally search other sessions |
+| `checkpoint Q S [--memories JSON]` | Record a turn back to memory (JSON) |
+| `remember --summary S [--type T] [--why W]` | Append a memory (JSON) |
+| `list` / `archive ID` / `delete ID` | Manage tape records (JSON) |
+| `sessions` | List sessions (JSON) |
+| `rollup [--keep-recent N]` | Consolidate older tape records into one summary |
 
 Use `-C <dir>` to operate on a specific project directory. Run
 `python3 -m memory_machine <cmd> --help` for details.

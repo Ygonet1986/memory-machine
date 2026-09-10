@@ -10,6 +10,7 @@ conceptual cycle:
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from typing import Any
 
@@ -29,6 +30,7 @@ from .llm import LLMClient, LLMError
 from .main_chatbot import memory_from_spec, run_main_chatbot
 from .metacognition import update_metacognition
 from .secrets import SecretError
+from .sessions import save_session_meta, search_sessions, sessions_dir_for
 from .tape import MemoryRecord, Tape
 from .whiteboard import (
     load_whiteboard,
@@ -38,6 +40,22 @@ from .whiteboard import (
     size_chars,
     Whiteboard,
 )
+
+_TRIVIAL_MESSAGES = {
+    "ok", "okay", "thanks", "thank you", "hi", "hello", "oi", "obrigado",
+    "valeu", "yes", "no", "sim", "não", "nao", "blz", "beleza", "certo",
+}
+
+
+def _is_trivial(question: str) -> bool:
+    q = (question or "").strip().lower()
+    return len(q) < 4 or q in _TRIVIAL_MESSAGES
+
+
+ROLLUP_PROMPT = """You are consolidating older project memories into one \
+summary. Keep the durable decisions, lessons, conventions and facts; drop \
+transient chatter. Be concise (a short paragraph or bullets). Return only the \
+summary."""
 
 
 class Machine:
@@ -256,15 +274,33 @@ class Machine:
         self,
         question: str,
         *,
+        cross_session: bool = False,
         temperature: float = 0.0,
         max_workers: int | None = None,
     ) -> dict[str, Any]:
         """Run the memory agents only (no chatbot) and return the whiteboard.
 
-        This is the deterministic recall step: the agents read the whiteboard,
-        refine their checklists and annotate the memories relevant to the
-        current question. Returns the ready-to-inject whiteboard summary.
+        Deterministic recall: the agents read the whiteboard, refine their
+        checklists and annotate the memories relevant to the current question.
+
+        Optimizations: an identical subject is served from cache, and trivial
+        messages reuse the previous recall — both skip the LLM agents. When
+        ``cross_session`` is set, relevant memories from *other* sessions are
+        searched (BM25) and returned as ``past_hits``.
         """
+        trivial = _is_trivial(question)
+        cache = self._load_recall_cache()
+
+        if cache and (cache.get("subject") == question or trivial):
+            result = dict(cache.get("result") or {})
+            result["cached"] = True
+            if not trivial:
+                self.whiteboard.subject = question
+                self.save()
+            if cross_session:
+                result["past_hits"] = self._cross_session_hits(question)
+            return result
+
         client = self._ensure_client()
         self.whiteboard.subject = question
 
@@ -297,7 +333,7 @@ class Machine:
             consolidated = True
 
         self.save()
-        return {
+        result: dict[str, Any] = {
             "ok": True,
             "subject": self.whiteboard.subject,
             "understanding": self.whiteboard.metacognition,
@@ -312,7 +348,51 @@ class Machine:
             "tape_records": len(self.tape),
             "agents": len(self.manifest.agents),
             "render": self.whiteboard.render(),
+            "cached": False,
         }
+        self._save_recall_cache(question, result)
+        if cross_session:
+            result["past_hits"] = self._cross_session_hits(question)
+        return result
+
+    # ---------------------------------------------------------- recall cache
+
+    def _recall_cache_path(self) -> Path:
+        return self.root / "recall_cache.json"
+
+    def _load_recall_cache(self) -> dict[str, Any] | None:
+        path = self._recall_cache_path()
+        if not path.exists():
+            return None
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+            return data if isinstance(data, dict) else None
+        except (json.JSONDecodeError, OSError):
+            return None
+
+    def _save_recall_cache(self, question: str, result: dict[str, Any]) -> None:
+        try:
+            self._recall_cache_path().write_text(
+                json.dumps({"subject": question, "result": result}, ensure_ascii=False),
+                encoding="utf-8",
+            )
+        except OSError:
+            pass
+
+    def _cross_session_hits(self, question: str) -> list[dict[str, Any]]:
+        sdir = sessions_dir_for(self.root)
+        if sdir is None:
+            return []
+        return search_sessions(sdir, question, exclude_id=self.root.name, limit=5)
+
+    def _update_session_meta(self) -> None:
+        if sessions_dir_for(self.root) is None:
+            return
+        summary = self.whiteboard.metacognition or self.whiteboard.subject
+        try:
+            save_session_meta(self.root, session_id=self.root.name, summary=summary)
+        except OSError:
+            pass
 
     def checkpoint(
         self,
@@ -375,6 +455,7 @@ class Machine:
             consolidate_context(self.context, client=client, temperature=temperature)
 
         self.save()
+        self._update_session_meta()
         return {
             "ok": True,
             "memories_saved": saved,
@@ -388,6 +469,52 @@ class Machine:
 
     def list_records(self) -> list[dict[str, Any]]:
         return [r.to_dict() for r in self.tape.read()]
+
+    def rollup(self, *, keep_recent: int = 20, temperature: float = 0.0) -> dict[str, Any]:
+        """Consolidate older active records into one rollup memory.
+
+        The oldest records (all but the ``keep_recent`` newest) are summarized
+        into a single ``memory`` record and the sources are archived, so the
+        tape stays bounded without losing the essentials.
+        """
+        records = [r for r in self.tape.read() if r.status == "active"]
+        if len(records) <= keep_recent:
+            return {"ok": True, "rolled": 0, "reason": "nothing to roll up"}
+
+        old = records[:-keep_recent]
+        body = "\n".join(f"- [{r.type}] {r.summary}" for r in old)
+
+        client = self.ensure_client_optional()
+        summary = ""
+        if client is not None:
+            try:
+                summary = client.complete(
+                    [
+                        {"role": "system", "content": ROLLUP_PROMPT},
+                        {"role": "user", "content": body},
+                    ],
+                    temperature=temperature,
+                ).strip()
+            except Exception:
+                summary = ""
+        if not summary:
+            summary = f"Rollup of {len(old)} older memories: " + "; ".join(
+                r.summary for r in old[:10]
+            )
+
+        roll_rec = MemoryRecord(type="memory", summary=summary[:1500], why=body[:4000])
+        rec, _g, _a, _created = add_memory(
+            self.tape, self.manifest, roll_rec, model=self.config.model
+        )
+        self.tape.set_status_many([r.id for r in old], "archived")
+        self.save()
+        return {
+            "ok": True,
+            "rolled": len(old),
+            "rollup_id": rec.id,
+            "kept": len(records) - len(old),
+            "archived": [r.id for r in old],
+        }
 
     def consolidate(self, *, temperature: float = 0.0, use_llm: bool = False) -> dict[str, Any]:
         client = self.ensure_client_optional() if use_llm else self.client

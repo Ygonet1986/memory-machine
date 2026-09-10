@@ -155,5 +155,18 @@ class Tape:
                 return True
         return False
 
+    def set_status_many(self, memory_ids: list[str], status: str) -> int:
+        """Set the status of several records in a single rewrite. Returns the count."""
+        ids = set(memory_ids)
+        records = self._read_all()
+        changed = 0
+        for r in records:
+            if r.id in ids:
+                r.status = status
+                changed += 1
+        if changed:
+            self._rewrite(records)
+        return changed
+
     def __len__(self) -> int:
         return len(self._read_all())

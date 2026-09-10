@@ -1,0 +1,149 @@
+from memory_machine.config import Config
+from memory_machine.coordinator import Machine
+from memory_machine.tape import MemoryRecord
+
+from fakes import FakeClient, text
+
+
+def _machine(tmp_path, handler):
+    client = FakeClient(handler)
+    cfg = Config(capacity=3)
+    return Machine(tmp_path, config=cfg, client=client)
+
+
+def test_run_full_cycle(tmp_path):
+    def handler(messages, temperature):
+        sys_text = text(messages, "system")
+        if "You are a memory agent" in sys_text:
+            return '{"annotations":[{"memory_id":"M0001","note":"prior db decision","relevance":0.9}]}'
+        # main chatbot
+        return "Use Postgres.\n" + '{"memories":[{"type":"lesson","summary":"pool connections","why":"perf"}]}'
+
+    m = _machine(tmp_path, handler)
+    m.add_memory(MemoryRecord(type="decision", summary="Adopt Postgres", why="ACID"), save=True)
+    m.set_subject("choose the database", save=True)
+
+    result = m.run("which database should we use?")
+
+    assert result["ok"] is True
+    assert result["raw_annotations"] == 1
+    assert result["kept_annotations"][0]["memory_id"] == "M0001"
+    assert result["reply"] == "Use Postgres."
+    assert len(result["memories_saved"]) == 2  # chatbot memory + turn record
+    assert result["tape_records"] == 3  # initial + chatbot memory + turn record
+    assert result["memories_saved"][0]["type"] == "lesson"  # durable memory first
+    assert result["memories_saved"][1]["type"] == "memory"  # turn record last
+
+
+def test_run_dedups_duplicate_turn_record(tmp_path):
+    def handler(messages, temperature):
+        sys_text = text(messages, "system")
+        if "You are a memory agent" in sys_text:
+            return '{"annotations":[]}'
+        return "ok"
+
+    m = _machine(tmp_path, handler)
+    m.set_subject("s", save=True)
+    m.run("same question")
+    before = len(m.tape)
+    m.run("same question")  # identical turn record -> skipped
+    # Only the (empty) chatbot step; the duplicate turn record is not re-appended.
+    assert len(m.tape) == before
+
+
+def test_run_creates_new_agent_as_tape_grows(tmp_path):
+    def handler(messages, temperature):
+        sys_text = text(messages, "system")
+        if "You are a memory agent" in sys_text:
+            return '{"annotations":[]}'
+        return "ok\n" + '{"memories":[{"type":"decision","summary":"d1"},{"type":"decision","summary":"d2"},{"type":"decision","summary":"d3"},{"type":"decision","summary":"d4"}]}'
+
+    m = _machine(tmp_path, handler)
+    m.set_subject("seed decisions", save=True)
+    result = m.run("make some decisions")
+
+    # capacity 3 -> 5 records (4 memories + 1 turn record) -> 2 groups, 2 agents
+    assert result["new_agents"] == 2
+    assert result["groups"] == 2
+    assert result["agents"] == 2
+    assert result["tape_records"] == 5
+
+
+def test_run_skips_secret_memories(tmp_path):
+    def handler(messages, temperature):
+        sys_text = text(messages, "system")
+        if "You are a memory agent" in sys_text:
+            return '{"annotations":[]}'
+        # chatbot reply contains a secret memory
+        return "done\n" + '{"memories":[{"type":"decision","summary":"leak","why":"sk-abcdefghijklmnopqrstuvwxyz123456"},{"type":"lesson","summary":"pool connections","why":"perf"}]}'
+
+    m = _machine(tmp_path, handler)
+    m.set_subject("s", save=True)
+    result = m.run("do something")
+
+    assert result["ok"] is True
+    # secret memory skipped; clean memory + turn record kept
+    assert result["skipped_secrets"] == 1
+    summaries = [r.summary for r in m.tape.read()]
+    assert "leak" not in summaries
+    assert "pool connections" in summaries
+
+
+def test_status(tmp_path):
+    m = _machine(tmp_path, lambda messages, temperature: '{"annotations":[]}')
+    m.add_memory(MemoryRecord(type="decision", summary="a"))
+    m.set_subject("s")
+    st = m.status()
+    assert st["tape_records"] == 1
+    assert st["agents"] == 1
+    assert st["whiteboard_subject"] == "s"
+
+
+def test_recall_returns_whiteboard(tmp_path):
+    def handler(messages, temperature):
+        sys_text = text(messages, "system")
+        if "You are a memory agent" in sys_text:
+            return '{"checklist":["remember postgres"],"annotations":[{"memory_id":"M0001","note":"db choice","relevance":0.9}]}'
+        raise AssertionError("recall should only call agents")
+
+    m = _machine(tmp_path, handler)
+    m.add_memory(MemoryRecord(type="decision", summary="Use Postgres", why="ACID"))
+    result = m.recall("which database?")
+
+    assert result["ok"] is True
+    assert result["annotations"][0]["memory_id"] == "M0001"
+    assert result["agents_checklists"][0]["checklist"] == "- remember postgres"
+    assert "which database?" in result["render"]
+    assert result["tape_records"] == 1  # recall does not write to the tape
+
+
+def test_checkpoint_writes_back(tmp_path):
+    def handler(messages, temperature):
+        sys_text = text(messages, "system")
+        if "metacognitive layer" in sys_text:
+            return '{"understanding":"decided db","checklist":["use postgres"]}'
+        raise AssertionError("unexpected call")
+
+    m = _machine(tmp_path, handler)
+    m.set_subject("db", save=True)
+    result = m.checkpoint(
+        "which db?",
+        "Use Postgres",
+        memories=[{"type": "decision", "summary": "Adopt Postgres", "why": "ACID"}],
+    )
+
+    assert result["ok"] is True
+    assert len(result["memories_saved"]) == 2  # decision + turn record
+    assert result["tape_records"] == 2
+    assert m.whiteboard.checklist == "- use postgres"
+    assert m.whiteboard.metacognition == "decided db"
+
+
+def test_add_memory_roundtrip(tmp_path):
+    m = _machine(tmp_path, lambda messages, temperature: '{"annotations":[]}')
+    res = m.add_memory(MemoryRecord(type="decision", summary="use redis"))
+    assert res["record"]["id"] == "M0001"
+    # reload from disk
+    m2 = _machine(tmp_path, lambda messages, temperature: '{"annotations":[]}')
+    assert len(m2.tape) == 1
+    assert m2.tape.read()[0].summary == "use redis"

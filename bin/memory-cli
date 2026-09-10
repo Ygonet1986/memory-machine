@@ -1,0 +1,26 @@
+#!/bin/bash
+# Memory Machine CLI wrapper.
+#
+# Runs the memory_machine package from the bundled venv and, if the DeepSeek
+# key is not already in the environment, loads it from the desktop app's
+# settings file (~/Library/Application Support/MemoryMachine/settings.json).
+set -euo pipefail
+
+MM="$HOME/memory-machine"
+export PYTHONPATH="$MM/src${PYTHONPATH:+:$PYTHONPATH}"
+
+if [[ -z "${DEEPSEEK_API_KEY:-}" ]]; then
+  KEY="$("$MM/.venv/bin/python" -c "
+import json, os
+p = os.path.expanduser('~/Library/Application Support/MemoryMachine/settings.json')
+try:
+    print(json.load(open(p)).get('api_key', ''))
+except Exception:
+    pass
+" 2>/dev/null || true)"
+  if [[ -n "$KEY" ]]; then
+    export DEEPSEEK_API_KEY="$KEY"
+  fi
+fi
+
+exec "$MM/.venv/bin/python" -m memory_machine "$@"

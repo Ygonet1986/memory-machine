@@ -38,11 +38,20 @@ class SettingsDialog(QDialog):
         idx = self.auto_topic.findData(current)
         self.auto_topic.setCurrentIndex(idx if idx >= 0 else 0)
 
+        self.web_search = QComboBox()
+        self.web_search.addItem("Auto (when the question needs it)", "auto")
+        self.web_search.addItem("Off", "off")
+        self.web_search.addItem("Always", "always")
+        web_current = settings.get("web_search", "auto")
+        widx = self.web_search.findData(web_current)
+        self.web_search.setCurrentIndex(widx if widx >= 0 else 0)
+
         form = QFormLayout()
         form.addRow("DeepSeek API key", self.api_key)
         form.addRow("Model", self.model)
         form.addRow("Base URL", self.base_url)
         form.addRow("Auto topic", self.auto_topic)
+        form.addRow("Web search", self.web_search)
         form.addRow("Memory root", self.memory_root)
 
         buttons = QDialogButtonBox(
@@ -63,6 +72,7 @@ class SettingsDialog(QDialog):
                 "base_url": self.base_url.text().strip() or "https://api.deepseek.com",
                 "memory_root": self.memory_root.text().strip(),
                 "auto_topic": self.auto_topic.currentData(),
+                "web_search": self.web_search.currentData(),
             }
         )
         self.accept()

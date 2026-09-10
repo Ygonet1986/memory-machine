@@ -8,6 +8,7 @@ memory agents.
 from __future__ import annotations
 
 import json
+import re
 import urllib.parse
 import urllib.request
 from typing import Any
@@ -16,6 +17,28 @@ from memory_machine.llm import _ssl_context
 
 DDG_URL = "https://api.duckduckgo.com/"
 USER_AGENT = "MemoryMachine/0.1 (+personal use)"
+
+# Signals that a question likely needs current / external information.
+_WEB_TRIGGERS = {
+    # English
+    "latest", "current", "currently", "today", "tonight", "now", "news",
+    "recent", "recently", "price", "prices", "cost", "release", "released",
+    "version", "update", "updates", "live", "2025", "2026", "2027",
+    "search", "google", "online", "internet",
+    # Portuguese
+    "hoje", "agora", "atual", "atualmente", "recente", "recentes", "noticia",
+    "notícia", "noticias", "notícias", "preco", "preço", "precos", "preços",
+    "lancamento", "lançamento", "versao", "versão", "ultima", "última",
+    "ultimo", "último", "cotacao", "cotação", "busca", "buscar", "pesquise",
+    "pesquisar", "internet", "online",
+}
+
+
+def needs_web(query: str) -> bool:
+    """Heuristic: does this question likely need a web search?"""
+    q = (query or "").lower()
+    tokens = set(re.findall(r"[a-z0-9à-ÿ]+", q))
+    return bool(tokens & _WEB_TRIGGERS)
 
 
 def search(query: str, *, limit: int = 5, timeout: int = 20) -> list[dict[str, Any]]:

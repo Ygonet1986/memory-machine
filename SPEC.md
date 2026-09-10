@@ -1,8 +1,8 @@
 # Memory Machine Specification
 
-**Version:** 0.2
+**Version:** 0.3
 **Status:** Draft
-**Date:** 2026-09-09
+**Date:** 2026-09-10
 
 ## 1. Abstract
 
@@ -211,6 +211,9 @@ per agent per cycle, not two.
 - **Chatbot context consolidation**: the chatbot's own conversation context is
   consolidated on its own schedule, independently of the whiteboard, when it
   exceeds its threshold.
+- **Tape rollup**: the oldest active records (beyond `keep_recent`) are
+  summarized into a single `memory` record and the sources are archived
+  (`status: archived`), keeping the tape bounded without losing the essentials.
 
 ## 12. Topics, Router and Auto-topic
 
@@ -225,14 +228,37 @@ per agent per cycle, not two.
 ## 13. RAG and Web Search (external context)
 
 - **RAG**: `.txt` documents stored under `documents/`; relevant chunks are
-  retrieved by deterministic keyword scoring for the current message.
+  retrieved by **BM25** lexical scoring for the current message. If an
+  OpenAI-compatible embeddings model is configured, semantic ranking
+  (cosine similarity) is used instead, falling back to BM25.
 - **Web search**: a keyless DuckDuckGo lookup for the current message (manual
   opt-in per message).
 - External context is handed ONLY to the main chatbot, in a separate
   `## External context` section. It MUST NOT touch the tape, the whiteboard or
   the memory agents. It is not treated as settled memory.
 
-## 14. Failure Modes
+## 14. Sessions and Cross-session Recall
+
+- A **session** is a self-contained memory store (`sessions/<id>/`) with its own
+  tape, manifest, whiteboard and context. Each opencode session owns one tape.
+- A **session index** (metadata: id, created/updated time, summary, record
+  count) is maintained per session (`session.json`).
+- **Cross-session recall**: when enabled, recall also searches the *other*
+  sessions' tapes with BM25 and returns the top hits as `past_hits`, so a new
+  session can recall decisions made in previous ones. The current session's
+  tape/whiteboard/agents remain primary; past hits are advisory context.
+
+## 15. Recall Optimizations
+
+To avoid running the LLM agents on every message unnecessarily:
+
+- **Cache**: an identical subject is served from the previous recall result
+  without any LLM call.
+- **Trivial filter**: short/acknowledgement messages reuse the previous recall.
+- **Empty tape**: with no active memories there are no agents, so recall makes
+  no LLM calls.
+
+## 16. Failure Modes
 
 | Failure | Required behavior |
 |---------|-------------------|
@@ -246,7 +272,7 @@ per agent per cycle, not two.
 | Secret detected in a record | REFUSE the write; skip that record in the cycle |
 | Concurrent writes | Serialized by a reentrant lock per process |
 
-## 15. Configuration
+## 17. Configuration
 
 | Key | Default | Meaning |
 |-----|---------|---------|
@@ -260,12 +286,11 @@ per agent per cycle, not two.
 
 Values are validated and clamped on load.
 
-## 16. Open Questions
+## 18. Open Questions
 
 - Agent retirement / rebalancing when the tape is reorganized or shrunk.
 - Optimal `capacity` (default 50; to be calibrated).
-- Tape deduplication / compaction for near-identical turn records.
 - Relevance threshold calibration and prompt tuning.
 - Multi-session concurrency over a shared whiteboard.
-- Embedding-based RAG (currently keyword-based).
+- Embedding-based retrieval (BM25 is the default; embeddings are optional).
 - Objective evaluation metrics for continuity.

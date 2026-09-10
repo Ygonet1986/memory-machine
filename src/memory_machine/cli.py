@@ -12,6 +12,7 @@ from .config import Config
 from .coordinator import Machine
 from .llm import LLMError
 from .secrets import SecretError
+from .sessions import list_sessions, sessions_dir_for
 from .tape import PROJECT_TYPES, MemoryRecord
 
 
@@ -57,6 +58,13 @@ def _build_parser() -> argparse.ArgumentParser:
     recall.add_argument("question")
     recall.add_argument("--temperature", type=float, default=0.0)
     recall.add_argument("--max-workers", type=int, default=None)
+    recall.add_argument("--cross-session", action="store_true", help="also search other sessions' tapes")
+
+    sub.add_parser("sessions", help="list sessions (JSON)")
+
+    roll = sub.add_parser("rollup", help="consolidate older tape records (JSON)")
+    roll.add_argument("--keep-recent", type=int, default=20)
+    roll.add_argument("--temperature", type=float, default=0.0)
 
     ckpt = sub.add_parser("checkpoint", help="record a turn back to memory (JSON)")
     ckpt.add_argument("question")
@@ -194,11 +202,27 @@ def cmd_recall(args: argparse.Namespace) -> int:
     m = _machine(args)
     try:
         result = m.recall(
-            args.question, temperature=args.temperature, max_workers=args.max_workers
+            args.question,
+            cross_session=args.cross_session,
+            temperature=args.temperature,
+            max_workers=args.max_workers,
         )
     except LLMError as e:
         return _j({"ok": False, "error": str(e)})
     return _j(result)
+
+
+def cmd_sessions(args: argparse.Namespace) -> int:
+    root = Path(args.root).expanduser().resolve()
+    sdir = sessions_dir_for(root)
+    if sdir is None:
+        return _j({"ok": False, "error": "not a session store (expected .../sessions/<id>)"})
+    return _j({"ok": True, "sessions": list_sessions(sdir)})
+
+
+def cmd_rollup(args: argparse.Namespace) -> int:
+    m = _machine(args)
+    return _j(m.rollup(keep_recent=args.keep_recent, temperature=args.temperature))
 
 
 def cmd_checkpoint(args: argparse.Namespace) -> int:
@@ -265,6 +289,8 @@ def main(argv: list[str] | None = None) -> int:
         "list": cmd_list,
         "archive": cmd_archive,
         "delete": cmd_delete,
+        "sessions": cmd_sessions,
+        "rollup": cmd_rollup,
     }
     return handlers[args.command](args)
 

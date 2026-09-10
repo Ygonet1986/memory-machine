@@ -1,6 +1,6 @@
 from memory_machine.config import Config
 from memory_machine.coordinator import Machine
-from memory_machine.tape import MemoryRecord
+from memory_machine.tape import MemoryRecord, Tape
 
 from fakes import FakeClient, text
 
@@ -147,3 +147,66 @@ def test_add_memory_roundtrip(tmp_path):
     m2 = _machine(tmp_path, lambda messages, temperature: '{"annotations":[]}')
     assert len(m2.tape) == 1
     assert m2.tape.read()[0].summary == "use redis"
+
+
+def test_recall_cache_skips_second_call(tmp_path):
+    calls = {"n": 0}
+
+    def handler(messages, temperature):
+        calls["n"] += 1
+        return '{"annotations":[]}'
+
+    m = _machine(tmp_path, handler)
+    m.add_memory(MemoryRecord(type="decision", summary="Use Postgres"))
+    m.recall("a question about the database")
+    m.recall("a question about the database")  # identical -> cache
+    assert calls["n"] == 1
+
+
+def test_recall_trivial_reuses_cache(tmp_path):
+    calls = {"n": 0}
+
+    def handler(messages, temperature):
+        calls["n"] += 1
+        return '{"annotations":[]}'
+
+    m = _machine(tmp_path, handler)
+    m.add_memory(MemoryRecord(type="decision", summary="Use Postgres"))
+    m.recall("a real question about the database")
+    n = calls["n"]
+    m.recall("ok")  # trivial -> cached
+    assert calls["n"] == n
+
+
+def test_recall_cross_session(tmp_path):
+    sdir = tmp_path / "sessions"
+    a = sdir / "ses_a"
+    a.mkdir(parents=True)
+    Tape(a / "tape.jsonl").append(
+        MemoryRecord(type="decision", summary="Use PostgreSQL for the database")
+    )
+    b = sdir / "ses_b"
+    b.mkdir(parents=True)
+
+    m = Machine(b, config=Config(capacity=10), client=FakeClient(lambda m_, t: '{"annotations":[]}'))
+    res = m.recall("which database should we use", cross_session=True)
+    assert res["past_hits"]
+    assert res["past_hits"][0]["session_id"] == "ses_a"
+
+
+def test_rollup_archives_old_records(tmp_path):
+    def handler(messages, temperature):
+        sys_text = text(messages, "system")
+        if "consolidating older project memories" in sys_text:
+            return "Rolled summary of old memories"
+        return '{"annotations":[]}'
+
+    m = _machine(tmp_path, handler)
+    for i in range(5):
+        m.add_memory(MemoryRecord(type="decision", summary=f"decision {i}"))
+    res = m.rollup(keep_recent=2)
+
+    assert res["rolled"] == 3
+    active = [r for r in m.tape.read() if r.status == "active"]
+    assert len(active) == 3  # 2 kept + 1 rollup
+    assert any(r.summary == "Rolled summary of old memories" for r in active)

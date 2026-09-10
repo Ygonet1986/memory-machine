@@ -222,6 +222,12 @@ class Backend:
     # -------------------------------------------------------------- work
 
     def run(self, message: str, *, use_web: bool = False, on_token: Any = None) -> dict[str, Any]:
+        if not use_web:
+            mode = load_settings().get("web_search", "auto")
+            if mode == "always":
+                use_web = True
+            elif mode == "auto":
+                use_web = websearch.needs_web(message)
         extra = self._external_context(message, use_web)
         with self._lock:
             target = None

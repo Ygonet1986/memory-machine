@@ -231,8 +231,9 @@ per agent per cycle, not two.
   retrieved by **BM25** lexical scoring for the current message. If an
   OpenAI-compatible embeddings model is configured, semantic ranking
   (cosine similarity) is used instead, falling back to BM25.
-- **Web search**: a keyless DuckDuckGo lookup for the current message (manual
-  opt-in per message).
+- **Web search**: a keyless DuckDuckGo lookup for the current message. The
+  desktop app supports `auto` (a heuristic decides when the question needs
+  current info), `off`, or `always`.
 - External context is handed ONLY to the main chatbot, in a separate
   `## External context` section. It MUST NOT touch the tape, the whiteboard or
   the memory agents. It is not treated as settled memory.
@@ -285,6 +286,10 @@ To avoid running the LLM agents on every message unnecessarily:
 | `api_key_env` | `DEEPSEEK_API_KEY` | env var holding the API key |
 
 Values are validated and clamped on load.
+
+On macOS, the desktop app stores the DeepSeek API key in the **Keychain**
+(service `memory-machine`, account `api_key`), never in the settings file; the
+CLI wrapper reads the key from the Keychain first, then the environment.
 
 ## 18. Open Questions
 

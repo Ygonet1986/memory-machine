@@ -1,16 +1,18 @@
 #!/bin/bash
 # Memory Machine CLI wrapper.
 #
-# Runs the memory_machine package from the bundled venv and, if the DeepSeek
-# key is not already in the environment, loads it from the desktop app's
-# settings file (~/Library/Application Support/MemoryMachine/settings.json).
+# Runs the memory_machine package from the bundled venv. If the DeepSeek key is
+# not already in the environment, it is read from the macOS Keychain, then from
+# the desktop app's settings file as a fallback.
 set -euo pipefail
 
 MM="$HOME/memory-machine"
 export PYTHONPATH="$MM/src${PYTHONPATH:+:$PYTHONPATH}"
 
 if [[ -z "${DEEPSEEK_API_KEY:-}" ]]; then
-  KEY="$("$MM/.venv/bin/python" -c "
+  KEY="$(/usr/bin/security find-generic-password -s memory-machine -a api_key -w 2>/dev/null || true)"
+  if [[ -z "$KEY" ]]; then
+    KEY="$("$MM/.venv/bin/python" -c "
 import json, os
 p = os.path.expanduser('~/Library/Application Support/MemoryMachine/settings.json')
 try:
@@ -18,6 +20,7 @@ try:
 except Exception:
     pass
 " 2>/dev/null || true)"
+  fi
   if [[ -n "$KEY" ]]; then
     export DEEPSEEK_API_KEY="$KEY"
   fi

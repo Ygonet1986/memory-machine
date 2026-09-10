@@ -140,7 +140,9 @@ process (PySide6), packaged as a self-contained `.app`.
 
 ### App specifics
 
-- The DeepSeek API key, model and memory root live in
+- The DeepSeek API key is stored in the **macOS Keychain**
+  (`security find-generic-password -s memory-machine`), never in a file. The
+  model and memory root live in
   `~/Library/Application Support/MemoryMachine/settings.json` (chmod 600,
   never in the repo). Edit them in the app's **Settings** dialog.
 - Persistent memory is stored under
@@ -159,9 +161,10 @@ process (PySide6), packaged as a self-contained `.app`.
   material (`data/documents/`). Relevant chunks are retrieved per message
   (deterministic keyword scoring) and handed to the chatbot only; they never
   touch the tape, whiteboard or memory agents.
-- **Web search** — the **Web search** checkbox runs a keyless DuckDuckGo lookup
-  for the current message and feeds the results to the chatbot for that turn
-  only (also kept out of long-term memory).
+- **Web search** — a keyless DuckDuckGo lookup for the current message. In
+  **Auto** mode (default) it runs only when the question looks like it needs
+  current info; the checkbox forces it on. Results go to the chatbot for that
+  turn only (kept out of long-term memory).
 - The app runs in the menu bar; closing the window hides it. Use the tray menu
   to reopen, open Settings, or quit.
 - Each reply shows **Remembered** memory ids (from the memory agents) and

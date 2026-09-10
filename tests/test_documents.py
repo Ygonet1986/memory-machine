@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from app.documents import add_document, list_documents, remove_document, retrieve
+from memory_machine.documents import add_document, list_documents, remove_document, retrieve
 
 
 def test_add_and_retrieve(tmp_path):

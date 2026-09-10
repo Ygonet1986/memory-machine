@@ -23,7 +23,7 @@ STOPWORDS = {
 
 
 def tokenize(text: str) -> list[str]:
-    toks = re.findall(r"[a-z0-9_./]+", (text or "").lower())
+    toks = re.findall(r"[a-z0-9_]+", (text or "").lower())
     return [t for t in toks if len(t) > 2 and t not in STOPWORDS]
 
 

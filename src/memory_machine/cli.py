@@ -80,6 +80,10 @@ def _build_parser() -> argparse.ArgumentParser:
 
     sub.add_parser("list", help="list tape records (JSON)")
 
+    att = sub.add_parser("attach", help="ingest an attached .txt into the tape as chunk memories (JSON)")
+    att.add_argument("path")
+    att.add_argument("--chunk-size", type=int, default=None)
+
     arch = sub.add_parser("archive", help="archive a memory (JSON)")
     arch.add_argument("memory_id")
 
@@ -259,6 +263,11 @@ def cmd_list(args: argparse.Namespace) -> int:
     return _j({"ok": True, "records": m.list_records()})
 
 
+def cmd_attach(args: argparse.Namespace) -> int:
+    m = _machine(args)
+    return _j(m.attach(args.path, chunk_size=args.chunk_size))
+
+
 def cmd_archive(args: argparse.Namespace) -> int:
     m = _machine(args)
     ok = m.tape.set_status(args.memory_id, "archived")
@@ -287,6 +296,7 @@ def main(argv: list[str] | None = None) -> int:
         "checkpoint": cmd_checkpoint,
         "remember": cmd_remember,
         "list": cmd_list,
+        "attach": cmd_attach,
         "archive": cmd_archive,
         "delete": cmd_delete,
         "sessions": cmd_sessions,

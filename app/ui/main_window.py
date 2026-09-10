@@ -307,15 +307,20 @@ class MainWindow(QMainWindow):
 
     def _add_files(self) -> None:
         paths, _ = QFileDialog.getOpenFileNames(
-            self, "Add .txt files for RAG", "", "Text files (*.txt)"
+            self, "Add .txt files (RAG + tape)", "", "Text files (*.txt)"
         )
         added = 0
+        chunks = 0
         for p in paths:
             res = self._backend.add_document(p)
             if res.get("ok"):
                 added += 1
+                chunks += (res.get("attached") or {}).get("saved", 0)
         if added:
-            self._append_system(f"Added {added} document(s) as reference (RAG).")
+            msg = f"Added {added} document(s) as reference (RAG)"
+            if chunks:
+                msg += f" and {chunks} chunk(s) to the tape"
+            self._append_system(msg + ".")
         self._refresh_status()
 
     def _open_tape(self) -> None:

@@ -11,7 +11,7 @@ import shutil
 from pathlib import Path
 from typing import Any
 
-from .retrieval import rank
+from .retrieval import chunk_text, rank
 
 CHUNK_SIZE = 1200
 CHUNK_OVERLAP = 200
@@ -52,20 +52,7 @@ def remove_document(base: Path, name: str) -> bool:
 
 
 def _chunks(text: str, size: int = CHUNK_SIZE, overlap: int = CHUNK_OVERLAP) -> list[str]:
-    text = text.strip()
-    if not text:
-        return []
-    if len(text) <= size:
-        return [text]
-    out: list[str] = []
-    start = 0
-    while start < len(text):
-        end = min(start + size, len(text))
-        out.append(text[start:end])
-        if end == len(text):
-            break
-        start = end - overlap
-    return out
+    return chunk_text(text, size=size, overlap=overlap)
 
 
 def retrieve(base: Path, query: str, *, top_k: int = 4, budget: int = 4000) -> str:

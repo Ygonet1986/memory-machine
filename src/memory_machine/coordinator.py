@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Any
 
 from .agents import run_agents
+from .attachments import ingest_attachment
 from .config import Config, resolve_path
 from .consolidate import consolidate_whiteboard
 from .context import (
@@ -340,6 +341,7 @@ class Machine:
             "understanding": self.whiteboard.metacognition,
             "checklist": self.whiteboard.checklist,
             "annotations": [a.to_dict() for a in kept],
+            "attached_content": self._attached_content(kept),
             "agents_checklists": [
                 {"id": a.id, "checklist": a.checklist}
                 for a in self.manifest.agents
@@ -379,6 +381,30 @@ class Machine:
             )
         except OSError:
             pass
+
+    def _invalidate_recall_cache(self) -> None:
+        try:
+            self._recall_cache_path().unlink(missing_ok=True)
+        except OSError:
+            pass
+
+    def _attached_content(self, kept: list[Any], *, budget: int = 2000) -> list[dict[str, Any]]:
+        """Full text of annotated attachment chunks, so the chatbot can read them."""
+        if not kept:
+            return []
+        by_id = {r.id: r for r in self.tape.read()}
+        out: list[dict[str, Any]] = []
+        used = 0
+        for a in kept:
+            r = by_id.get(a.memory_id)
+            if r is None or r.type != "attachment":
+                continue
+            cost = len(r.why) + 40
+            if out and used + cost > budget:
+                break
+            out.append({"memory_id": r.id, "source": r.source, "text": r.why[:1200]})
+            used += cost
+        return out
 
     def _cross_session_hits(self, question: str) -> list[dict[str, Any]]:
         sdir = sessions_dir_for(self.root)
@@ -473,6 +499,21 @@ class Machine:
     def list_records(self) -> list[dict[str, Any]]:
         return [r.to_dict() for r in self.tape.read()]
 
+    def attach(self, path: str | Path, *, chunk_size: int | None = None) -> dict[str, Any]:
+        """Ingest an attached .txt file into the tape as labeled chunk memories."""
+        result = ingest_attachment(
+            self.tape,
+            self.manifest,
+            path,
+            chunk_size=chunk_size or self.config.attach_chunk_size,
+            model=self.config.model,
+        )
+        if result.get("ok"):
+            self.save()
+            self._update_session_meta()
+            self._invalidate_recall_cache()
+        return result
+
     def rollup(self, *, keep_recent: int = 20, temperature: float = 0.0) -> dict[str, Any]:
         """Consolidate older active records into one rollup memory.
 
@@ -511,6 +552,7 @@ class Machine:
         )
         self.tape.set_status_many([r.id for r in old], "archived")
         self.save()
+        self._invalidate_recall_cache()
         return {
             "ok": True,
             "rolled": len(old),

@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Virtualenv
+.venv/
+venv/
+
+# Build artifacts
+build/
+dist/
+*.spec.bak
+
+# macOS
+.DS_Store
+
+# Secrets / local settings (never commit)
+.env
+.env.*
+settings.json
+
+# NOTE: .opencode/memory/ is the versioned project memory — do NOT ignore it.

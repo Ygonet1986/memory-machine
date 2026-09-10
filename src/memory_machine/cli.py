@@ -1,0 +1,273 @@
+"""Command-line interface for the Memory Machine."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from pathlib import Path
+from typing import Any
+
+from .config import Config
+from .coordinator import Machine
+from .llm import LLMError
+from .secrets import SecretError
+from .tape import PROJECT_TYPES, MemoryRecord
+
+
+def _build_parser() -> argparse.ArgumentParser:
+    p = argparse.ArgumentParser(
+        prog="memory-machine",
+        description="Persistent memory tape with memory agents and a shared whiteboard.",
+    )
+    p.add_argument("-C", "--root", default=".", help="project root directory")
+    sub = p.add_subparsers(dest="command", required=True)
+
+    sub.add_parser("init", help="create an empty project (config + tape + manifest + whiteboard)")
+
+    add = sub.add_parser("add", help="append a memory to the tape")
+    add.add_argument("--type", default="decision", choices=sorted(PROJECT_TYPES))
+    add.add_argument("--summary", required=True)
+    add.add_argument("--why", default="")
+    add.add_argument("--files", default="", help="comma-separated file paths")
+
+    subj = sub.add_parser("subject", help="set the current whiteboard subject")
+    subj.add_argument("subject")
+    subj.add_argument("--objective", default="")
+
+    run = sub.add_parser("run", help="run one cycle (agents -> whiteboard -> main chatbot)")
+    run.add_argument("--task", required=True)
+    run.add_argument("--no-consolidate", action="store_true")
+    run.add_argument("--temperature", type=float, default=0.0)
+    run.add_argument("--max-workers", type=int, default=None)
+    run.add_argument("--json", action="store_true", help="print result as JSON")
+
+    cons = sub.add_parser("consolidate", help="consolidate the whiteboard (one consolidator agent)")
+    cons.add_argument("--llm", action="store_true", help="use the consolidator LLM agent")
+    cons.add_argument("--temperature", type=float, default=0.0)
+
+    sub.add_parser("status", help="show tape / groups / agents / whiteboard state")
+
+    wb = sub.add_parser("whiteboard", help="print the whiteboard")
+    wb.add_argument("--no-annotations", action="store_true")
+
+    sub.add_parser("context", help="print the main chatbot's conversation context")
+
+    recall = sub.add_parser("recall", help="run memory agents for a question; print whiteboard as JSON")
+    recall.add_argument("question")
+    recall.add_argument("--temperature", type=float, default=0.0)
+    recall.add_argument("--max-workers", type=int, default=None)
+
+    ckpt = sub.add_parser("checkpoint", help="record a turn back to memory (JSON)")
+    ckpt.add_argument("question")
+    ckpt.add_argument("summary")
+    ckpt.add_argument("--memories", default="", help='JSON list of memory specs, e.g. \'[{"type":"decision","summary":"...","why":"..."}]\'')
+    ckpt.add_argument("--temperature", type=float, default=0.0)
+
+    rem = sub.add_parser("remember", help="append a memory (JSON)")
+    rem.add_argument("--type", default="decision")
+    rem.add_argument("--summary", required=True)
+    rem.add_argument("--why", default="")
+    rem.add_argument("--files", default="", help="comma-separated file paths")
+
+    sub.add_parser("list", help="list tape records (JSON)")
+
+    arch = sub.add_parser("archive", help="archive a memory (JSON)")
+    arch.add_argument("memory_id")
+
+    dele = sub.add_parser("delete", help="delete a memory (JSON)")
+    dele.add_argument("memory_id")
+
+    return p
+
+
+def _machine(args: argparse.Namespace) -> Machine:
+    root = Path(args.root).expanduser().resolve()
+    return Machine(root)
+
+
+def cmd_init(args: argparse.Namespace) -> int:
+    root = Path(args.root).expanduser().resolve()
+    root.mkdir(parents=True, exist_ok=True)
+    cfg = Config.load(root)
+    cfg.save(root / "config.json")
+    Machine(root, config=cfg).save()  # create empty tape/manifest/whiteboard
+    print(f"initialized project at {root}")
+    print(f"  model: {cfg.model} (api key from ${cfg.api_key_env})")
+    print(f"  capacity per agent group: {cfg.capacity}")
+    return 0
+
+
+def cmd_add(args: argparse.Namespace) -> int:
+    m = _machine(args)
+    files = [f.strip() for f in args.files.split(",") if f.strip()]
+    rec = MemoryRecord(type=args.type, summary=args.summary, why=args.why, files=files)
+    try:
+        res = m.add_memory(rec)
+    except SecretError as e:
+        print(f"error: {e}", file=sys.stderr)
+        return 2
+    print(f"appended {res['record']['id']} [{res['record']['type']}] {res['record']['summary']}")
+    print(f"  group {res['group']} -> agent {res['agent']}" + (" (new agent created)" if res["new_agent"] else ""))
+    return 0
+
+
+def cmd_subject(args: argparse.Namespace) -> int:
+    m = _machine(args)
+    m.set_subject(args.subject, args.objective)
+    print(f"subject set: {args.subject}")
+    return 0
+
+
+def cmd_run(args: argparse.Namespace) -> int:
+    m = _machine(args)
+    try:
+        result = m.run(
+            args.task,
+            temperature=args.temperature,
+            consolidate=not args.no_consolidate,
+            max_workers=args.max_workers,
+        )
+    except LLMError as e:
+        print(f"error: {e}", file=sys.stderr)
+        return 2
+
+    if args.json:
+        print(json.dumps(result, indent=2))
+        return 0
+
+    print(f"subject: {result['subject']}")
+    print(f"agents consulted: {result['agents']}  (annotations proposed: {result['raw_annotations']})")
+    print("remembered:")
+    for a in result["kept_annotations"]:
+        print(f"  - {a['memory_id']} ({a['relevance']:.2f}): {a['note']}")
+    if not result["kept_annotations"]:
+        print("  (none)")
+    if result["consolidated"]:
+        print("whiteboard consolidated this cycle")
+    if result["context_consolidated"]:
+        print("chatbot context consolidated this cycle")
+    print("reply:")
+    print("  " + result["reply"].replace("\n", "\n  "))
+    if result["memories_saved"]:
+        print("saved to tape:")
+        for rec in result["memories_saved"]:
+            print(f"  - {rec['id']} [{rec['type']}] {rec['summary']}")
+    print(f"tape: {result['tape_records']} records | groups: {result['groups']} | agents: {result['agents']}")
+    return 0
+
+
+def cmd_consolidate(args: argparse.Namespace) -> int:
+    m = _machine(args)
+    result = m.consolidate(temperature=args.temperature, use_llm=args.llm)
+    print(f"consolidated (from {result['consolidated_from']})")
+    print(f"persisted to tape: {len(result['persisted'])} record(s)")
+    print("summary:")
+    print("  " + result["summary"].replace("\n", "\n  "))
+    return 0
+
+
+def cmd_status(args: argparse.Namespace) -> int:
+    st = _machine(args).status()
+    print(json.dumps(st, indent=2))
+    return 0
+
+
+def cmd_whiteboard(args: argparse.Namespace) -> int:
+    m = _machine(args)
+    print(m.whiteboard.render(include_annotations=not args.no_annotations))
+    return 0
+
+
+def cmd_context(args: argparse.Namespace) -> int:
+    m = _machine(args)
+    print(m.context.render() or "(empty context)")
+    return 0
+
+
+def _j(obj: dict[str, Any]) -> int:
+    print(json.dumps(obj, ensure_ascii=False))
+    return 0
+
+
+def cmd_recall(args: argparse.Namespace) -> int:
+    m = _machine(args)
+    try:
+        result = m.recall(
+            args.question, temperature=args.temperature, max_workers=args.max_workers
+        )
+    except LLMError as e:
+        return _j({"ok": False, "error": str(e)})
+    return _j(result)
+
+
+def cmd_checkpoint(args: argparse.Namespace) -> int:
+    m = _machine(args)
+    memories: list[dict[str, Any]] = []
+    if args.memories:
+        try:
+            parsed = json.loads(args.memories)
+            if isinstance(parsed, list):
+                memories = parsed
+        except json.JSONDecodeError:
+            memories = []
+    try:
+        result = m.checkpoint(
+            args.question, args.summary, memories=memories, temperature=args.temperature
+        )
+    except LLMError as e:
+        return _j({"ok": False, "error": str(e)})
+    return _j(result)
+
+
+def cmd_remember(args: argparse.Namespace) -> int:
+    m = _machine(args)
+    files = [f.strip() for f in args.files.split(",") if f.strip()]
+    rec = MemoryRecord(type=args.type, summary=args.summary, why=args.why, files=files)
+    try:
+        return _j(m.add_memory(rec))
+    except SecretError as e:
+        return _j({"ok": False, "error": str(e)})
+
+
+def cmd_list(args: argparse.Namespace) -> int:
+    m = _machine(args)
+    return _j({"ok": True, "records": m.list_records()})
+
+
+def cmd_archive(args: argparse.Namespace) -> int:
+    m = _machine(args)
+    ok = m.tape.set_status(args.memory_id, "archived")
+    return _j({"ok": ok, "id": args.memory_id, "status": "archived"})
+
+
+def cmd_delete(args: argparse.Namespace) -> int:
+    m = _machine(args)
+    ok = m.tape.delete(args.memory_id)
+    return _j({"ok": ok, "id": args.memory_id})
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = _build_parser()
+    args = parser.parse_args(argv)
+    handlers: dict[str, Any] = {
+        "init": cmd_init,
+        "add": cmd_add,
+        "subject": cmd_subject,
+        "run": cmd_run,
+        "consolidate": cmd_consolidate,
+        "status": cmd_status,
+        "whiteboard": cmd_whiteboard,
+        "context": cmd_context,
+        "recall": cmd_recall,
+        "checkpoint": cmd_checkpoint,
+        "remember": cmd_remember,
+        "list": cmd_list,
+        "archive": cmd_archive,
+        "delete": cmd_delete,
+    }
+    return handlers[args.command](args)
+
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -1,0 +1,34 @@
+from memory_machine.config import Config
+
+
+def test_defaults_are_valid():
+    cfg = Config()
+    assert cfg.validate() == []
+
+
+def test_clamps_capacity_and_budgets():
+    cfg = Config(capacity=0, whiteboard_budget=10, consolidate_threshold=1)
+    assert cfg.capacity == 1
+    assert cfg.whiteboard_budget == 100
+    assert cfg.consolidate_threshold >= cfg.whiteboard_budget + 1
+
+
+def test_non_int_values_fall_back():
+    cfg = Config(capacity="abc", whiteboard_budget="x")
+    assert cfg.capacity == 50  # DEFAULT_CAPACITY
+    assert cfg.whiteboard_budget == 4000  # DEFAULT_WHITEBOARD_BUDGET
+
+
+def test_base_url_trailing_slash_removed():
+    cfg = Config(base_url="https://api.deepseek.com/")
+    assert cfg.base_url == "https://api.deepseek.com"
+
+
+def test_validate_flags_bad_base_url():
+    cfg = Config(base_url="not-a-url")
+    assert any("base_url" in e for e in cfg.validate())
+
+
+def test_from_dict_ignores_unknown_keys():
+    cfg = Config.from_dict({"capacity": 7, "bogus": 1})
+    assert cfg.capacity == 7

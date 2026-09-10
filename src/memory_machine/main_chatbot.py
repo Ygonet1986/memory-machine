@@ -1,0 +1,158 @@
+"""The main chatbot: consumes the whiteboard and continues the task.
+
+The main chatbot is the consumer of working memory. It reads the whiteboard
+(subject, objective, context, pending and the agents' annotations) and
+produces the next step of the work. Durable facts it produces are returned as
+structured memories for the coordinator to append to the tape.
+"""
+
+from __future__ import annotations
+
+import json
+import re
+from typing import Any
+
+from .tape import MemoryRecord
+from .whiteboard import Whiteboard
+
+MAIN_SYSTEM_PROMPT = """You are the main assistant working on a long-running project. \
+You are given a whiteboard representing the current work: the subject, the \
+objective, the context, pending items, and "Remembered" notes contributed by \
+memory agents.
+
+Use the remembered information to continue the task accurately. Do not ignore \
+relevant memories; do not contradict a settled decision unless the new work \
+clearly supersedes it.
+
+You MAY also receive external context (relevant documents and web search \
+results). Use it to answer accurately, but it is NOT part of long-term memory: \
+do not treat it as a settled decision unless you explicitly turn a durable \
+fact into a memory.
+
+After your reply, if you produced durable facts worth remembering (a decision, \
+lesson, preference, bugfix, or build note), append a JSON block on its own line:
+
+{"memories":[{"type":"decision","summary":"...","why":"...","files":["..."]}]}
+
+If nothing durable was produced, omit the JSON entirely. Never include API \
+keys or secrets."""
+
+MEMORIES_RE = re.compile(r'\{\s*"memories"\s*:\s*', re.S)
+
+
+def main_user_prompt(
+    whiteboard: Whiteboard,
+    task: str,
+    history: str = "",
+    extra_context: str = "",
+) -> str:
+    parts = []
+    if history:
+        parts.append(history)
+    parts.append("## Whiteboard\n\n" + whiteboard.render())
+    if extra_context:
+        parts.append("## External context\n\n" + extra_context)
+    parts.append("## Task\n\n" + task)
+    return "\n\n".join(parts)
+
+
+def extract_memories(content: str) -> tuple[str, list[dict[str, Any]]]:
+    """Split raw memories JSON out of a reply. Returns (clean_text, memories)."""
+    memories: list[dict[str, Any]] = []
+    clean = content
+    for m in MEMORIES_RE.finditer(content):
+        start = m.start()
+        decoder = json.JSONDecoder()
+        try:
+            obj, end = decoder.raw_decode(content[start:])
+        except json.JSONDecodeError:
+            continue
+        if isinstance(obj, dict) and "memories" in obj:
+            for mem in obj.get("memories") or []:
+                if isinstance(mem, dict):
+                    memories.append(mem)
+            clean = clean.replace(content[start : start + end], "", 1)
+    return clean.strip(), memories
+
+
+def memory_from_spec(spec: dict[str, Any]) -> MemoryRecord | None:
+    mtype = str(spec.get("type") or "").strip()
+    summary = str(spec.get("summary") or "").strip()
+    if not mtype or not summary:
+        return None
+    files = spec.get("files") or []
+    if isinstance(files, str):
+        files = [f.strip() for f in files.split(",") if f.strip()]
+    return MemoryRecord(
+        type=mtype,
+        summary=summary,
+        why=str(spec.get("why") or ""),
+        files=list(files),
+    )
+
+
+def run_main_chatbot(
+    client: Any,
+    whiteboard: Whiteboard,
+    task: str,
+    *,
+    history: str = "",
+    extra_context: str = "",
+    temperature: float = 0.0,
+    on_token: Any = None,
+) -> tuple[str, list[MemoryRecord], str]:
+    """Run the main chatbot. Returns ``(reply, durable_memories, reasoning)``.
+
+    ``on_token`` is an optional callback ``(content_delta, reasoning_delta)``
+    called as output is produced (streaming). The trailing memories JSON is
+    stripped from the streamed content.
+    """
+    messages = [
+        {"role": "system", "content": MAIN_SYSTEM_PROMPT},
+        {
+            "role": "user",
+            "content": main_user_prompt(
+                whiteboard, task, history=history, extra_context=extra_context
+            ),
+        },
+    ]
+    reasoning = ""
+    content = ""
+
+    if on_token is not None and hasattr(client, "stream"):
+        content_parts: list[str] = []
+        reasoning_parts: list[str] = []
+        visible_len = 0
+        for c_delta, r_delta in client.stream(messages, temperature=temperature):
+            if r_delta:
+                reasoning_parts.append(r_delta)
+            if c_delta:
+                content_parts.append(c_delta)
+                acc = "".join(content_parts)
+                m = MEMORIES_RE.search(acc)
+                visible = acc if m is None else acc[: m.start()]
+                if len(visible) > visible_len:
+                    on_token(visible[visible_len:], r_delta)
+                    visible_len = len(visible)
+                else:
+                    on_token("", r_delta)
+            else:
+                on_token("", r_delta)
+        content = "".join(content_parts)
+        reasoning = "".join(reasoning_parts)
+    else:
+        cwr = getattr(client, "complete_with_reasoning", None)
+        if cwr is not None:
+            content, reasoning = cwr(messages, temperature=temperature)
+        else:
+            content = client.complete(messages, temperature=temperature)
+        if on_token is not None:
+            on_token(content, reasoning)
+
+    clean, specs = extract_memories(content)
+    memories: list[MemoryRecord] = []
+    for spec in specs:
+        rec = memory_from_spec(spec)
+        if rec is not None:
+            memories.append(rec)
+    return clean, memories, reasoning

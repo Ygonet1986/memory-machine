@@ -27,6 +27,24 @@ def tokenize(text: str) -> list[str]:
     return [t for t in toks if len(t) > 2 and t not in STOPWORDS]
 
 
+def chunk_text(text: str, size: int = 600, overlap: int = 100) -> list[str]:
+    """Split text into overlapping fixed-size chunks."""
+    text = (text or "").strip()
+    if not text:
+        return []
+    if len(text) <= size:
+        return [text]
+    out: list[str] = []
+    start = 0
+    while start < len(text):
+        end = min(start + size, len(text))
+        out.append(text[start:end])
+        if end == len(text):
+            break
+        start = end - overlap
+    return out
+
+
 def bm25(query: str, docs: list[str], *, k1: float = 1.5, b: float = 0.75) -> list[float]:
     """BM25 relevance of each doc for the query (0.0 when no term matches)."""
     if not docs:

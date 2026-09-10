@@ -158,7 +158,11 @@ class Backend:
     # --------------------------------------------------------- RAG + web
 
     def add_document(self, src: str | Path) -> dict[str, Any]:
-        return documents_mod.add_document(self._base(), Path(src))
+        res = documents_mod.add_document(self._base(), Path(src))
+        if res.get("ok"):
+            with self._lock:
+                res["attached"] = self._machine.attach(src)  # type: ignore[union-attr]
+        return res
 
     def list_documents(self) -> list[dict[str, Any]]:
         return documents_mod.list_documents(self._base())

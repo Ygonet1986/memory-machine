@@ -225,7 +225,7 @@ per agent per cycle, not two.
   `idle` (new topic after N hours of inactivity) or `off` (manual). When the
   router returns `null`, the auto-topic policy decides the "current" topic.
 
-## 13. RAG and Web Search (external context)
+## 13. RAG, Web Search and Attachments
 
 - **RAG**: `.txt` documents stored under `documents/`; relevant chunks are
   retrieved by **BM25** lexical scoring for the current message. If an
@@ -234,9 +234,15 @@ per agent per cycle, not two.
 - **Web search**: a keyless DuckDuckGo lookup for the current message. The
   desktop app supports `auto` (a heuristic decides when the question needs
   current info), `off`, or `always`.
-- External context is handed ONLY to the main chatbot, in a separate
-  `## External context` section. It MUST NOT touch the tape, the whiteboard or
-  the memory agents. It is not treated as settled memory.
+- **Attachments** (explicit exception): an attached `.txt` file is read, split
+  into chunks, and each chunk is appended to the session's tape as a record of
+  type `attachment` whose summary says it is an attached text. Chunks are
+  secret-scanned and deduplicated by file + content hash (`source`). When a
+  memory agent annotates an attachment chunk, recall returns its full text as
+  `attached_content` so the chatbot can read it.
+- External context (RAG/web) is handed ONLY to the main chatbot, in a separate
+  `## External context` section; it MUST NOT touch the tape. Attachments are the
+  one intentional, labeled exception.
 
 ## 14. Sessions and Cross-session Recall
 

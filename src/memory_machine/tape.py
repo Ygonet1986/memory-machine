@@ -42,6 +42,7 @@ class MemoryRecord:
     id: str = ""
     created_at: str = ""
     status: str = "active"
+    source: str = ""
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -52,6 +53,7 @@ class MemoryRecord:
             "files": self.files,
             "created_at": self.created_at,
             "status": self.status,
+            "source": self.source,
         }
 
     @classmethod
@@ -64,6 +66,7 @@ class MemoryRecord:
             files=list(data.get("files") or []),
             created_at=str(data.get("created_at") or ""),
             status=str(data.get("status") or "active"),
+            source=str(data.get("source") or ""),
         )
 
     def text(self) -> str:

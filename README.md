@@ -157,10 +157,13 @@ process (PySide6), packaged as a self-contained `.app`.
 - **Automatic topic creation** — by default one topic per day is created
   automatically (`auto_topic: day`). Alternatives in Settings: `idle` (a new
   topic after N hours without activity) or `off` (fully manual).
-- **RAG documents** — the **Add files** button imports `.txt` files as reference
-  material (`data/documents/`). Relevant chunks are retrieved per message
-  (deterministic keyword scoring) and handed to the chatbot only; they never
-  touch the tape, whiteboard or memory agents.
+- **RAG documents + tape attachments** — the **Add files** button imports `.txt`
+  files: they are added as RAG reference material (`data/documents/`, retrieved
+  per message with BM25) **and** split into chunks that are appended to the
+  session's tape as labeled `attachment` memories, so the memory agents can
+  recall them. Attached chunks are secret-scanned and deduplicated by file
+  hash. (This is the one intentional exception to "external context never
+  touches the tape".)
 - **Web search** — a keyless DuckDuckGo lookup for the current message. In
   **Auto** mode (default) it runs only when the question looks like it needs
   current info; the checkbox forces it on. Results go to the chatbot for that

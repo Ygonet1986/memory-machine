@@ -37,6 +37,7 @@ class Config:
     whiteboard_budget: int = DEFAULT_WHITEBOARD_BUDGET
     consolidate_threshold: int = DEFAULT_CONSOLIDATE_THRESHOLD
     context_consolidate_threshold: int = DEFAULT_CONTEXT_CONSOLIDATE_THRESHOLD
+    attach_chunk_size: int = 600
     model: str = DEFAULT_MODEL
     base_url: str = DEFAULT_BASE_URL
     api_key_env: str = DEFAULT_API_KEY_ENV
@@ -62,6 +63,7 @@ class Config:
             100,
             _int(self.context_consolidate_threshold, DEFAULT_CONTEXT_CONSOLIDATE_THRESHOLD),
         )
+        self.attach_chunk_size = max(100, _int(self.attach_chunk_size, 600))
         self.model = (self.model or DEFAULT_MODEL).strip()
         self.base_url = (self.base_url or DEFAULT_BASE_URL).strip().rstrip("/")
         self.api_key_env = (self.api_key_env or DEFAULT_API_KEY_ENV).strip()

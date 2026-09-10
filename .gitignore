@@ -20,5 +20,3 @@ dist/
 .env
 .env.*
 settings.json
-
-# NOTE: .opencode/memory/ is the versioned project memory — do NOT ignore it.

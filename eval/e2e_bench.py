@@ -46,6 +46,7 @@ from memory_machine.llm import LLMClient, extract_json_object
 from memory_machine.main_chatbot import run_main_chatbot
 from memory_machine.payload import payload_as_context
 from memory_machine.retrieval import rank, tokenize
+from memory_machine.secrets import SecretError
 from memory_machine.tape import MemoryRecord
 
 from tag_sessions import tag_sessions, views_for
@@ -328,6 +329,7 @@ def build_external_machine(
     path.mkdir(parents=True, exist_ok=True)
     machine = Machine(path, config=cfg, client=client)
     id_map: dict[str, str] = {}
+    skipped = 0
     for session in task["sessions"]:
         text = session["text"]
         record = MemoryRecord(
@@ -337,9 +339,16 @@ def build_external_machine(
             source=session["id"],
             views=views_for(tags.get(session["id"])),
         )
-        result = machine.add_memory(record, save=False)
+        try:
+            result = machine.add_memory(record, save=False)
+        except SecretError:
+            # the secret scanner gates every tape write; benchmark sessions that
+            # look like credentials are skipped rather than bypassing the gate.
+            skipped += 1
+            continue
         id_map[session["id"]] = result["record"]["id"]
     machine.save()
+    machine._e2e_skipped = skipped  # type: ignore[attr-defined]
     return machine, id_map
 
 
@@ -374,6 +383,7 @@ def run_external_case(
     )
     row["ingest_summary"] = ingest_summary
     row["ingest_why"] = ingest_why
+    row["ingest_skipped"] = int(getattr(machine, "_e2e_skipped", 0))
     if gfr:
         by_id = {r.id: r for r in machine.tape.read()}
         evidence_text = "\n\n".join(
@@ -434,6 +444,7 @@ def main() -> None:
     p.add_argument("--limit", type=int, default=0, help="0 = all")
     p.add_argument("--model", default="deepseek-v4-flash")
     p.add_argument("--judge-model", default="deepseek-v4-flash")
+    p.add_argument("--timeout", type=int, default=120, help="LLM request timeout (seconds)")
     p.add_argument("--audit-model", default="", help="default: same as judge model")
     p.add_argument("--audit-fraction", type=float, default=0.25)
     p.add_argument("--ctx-budget", type=int, default=6000)
@@ -455,10 +466,12 @@ def main() -> None:
         raise SystemExit("set DEEPSEEK_API_KEY (or --api-key)")
 
     base = CountingClient(
-        LLMClient("https://api.deepseek.com", api_key, args.model, retries=1, backoff=0.5)
+        LLMClient("https://api.deepseek.com", api_key, args.model,
+                  timeout=args.timeout, retries=1, backoff=0.5)
     )
     judge_client = CountingClient(
-        LLMClient("https://api.deepseek.com", api_key, args.judge_model, retries=1, backoff=0.5)
+        LLMClient("https://api.deepseek.com", api_key, args.judge_model,
+                  timeout=args.timeout, retries=1, backoff=0.5)
     )
     root = Path(tempfile.mkdtemp(prefix="mm-e2e-"))
     arms = [a.strip() for a in args.arms.split(",") if a.strip()]
@@ -520,6 +533,8 @@ def main() -> None:
     suffix = f"_{args.dataset}" if args.dataset != "synthetic" else ""
     if args.dataset == "longmemeval" and args.ingest_why != 2000:
         suffix += f"_ing{args.ingest_why}"
+    if args.dataset == "longmemeval" and args.payload_budget:
+        suffix += f"_pb{args.payload_budget}"
     manifest_name = (
         f"run_manifest_{arms[0]}{suffix}.json" if len(arms) == 1 else f"run_manifest{suffix}.json"
     )
@@ -530,20 +545,27 @@ def main() -> None:
     all_rows: list[dict[str, Any]] = []
     for arm in arms:
         rows: list[dict[str, Any]] = []
+        errors = 0
         print(f"running {arm} ...", flush=True)
         for i in indices:
             task = tasks[i]
             if not gold.get(i):
                 continue
-            rows.append(
-                runner(
-                    arm, i, task, gold[i], root, base, judge_client,
-                    ctx_budget=args.ctx_budget, payload_budget=args.payload_budget,
-                    ingest_summary=args.ingest_summary, ingest_why=args.ingest_why,
-                    gfr=args.gfr,
-                    **extra,
+            try:
+                rows.append(
+                    runner(
+                        arm, i, task, gold[i], root, base, judge_client,
+                        ctx_budget=args.ctx_budget, payload_budget=args.payload_budget,
+                        ingest_summary=args.ingest_summary, ingest_why=args.ingest_why,
+                        gfr=args.gfr,
+                        **extra,
+                    )
                 )
-            )
+            except Exception as exc:  # one bad case must not abort the arm
+                errors += 1
+                print(f"  case {i} failed: {type(exc).__name__}: {exc}", flush=True)
+        if errors:
+            print(f"  {errors} case(s) skipped", flush=True)
         path = OUT_DIR / f"e2e_{arm}{suffix}.jsonl"
         with path.open("w", encoding="utf-8") as fh:
             for row in rows:

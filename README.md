@@ -116,6 +116,10 @@ Use `-C <dir>` to operate on a specific project directory. Run
   cap lifts Gold Fact Retention from 0.42 to 0.83 and strict accuracy from 0.33
   to 0.50 (evidence recall constant at 0.75 — the loss was upstream of
   retrieval).
+- **Compression curve (H3)** — on LongMemEval 50q with full ingestion, payload
+  6000 matches the full context (0.60 vs 0.58 strict) with a 57% context
+  reduction, and payload 4000 stays within noise at 70% reduction; 2500 loses
+  accuracy, so the compression knee is around 4000.
 - **Evidence payload** (`evidence_payload: budgeted`) — the agents say *why* a
   memory matters; the payload delivers *what it says* under a character budget
   (relevance-ordered, `why` truncated first, rollups rehydrated from their

@@ -902,6 +902,41 @@ Readings:
   rather than missing anchors: the timestamps are in the evidence and in the
   task, and the oracle sees the full sessions.
 
+### 15.16 H6a — temporal computation prompt (v0.11, refuted)
+
+Hypothesis: with the same memories, real dates and 4000-char payload, an
+explicit temporal-computation procedure (list timestamps → resolve relative
+expressions against the session timestamp → use the question date as "now" →
+compute → verify) improves temporal reasoning. The procedure is gated by
+conservative markers (`how many days/weeks/months/...`, `how long`, `ago`,
+`between ... and`, `how long/many ... before/after`, `days/weeks/... before/after`,
+`what/which happened/came before/after`, `since`, `last week/month/year`), so
+unrelated questions keep the base prompt.
+
+| arm | evidence | strict | lenient | AUR | temporal total | temporal \| evidence complete |
+|-----|----------|--------|---------|-----|----------------|-------------------------------|
+| dates (base) | 0.72 | 0.56 | 0.58 | 0.72 | 0.43 (6/14) | **0.56 (5/9)** |
+| dates + temporal prompt | 0.72 | 0.58 | 0.64 | 0.78 | 0.36 (5/14) | **0.56 (5/9)** |
+
+Readings:
+
+- **H6a is refuted on the primary causal test**: with evidence complete, the
+  temporal procedure changed nothing (5/9 -> 5/9). All four audited
+  arithmetic/anchor errors (relative-date resolution, wrong anchor, interval
+  computation, date-window selection) remained wrong, and one previously
+  correct temporal case flipped to incorrect (incomplete evidence).
+- The small overall strict gain (0.56 -> 0.58, lenient 0.58 -> 0.64) comes from
+  other categories and is within single-case variance.
+- Controls held: evidence 0.72 and GFR 0.80/0.82.
+- The gate fired on 12/14 temporal questions and on 8/36 others (20/50 total),
+  so the change was narrow as designed.
+- Together with H4, the pattern is consistent: **prompt-only interventions do
+  not move the answerer**; the remaining errors are composition/arithmetic
+  capability, not instruction-following.
+
+The pre-declared contingency (H6b, a dedicated temporal solver call) was NOT
+executed: experiments stop here and the project moves to the v1.0 consolidation.
+
 ## 16. Failure Modes
 
 | Failure | Required behavior |
@@ -955,3 +990,41 @@ CLI wrapper reads the key from the Keychain first, then the environment.
 - Multi-session concurrency over a shared whiteboard.
 - Objective evaluation metrics for continuity; ablation study and external
   benchmarks (LongMemEval, LoCoMo).
+
+## 19. Experimental summary (v1.0)
+
+The v0.5-v0.11 program tested one layer at a time, each result determining the
+next experiment. Hypotheses and outcomes:
+
+| # | Hypothesis | Outcome | Key numbers |
+|---|------------|---------|-------------|
+| H1 | Perspective agents over views retrieve better than partition agents | confirmed | 1.00 complete evidence @ 5.0 calls (all 7 categories) vs 15.2 for group agents; lexical plan 0.97 @ 3.0 |
+| H2 | Delivering the factual content (not only the note) improves answers | confirmed | strict 0.72 -> 0.88 and AUR 0.74 -> 0.90 at the same evidence (0.97) and cost (4.0-4.1) |
+| H3 | A budgeted payload preserves accuracy with far less context | confirmed (relative) | payload 6000 0.60 @ 5.5k vs full 0.58 @ 12.9k (-57%); 4000 0.56 @ 3.8k (-70%); knee at ~4000 |
+| H4 | A memory-aware answer prompt fixes the remaining gap | refuted | payload 0.56 -> 0.50; oracle 0.52 both |
+| H5 | Multi-session evidence aggregation is the bottleneck | refuted | multi-session was the easiest category (0.77); temporal-reasoning the worst (0.29) |
+| H5' | Restoring real session/question timestamps improves temporal reasoning | partial | temporal-reasoning 0.29 -> 0.43 (both arms); overall flat 0.56; controls flat |
+| H6a | An explicit temporal-computation procedure fixes the rest | refuted | temporal \| evidence complete 0.56 -> 0.56 (5/9); 0/4 target errors fixed |
+
+Additional findings:
+
+- **Ingestion is part of the system**: the external harness stored only 2k of
+  each ~10.4k-char session (Gold Fact Retention 0.42); full text lifted GFR to
+  0.83 and strict from 0.33 to 0.50 with evidence recall constant (0.75) — the
+  loss was at write time, before retrieval.
+- **More memory is not better memory**: an oracle that receives *all* expected
+  sessions with no context cap (14.7k+ chars) collapses on multi-session
+  (0.08 -> 0.00) and scores below the 4000-char payload. The budget is a
+  protective filter, not only a cost optimization.
+- **Prompt-only interventions do not move the answerer** (H4 and H6a): the
+  remaining errors are evidence composition and arithmetic capability.
+- Remaining open problems: temporal-reasoning retrieval misses (4 of the 8
+  errors are evidence-incomplete), the answerer ceiling on LongMemEval
+  (~0.56 even with evidence), external tagger coarseness, and multi-turn
+  continuity that actually *learns* new memories.
+
+The central architectural statement:
+
+> A good memory for an LLM is not the one that puts the most history into the
+> context; it is the one that preserves, finds and delivers the right amount of
+> evidence, with its provenance, at the right moment.

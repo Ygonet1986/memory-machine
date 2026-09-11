@@ -40,6 +40,17 @@ keys or secrets."""
 MEMORIES_RE = re.compile(r'\{\s*"memories"\s*:\s*', re.S)
 
 
+TEMPORAL_SECTION = """## Temporal computation
+
+Before answering, resolve the question's time reference explicitly:
+
+1. List the relevant timestamps and the memory each one comes from.
+2. Resolve relative expressions spoken inside a memory ("today", "yesterday", "a week ago") against THAT memory's session timestamp.
+3. Use the question date (given in the task) as "now".
+4. Compute the interval or ordering step by step.
+5. Verify the computation, then answer with the result."""
+
+
 MAIN_SYSTEM_PROMPT_MEMORY = """You are the main assistant working on a long-running project. \
 You are given a whiteboard representing the current work: the subject, the \
 objective, the context, pending items, and "Remembered" notes contributed by \
@@ -78,6 +89,7 @@ def main_user_prompt(
     extra_context: str = "",
     *,
     evidence_label: str = "External context",
+    temporal_instruction: bool = False,
 ) -> str:
     parts = []
     if history:
@@ -85,6 +97,8 @@ def main_user_prompt(
     parts.append("## Whiteboard\n\n" + whiteboard.render())
     if extra_context:
         parts.append(f"## {evidence_label}\n\n" + extra_context)
+    if temporal_instruction:
+        parts.append(TEMPORAL_SECTION)
     parts.append("## Task\n\n" + task)
     return "\n\n".join(parts)
 
@@ -132,6 +146,7 @@ def run_main_chatbot(
     history: str = "",
     extra_context: str = "",
     memory_aware: bool = False,
+    temporal_instruction: bool = False,
     temperature: float = 0.0,
     on_token: Any = None,
 ) -> tuple[str, list[MemoryRecord], str]:
@@ -156,6 +171,7 @@ def run_main_chatbot(
                 evidence_label=(
                     "Recalled memory evidence" if memory_aware else "External context"
                 ),
+                temporal_instruction=temporal_instruction,
             ),
         },
     ]

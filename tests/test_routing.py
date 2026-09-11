@@ -607,3 +607,94 @@ def test_view_agent_state_persists_across_recalls(tmp_path):
 
     m.recall("tell me more about the router")
     assert "keep me" in seen[-1]
+
+
+# --------------------------------------------------------- dimension boards
+
+
+def test_whiteboard_dimension_boards_roundtrip(tmp_path):
+    from memory_machine.whiteboard import Whiteboard, size_chars
+
+    wb = Whiteboard(subject="work", objective="obj")
+    board = wb.for_dimension("temporal")
+    board.checklist = "- keep dates"
+    board.annotations = []
+    assert board.subject == "work"
+
+    restored = Whiteboard.from_dict(wb.to_dict())
+    assert restored.boards["temporal"].checklist == "- keep dates"
+    assert "temporal" in restored.render_boards(["temporal"])
+    before = size_chars(restored)
+    restored.boards["temporal"].context = ["x" * 5000]
+    assert size_chars(restored) == before  # boards do not trigger consolidation
+
+
+def test_recall_dimension_boards_split_annotations(tmp_path):
+    def handler(messages, temperature):
+        sys_text = text(messages, "system")
+        if "memory agent watching the view" in sys_text:
+            if "`time/2026-07`" in sys_text:
+                return (
+                    '{"digest":"d","annotations":'
+                    '[{"memory_id":"M0002","note":"temporal note","relevance":0.9}],'
+                    '"coverage":"complete"}'
+                )
+            return (
+                '{"digest":"d","annotations":'
+                '[{"memory_id":"M0001","note":"semantic note","relevance":0.9}],'
+                '"coverage":"complete"}'
+            )
+        return '{"digest":"d","checklist":[],"annotations":[],"coverage":"complete"}'
+
+    m = _machine(
+        tmp_path,
+        handler,
+        router_enabled=True,
+        router_mode="views",
+        view_router_mode="lexical",
+        view_dimension_mode="auto",
+        agent_mode="view",
+        whiteboard_mode="dimension",
+        view_top_k=1,
+    )
+    m.add_memory(
+        MemoryRecord(type="decision", summary="router opt-in", created_at="2026-07-10",
+                     views=["topic/router"])
+    )
+    m.add_memory(
+        MemoryRecord(type="lesson", summary="benchmark note", created_at="2026-07-15",
+                     views=["topic/benchmarks"])
+    )
+    res = m.recall("what changed about the router since July?")
+    boards = res["boards"]
+    assert "semantic" in boards and "temporal" in boards
+    assert "M0001" in boards["semantic"] and "M0002" not in boards["semantic"]
+    assert "M0002" in boards["temporal"] and "M0001" not in boards["temporal"]
+    assert {a["memory_id"] for a in res["annotations"]} == {"M0001", "M0002"}
+
+
+def test_view_agent_reads_its_dimension_board(tmp_path):
+    seen: list[str] = []
+
+    def handler(messages, temperature):
+        sys_text = text(messages, "system")
+        if "memory agent watching the view" in sys_text:
+            seen.append(text(messages, "user"))
+            return '{"digest":"d","annotations":[],"coverage":"complete"}'
+        return '{"digest":"d","checklist":[],"annotations":[],"coverage":"complete"}'
+
+    m = _machine(
+        tmp_path,
+        handler,
+        router_enabled=True,
+        router_mode="views",
+        view_router_mode="lexical",
+        view_dimension_mode="auto",
+        agent_mode="view",
+        whiteboard_mode="dimension",
+        view_top_k=1,
+    )
+    m.add_memory(MemoryRecord(type="decision", summary="router opt-in", views=["topic/router"]))
+    m.whiteboard.for_dimension("semantic").checklist = "- semantic reminder"
+    m.recall("what about the router?")
+    assert any("semantic reminder" in prompt for prompt in seen)

@@ -518,6 +518,24 @@ the selection itself is not stable; the lexical plan is deterministic (0.97 @
 3.0 calls). Reproducibility-sensitive deployments should prefer the lexical
 plan or pin the selection.
 
+### 15.5 Dimension boards (v0.6c)
+
+With `whiteboard_mode: dimension`, each dimension keeps its own working board
+(`Whiteboard.boards`): a semantic board, a temporal board and a structural
+board. View agents read the board of their dimension and their annotations are
+merged back into it, so each dimension maintains a different working memory of
+the same work while the primary board keeps the union for compatibility.
+Boards persist inside `whiteboard.json` (old files load with no boards) and are
+excluded from the primary's consolidation size — each board is bounded by the
+per-board annotation budget.
+
+Measured (n=32, deterministic lexical plan): view agents with dimension boards
+score 0.97 complete evidence @ 3.1 calls / 0.57 reduction — identical to the
+single-board arm (0.97 @ 3.0 / 0.57), i.e., no retrieval regression. The value
+is architectural: per-dimension understanding, checklist and annotations are
+now separate and inspectable, ready for dimension-specific consolidation and
+for multiple active boards selected by context.
+
 ## 16. Failure Modes
 
 | Failure | Required behavior |

@@ -48,6 +48,7 @@ class Whiteboard:
     annotations: list[Annotation] = field(default_factory=list)
     consolidated_from: str = ""
     updated_at: str = ""
+    boards: dict[str, "Whiteboard"] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -60,6 +61,7 @@ class Whiteboard:
             "annotations": [a.to_dict() for a in self.annotations],
             "consolidated_from": self.consolidated_from,
             "updated_at": self.updated_at,
+            "boards": {name: board.to_dict() for name, board in self.boards.items()},
         }
 
     @classmethod
@@ -74,10 +76,41 @@ class Whiteboard:
             annotations=[Annotation.from_dict(a) for a in (data.get("annotations") or [])],
             consolidated_from=str(data.get("consolidated_from") or ""),
             updated_at=str(data.get("updated_at") or ""),
+            boards={
+                str(name): cls.from_dict(board)
+                for name, board in (data.get("boards") or {}).items()
+            },
         )
 
     def touch(self) -> None:
         self.updated_at = datetime.now(timezone.utc).isoformat()
+
+    def for_dimension(self, dimension: str) -> "Whiteboard":
+        """Return (creating if needed) the working board of a dimension.
+
+        Dimension boards inherit the session subject/objective when created,
+        then keep their own understanding, checklist and annotations — so each
+        dimension maintains a different working memory of the same work.
+        """
+        board = self.boards.get(dimension)
+        if board is None:
+            board = Whiteboard(subject=self.subject, objective=self.objective)
+            self.boards[dimension] = board
+        return board
+
+    def active_boards(self, dimensions: list[str]) -> dict[str, "Whiteboard"]:
+        return {d: self.boards[d] for d in dimensions if d in self.boards}
+
+    def render_boards(self, dimensions: list[str] | None = None) -> str:
+        """Render the requested dimension boards, each under its own header."""
+        names = dimensions if dimensions is not None else list(self.boards)
+        parts: list[str] = []
+        for name in names:
+            board = self.boards.get(name)
+            if board is None:
+                continue
+            parts.append(f"## {name}\n{board.render()}")
+        return "\n\n".join(parts)
 
     def render(self, *, include_annotations: bool = True) -> str:
         """Human-readable representation of the whiteboard."""
@@ -122,8 +155,14 @@ def save_whiteboard(whiteboard: Whiteboard, path: Path) -> None:
 
 
 def size_chars(whiteboard: Whiteboard) -> int:
-    """Approximate serialized size used to trigger consolidation."""
-    return len(json.dumps(whiteboard.to_dict()))
+    """Approximate serialized size used to trigger consolidation.
+
+    Dimension boards are excluded: they are bounded by the annotation budget
+    and must not force the primary board to consolidate on every turn.
+    """
+    data = whiteboard.to_dict()
+    data.pop("boards", None)
+    return len(json.dumps(data))
 
 
 def needs_consolidation(whiteboard: Whiteboard, threshold: int) -> bool:

@@ -17,6 +17,7 @@ from PySide6.QtWidgets import (
     QMessageBox,
     QPlainTextEdit,
     QPushButton,
+    QScrollArea,
     QTextBrowser,
     QVBoxLayout,
     QWidget,
@@ -63,6 +64,19 @@ class InputBox(QPlainTextEdit):
         super().keyPressEvent(event)
 
 
+def _scrollable(widget: QWidget, max_height: int) -> QScrollArea:
+    """Wrap a widget in a scroll area bounded by ``max_height``."""
+    area = QScrollArea()
+    area.setWidget(widget)
+    area.setWidgetResizable(True)
+    area.setMaximumHeight(max_height)
+    area.setFrameShape(QScrollArea.Shape.NoFrame)
+    area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+    area.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+    area.setStyleSheet("QScrollArea { background: transparent; border: none; }")
+    return area
+
+
 class MainWindow(QMainWindow):
     def __init__(self, backend: Backend) -> None:
         super().__init__()
@@ -83,18 +97,22 @@ class MainWindow(QMainWindow):
         root = QVBoxLayout(central)
 
         self.status_label = QLabel()
+        self.status_label.setWordWrap(True)
         self.status_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
-        root.addWidget(self.status_label)
+        self.status_scroll = _scrollable(self.status_label, 48)
+        root.addWidget(self.status_scroll)
 
         self.whiteboard_label = QLabel()
         self.whiteboard_label.setWordWrap(True)
         self.whiteboard_label.setTextFormat(Qt.TextFormat.RichText)
+        self.whiteboard_label.setAlignment(Qt.AlignmentFlag.AlignTop)
         self.whiteboard_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
         self.whiteboard_label.setStyleSheet(
             "QLabel { background: #161d27; color: #b8c4d4; border: 1px solid #2c3847; "
             "border-radius: 6px; padding: 8px; font-size: 12px; }"
         )
-        root.addWidget(self.whiteboard_label)
+        self.whiteboard_scroll = _scrollable(self.whiteboard_label, 160)
+        root.addWidget(self.whiteboard_scroll)
 
         topic_row = QHBoxLayout()
         topic_row.addWidget(QLabel("Topic:"))
@@ -124,15 +142,29 @@ class MainWindow(QMainWindow):
         )
         root.addWidget(self.chat, 1)
 
-        self.stream_label = QLabel()
-        self.stream_label.setWordWrap(True)
-        self.stream_label.setTextFormat(Qt.TextFormat.RichText)
-        self.stream_label.setStyleSheet(
-            "QLabel { background: #161d27; color: #b8c4d4; border: 1px solid #2c3847; "
+        self.reasoning_label = QLabel()
+        self.reasoning_label.setWordWrap(True)
+        self.reasoning_label.setTextFormat(Qt.TextFormat.RichText)
+        self.reasoning_label.setAlignment(Qt.AlignmentFlag.AlignTop)
+        self.reasoning_label.setStyleSheet(
+            "QLabel { background: #161d27; color: #9fb2c8; border: 1px solid #2c3847; "
+            "border-radius: 6px; padding: 8px; font-size: 12px; }"
+        )
+        self.reasoning_scroll = _scrollable(self.reasoning_label, 140)
+        self.reasoning_scroll.hide()
+        root.addWidget(self.reasoning_scroll)
+
+        self.answer_label = QLabel()
+        self.answer_label.setWordWrap(True)
+        self.answer_label.setTextFormat(Qt.TextFormat.RichText)
+        self.answer_label.setAlignment(Qt.AlignmentFlag.AlignTop)
+        self.answer_label.setStyleSheet(
+            "QLabel { background: #161d27; color: #e8eef7; border: 1px solid #2c3847; "
             "border-radius: 6px; padding: 8px; font-size: 13px; }"
         )
-        self.stream_label.hide()
-        root.addWidget(self.stream_label)
+        self.answer_scroll = _scrollable(self.answer_label, 200)
+        self.answer_scroll.hide()
+        root.addWidget(self.answer_scroll)
 
         self.input = InputBox()
         self.input.setPlaceholderText("Ask about your project… (Enter to send, Shift+Enter for newline)")
@@ -258,8 +290,10 @@ class MainWindow(QMainWindow):
         self._append_user(task)
         self._stream_reasoning = ""
         self._stream_content = ""
-        self.stream_label.setText("")
-        self.stream_label.show()
+        self.reasoning_label.setText("")
+        self.answer_label.setText("")
+        self.reasoning_scroll.show()
+        self.answer_scroll.show()
         self._set_busy(True)
         self._worker = ChatWorker(self._backend, task, self.web_check.isChecked(), parent=self)
         self._worker.ok.connect(self._on_ok)
@@ -271,17 +305,20 @@ class MainWindow(QMainWindow):
     def _on_token(self, content: str, reasoning: str) -> None:
         self._stream_reasoning += reasoning
         self._stream_content += content
-        parts: list[str] = []
         if self._stream_reasoning:
             r = html.escape(self._stream_reasoning).replace("\n", "<br>")
-            parts.append(f'<b style="color:#5db9ff">Reasoning</b><br>{r}')
+            self.reasoning_label.setText(f'<b style="color:#5db9ff">Reasoning</b><br>{r}')
+            bar = self.reasoning_scroll.verticalScrollBar()
+            bar.setValue(bar.maximum())
         if self._stream_content:
             c = html.escape(self._stream_content).replace("\n", "<br>")
-            parts.append(f'<b style="color:#9fd79f">Answer</b><br>{c}')
-        self.stream_label.setText("<br>".join(parts))
+            self.answer_label.setText(f'<b style="color:#9fd79f">Answer</b><br>{c}')
+            bar = self.answer_scroll.verticalScrollBar()
+            bar.setValue(bar.maximum())
 
     def _on_ok(self, result: dict[str, Any]) -> None:
-        self.stream_label.hide()
+        self.reasoning_scroll.hide()
+        self.answer_scroll.hide()
         reply = result.get("reply", "")
         annotations = result.get("kept_annotations") or []
         saved = result.get("memories_saved") or []
@@ -290,7 +327,8 @@ class MainWindow(QMainWindow):
         self._refresh_status()
 
     def _on_err(self, message: str) -> None:
-        self.stream_label.hide()
+        self.reasoning_scroll.hide()
+        self.answer_scroll.hide()
         self._append_system(f"Error: {message}")
 
     def _on_done(self) -> None:
@@ -373,9 +411,9 @@ class MainWindow(QMainWindow):
             )
         if parts:
             self.whiteboard_label.setText("<br>".join(parts))
-            self.whiteboard_label.show()
+            self.whiteboard_scroll.show()
         else:
-            self.whiteboard_label.hide()
+            self.whiteboard_scroll.hide()
 
     # ------------------------------------------------------------- render
 

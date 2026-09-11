@@ -1,0 +1,36 @@
+tagging 574 sessions ...
+  tagged 8/185
+  tagged 16/185
+  tagged 24/185
+  tagged 32/185
+  tagged 40/185
+  tagged 48/185
+  tagged 56/185
+  tagged 64/185
+  tagged 72/185
+  tagged 80/185
+  tagged 88/185
+  tagged 96/185
+  tagged 104/185
+  tagged 112/185
+  tagged 120/185
+  tagged 128/185
+  tagged 136/185
+  tagged 144/185
+  tagged 152/185
+  tagged 160/185
+  tagged 168/185
+  tagged 176/185
+  tagged 184/185
+  tagged 185/185
+running agents_view_ctx ...
+  n=12 evidence=0.75 strict=0.33 lenient=0.33 AUR=0.44 calls=4.0
+running agents_view_payload ...
+  n=12 evidence=0.75 strict=0.33 lenient=0.42 AUR=0.44 calls=4.0
+
+final table:
+arm                   n   evid  strict  lenient    AUR   calls
+agents_view_ctx      12   0.75    0.33     0.33   0.44     4.0
+agents_view_payload  12   0.75    0.33     0.42   0.44     4.0
+
+audit (deepseek-v4-flash): 5/6 agreement (0.83) -> /Users/igorcoutrimlacerda/memory-machine/eval/out/judge_audit_longmemeval.jsonl

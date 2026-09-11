@@ -45,7 +45,7 @@ from memory_machine.coordinator import Machine
 from memory_machine.llm import LLMClient, extract_json_object
 from memory_machine.main_chatbot import run_main_chatbot
 from memory_machine.payload import payload_as_context
-from memory_machine.retrieval import rank, tokenize
+from memory_machine.retrieval import Embedder, cosine, rank, tokenize
 from memory_machine.secrets import SecretError
 from memory_machine.tape import MemoryRecord
 
@@ -153,6 +153,7 @@ VIEW_CONFIG = dict(
 ARMS: dict[str, dict[str, Any]] = {
     "no_memory": {},
     "bm25": {},
+    "vector": {},
     "agents_group": dict(capacity=5, router_enabled=False, agent_mode="group"),
     "agents_view": dict(VIEW_CONFIG),
     "agents_view_ctx": dict(VIEW_CONFIG),
@@ -165,6 +166,10 @@ ARMS: dict[str, dict[str, Any]] = {
     "oracle_dates": {},
 }
 
+PAYLOAD_ARMS = {
+    "agents_view_payload", "agents_view_payload_memory",
+    "agents_view_payload_dates", "agents_view_payload_dates_temporal",
+}
 MEMORY_AWARE_ARMS = {"agents_view_payload_memory", "oracle_memory"}
 DATES_ARMS = {
     "agents_view_payload_dates", "agents_view_payload_dates_temporal", "oracle_dates",
@@ -183,7 +188,9 @@ def load_gold() -> dict[int, str]:
     return {int(k): v for k, v in json.loads(GOLD_PATH.read_text(encoding="utf-8")).items()}
 
 
-def full_text(machine: Any, ids: list[str], *, budget: int = 6000) -> str:
+def full_text(
+    machine: Any, ids: list[str], *, budget: int = 6000, dates: bool = False
+) -> str:
     """Full text of the records; ``budget <= 0`` means no cap (oracle)."""
     by_id = {r.id: r for r in machine.tape.read()}
     blocks: list[str] = []
@@ -192,7 +199,9 @@ def full_text(machine: Any, ids: list[str], *, budget: int = 6000) -> str:
         record = by_id.get(mid)
         if record is None:
             continue
-        block = f"[{record.id}] {record.summary}\n{record.why}"
+        stamp = (record.created_at or "")[:16].replace("T", " ")
+        prefix = f"[{record.id} | {stamp}]" if dates and stamp else f"[{record.id}]"
+        block = f"{prefix} {record.summary}\n{record.why}"
         if budget > 0 and blocks and used + len(block) > budget:
             break
         blocks.append(block)
@@ -232,6 +241,40 @@ def parse_date(raw: str) -> str:
         return ""
     y, mo, d, h, mi = m.groups()
     return f"{y}-{mo}-{d}T{h}:{mi}:00"
+
+
+_DOC_VECTORS: dict[tuple[str, ...], list[list[float]]] = {}
+
+
+def vector_rank(
+    question: str, records: list[Any], embedder: Any, *, limit: int = 5
+) -> list[tuple[int, float]]:
+    """Dense top-k over session texts with cached document embeddings.
+
+    The embedding model has a small context (2048 tokens); each session is
+    embedded as one (truncated) vector. A failed embedding aborts the run
+    instead of silently degrading to BM25.
+    """
+    if embedder is None:
+        raise RuntimeError("vector arm needs an embedder")
+    key = tuple(r.id for r in records)
+    vectors = _DOC_VECTORS.get(key)
+    texts = [r.text() for r in records]
+    if vectors is None:
+        vectors = []
+        for i in range(0, len(texts), 32):
+            chunk = texts[i:i + 32]
+            got = embedder.embed(chunk)
+            if len(got) != len(chunk):
+                raise RuntimeError(f"embedding request failed at chunk {i}")
+            vectors.extend(got)
+        _DOC_VECTORS[key] = vectors
+    qv = embedder.embed([question])
+    if len(qv) != 1:
+        raise RuntimeError("query embedding failed")
+    scored = [(i, cosine(qv[0], dv)) for i, dv in enumerate(vectors)]
+    scored.sort(key=lambda x: -x[1])
+    return scored[:limit]
 
 
 def answer_with(
@@ -303,6 +346,7 @@ def _run_arm(
     expected_sessions: list[str] | None = None,
     error_classify: bool = False,
     question_date: str = "",
+    embedder: Any = None,
 ) -> dict[str, Any]:
     required = set(required_ids)
     before = client.calls
@@ -321,12 +365,16 @@ def _run_arm(
             client, machine, question + provenance, memory_aware=memory_aware,
             temporal_instruction=temporal_instruction,
         )
-    elif arm == "bm25":
+    elif arm in {"bm25", "vector"}:
         records = machine.tape.read()
         docs = [r.text() for r in records]
         ids = [r.id for r in records]
-        top = [ids[j] for j, _s in rank(question, docs, limit=5)]
-        context = full_text(machine, top, budget=ctx_budget)
+        if arm == "vector":
+            hits = vector_rank(question, records, embedder, limit=5)
+        else:
+            hits = rank(question, docs, limit=5)
+        top = [ids[j] for j, _s in hits]
+        context = full_text(machine, top, budget=ctx_budget, dates=bool(question_date))
         evidence_complete = int(required <= set(top))
         answer = answer_with(
             client, machine, question + provenance, extra_context=context,
@@ -341,7 +389,7 @@ def _run_arm(
         evidence_complete = int(required <= consulted)
         if arm == "agents_view_ctx":
             context = full_text(machine, annotated, budget=ctx_budget)
-        elif arm in {"agents_view_payload", "agents_view_payload_memory"}:
+        elif arm in PAYLOAD_ARMS:
             context = payload_as_context(res.get("evidence_payload") or [])
         answer = answer_with(
             client, machine, question + provenance, extra_context=context,
@@ -393,7 +441,7 @@ def _run_arm(
             }
             for item in (res.get("evidence_payload") or [])
         ]
-        if res is not None
+        if res is not None and arm in PAYLOAD_ARMS
         else [],
         "whiteboard_rendered": machine.whiteboard.render(),
         "dimension_boards_rendered": {
@@ -500,6 +548,7 @@ def run_external_case(
     gfr: bool = False,
     error_classify: bool = False,
     ingest_dates: bool = False,
+    embedder: Any = None,
 ) -> dict[str, Any]:
     use_dates = ingest_dates or arm in DATES_ARMS
     cfg = Config(**ARMS[arm])
@@ -519,6 +568,7 @@ def run_external_case(
         machine, client, judge_client, ctx_budget=ctx_budget, expected_sessions=expected,
         error_classify=error_classify,
         question_date=task.get("question_date", "") if use_dates else "",
+        embedder=embedder,
     )
     row["ingest_summary"] = ingest_summary
     row["ingest_why"] = ingest_why
@@ -598,6 +648,8 @@ def main() -> None:
     p.add_argument("--ingest-why", type=int, default=2000, help="why chars at ingestion (0 = full text)")
     p.add_argument("--gfr", action="store_true", help="measure Gold Fact Retention per case")
     p.add_argument("--error-classify", action="store_true", help="classify answerer failures")
+    p.add_argument("--embedding-model", default="nomic-embed-text")
+    p.add_argument("--embedding-base-url", default="http://localhost:11434/v1")
     p.add_argument("--ingest-dates", action="store_true",
                    help="restore real session timestamps and the question date (H5')")
     p.add_argument("--seed", type=int, default=7)
@@ -624,6 +676,7 @@ def main() -> None:
     root = Path(tempfile.mkdtemp(prefix="mm-e2e-"))
     arms = [a.strip() for a in args.arms.split(",") if a.strip()]
 
+    embedder = Embedder(args.embedding_base_url, "", args.embedding_model, timeout=300)
     tags: dict[str, dict[str, Any]] = {}
     if args.dataset == "synthetic":
         gold = load_gold()
@@ -708,7 +761,7 @@ def main() -> None:
                         ctx_budget=args.ctx_budget, payload_budget=args.payload_budget,
                         ingest_summary=args.ingest_summary, ingest_why=args.ingest_why,
                         gfr=args.gfr, error_classify=args.error_classify,
-                        ingest_dates=args.ingest_dates,
+                        ingest_dates=args.ingest_dates, embedder=embedder,
                         **extra,
                     )
                 )

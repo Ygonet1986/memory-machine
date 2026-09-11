@@ -1,0 +1,4 @@
+arm,n_temporal,temporal_all,temporal_evidence_complete
+payload base,14,0.286,0.444
++ real dates,14,0.643,1.0
++ temporal prompt,14,0.643,1.0

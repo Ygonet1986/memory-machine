@@ -116,15 +116,18 @@ Use `-C <dir>` to operate on a specific project directory. Run
   cap lifts Gold Fact Retention from 0.42 to 0.83 and strict accuracy from 0.33
   to 0.50 (evidence recall constant at 0.75 — the loss was upstream of
   retrieval).
-- **H6a (refuted)** — an explicit temporal-computation procedure in the
-  answerer prompt (gated by markers) fixed none of the four audited
-  arithmetic/anchor errors: temporal | evidence complete stayed 5/9. Together
-  with H4, prompt-only interventions do not move the answerer.
-- **H5' (partial)** — restoring the real session timestamps and the question
-  date (`--ingest-dates`) improves temporal-reasoning 0.29 -> 0.43 (n=14)
-  consistently, though overall strict stays flat (0.56); an oracle with all
-  expected sessions and no context cap collapses on multi-session, showing that
-  more evidence can hurt.
+- **H5' (confirmed)** — with the payload delivered, restoring the real session
+  timestamps and the question date (`--ingest-dates`) lifts temporal-reasoning
+  0.29 -> 0.64 and temporal | evidence complete 0.44 -> 1.00 (9/9); overall
+  strict 0.56 -> 0.64 and AUR 0.76 -> 0.89. An oracle with all expected
+  sessions and no context cap collapses on multi-session, showing that more
+  evidence can hurt.
+- **H6a (refuted on temporal)** — a gated temporal-computation procedure added
+  nothing on temporal questions once the timestamps were correct (0.64 -> 0.64);
+  the small overall gain (0.64 -> 0.70) comes from non-temporal small-n cases.
+- **Harness bug (documented)** — the first H5'/H6a "dates" runs were missing
+  from the payload-delivery branch, so they measured whiteboard-only answers;
+  after the fix the results reversed. Old snapshots kept as `*_BUGGY.jsonl`.
 - **H4 (refuted)** — a memory-aware answer prompt (explicitly telling the
   answerer the context is recalled history) did not help: payload 4000 dropped
   0.56 -> 0.50 strict and the oracle stayed at 0.52. The dominant remaining
@@ -175,11 +178,17 @@ Use `-C <dir>` to operate on a specific project directory. Run
 The experimental program tested one layer at a time. Confirmed: perspective
 agents over views (H1), factual-content delivery (H2), budgeted evidence with
 relative parity at -70% context (H3). Refuted: the memory-aware prompt (H4),
-multi-session aggregation as the bottleneck (H5), the temporal-computation
-prompt (H6a). Partial: real timestamps for temporal reasoning (H5').
+multi-session aggregation as the bottleneck (H5), and the temporal-computation
+prompt once the timestamps were correct (H6a). Confirmed: real timestamps plus
+payload delivery fix evidence-complete temporal reasoning (H5').
 Two findings stand out: the external ingestion cap was losing ~80% of each
 session at write time, and an oracle with unlimited context scores *below* the
 4000-char payload — the budget is a protective filter, not just a cost play.
+The paper-phase flat dense baseline (one vector per session, top-5) confirms
+the boundary story from the other side: 0.24 evidence and 0.16 strict while
+delivering ~11k context characters — context size is not evidence. See
+`docs/PAPER.md` (draft), `docs/RESULTS.md` (generated tables) and
+`docs/RELATED_WORK.md`.
 
 ## Configuration
 

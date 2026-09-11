@@ -1,0 +1,26 @@
+running llm / anaphora ...
+running llm / topic_shift ...
+running llm_state / anaphora ...
+running llm_state / topic_shift ...
+
+arm    conversation turn kind       ecomp   arec  calls  churn attn_top  old_res
+llm    anaphora        1 normal         1   1.00    3.0   0.00     0.00     0.00
+llm    anaphora        2 anaphora       0   1.00    3.0   0.33     0.00     0.00
+llm    anaphora        3 normal         1   1.00    4.0   0.00     0.00     0.00
+llm    anaphora        4 anaphora       1   1.00    3.0   0.00     0.00     0.00
+llm    topic_shift     1 normal         1   1.00    3.0   0.00     0.00     0.00
+llm    topic_shift     2 normal         1   1.00    3.0   0.33     0.00     0.00
+llm    topic_shift     3 shift          1   1.00    3.0   0.00     0.00     0.00
+llm    topic_shift     4 anaphora       1   1.00    4.0   0.67     0.00     0.00
+llm_state anaphora        1 normal         1   1.00    3.0   0.00     0.86     0.00
+llm_state anaphora        2 anaphora       1   1.00    3.0   1.00     0.93     0.93
+llm_state anaphora        3 normal         1   1.00    4.0   0.25     0.94     0.94
+llm_state anaphora        4 anaphora       1   1.00    4.0   0.50     0.94     0.94
+llm_state topic_shift     1 normal         1   1.00    3.0   0.00     0.86     0.00
+llm_state topic_shift     2 normal         1   1.00    3.0   0.33     0.93     0.93
+llm_state topic_shift     3 shift          1   1.00    3.0   0.00     0.86     0.56
+llm_state topic_shift     4 anaphora       1   1.00    3.0   1.00     0.93     0.93
+
+summary:
+  llm    anaphora_ecomp=0.67 anaphora_calls=3.3 shift_ecomp=1.00 shift_old_residual=0.00
+  llm_state anaphora_ecomp=1.00 anaphora_calls=3.3 shift_ecomp=1.00 shift_old_residual=0.56

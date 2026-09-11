@@ -1,0 +1,8 @@
+arm,dataset,n,evidence,strict,lenient,AUR,GFR,fact_cov,chars,calls
+agents_group,synthetic,32,1.0,0.62,0.88,0.62,,0.72,0,16.1
+agents_view,synthetic,32,0.97,0.72,0.94,0.74,,0.73,0,4.1
+agents_view_ctx,synthetic,32,0.97,0.88,0.97,0.9,,0.99,1632,4.0
+agents_view_payload,synthetic,32,0.97,0.97,1.0,1.0,,0.99,2007,4.1
+bm25,synthetic,32,0.28,0.31,0.66,1.0,,0.48,335,1.0
+no_memory,synthetic,32,0.0,0.0,0.12,,,0.15,0,1.0
+oracle,synthetic,32,1.0,0.94,0.97,0.94,,1.0,242,1.0

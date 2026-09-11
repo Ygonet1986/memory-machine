@@ -215,7 +215,33 @@ TASKS: list[dict[str, Any]] = [
     {"q": "what did the last experiment show?", "required": ["bench_judge"],
      "cat": "adversarial", "context": "We are reviewing the memory machine's benchmark results."},
     {"q": "what changed between the first router decision and the recent benchmark?",
-     "required": ["router_llm", "bench_judge"], "cat": "adversarial"},
+     "required": ["router_llm", "bench_judge"], "cat": "adversarial",
+     "dims": ["semantic", "temporal"]},
+    # dimension-specific tasks (temporal / structural / relational)
+    {"q": "what changed about the router since July?",
+     "required": ["router_digest", "adv_dual"], "cat": "temporal",
+     "dims": ["semantic", "temporal"]},
+    {"q": "what did we decide about views in September?",
+     "required": ["views_foundation", "views_index"], "cat": "temporal",
+     "dims": ["semantic", "temporal"]},
+    {"q": "list the decisions made in May and June",
+     "required": ["router_llm", "adv_missing"], "cat": "temporal",
+     "dims": ["temporal", "structural"]},
+    {"q": "which lessons did we learn in February?",
+     "required": ["riemann_siegel", "riemann_gmpy2", "sieve_segmented"], "cat": "temporal",
+     "dims": ["temporal", "structural"]},
+    {"q": "which decisions did we make about routing?",
+     "required": ["router_llm", "router_digest"], "cat": "structural",
+     "dims": ["semantic", "structural"]},
+    {"q": "which lessons did we record about benchmarks?",
+     "required": ["bench_locomo", "bench_longmemeval", "bench_timeout"], "cat": "structural",
+     "dims": ["semantic", "structural"]},
+    {"q": "what did we work on in September?",
+     "required": ["views_foundation", "views_index", "views_expand", "adv_dual"],
+     "cat": "temporal", "dims": ["temporal"]},
+    {"q": "what did we decide recently about routing?",
+     "required": ["router_digest", "adv_dual"], "cat": "ambiguous",
+     "dims": ["semantic", "temporal", "structural"]},
 ]
 
 FILLER_TEMPLATES = [
@@ -226,7 +252,7 @@ FILLER_TEMPLATES = [
     "Document the {t} follow-up",
 ]
 
-CATEGORIES = ["single", "same_view", "cross_view", "adversarial"]
+CATEGORIES = ["single", "same_view", "cross_view", "adversarial", "temporal", "structural", "ambiguous"]
 
 
 class CountingClient:
@@ -391,12 +417,27 @@ def run_arm(
         view_hits = [1 if selected & views else 0 for views in per_memory_views]
         reasons = list(routing.get("fallback_reasons") or [])
 
+        required_dims = set(task.get("dims") or ["semantic"])
+        selected_dims = set(routing.get("dimensions") or [])
+        missed = [
+            key
+            for key, views in zip(task["required"], per_memory_views)
+            if not (selected & views)
+        ]
+        recovered = [key for key in missed if id_map[key] in consulted]
+        level1 = set(routing.get("level1_ids") or [])
+
         row = {
             "arm": name,
             "cat": task["cat"],
             "q": task["q"],
             "view_recall": sum(view_hits) / len(view_hits),
             "view_precision": (len(selected & target_views) / len(selected)) if selected else 0.0,
+            "dimension_recall": len(selected_dims & required_dims) / len(required_dims),
+            "dimension_precision": (
+                len(selected_dims & required_dims) / len(selected_dims) if selected_dims else 0.0
+            ),
+            "recovery_redundancy": (len(recovered) / len(missed)) if missed else 1.0,
             "evidence_recall": len(consulted & required) / len(required),
             "complete_evidence": int(required <= consulted),
             "agent_recall": len(annotated & required) / len(required),
@@ -406,6 +447,9 @@ def run_arm(
             "level": routing.get("level", 0),
             "fallback": int(routing.get("level", 0) > 1),
             "reasons": reasons,
+            "coverage_signal": routing.get("coverage_signal") or "",
+            "level1_complete": int(required <= level1) if level1 else 0,
+            "intersection_mode": routing.get("intersection_mode") or "",
             "calls": calls,
             "tokens": (prompt_chars + completion_chars) / 4,
             "latency": latency,
@@ -434,13 +478,39 @@ def _mean(rows: list[dict[str, Any]], key: str) -> float:
 
 def summarize(rows: list[dict[str, Any]]) -> dict[str, Any]:
     reasons: Counter[str] = Counter()
+    modes: Counter[str] = Counter()
     for r in rows:
         for reason in r["reasons"]:
             reasons[reason] += 1
+        if r.get("intersection_mode"):
+            modes[r["intersection_mode"]] += 1
+    signals = [r for r in rows if r.get("coverage_signal")]
+    complete_signals = [r for r in signals if r["coverage_signal"] == "complete"]
+    level1_incomplete = [r for r in signals if not r["level1_complete"]]
+    level1_complete = [r for r in signals if r["level1_complete"]]
+    calibration = {
+        "n": len(signals),
+        "coverage_confidence": _mean(complete_signals, "level1_complete"),
+        "false_safe_rate": (
+            sum(1 for r in level1_incomplete if r["coverage_signal"] == "complete")
+            / len(level1_incomplete)
+            if level1_incomplete
+            else 0.0
+        ),
+        "fallback_waste": (
+            sum(1 for r in level1_complete if r["coverage_signal"] != "complete")
+            / len(level1_complete)
+            if level1_complete
+            else 0.0
+        ),
+    }
     return {
         "n": len(rows),
         "view_recall": _mean(rows, "view_recall"),
         "view_precision": _mean(rows, "view_precision"),
+        "dimension_recall": _mean(rows, "dimension_recall"),
+        "dimension_precision": _mean(rows, "dimension_precision"),
+        "recovery_redundancy": _mean(rows, "recovery_redundancy"),
         "evidence_recall": _mean(rows, "evidence_recall"),
         "complete_evidence": _mean(rows, "complete_evidence"),
         "agent_recall": _mean(rows, "agent_recall"),
@@ -452,6 +522,8 @@ def summarize(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "tokens": _mean(rows, "tokens"),
         "latency": _mean(rows, "latency"),
         "reasons": dict(reasons),
+        "modes": dict(modes),
+        "calibration": calibration,
         "attribution": dict(Counter(r["attribution"] for r in rows if r["attribution"])),
     }
 
@@ -474,13 +546,41 @@ ARM_CONFIGS: dict[str, Config] = {
         router_enabled=True, router_mode="cascade", view_router_mode="llm",
         view_top_k=3, cascade_min_score=0.5,
     ),
+    "view_bm25_dim": Config(
+        router_enabled=True, router_mode="views", view_router_mode="lexical",
+        view_dimension_mode="auto", view_top_k=3, coverage_mode="both",
+    ),
+    "view_bm25_dim_struct": Config(
+        router_enabled=True, router_mode="views", view_router_mode="lexical",
+        view_dimension_mode="auto", view_top_k=3, coverage_mode="structural",
+    ),
+    "view_llm_dim": Config(
+        router_enabled=True, router_mode="views", view_router_mode="llm",
+        view_dimension_mode="auto", view_top_k=3, coverage_mode="both",
+    ),
+    "cascade_bm25_dim": Config(
+        router_enabled=True, router_mode="cascade", view_router_mode="lexical",
+        view_dimension_mode="auto", view_top_k=3, coverage_mode="both",
+    ),
+    "cascade_llm_dim": Config(
+        router_enabled=True, router_mode="cascade", view_router_mode="llm",
+        view_dimension_mode="auto", view_top_k=3, coverage_mode="both",
+    ),
+    "view_bm25_dim_judge": Config(
+        router_enabled=True, router_mode="views", view_router_mode="lexical",
+        view_dimension_mode="auto", view_top_k=3, coverage_mode="judge",
+    ),
+    "cascade_bm25_dim_judge": Config(
+        router_enabled=True, router_mode="cascade", view_router_mode="lexical",
+        view_dimension_mode="auto", view_top_k=3, coverage_mode="judge",
+    ),
 }
 
 
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--root", default="/tmp/mm-view-bench")
-    p.add_argument("--arms", default="full,similarity,view_bm25,view_llm,view_oracle,cascade_bm25,cascade_llm")
+    p.add_argument("--arms", default="full,similarity,view_bm25,view_llm,view_oracle,cascade_bm25,cascade_llm,view_bm25_dim,view_llm_dim,cascade_bm25_dim,cascade_llm_dim")
     p.add_argument("--limit", type=int, default=0, help="0 = all tasks")
     p.add_argument("--indices", default="", help="comma-separated task indices to run (preserves dir names)")
     p.add_argument("--capacity", type=int, default=5)
@@ -549,21 +649,37 @@ def main() -> None:
     print(f"\nfixture: {len(MEMORIES) + len(filler_specs())} memories | "
           f"tasks: {len(tasks)} | capacity: {args.capacity}\n")
     header = (
-        f"{'arm':<14} {'vrec':>6} {'vprec':>6} {'erec':>6} {'ecomp':>6} "
-        f"{'arec':>6} {'acomp':>6} {'reduce':>7} {'exp':>5} {'fall':>5} "
-        f"{'calls':>6} {'tok/q':>7} {'lat':>6}"
+        f"{'arm':<16} {'n':>3} {'vrec':>6} {'vprec':>6} {'drec':>6} {'dprec':>6} "
+        f"{'recov':>6} {'erec':>6} {'ecomp':>6} {'arec':>6} {'acomp':>6} "
+        f"{'reduce':>7} {'exp':>5} {'fall':>5} {'calls':>6} {'tok/q':>7} {'lat':>6}"
     )
     print(header)
     print("-" * len(header))
     for name, rows in all_rows.items():
         s = summarize(rows)
         print(
-            f"{name:<14} {s['view_recall']:>6.2f} {s['view_precision']:>6.2f} "
-            f"{s['evidence_recall']:>6.2f} {s['complete_evidence']:>6.2f} "
-            f"{s['agent_recall']:>6.2f} {s['complete_agent']:>6.2f} "
-            f"{s['reduction']:>7.2f} {s['expansion']:>5.2f} {s['fallback']:>5.2f} "
-            f"{s['calls']:>6.1f} {s['tokens']:>7.0f} {s['latency']:>6.1f}"
+            f"{name:<16} {s['n']:>3} {s['view_recall']:>6.2f} {s['view_precision']:>6.2f} "
+            f"{s['dimension_recall']:>6.2f} {s['dimension_precision']:>6.2f} "
+            f"{s['recovery_redundancy']:>6.2f} {s['evidence_recall']:>6.2f} "
+            f"{s['complete_evidence']:>6.2f} {s['agent_recall']:>6.2f} "
+            f"{s['complete_agent']:>6.2f} {s['reduction']:>7.2f} {s['expansion']:>5.2f} "
+            f"{s['fallback']:>5.2f} {s['calls']:>6.1f} {s['tokens']:>7.0f} {s['latency']:>6.1f}"
         )
+
+    print("\ncoverage calibration (level 1):")
+    for name, rows in all_rows.items():
+        s = summarize(rows)["calibration"]
+        if s["n"]:
+            print(
+                f"  {name:<16} n={s['n']:<3} P(complete|signal=complete)={s['coverage_confidence']:.2f} "
+                f"false_safe={s['false_safe_rate']:.2f} fallback_waste={s['fallback_waste']:.2f}"
+            )
+
+    print("\nintersection modes:")
+    for name, rows in all_rows.items():
+        s = summarize(rows)["modes"]
+        if s:
+            print(f"  {name:<16} {s}")
 
     print("\nby category (view recall / complete evidence / agent recall):")
     for name, rows in all_rows.items():

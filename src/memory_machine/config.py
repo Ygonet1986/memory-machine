@@ -45,6 +45,8 @@ class Config:
     router_full_every: int = 0
     view_router_mode: str = "lexical"
     view_top_k: int = 5
+    view_dimension_mode: str = "off"
+    coverage_mode: str = "off"
     cascade_min_score: float = 0.0
     cascade_expand_top_k: int = 5
     embedding_model: str = ""
@@ -92,6 +94,12 @@ class Config:
             self.view_router_mode if self.view_router_mode in {"lexical", "llm"} else "lexical"
         )
         self.view_top_k = max(1, _int(self.view_top_k, 5))
+        self.view_dimension_mode = (
+            self.view_dimension_mode if self.view_dimension_mode in {"off", "auto"} else "off"
+        )
+        self.coverage_mode = (
+            self.coverage_mode if self.coverage_mode in {"off", "agents", "structural", "both", "judge"} else "off"
+        )
         try:
             self.cascade_min_score = float(self.cascade_min_score)
         except (TypeError, ValueError):

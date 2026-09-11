@@ -116,10 +116,15 @@ Use `-C <dir>` to operate on a specific project directory. Run
   or an LLM call with the whiteboard) and consults only their records;
   `router_mode: cascade` adds a recall-safe fallback (expand co-occurring
   views → similarity router → full sweep) and records why it fell back. An
-  explicit `recall --views` overrides routing. Controlled benchmark (24 tasks):
-  view-BM25 keeps 0.96 complete evidence vs 0.83 for the similarity router
-  (reduction 0.67 vs 0.79), and the ground-truth-views oracle reaches 1.00 at
-  0.86 reduction — so the router, not the topology, is the bottleneck.
+  explicit `recall --views` overrides routing. With `view_dimension_mode:
+  auto` the router plans dimensions first (semantic/temporal/structural) and
+  intersects their record sets with progressive relaxation; `coverage_mode`
+  adds a recall-local coverage signal (agents/structural/both/judge) that the
+  cascade uses to expand. Controlled benchmarks (32 tasks): dimension-aware
+  view-BM25 raises view recall 0.67 -> 0.81 and reduction 0.63 -> 0.70 at 9.6
+  calls; the ground-truth-views oracle reaches 1.00 at 7.7 calls / 0.84
+  reduction, so the router and the coverage signal — not the topology — are the
+  bottleneck (manual 40.4/40.5).
 
 ## Configuration
 
@@ -136,6 +141,8 @@ Use `-C <dir>` to operate on a specific project directory. Run
 | `router_top_k` | 5 | partitions selected by the similarity router |
 | `view_router_mode` | `lexical` | view selection: `lexical` (BM25) / `llm` (contextual) |
 | `view_top_k` | 5 | views selected by the view router |
+| `view_dimension_mode` | `off` | `auto` = dimension-aware plan (semantic/temporal/structural) with intersection |
+| `coverage_mode` | `off` | recall-local coverage signal: `agents` / `structural` |
 | `cascade_min_score` | 0.0 | selection score below which the cascade expands |
 | `cascade_expand_top_k` | 5 | co-occurring views added on expansion |
 | `model` | `deepseek-v4-flash` | LLM model for agents, chatbot and consolidators |

@@ -11,6 +11,8 @@
   "router_full_every": 0,
   "view_router_mode": "lexical",
   "view_top_k": 5,
+  "view_dimension_mode": "off",
+  "coverage_mode": "off",
   "cascade_min_score": 0.0,
   "cascade_expand_top_k": 5,
   "embedding_model": "",

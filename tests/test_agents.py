@@ -78,7 +78,7 @@ def test_run_agents_dispatches_all_agents(tmp_path):
         raise AssertionError("unexpected call")
 
     client = FakeClient(handler)
-    anns = run_agents(tape, manifest, wb, client)
+    anns = run_agents(tape, manifest, wb, client).annotations
     assert len(client.calls) == 2  # every agent reads the whiteboard
     assert [a.memory_id for a in anns] == ["M0001"]
     assert anns[0].agent_id == "A1"
@@ -92,7 +92,7 @@ def test_run_agents_empty_annotations_are_valid(tmp_path):
         return '{"annotations":[]}'
 
     client = FakeClient(handler)
-    anns = run_agents(tape, manifest, wb, client)
+    anns = run_agents(tape, manifest, wb, client).annotations
     assert anns == []
     assert len(client.calls) == 2
 
@@ -108,7 +108,7 @@ def test_run_agents_skip_on_error(tmp_path):
         raise RuntimeError("agent down")
 
     client = FakeClient(handler)
-    anns = run_agents(tape, manifest, wb, client, on_error="skip")
+    anns = run_agents(tape, manifest, wb, client, on_error="skip").annotations
     assert [a.memory_id for a in anns] == ["M0001"]
 
 
@@ -146,7 +146,7 @@ def test_run_agents_fuses_checklist_and_annotations(tmp_path):
         return '{"checklist":["remember Postgres is settled"],"annotations":[{"memory_id":"M0001","note":"db choice","relevance":0.9}]}'
 
     client = FakeClient(handler)
-    anns = run_agents(tape, manifest, wb, client)
+    anns = run_agents(tape, manifest, wb, client).annotations
 
     assert len(anns) == 1
     assert anns[0].memory_id == "M0001"
@@ -176,7 +176,7 @@ def test_run_agents_skips_empty_groups(tmp_path):
     manifest, _g, a1, _ = ensure_group(manifest, 1)
     wb = Whiteboard(subject="x")
     client = FakeClient(lambda messages, temperature: "unexpected")
-    anns = run_agents(tape, manifest, wb, client)
+    anns = run_agents(tape, manifest, wb, client).annotations
     assert anns == []
     assert len(client.calls) == 0
 

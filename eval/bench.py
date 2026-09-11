@@ -64,7 +64,7 @@ def deterministic(tape: Tape, task: str, expected: str, k: int = 10) -> dict[str
 def agents(machine: Machine, client: Any, task: str, expected: str) -> dict[str, Any]:
     wb = Whiteboard(subject=task[:120])
     start = time.monotonic()
-    anns = run_agents(machine.tape, machine.manifest, wb, client)
+    anns = run_agents(machine.tape, machine.manifest, wb, client).annotations
     latency = time.monotonic() - start
 
     merge_annotations(wb, anns, budget=machine.config.whiteboard_budget)

@@ -1,8 +1,8 @@
 # Memory Machine Specification
 
-**Version:** 0.3
+**Version:** 0.4
 **Status:** Draft
-**Date:** 2026-09-10
+**Date:** 2026-09-11
 
 ## 1. Abstract
 
@@ -214,6 +214,11 @@ per agent per cycle, not two.
 - **Tape rollup**: the oldest active records (beyond `keep_recent`) are
   summarized into a single `memory` record and the sources are archived
   (`status: archived`), keeping the tape bounded without losing the essentials.
+- **Provenance and rehydration**: a rollup record carries `derived_from` (the
+  ids of its archived sources). `rehydrate <id>` returns those sources (even
+  archived), optionally reactivating them, so physical persistence does not
+  become cognitive unavailability. Recall of a rollup also returns its source
+  summaries as `rehydrated`.
 
 ## 12. Topics, Router and Auto-topic
 
@@ -265,6 +270,23 @@ To avoid running the LLM agents on every message unnecessarily:
 - **Empty tape**: with no active memories there are no agents, so recall makes
   no LLM calls.
 
+### 15.1 Memory Router (opt-in)
+
+Consulting every agent each turn costs O(N / capacity) LLM calls. The router is
+an optional layer that selects which partitions to consult:
+
+- Each group carries a **digest** (a short summary), produced by the agent's
+  fused call (`agent.digest`) or derived deterministically when stale.
+- `select_groups` ranks digests against the query and returns the top-K groups.
+  With an embedder it is semantic (`router_mode: embedding`); otherwise lexical
+  (BM25).
+- No match → full sweep (`router_fallback: full`), or the most recent K.
+
+`router_enabled` is **false by default**: lexical routing can miss partitions
+whose vocabulary does not overlap the query, and the benchmark showed the
+lexical router's recall ceiling saturating well below a full sweep for
+lexically-distant tasks. Semantic routing (embeddings) is the intended mode.
+
 ## 16. Failure Modes
 
 | Failure | Required behavior |
@@ -299,9 +321,12 @@ CLI wrapper reads the key from the Keychain first, then the environment.
 
 ## 18. Open Questions
 
+- Semantic (embedding) routing for the memory router; lexical routing is unsafe
+  for lexically-distant queries (measured).
+- Router false-negative rate and calibration of the full-sweep fallback.
 - Agent retirement / rebalancing when the tape is reorganized or shrunk.
 - Optimal `capacity` (default 50; to be calibrated).
 - Relevance threshold calibration and prompt tuning.
 - Multi-session concurrency over a shared whiteboard.
-- Embedding-based retrieval (BM25 is the default; embeddings are optional).
-- Objective evaluation metrics for continuity.
+- Objective evaluation metrics for continuity; ablation study and external
+  benchmarks (LongMemEval, LoCoMo).

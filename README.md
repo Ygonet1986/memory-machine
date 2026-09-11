@@ -57,8 +57,10 @@ python3 -m memory_machine run \
 | `checkpoint Q S [--memories JSON]` | Record a turn back to memory (JSON) |
 | `remember --summary S [--type T] [--why W]` | Append a memory (JSON) |
 | `list` / `archive ID` / `delete ID` | Manage tape records (JSON) |
+| `attach PATH [--chunk-size N]` | Ingest a `.txt` into the tape as labeled chunk memories |
 | `sessions` | List sessions (JSON) |
 | `rollup [--keep-recent N]` | Consolidate older tape records into one summary |
+| `rehydrate ID [--reactivate]` | Recover the original memories behind a rollup |
 
 Use `-C <dir>` to operate on a specific project directory. Run
 `python3 -m memory_machine <cmd> --help` for details.
@@ -84,6 +86,12 @@ Use `-C <dir>` to operate on a specific project directory. Run
 - **Chatbot context** — the main chatbot also keeps its own conversation
   context (`context.json`) and consolidates it on its own schedule, independent
   of the whiteboard, so it never runs out of context over a long project.
+- **Memory router** (opt-in) — selects the top-K partitions (via group digests)
+  instead of consulting every agent, cutting fan-out. Off by default because
+  *lexical* routing can miss lexically-distant memories; use
+  `router_mode: embedding` for semantic routing.
+- **Provenance** — rollups record `derived_from`; `rehydrate <id>` recovers the
+  original (archived) memories so compression is never a dead end.
 
 ## Configuration
 

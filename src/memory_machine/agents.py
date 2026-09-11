@@ -32,19 +32,23 @@ Your memories (only these; never invent others):
 
 The shared whiteboard below describes the work happening right now.
 
-Do two things in one response:
+Do three things in one response:
 
-1. Update your checklist of the things you must NOT forget to remind the \
+1. Write a short digest (1-2 sentences) of what this group covers, so a router \
+can decide later whether this group is worth consulting. Keep it topical and \
+stable.
+
+2. Update your checklist of the things you must NOT forget to remind the \
 assistant about (based on your memories and the current work). Keep it \
 dynamic: drop no-longer-relevant items, sharpen and keep relevant ones, add \
 new ones. Be concise.
 
-2. Identify which of YOUR memories MUST be remembered for the current work \
+3. Identify which of YOUR memories MUST be remembered for the current work \
 and annotate them.
 
 Return ONLY a JSON object, nothing else:
 
-{{"checklist":["...","..."],"annotations":[{{"memory_id":"M0001","note":"<why this matters now>","relevance":0.0}}]}}
+{{"digest":"<what this group covers>","checklist":["...","..."],"annotations":[{{"memory_id":"M0001","note":"<why this matters now>","relevance":0.0}}]}}
 
 Rules:
 - Only annotate memory ids that appear in YOUR list above.
@@ -115,6 +119,15 @@ def _deterministic_checklist(records: list[MemoryRecord], max_items: int = 8) ->
     return "\n".join(items)
 
 
+def _digest_from_obj(obj: dict[str, Any]) -> str:
+    digest = obj.get("digest")
+    return digest.strip() if isinstance(digest, str) else ""
+
+
+def deterministic_digest(records: list[MemoryRecord], max_items: int = 10) -> str:
+    return " | ".join(r.summary for r in records[:max_items] if r.summary)
+
+
 def _run_one(
     agent: Agent,
     group: Group,
@@ -133,6 +146,9 @@ def _run_one(
     checklist = _checklist_from_obj(obj) or _deterministic_checklist(records)
     agent.checklist = checklist[:1500]
     agent.checklist_records = len(records)
+    digest = _digest_from_obj(obj) or deterministic_digest(records)
+    agent.digest = digest[:600]
+    agent.digest_records = len(records)
     return _annotations_from_obj(obj, agent.id)
 
 
@@ -142,20 +158,25 @@ def run_agents(
     whiteboard: Whiteboard,
     client: Any,
     *,
+    groups: list[Group] | None = None,
     temperature: float = 0.0,
     max_workers: int | None = None,
     on_error: str = "skip",
 ) -> list[Annotation]:
     """Dispatch one LLM call per (group, agent) pair, in parallel.
 
-    Each call updates the agent's checklist in place and returns its
-    annotations. ``on_error`` controls failure handling: ``"skip"`` ignores a
-    failed agent, ``"raise"`` propagates the exception.
+    When ``groups`` is given, only those partitions are consulted (the memory
+    router's selection). Each call updates the agent's checklist and digest in
+    place and returns its annotations. ``on_error`` controls failure handling:
+    ``"skip"`` ignores a failed agent, ``"raise"`` propagates the exception.
     """
+    selected_ids = {g.id for g in groups} if groups is not None else None
     tasks: list[tuple[Agent, Group, list[MemoryRecord]]] = []
     for agent in manifest.agents:
         group = next((g for g in manifest.groups if g.id == agent.group_id), None)
         if group is None:
+            continue
+        if selected_ids is not None and group.id not in selected_ids:
             continue
         records = group_records(tape, group)
         if not records:

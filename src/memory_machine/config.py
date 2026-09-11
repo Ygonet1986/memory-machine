@@ -56,6 +56,9 @@ class Config:
     attention_weight: float = 0.5
     attention_gate_min: float = 0.5
     attention_gate_margin: float = 0.1
+    evidence_payload: str = "off"
+    evidence_payload_budget: int = 4000
+    evidence_payload_min_item: int = 200
     coverage_mode: str = "off"
     cascade_min_score: float = 0.0
     cascade_expand_top_k: int = 5
@@ -130,6 +133,13 @@ class Config:
             except (TypeError, ValueError):
                 value = default
             setattr(self, name, max(0.0, min(1.0, value)))
+        self.evidence_payload = (
+            self.evidence_payload
+            if self.evidence_payload in {"off", "budgeted", "full"}
+            else "off"
+        )
+        self.evidence_payload_budget = max(0, _int(self.evidence_payload_budget, 4000))
+        self.evidence_payload_min_item = max(0, _int(self.evidence_payload_min_item, 200))
         self.coverage_mode = (
             self.coverage_mode if self.coverage_mode in {"off", "agents", "structural", "both", "judge", "judge_views", "views"} else "off"
         )

@@ -697,6 +697,59 @@ The "rehydrated evidence payload" is therefore justified by H2 but not yet
 implemented: the next step is to deliver the needed slice of a memory's content
 (not only the note) under a budget, rather than whole memories.
 
+### 15.11 Budgeted evidence rehydration (v0.9)
+
+The annotation says *why* a memory matters; the evidence payload delivers *what
+it says*. `evidence_payload: budgeted|full|off` builds a deterministic,
+recall-local payload for the kept annotations:
+
+- **Ordering**: by relevance (then id), so the most important facts come first.
+- **Allocation**: a floor per item (`evidence_payload_min_item`, default 200)
+  then water-filling proportional to relevance, capped at each item's actual
+  size — the budget is used fully when the content is larger.
+- **Content**: `[id | type | date]` + summary + why; the summary is preserved
+  whole whenever possible and the `why` is truncated first. Rollups
+  (`derived_from`) are **rehydrated** from their archived sources instead of a
+  second copy.
+- **Ephemeral**: the payload is returned in the recall result
+  (`evidence_payload`, `evidence_payload_chars`) and never merged into the
+  persistent whiteboard; `run()` appends it to the assistant's context when
+  enabled. Each item records `allocated_chars`, `used_chars`, `truncated` and
+  `source` for budget analysis.
+
+Measured with the v0.8 harness (judge v1):
+
+**Controlled fixture (32 tasks)** — `agents_view_payload` vs the v0.8 arms:
+
+| arm | evidence | strict | AUR | context chars |
+|-----|----------|--------|-----|---------------|
+| agents_view (notes only) | 0.97 | 0.72 | 0.74 | 0 |
+| agents_view_ctx (full) | 0.97 | 0.88 | 0.90 | 1632 |
+| **agents_view_payload (4000)** | 0.97 | **0.97** | **1.00** | 1928 |
+| oracle | 1.00 | 0.94 | 0.94 | 242 |
+
+The payload matched/exceeded full-injection accuracy and fixed tasks 11, 15 and
+24 (partial/incorrect under full). The gain came from **relevance-ordered,
+typed/dated evidence**, not from compression: the fixture's memories are short
+(total < budget), so the budget never binds and the payload is not smaller.
+
+**LongMemEval (12 questions, tagged sessions)**:
+
+| run | strict | context chars | truncated items |
+|-----|--------|---------------|-----------------|
+| full (6000) | 0.33 | 3767 | 0 |
+| payload (4000) | 0.33 | 4000 | 32 |
+| payload (2500) | 0.25 | 2458 (65% of full) | 33 |
+
+Readings: the payload adds a **hard context cap** (bounded by construction)
+and preserves accuracy at 4000; at 65% of the full context the strict accuracy
+dropped by one task (12-question sample). **H3 is partially confirmed**: the
+accuracy claim holds on the controlled fixture, but the efficiency claim
+(payload <= 70% of full with parity) is not cleanly demonstrated — the fixture
+never exceeds the budget and the external sample is too small. The absolute
+external accuracy (0.33 for both arms) is a downstream/ingestion limitation to
+investigate separately.
+
 ## 16. Failure Modes
 
 | Failure | Required behavior |

@@ -32,6 +32,7 @@ from .groups import Manifest, add_memory, load_manifest, save_manifest
 from .llm import LLMClient, LLMError
 from .main_chatbot import memory_from_spec, run_main_chatbot
 from .metacognition import update_metacognition
+from .payload import build_evidence_payload, payload_as_context, payload_chars
 from .retrieval import Embedder
 from .router import select_groups, select_groups_llm
 from .routing import (
@@ -368,6 +369,19 @@ class Machine:
             )
         self.whiteboard.annotations = kept
         return kept
+
+    def _evidence_payload(self, kept: list[Any]) -> list[dict[str, Any]]:
+        """Recall-local evidence payload for the kept annotations (v0.9)."""
+        if not kept or self.config.evidence_payload == "off":
+            return []
+        records = {r.id: r for r in self.tape.read()}
+        budgeted = self.config.evidence_payload == "budgeted"
+        return build_evidence_payload(
+            records,
+            kept,
+            budget=self.config.evidence_payload_budget if budgeted else 0,
+            min_item_chars=self.config.evidence_payload_min_item if budgeted else 0,
+        )
 
     def _update_attention(self, plan: RoutingPlan, run: RecallRun) -> None:
         """Decay by neglect, reinforce selected views and those that found evidence.
@@ -786,6 +800,10 @@ class Machine:
             raw_annotations,
             budget=self.config.whiteboard_budget,
         )
+        payload = self._evidence_payload(kept)
+        if payload:
+            evidence = payload_as_context(payload)
+            extra_context = (extra_context + "\n\n" + evidence).strip()
 
         consolidated = False
         if consolidate and whiteboard_needs_consolidation(
@@ -871,6 +889,7 @@ class Machine:
             "ok": True,
             "subject": self.whiteboard.subject,
             "raw_annotations": len(raw_annotations),
+            "evidence_payload_chars": payload_chars(payload),
             "kept_annotations": [a.to_dict() for a in kept],
             "consolidated": consolidated,
             "context_consolidated": context_consolidated,
@@ -996,6 +1015,7 @@ class Machine:
             )
         if self.config.attention_mode != "off":
             self._update_attention(plan, run)
+        payload = self._evidence_payload(kept)
 
         consolidated = False
         if whiteboard_needs_consolidation(
@@ -1031,6 +1051,8 @@ class Machine:
             ],
             "consolidated": consolidated,
             "views": views or plan.selected_views,
+            "evidence_payload": payload,
+            "evidence_payload_chars": payload_chars(payload),
             "attention": dict(self.whiteboard.attention),
             "attention_contribution": contribution_summary(plan.view_scores),
             "routing": plan.to_dict(),

@@ -69,6 +69,8 @@ def _build_parser() -> argparse.ArgumentParser:
                         help="override dimension-aware routing for this recall")
     recall.add_argument("--attention", default="", choices=["", "off", "prior", "context", "state"],
                         help="override the attention mode for this recall")
+    recall.add_argument("--evidence-payload", default="", choices=["", "off", "budgeted", "full"],
+                        help="override the evidence payload mode for this recall")
 
     sub.add_parser("sessions", help="list sessions (JSON)")
     sub.add_parser("views", help="list memory views / projections (JSON)")
@@ -234,6 +236,8 @@ def cmd_recall(args: argparse.Namespace) -> int:
         m.config.view_dimension_mode = args.dimension_mode
     if getattr(args, "attention", ""):
         m.config.attention_mode = args.attention
+    if getattr(args, "evidence_payload", ""):
+        m.config.evidence_payload = args.evidence_payload
     views = [v.strip() for v in (args.views or "").split(",") if v.strip()]
     try:
         result = m.recall(

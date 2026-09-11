@@ -111,6 +111,11 @@ Use `-C <dir>` to operate on a specific project directory. Run
   appear in several views (`time/…`, `type/…`, `source/…`, `topic/…`,
   `subject/…`) without physical duplication; the view index is a rebuildable
   projection. List with `views`, filter recall with `--views`.
+- **Evidence payload** (`evidence_payload: budgeted`) — the agents say *why* a
+  memory matters; the payload delivers *what it says* under a character budget
+  (relevance-ordered, `why` truncated first, rollups rehydrated from their
+  archived sources). It is recall-local (never persisted in the whiteboard).
+  Measured: 0.97 strict vs 0.88 for full injection on the controlled fixture.
 - **End-to-end answer accuracy** (`eval/e2e_bench.py`) — measures whether the
   memory actually improves the final answer, not just retrieval: view agents +
   full memory content score 0.88 strict (AUR 0.90) vs 0.72 (AUR 0.74) with

@@ -43,6 +43,7 @@ class MemoryRecord:
     created_at: str = ""
     status: str = "active"
     source: str = ""
+    derived_from: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -54,6 +55,7 @@ class MemoryRecord:
             "created_at": self.created_at,
             "status": self.status,
             "source": self.source,
+            "derived_from": self.derived_from,
         }
 
     @classmethod
@@ -67,6 +69,7 @@ class MemoryRecord:
             created_at=str(data.get("created_at") or ""),
             status=str(data.get("status") or "active"),
             source=str(data.get("source") or ""),
+            derived_from=list(data.get("derived_from") or []),
         )
 
     def text(self) -> str:

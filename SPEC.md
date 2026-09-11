@@ -469,6 +469,40 @@ Readings (v0.5b):
   1/3 in the pruned cascade); precision without an oracle remains the open
   problem.
 
+### 15.4 View agents (v0.6)
+
+Instead of one agent per chronological group, `agent_mode: view` dispatches one
+**perspective agent per selected view**: the same memory can be examined by
+several perspectives without being duplicated (a topic agent looks for domain
+facts and decisions; a temporal agent for evolution and sequence; a structural
+agent for kinds and provenance). Each view agent sees every active memory in
+its view, annotates what must be remembered and reports recall-local coverage.
+The consulted set is the union of the selected views' records — the routing
+intersection is not applied, because arbitration happens across the agents on
+the whiteboard.
+
+Measured on the frozen fixture (n=32, `deepseek-v4-flash`):
+
+| arm | complete evidence | agent recall | calls | reduction |
+|-----|-------------------|--------------|-------|-----------|
+| C1d dimension (group agents) | 0.91 | 0.94 | 9.6 | 0.70 |
+| C2 view-LLM (group agents) | 1.00 | 1.00 | 15.2 | 0.49 |
+| C2 pruned (group agents) | 0.97 | 0.97 | 13.3 | 0.63 |
+| view agents (lexical plan) | 0.97 | 0.98 | 3.0 | 0.57 |
+| view agents (LLM plan) | 0.94 | 0.95 | 3.2 | 0.67 |
+| **view agents (LLM + pruned)** | **1.00** | **1.00** | **5.0** | 0.59 |
+| C3 oracle (ground-truth views, group agents) | 1.00 | 1.00 | 7.7 | 0.84 |
+
+Readings: view agents dominate the frontier. The LLM plan + subject pruning +
+view agents reaches complete evidence 1.00 in all seven categories at 5.0
+calls/query — 3x fewer than the best group-agent arm and below the oracle's 7.7
+calls. The perspective prompts make the per-view annotation stronger than the
+per-group annotation (the pruned group-agent arm scored 0.97 on the same
+selection). The lower reduction (0.59) reflects deliberate perspective
+redundancy: overlapping views let the same memory be examined by more than one
+agent. View agents are currently stateless (no digest/checklist persistence);
+persisting view state is the next step.
+
 ## 16. Failure Modes
 
 | Failure | Required behavior |

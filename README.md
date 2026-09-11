@@ -142,7 +142,9 @@ Use `-C <dir>` to operate on a specific project directory. Run
 | `view_router_mode` | `lexical` | view selection: `lexical` (BM25) / `llm` (contextual) |
 | `view_top_k` | 5 | views selected by the view router |
 | `view_dimension_mode` | `off` | `auto` = dimension-aware plan (semantic/temporal/structural) with intersection |
-| `coverage_mode` | `off` | recall-local coverage signal: `agents` / `structural` |
+| `view_prune` | `none` | `subject` = drop broad `subject/*` views when a topic matched |
+| `agent_mode` | `group` | `view` = one perspective agent per selected view |
+| `coverage_mode` | `off` | recall-local coverage signal: `agents` / `structural` / `views` / `judge` |
 | `cascade_min_score` | 0.0 | selection score below which the cascade expands |
 | `cascade_expand_top_k` | 5 | co-occurring views added on expansion |
 | `model` | `deepseek-v4-flash` | LLM model for agents, chatbot and consolidators |

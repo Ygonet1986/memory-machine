@@ -491,3 +491,81 @@ def test_cascade_expands_missing_judge_region(tmp_path):
     assert routing["level1_coverage_signal"] == "partial"
     assert routing["level"] == 2
     assert any(a["memory_id"] == "M0002" for a in res["annotations"])
+
+
+# ------------------------------------------------------------------ view agents
+
+
+def test_run_view_agents_dispatch(tmp_path):
+    from memory_machine.agents import run_view_agents
+
+    tape = Tape(tmp_path / "tape.jsonl")
+    tape.append(MemoryRecord(id="M0001", type="decision", summary="router opt-in",
+                             views=["topic/router"]))
+    tape.append(MemoryRecord(id="M0002", type="lesson", summary="benchmark note",
+                             views=["topic/benchmarks"]))
+    tape.append(MemoryRecord(id="M0003", type="decision", summary="router digest",
+                             views=["topic/router"]))
+    seen: list[str] = []
+
+    def handler(messages, temperature):
+        sys_text = text(messages, "system")
+        seen.append(sys_text)
+        return '{"digest":"d","annotations":[],"coverage":"complete"}'
+
+    run = run_view_agents(
+        tape, Whiteboard(subject="x"), FakeClient(handler),
+        views=["topic/router", "topic/benchmarks"],
+    )
+    assert len(seen) == 2
+    router_prompt = next(s for s in seen if "topic/router" in s)
+    assert "M0001" in router_prompt and "M0003" in router_prompt
+    assert "M0002" not in router_prompt
+    assert "Look for facts, decisions" in router_prompt
+    assert len(run.coverage) == 2
+    assert all(c.coverage == "complete" for c in run.coverage)
+
+
+def test_view_agent_temporal_perspective(tmp_path):
+    from memory_machine.agents import view_agent_prompt
+
+    prompt = view_agent_prompt(
+        "time/2026-09", [MemoryRecord(id="M0001", type="decision", summary="x")]
+    )
+    assert "Look for evolution, sequence" in prompt
+    assert "temporal memory agent" in prompt
+
+
+def test_recall_agent_mode_view(tmp_path):
+    calls = {"n": 0}
+
+    def handler(messages, temperature):
+        sys_text = text(messages, "system")
+        if "memory agent watching the view" in sys_text:
+            calls["n"] += 1
+            view = "topic/router" if "topic/router" in sys_text else "topic/benchmarks"
+            return (
+                '{"digest":"d","annotations":[],"coverage":"complete"}'
+            )
+        return '{"digest":"d","checklist":[],"annotations":[],"coverage":"complete"}'
+
+    m = _machine(
+        tmp_path,
+        handler,
+        router_enabled=True,
+        router_mode="views",
+        view_router_mode="lexical",
+        view_dimension_mode="auto",
+        agent_mode="view",
+        view_top_k=2,
+    )
+    m.add_memory(MemoryRecord(type="decision", summary="router opt-in", views=["topic/router"]))
+    m.add_memory(
+        MemoryRecord(type="lesson", summary="benchmarks changed the router",
+                     views=["topic/benchmarks"])
+    )
+    res = m.recall("why did the benchmark change the router?")
+    routing = res["routing"]
+    assert routing["intersection_mode"] == "views"
+    assert calls["n"] == len(routing["selected_views"]) >= 1
+    assert routing["records_consulted"] == 2

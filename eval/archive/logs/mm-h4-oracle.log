@@ -1,0 +1,9 @@
+tagging 2312 sessions ...
+running oracle ...
+  n=50 evidence=1.00 strict=0.52 lenient=0.58 AUR=0.52 calls=1.0
+
+final table:
+arm                   n   evid  strict  lenient    AUR   calls
+oracle               50   1.00    0.52     0.58   0.52     1.0
+
+audit (deepseek-v4-flash): 11/12 agreement (0.92) -> /Users/igorcoutrimlacerda/memory-machine/eval/out/judge_audit_oracle_longmemeval_ing0.jsonl

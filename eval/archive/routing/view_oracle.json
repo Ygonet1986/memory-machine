@@ -1,0 +1,673 @@
+{
+  "tasks": [
+    {
+      "q": "why was the semantic router turned off?",
+      "required": [
+        "router_embed"
+      ],
+      "cat": "single"
+    },
+    {
+      "q": "what recall ceiling does lexical routing hit?",
+      "required": [
+        "router_lexical"
+      ],
+      "cat": "single"
+    },
+    {
+      "q": "how is the conversational benchmark different?",
+      "required": [
+        "bench_locomo"
+      ],
+      "cat": "single"
+    },
+    {
+      "q": "what did the answer-accuracy judge find?",
+      "required": [
+        "bench_judge"
+      ],
+      "cat": "single"
+    },
+    {
+      "q": "how are views stored relative to the tape?",
+      "required": [
+        "views_foundation"
+      ],
+      "cat": "single"
+    },
+    {
+      "q": "how do agents keep checklists fresh without extra calls?",
+      "required": [
+        "agents_fused"
+      ],
+      "cat": "single"
+    },
+    {
+      "q": "when is the whiteboard consolidated?",
+      "required": [
+        "wb_bounded"
+      ],
+      "cat": "single"
+    },
+    {
+      "q": "what are our routing defaults and their limits?",
+      "required": [
+        "router_llm",
+        "router_lexical"
+      ],
+      "cat": "same_view"
+    },
+    {
+      "q": "summarize our benchmark findings so far",
+      "required": [
+        "bench_locomo",
+        "bench_longmemeval",
+        "bench_judge"
+      ],
+      "cat": "same_view"
+    },
+    {
+      "q": "what are the rules for views and expansion?",
+      "required": [
+        "views_foundation",
+        "views_index",
+        "views_expand"
+      ],
+      "cat": "same_view"
+    },
+    {
+      "q": "how do memory agents work?",
+      "required": [
+        "agents_fused",
+        "agents_budget",
+        "agents_parallel"
+      ],
+      "cat": "same_view"
+    },
+    {
+      "q": "what does the whiteboard hold and when does it shrink?",
+      "required": [
+        "wb_bounded",
+        "wb_metacognition"
+      ],
+      "cat": "same_view"
+    },
+    {
+      "q": "what do we know about sourdough and hydration?",
+      "required": [
+        "bread_ferment",
+        "bread_hydration"
+      ],
+      "cat": "same_view"
+    },
+    {
+      "q": "why did we change the routing strategy after the benchmarks?",
+      "required": [
+        "router_embed",
+        "bench_locomo"
+      ],
+      "cat": "cross_view"
+    },
+    {
+      "q": "how do views interact with routing experiments?",
+      "required": [
+        "views_foundation",
+        "router_lexical"
+      ],
+      "cat": "cross_view"
+    },
+    {
+      "q": "what limits the agentic memory path in practice?",
+      "required": [
+        "agents_budget",
+        "bench_timeout"
+      ],
+      "cat": "cross_view"
+    },
+    {
+      "q": "how is the whiteboard kept stable across turns?",
+      "required": [
+        "wb_cache",
+        "agents_fused"
+      ],
+      "cat": "cross_view"
+    },
+    {
+      "q": "what should we know before benchmarking retrieval again?",
+      "required": [
+        "bench_judge",
+        "router_lexical"
+      ],
+      "cat": "cross_view"
+    },
+    {
+      "q": "how do views help keep the tape canonical?",
+      "required": [
+        "views_index",
+        "views_expand"
+      ],
+      "cat": "cross_view"
+    },
+    {
+      "q": "why did we revert the router to opt-in after the first external benchmark?",
+      "required": [
+        "adv_missing"
+      ],
+      "cat": "adversarial"
+    },
+    {
+      "q": "why is router top-k fixed at five?",
+      "required": [
+        "adv_wrong"
+      ],
+      "cat": "adversarial"
+    },
+    {
+      "q": "what did we learn about the router's similarity mode?",
+      "required": [
+        "adv_terminology"
+      ],
+      "cat": "adversarial"
+    },
+    {
+      "q": "what did the last experiment show?",
+      "required": [
+        "bench_judge"
+      ],
+      "cat": "adversarial",
+      "context": "We are reviewing the memory machine's benchmark results."
+    },
+    {
+      "q": "what changed between the first router decision and the recent benchmark?",
+      "required": [
+        "router_llm",
+        "bench_judge"
+      ],
+      "cat": "adversarial"
+    }
+  ],
+  "arms": {
+    "view_oracle": [
+      {
+        "arm": "view_oracle",
+        "cat": "single",
+        "q": "why was the semantic router turned off?",
+        "view_recall": 1.0,
+        "view_precision": 1.0,
+        "evidence_recall": 1.0,
+        "complete_evidence": 1,
+        "agent_recall": 1.0,
+        "complete_agent": 1,
+        "reduction": 0.8873239436619719,
+        "expansion": 1.0,
+        "level": 1,
+        "fallback": 0,
+        "reasons": [],
+        "calls": 8,
+        "tokens": 4544.25,
+        "latency": 6.709805999998935,
+        "attribution": ""
+      },
+      {
+        "arm": "view_oracle",
+        "cat": "single",
+        "q": "what recall ceiling does lexical routing hit?",
+        "view_recall": 1.0,
+        "view_precision": 1.0,
+        "evidence_recall": 1.0,
+        "complete_evidence": 1,
+        "agent_recall": 1.0,
+        "complete_agent": 1,
+        "reduction": 0.8873239436619719,
+        "expansion": 1.0,
+        "level": 1,
+        "fallback": 0,
+        "reasons": [],
+        "calls": 8,
+        "tokens": 4295.75,
+        "latency": 5.206988750003802,
+        "attribution": ""
+      },
+      {
+        "arm": "view_oracle",
+        "cat": "single",
+        "q": "how is the conversational benchmark different?",
+        "view_recall": 1.0,
+        "view_precision": 1.0,
+        "evidence_recall": 1.0,
+        "complete_evidence": 1,
+        "agent_recall": 1.0,
+        "complete_agent": 1,
+        "reduction": 0.8873239436619719,
+        "expansion": 1.0,
+        "level": 1,
+        "fallback": 0,
+        "reasons": [],
+        "calls": 7,
+        "tokens": 4001.25,
+        "latency": 5.9403461670008255,
+        "attribution": ""
+      },
+      {
+        "arm": "view_oracle",
+        "cat": "single",
+        "q": "what did the answer-accuracy judge find?",
+        "view_recall": 1.0,
+        "view_precision": 1.0,
+        "evidence_recall": 1.0,
+        "complete_evidence": 1,
+        "agent_recall": 1.0,
+        "complete_agent": 1,
+        "reduction": 0.8873239436619719,
+        "expansion": 1.0,
+        "level": 1,
+        "fallback": 0,
+        "reasons": [],
+        "calls": 7,
+        "tokens": 3877.0,
+        "latency": 5.6234958749992074,
+        "attribution": ""
+      },
+      {
+        "arm": "view_oracle",
+        "cat": "single",
+        "q": "how are views stored relative to the tape?",
+        "view_recall": 1.0,
+        "view_precision": 1.0,
+        "evidence_recall": 1.0,
+        "complete_evidence": 1,
+        "agent_recall": 1.0,
+        "complete_agent": 1,
+        "reduction": 0.9154929577464789,
+        "expansion": 1.0,
+        "level": 1,
+        "fallback": 0,
+        "reasons": [],
+        "calls": 6,
+        "tokens": 3063.75,
+        "latency": 5.217154000005394,
+        "attribution": ""
+      },
+      {
+        "arm": "view_oracle",
+        "cat": "single",
+        "q": "how do agents keep checklists fresh without extra calls?",
+        "view_recall": 1.0,
+        "view_precision": 1.0,
+        "evidence_recall": 1.0,
+        "complete_evidence": 1,
+        "agent_recall": 1.0,
+        "complete_agent": 1,
+        "reduction": 0.9154929577464789,
+        "expansion": 1.0,
+        "level": 1,
+        "fallback": 0,
+        "reasons": [],
+        "calls": 6,
+        "tokens": 3015.25,
+        "latency": 7.50843933300348,
+        "attribution": ""
+      },
+      {
+        "arm": "view_oracle",
+        "cat": "single",
+        "q": "when is the whiteboard consolidated?",
+        "view_recall": 1.0,
+        "view_precision": 1.0,
+        "evidence_recall": 1.0,
+        "complete_evidence": 1,
+        "agent_recall": 1.0,
+        "complete_agent": 1,
+        "reduction": 0.9154929577464789,
+        "expansion": 1.0,
+        "level": 1,
+        "fallback": 0,
+        "reasons": [],
+        "calls": 6,
+        "tokens": 3063.0,
+        "latency": 4.810572374997719,
+        "attribution": ""
+      },
+      {
+        "arm": "view_oracle",
+        "cat": "same_view",
+        "q": "what are our routing defaults and their limits?",
+        "view_recall": 1.0,
+        "view_precision": 1.0,
+        "evidence_recall": 1.0,
+        "complete_evidence": 1,
+        "agent_recall": 1.0,
+        "complete_agent": 1,
+        "reduction": 0.8873239436619719,
+        "expansion": 1.0,
+        "level": 1,
+        "fallback": 0,
+        "reasons": [],
+        "calls": 8,
+        "tokens": 4354.25,
+        "latency": 5.752495125001587,
+        "attribution": ""
+      },
+      {
+        "arm": "view_oracle",
+        "cat": "same_view",
+        "q": "summarize our benchmark findings so far",
+        "view_recall": 1.0,
+        "view_precision": 1.0,
+        "evidence_recall": 1.0,
+        "complete_evidence": 1,
+        "agent_recall": 1.0,
+        "complete_agent": 1,
+        "reduction": 0.8873239436619719,
+        "expansion": 1.0,
+        "level": 1,
+        "fallback": 0,
+        "reasons": [],
+        "calls": 7,
+        "tokens": 3916.5,
+        "latency": 4.94918462500209,
+        "attribution": ""
+      },
+      {
+        "arm": "view_oracle",
+        "cat": "same_view",
+        "q": "what are the rules for views and expansion?",
+        "view_recall": 1.0,
+        "view_precision": 1.0,
+        "evidence_recall": 1.0,
+        "complete_evidence": 1,
+        "agent_recall": 1.0,
+        "complete_agent": 1,
+        "reduction": 0.9154929577464789,
+        "expansion": 1.0,
+        "level": 1,
+        "fallback": 0,
+        "reasons": [],
+        "calls": 6,
+        "tokens": 3164.25,
+        "latency": 4.758092208001472,
+        "attribution": ""
+      },
+      {
+        "arm": "view_oracle",
+        "cat": "same_view",
+        "q": "how do memory agents work?",
+        "view_recall": 1.0,
+        "view_precision": 1.0,
+        "evidence_recall": 1.0,
+        "complete_evidence": 1,
+        "agent_recall": 1.0,
+        "complete_agent": 1,
+        "reduction": 0.9154929577464789,
+        "expansion": 1.0,
+        "level": 1,
+        "fallback": 0,
+        "reasons": [],
+        "calls": 6,
+        "tokens": 2911.0,
+        "latency": 5.64074604200141,
+        "attribution": ""
+      },
+      {
+        "arm": "view_oracle",
+        "cat": "same_view",
+        "q": "what does the whiteboard hold and when does it shrink?",
+        "view_recall": 1.0,
+        "view_precision": 1.0,
+        "evidence_recall": 1.0,
+        "complete_evidence": 1,
+        "agent_recall": 1.0,
+        "complete_agent": 1,
+        "reduction": 0.9154929577464789,
+        "expansion": 1.0,
+        "level": 1,
+        "fallback": 0,
+        "reasons": [],
+        "calls": 6,
+        "tokens": 3230.5,
+        "latency": 5.40367220799817,
+        "attribution": ""
+      },
+      {
+        "arm": "view_oracle",
+        "cat": "same_view",
+        "q": "what do we know about sourdough and hydration?",
+        "view_recall": 1.0,
+        "view_precision": 1.0,
+        "evidence_recall": 1.0,
+        "complete_evidence": 1,
+        "agent_recall": 1.0,
+        "complete_agent": 1,
+        "reduction": 0.9295774647887324,
+        "expansion": 1.0,
+        "level": 1,
+        "fallback": 0,
+        "reasons": [],
+        "calls": 5,
+        "tokens": 2401.25,
+        "latency": 4.379381790997286,
+        "attribution": ""
+      },
+      {
+        "arm": "view_oracle",
+        "cat": "cross_view",
+        "q": "why did we change the routing strategy after the benchmarks?",
+        "view_recall": 1.0,
+        "view_precision": 1.0,
+        "evidence_recall": 1.0,
+        "complete_evidence": 1,
+        "agent_recall": 1.0,
+        "complete_agent": 1,
+        "reduction": 0.7887323943661972,
+        "expansion": 1.0,
+        "level": 1,
+        "fallback": 0,
+        "reasons": [],
+        "calls": 9,
+        "tokens": 5534.75,
+        "latency": 8.02455225000449,
+        "attribution": ""
+      },
+      {
+        "arm": "view_oracle",
+        "cat": "cross_view",
+        "q": "how do views interact with routing experiments?",
+        "view_recall": 1.0,
+        "view_precision": 1.0,
+        "evidence_recall": 1.0,
+        "complete_evidence": 1,
+        "agent_recall": 1.0,
+        "complete_agent": 1,
+        "reduction": 0.8028169014084507,
+        "expansion": 1.0,
+        "level": 1,
+        "fallback": 0,
+        "reasons": [],
+        "calls": 10,
+        "tokens": 5688.75,
+        "latency": 7.812633832996653,
+        "attribution": ""
+      },
+      {
+        "arm": "view_oracle",
+        "cat": "cross_view",
+        "q": "what limits the agentic memory path in practice?",
+        "view_recall": 1.0,
+        "view_precision": 1.0,
+        "evidence_recall": 1.0,
+        "complete_evidence": 1,
+        "agent_recall": 1.0,
+        "complete_agent": 1,
+        "reduction": 0.8028169014084507,
+        "expansion": 1.0,
+        "level": 1,
+        "fallback": 0,
+        "reasons": [],
+        "calls": 9,
+        "tokens": 5410.25,
+        "latency": 8.556571291999717,
+        "attribution": ""
+      },
+      {
+        "arm": "view_oracle",
+        "cat": "cross_view",
+        "q": "how is the whiteboard kept stable across turns?",
+        "view_recall": 1.0,
+        "view_precision": 1.0,
+        "evidence_recall": 1.0,
+        "complete_evidence": 1,
+        "agent_recall": 1.0,
+        "complete_agent": 1,
+        "reduction": 0.8309859154929577,
+        "expansion": 1.0,
+        "level": 1,
+        "fallback": 0,
+        "reasons": [],
+        "calls": 7,
+        "tokens": 4135.0,
+        "latency": 7.425650416997087,
+        "attribution": ""
+      },
+      {
+        "arm": "view_oracle",
+        "cat": "cross_view",
+        "q": "what should we know before benchmarking retrieval again?",
+        "view_recall": 1.0,
+        "view_precision": 1.0,
+        "evidence_recall": 1.0,
+        "complete_evidence": 1,
+        "agent_recall": 1.0,
+        "complete_agent": 1,
+        "reduction": 0.7887323943661972,
+        "expansion": 1.0,
+        "level": 1,
+        "fallback": 0,
+        "reasons": [],
+        "calls": 9,
+        "tokens": 5461.0,
+        "latency": 8.1211865830046,
+        "attribution": ""
+      },
+      {
+        "arm": "view_oracle",
+        "cat": "cross_view",
+        "q": "how do views help keep the tape canonical?",
+        "view_recall": 1.0,
+        "view_precision": 1.0,
+        "evidence_recall": 1.0,
+        "complete_evidence": 1,
+        "agent_recall": 1.0,
+        "complete_agent": 1,
+        "reduction": 0.9154929577464789,
+        "expansion": 1.0,
+        "level": 1,
+        "fallback": 0,
+        "reasons": [],
+        "calls": 6,
+        "tokens": 3219.0,
+        "latency": 4.181718666004599,
+        "attribution": ""
+      },
+      {
+        "arm": "view_oracle",
+        "cat": "adversarial",
+        "q": "why did we revert the router to opt-in after the first external benchmark?",
+        "view_recall": 1.0,
+        "view_precision": 1.0,
+        "evidence_recall": 1.0,
+        "complete_evidence": 1,
+        "agent_recall": 1.0,
+        "complete_agent": 1,
+        "reduction": 0.46478873239436624,
+        "expansion": 1.0,
+        "level": 1,
+        "fallback": 0,
+        "reasons": [],
+        "calls": 15,
+        "tokens": 10386.25,
+        "latency": 136.27674591699906,
+        "attribution": ""
+      },
+      {
+        "arm": "view_oracle",
+        "cat": "adversarial",
+        "q": "why is router top-k fixed at five?",
+        "view_recall": 1.0,
+        "view_precision": 1.0,
+        "evidence_recall": 1.0,
+        "complete_evidence": 1,
+        "agent_recall": 1.0,
+        "complete_agent": 1,
+        "reduction": 0.9154929577464789,
+        "expansion": 1.0,
+        "level": 1,
+        "fallback": 0,
+        "reasons": [],
+        "calls": 6,
+        "tokens": 2898.0,
+        "latency": 5.675346542004263,
+        "attribution": ""
+      },
+      {
+        "arm": "view_oracle",
+        "cat": "adversarial",
+        "q": "what did we learn about the router's similarity mode?",
+        "view_recall": 1.0,
+        "view_precision": 1.0,
+        "evidence_recall": 1.0,
+        "complete_evidence": 1,
+        "agent_recall": 1.0,
+        "complete_agent": 1,
+        "reduction": 0.9436619718309859,
+        "expansion": 1.0,
+        "level": 1,
+        "fallback": 0,
+        "reasons": [],
+        "calls": 4,
+        "tokens": 2066.0,
+        "latency": 2.876345875003608,
+        "attribution": ""
+      },
+      {
+        "arm": "view_oracle",
+        "cat": "adversarial",
+        "q": "what did the last experiment show?",
+        "view_recall": 1.0,
+        "view_precision": 1.0,
+        "evidence_recall": 1.0,
+        "complete_evidence": 1,
+        "agent_recall": 1.0,
+        "complete_agent": 1,
+        "reduction": 0.8873239436619719,
+        "expansion": 1.0,
+        "level": 1,
+        "fallback": 0,
+        "reasons": [],
+        "calls": 7,
+        "tokens": 3972.25,
+        "latency": 126.96511562500382,
+        "attribution": ""
+      },
+      {
+        "arm": "view_oracle",
+        "cat": "adversarial",
+        "q": "what changed between the first router decision and the recent benchmark?",
+        "view_recall": 1.0,
+        "view_precision": 1.0,
+        "evidence_recall": 1.0,
+        "complete_evidence": 1,
+        "agent_recall": 1.0,
+        "complete_agent": 1,
+        "reduction": 0.7887323943661972,
+        "expansion": 1.0,
+        "level": 1,
+        "fallback": 0,
+        "reasons": [],
+        "calls": 9,
+        "tokens": 5752.25,
+        "latency": 8.606876167003065,
+        "attribution": ""
+      }
+    ]
+  }
+}

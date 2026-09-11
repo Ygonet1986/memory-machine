@@ -1,0 +1,8 @@
+running no_memory ...
+  n=32 evidence=0.00 strict=0.00 lenient=0.12 AUR=  -  calls=1.0
+
+final table:
+arm                 n   evid  strict  lenient    AUR   calls
+no_memory          32   0.00    0.00     0.12     -      1.0
+
+audit (deepseek-v4-flash): 8/8 agreement (1.00) -> /Users/igorcoutrimlacerda/memory-machine/eval/out/judge_audit_no_memory.jsonl

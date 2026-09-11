@@ -1,0 +1,8 @@
+running bm25 ...
+  n=32 evidence=0.28 strict=0.31 lenient=0.66 AUR=1.00 calls=1.0
+
+final table:
+arm                 n   evid  strict  lenient    AUR   calls
+bm25               32   0.28    0.31     0.66   1.00     1.0
+
+audit (deepseek-v4-flash): 8/8 agreement (1.00) -> /Users/igorcoutrimlacerda/memory-machine/eval/out/judge_audit_bm25.jsonl

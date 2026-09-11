@@ -1,0 +1,37 @@
+running off / anaphora ...
+running off / topic_shift ...
+running prior / anaphora ...
+running prior / topic_shift ...
+running state / anaphora ...
+running state / topic_shift ...
+
+arm    conversation turn kind       ecomp   arec  calls  churn attn_top  old_res
+off    anaphora        1 normal         1   1.00    3.0   0.00     0.00     0.00
+off    anaphora        2 anaphora       1   1.00   15.0   0.00     0.00     0.00
+off    anaphora        3 normal         1   1.00    7.0   0.00     0.00     0.00
+off    anaphora        4 anaphora       1   1.00    2.0   0.17     0.00     0.00
+off    topic_shift     1 normal         1   1.00    4.0   0.00     0.00     0.00
+off    topic_shift     2 normal         1   1.00    3.0   0.40     0.00     0.00
+off    topic_shift     3 shift          1   1.00    5.0   0.00     0.00     0.00
+off    topic_shift     4 anaphora       1   1.00   16.0   0.00     0.00     0.00
+prior  anaphora        1 normal         1   1.00    3.0   0.00     0.86     0.00
+prior  anaphora        2 anaphora       1   1.00    3.0   1.00     0.93     0.93
+prior  anaphora        3 normal         1   1.00    6.0   0.50     0.94     0.94
+prior  anaphora        4 anaphora       1   1.00    6.0   1.00     0.94     0.94
+prior  topic_shift     1 normal         1   1.00    4.0   0.00     0.86     0.00
+prior  topic_shift     2 normal         1   1.00    4.0   1.00     0.93     0.93
+prior  topic_shift     3 shift          0   0.00    7.0   0.67     0.94     0.91
+prior  topic_shift     4 anaphora       0   0.00    7.0   1.00     0.94     0.94
+state  anaphora        1 normal         1   1.00    3.0   0.00     0.86     0.00
+state  anaphora        2 anaphora       1   1.00    3.0   1.00     0.93     0.93
+state  anaphora        3 normal         1   1.00    7.0   0.50     0.94     0.94
+state  anaphora        4 anaphora       1   1.00    7.0   1.00     0.94     0.94
+state  topic_shift     1 normal         1   1.00    4.0   0.00     0.86     0.00
+state  topic_shift     2 normal         1   1.00    4.0   1.00     0.93     0.93
+state  topic_shift     3 shift          0   0.00    6.0   0.67     0.94     0.94
+state  topic_shift     4 anaphora       0   0.00    6.0   1.00     0.94     0.94
+
+summary:
+  off    anaphora_ecomp=1.00 anaphora_calls=11.0 shift_ecomp=1.00 shift_old_residual=0.00
+  prior  anaphora_ecomp=0.67 anaphora_calls=5.3 shift_ecomp=0.00 shift_old_residual=0.91
+  state  anaphora_ecomp=0.67 anaphora_calls=5.3 shift_ecomp=0.00 shift_old_residual=0.94

@@ -1,0 +1,8 @@
+running oracle ...
+  n=32 evidence=1.00 strict=0.94 lenient=0.97 AUR=0.94 calls=1.0
+
+final table:
+arm                 n   evid  strict  lenient    AUR   calls
+oracle             32   1.00    0.94     0.97   0.94     1.0
+
+audit (deepseek-v4-flash): 8/8 agreement (1.00) -> /Users/igorcoutrimlacerda/memory-machine/eval/out/judge_audit_oracle.jsonl

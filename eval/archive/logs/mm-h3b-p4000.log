@@ -1,0 +1,9 @@
+tagging 2312 sessions ...
+running agents_view_payload ...
+  n=50 evidence=0.74 strict=0.56 lenient=0.62 AUR=0.76 calls=4.4
+
+final table:
+arm                   n   evid  strict  lenient    AUR   calls
+agents_view_payload  50   0.74    0.56     0.62   0.76     4.4
+
+audit (deepseek-v4-flash): 10/12 agreement (0.83) -> /Users/igorcoutrimlacerda/memory-machine/eval/out/judge_audit_agents_view_payload_longmemeval_ing0_pb4000.jsonl

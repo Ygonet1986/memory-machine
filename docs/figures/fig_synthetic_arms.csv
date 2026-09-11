@@ -1,0 +1,8 @@
+arm,strict,aur
+no_memory,0.0,0.0
+bm25,0.312,1.0
+agents_group,0.625,0.625
+agents_view,0.719,0.742
+agents_view_ctx,0.875,0.903
+agents_view_payload,0.969,1.0
+gold-evidence,0.938,0.938

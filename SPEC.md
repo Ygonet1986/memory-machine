@@ -859,7 +859,7 @@ Readings:
 - Negative results are recorded as such: the prompt variant is implemented
   (`memory_aware=True` in `run_main_chatbot`) but not enabled by default.
 
-### 15.15 H5' — Temporal provenance restoration (partial)
+### 15.15 H5' — Temporal provenance restoration (confirmed)
 
 The external loader dropped `haystack_dates` and `question_date`, so every
 session fell into the ingestion month and the payload header showed the
@@ -868,41 +868,49 @@ minute), makes the `time/*` views real, and appends the question date to the
 task as provenance. Everything else is frozen (full ingestion, prompt, model,
 judge v1, budget 4000).
 
-| arm | evidence | strict | lenient | AUR |
-|-----|----------|--------|---------|-----|
-| payload 4000 (base) | 0.74 | 0.56 | 0.66 | 0.76 |
-| payload 4000 + dates | 0.72 | 0.56 | 0.58 | 0.72 |
-| oracle (base, 6k cap) | 1.00 | 0.52 | 0.58 | 0.52 |
-| oracle + dates (no cap) | 1.00 | 0.54 | 0.56 | 0.54 |
+| arm | evidence | strict | lenient | AUR | temporal total | temporal \| evidence complete |
+|-----|----------|--------|---------|-----|----------------|-------------------------------|
+| payload 4000 (base) | 0.74 | 0.56 | 0.62 | 0.76 | 0.29 (4/14) | 0.44 (4/9) |
+| payload 4000 + dates | 0.72 | **0.64** | 0.70 | **0.89** | **0.64 (9/14)** | **1.00 (9/9)** |
+| oracle (base, 6k cap) | 1.00 | 0.52 | 0.58 | 0.52 | - | - |
+| oracle + dates (no cap) | 1.00 | 0.54 | 0.56 | 0.54 | - | - |
+
+> **Correction (harness bug).** The first H5'/H6a runs did not deliver the
+> evidence payload to the answerer (the new arms were missing from the
+> context-building branch), so they measured whiteboard-only answers; the
+> numbers were 0.56/0.72 and `fact_coverage` 0.16. After the fix the payload is
+> delivered (`fact_coverage` 0.83) and the results reverse: the date
+> restoration is the fix. The buggy snapshots are kept as `*_BUGGY.jsonl`.
 
 By question type (base -> dates):
 
 | type | base | dates | n |
 |------|------|-------|---|
-| temporal-reasoning | 0.29 | **0.43** | 14 |
-| single-session-user | 0.60 | 0.73 | 15 |
+| **temporal-reasoning** | 0.29 | **0.64** | 14 |
+| single-session-user | 0.60 | 0.60 | 15 |
 | multi-session | 0.77 | 0.77 | 13 |
-| single-session-assistant | 1.00 | 0.00 | 3 |
 | knowledge-update | 0.33 | 0.00 | 3 |
+| single-session-assistant | 1.00 | 1.00 | 3 |
 
 Readings:
 
-- **H5' is partially confirmed**: the date restoration improves the
-  date-sensitive category consistently — temporal-reasoning 0.29 -> 0.43 in
-  **both** the payload and the oracle arm (+0.14 each, 4 -> 6 of 14) — but the
-  overall strict is flat (0.56) because of small-n regressions in
-  single-session-assistant (3 cases; complete evidence in both arms, so these
-  are answer variance, not a systematic date effect) and knowledge-update (3).
-- Controls held: GFR 0.80-0.84 and evidence recall 0.72-0.74 across arms.
+- **H5' is confirmed**: with the payload delivered, restoring the real session
+  timestamps and the question date lifts temporal-reasoning 0.29 -> 0.64
+  (4 -> 9 of 14) and **temporal | evidence complete 0.44 -> 1.00 (9/9)**; all
+  four audited arithmetic/anchor errors are fixed. Overall strict 0.56 -> 0.64
+  and AUR 0.76 -> 0.89 at equal evidence (0.72 vs 0.74), cost (4.4 calls) and
+  fact coverage (0.83); GFR 0.84 -> 0.86.
+- Controls held: GFR 0.84-0.86 and evidence recall 0.72-0.74 across arms.
 - **Unlimited context is not a valid ceiling**: the oracle with *all* expected
   sessions and no cap collapses on multi-session (0.08 base, 0.00 dates) and
   scores below the 4000-char payload. More evidence can hurt; the payload's
   budget is protective. Earlier "oracle ceiling" readings need this caveat.
-- The residual temporal failures (6/14) now look like answerer arithmetic
-  rather than missing anchors: the timestamps are in the evidence and in the
-  task, and the oracle sees the full sessions.
+- The residual temporal failures (5/14) are all **evidence-incomplete**
+  (retrieval misses): every temporal question whose evidence was complete was
+  answered correctly (9/9). The next bottleneck for temporal reasoning is
+  therefore retrieval, not the answerer.
 
-### 15.16 H6a — temporal computation prompt (v0.11, refuted)
+### 15.16 H6a — temporal computation prompt (v0.11, refuted on temporal)
 
 Hypothesis: with the same memories, real dates and 4000-char payload, an
 explicit temporal-computation procedure (list timestamps → resolve relative
@@ -915,19 +923,18 @@ unrelated questions keep the base prompt.
 
 | arm | evidence | strict | lenient | AUR | temporal total | temporal \| evidence complete |
 |-----|----------|--------|---------|-----|----------------|-------------------------------|
-| dates (base) | 0.72 | 0.56 | 0.58 | 0.72 | 0.43 (6/14) | **0.56 (5/9)** |
-| dates + temporal prompt | 0.72 | 0.58 | 0.64 | 0.78 | 0.36 (5/14) | **0.56 (5/9)** |
+| dates (base) | 0.72 | 0.64 | 0.70 | 0.89 | 0.64 (9/14) | **1.00 (9/9)** |
+| dates + temporal prompt | 0.72 | 0.70 | 0.76 | 0.97 | 0.64 (9/14) | **1.00 (9/9)** |
 
 Readings:
 
-- **H6a is refuted on the primary causal test**: with evidence complete, the
-  temporal procedure changed nothing (5/9 -> 5/9). All four audited
-  arithmetic/anchor errors (relative-date resolution, wrong anchor, interval
-  computation, date-window selection) remained wrong, and one previously
-  correct temporal case flipped to incorrect (incomplete evidence).
-- The small overall strict gain (0.56 -> 0.58, lenient 0.58 -> 0.64) comes from
-  other categories and is within single-case variance.
-- Controls held: evidence 0.72 and GFR 0.80/0.82.
+- **H6a is refuted on its own hypothesis**: on temporal questions the procedure
+  adds nothing beyond the corrected dates (0.64 -> 0.64; temporal | evidence
+  complete stays 1.00, 9/9). The dates alone fixed all four audited errors.
+- The overall gain (0.64 -> 0.70 strict, AUR 0.89 -> 0.97) comes from
+  non-temporal categories (knowledge-update 0.00 -> 0.67 on n=3;
+  single-session-user 0.60 -> 0.67 on n=15) and is within small-n variance.
+- Controls held: evidence 0.72 and GFR 0.86 both arms.
 - The gate fired on 12/14 temporal questions and on 8/36 others (20/50 total),
   so the change was narrow as designed.
 - Together with H4, the pattern is consistent: **prompt-only interventions do
@@ -1003,8 +1010,8 @@ next experiment. Hypotheses and outcomes:
 | H3 | A budgeted payload preserves accuracy with far less context | confirmed (relative) | payload 6000 0.60 @ 5.5k vs full 0.58 @ 12.9k (-57%); 4000 0.56 @ 3.8k (-70%); knee at ~4000 |
 | H4 | A memory-aware answer prompt fixes the remaining gap | refuted | payload 0.56 -> 0.50; oracle 0.52 both |
 | H5 | Multi-session evidence aggregation is the bottleneck | refuted | multi-session was the easiest category (0.77); temporal-reasoning the worst (0.29) |
-| H5' | Restoring real session/question timestamps improves temporal reasoning | partial | temporal-reasoning 0.29 -> 0.43 (both arms); overall flat 0.56; controls flat |
-| H6a | An explicit temporal-computation procedure fixes the rest | refuted | temporal \| evidence complete 0.56 -> 0.56 (5/9); 0/4 target errors fixed |
+| H5' | Restoring real session/question timestamps improves temporal reasoning | confirmed | temporal-reasoning 0.29 -> 0.64; temporal \| evidence complete 0.44 -> 1.00 (9/9); overall 0.56 -> 0.64, AUR 0.76 -> 0.89 |
+| H6a | An explicit temporal-computation procedure fixes the rest | refuted (on temporal) | temporal 0.64 -> 0.64; overall 0.64 -> 0.70 from small-n non-temporal cases |
 
 Additional findings:
 
@@ -1016,12 +1023,15 @@ Additional findings:
   sessions with no context cap (14.7k+ chars) collapses on multi-session
   (0.08 -> 0.00) and scores below the 4000-char payload. The budget is a
   protective filter, not only a cost optimization.
-- **Prompt-only interventions do not move the answerer** (H4 and H6a): the
-  remaining errors are evidence composition and arithmetic capability.
-- Remaining open problems: temporal-reasoning retrieval misses (4 of the 8
-  errors are evidence-incomplete), the answerer ceiling on LongMemEval
-  (~0.56 even with evidence), external tagger coarseness, and multi-turn
-  continuity that actually *learns* new memories.
+- **Prompt-only interventions do not move the answerer**: framing the context
+  as memory (H4) was refuted; a task-specific temporal procedure (H6a) added
+  nothing on temporal questions once the timestamps were correct, though a few
+  small-n non-temporal cases moved. The measured fixes were architectural
+  (payload delivery, real timestamps), not prompt-only.
+- Remaining open problems: temporal-reasoning retrieval misses (all 5 remaining
+  temporal errors are evidence-incomplete), the answerer ceiling on LongMemEval
+  (0.64-0.70 with the corrected evidence), external tagger coarseness, and
+  multi-turn continuity that actually *learns* new memories.
 
 The central architectural statement:
 

@@ -1,0 +1,68 @@
+tagging 2312 sessions ...
+running agents_view_payload ...
+Traceback (most recent call last):
+  File "/Users/igorcoutrimlacerda/memory-machine/src/memory_machine/llm.py", line 83, in _post
+    return json.loads(resp.read().decode("utf-8"))
+                      ~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/http/client.py", line 478, in read
+    return self._read_chunked(amt)
+           ~~~~~~~~~~~~~~~~~~^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/http/client.py", line 602, in _read_chunked
+    while (chunk_left := self._get_chunk_left()) is not None:
+                         ~~~~~~~~~~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/http/client.py", line 584, in _get_chunk_left
+    chunk_left = self._read_next_chunk_size()
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/http/client.py", line 544, in _read_next_chunk_size
+    line = self.fp.readline(_MAXLINE + 1)
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/socket.py", line 729, in readinto
+    return self._sock.recv_into(b)
+           ~~~~~~~~~~~~~~~~~~~~^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/ssl.py", line 1304, in recv_into
+    return self.read(nbytes, buffer)
+           ~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/ssl.py", line 1138, in read
+    return self._sslobj.read(len, buffer)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+TimeoutError: The read operation timed out
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/igorcoutrimlacerda/memory-machine/eval/e2e_bench.py", line 610, in <module>
+    main()
+    ~~~~^^
+  File "/Users/igorcoutrimlacerda/memory-machine/eval/e2e_bench.py", line 541, in main
+    runner(
+    ~~~~~~^
+        arm, i, task, gold[i], root, base, judge_client,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        **extra,
+        ^^^^^^^^
+    )
+    ^
+  File "/Users/igorcoutrimlacerda/memory-machine/eval/e2e_bench.py", line 371, in run_external_case
+    row = _run_arm(
+        arm, index, task["question"], task.get("type", "external"), gold, required_ids,
+        machine, client, judge_client, ctx_budget=ctx_budget, expected_sessions=expected,
+    )
+  File "/Users/igorcoutrimlacerda/memory-machine/eval/e2e_bench.py", line 231, in _run_arm
+    answer = answer_with(client, machine, question, extra_context=context)
+  File "/Users/igorcoutrimlacerda/memory-machine/eval/e2e_bench.py", line 150, in answer_with
+    clean, _memories, _reasoning = run_main_chatbot(
+                                   ~~~~~~~~~~~~~~~~^
+        client, machine.whiteboard, question, extra_context=extra_context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/igorcoutrimlacerda/memory-machine/src/memory_machine/main_chatbot.py", line 146, in run_main_chatbot
+    content, reasoning = cwr(messages, temperature=temperature)
+                         ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/igorcoutrimlacerda/memory-machine/eval/view_router_bench.py", line 279, in complete_with_reasoning
+    content, reasoning = self.inner.complete_with_reasoning(messages, temperature=temperature)
+                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/igorcoutrimlacerda/memory-machine/src/memory_machine/llm.py", line 159, in complete_with_reasoning
+    data = self._post(payload)
+  File "/Users/igorcoutrimlacerda/memory-machine/src/memory_machine/llm.py", line 96, in _post
+    raise LLMError(str(e)) from e
+memory_machine.llm.LLMError: The read operation timed out

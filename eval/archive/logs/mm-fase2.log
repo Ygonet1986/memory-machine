@@ -1,0 +1,60 @@
+tagging 389 sessions ...
+  tagged 8/389
+  tagged 16/389
+  tagged 24/389
+  tagged 32/389
+  tagged 40/389
+  tagged 48/389
+  tagged 56/389
+  tagged 64/389
+  tagged 72/389
+  tagged 80/389
+  tagged 88/389
+  tagged 96/389
+  tagged 104/389
+  tagged 112/389
+  tagged 120/389
+  tagged 128/389
+  tagged 136/389
+  tagged 144/389
+  tagged 152/389
+  tagged 160/389
+  tagged 168/389
+  tagged 176/389
+  tagged 184/389
+  tagged 192/389
+  tagged 200/389
+  tagged 208/389
+  tagged 216/389
+  tagged 224/389
+  tagged 232/389
+  tagged 240/389
+  tagged 248/389
+  tagged 256/389
+  tagged 264/389
+  tagged 272/389
+  tagged 280/389
+  tagged 288/389
+  tagged 296/389
+  tagged 304/389
+  tagged 312/389
+  tagged 320/389
+  tagged 328/389
+  tagged 336/389
+  tagged 344/389
+  tagged 352/389
+  tagged 360/389
+  tagged 368/389
+  tagged 376/389
+  tagged 384/389
+  tagged 389/389
+tagged 389 sessions
+  [1/8] done
+  [8/8] done
+
+dataset: longmemeval | questions: 8 | capacity: 5 | arms: bm25,agents_full,agents_view_lex
+
+arm                          evidence recall  calls/query  latency(s)
+bm25                                    0.88          0.0        0.00
+agents_full                             1.00         10.1        7.68
+agents_view_lex                         0.88          3.0        6.16

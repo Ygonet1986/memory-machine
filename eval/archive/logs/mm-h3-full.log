@@ -1,0 +1,42 @@
+tagging 2312 sessions ...
+running agents_view_ctx ...
+Traceback (most recent call last):
+  File "/Users/igorcoutrimlacerda/memory-machine/eval/e2e_bench.py", line 610, in <module>
+    main()
+    ~~~~^^
+  File "/Users/igorcoutrimlacerda/memory-machine/eval/e2e_bench.py", line 541, in main
+    runner(
+    ~~~~~~^
+        arm, i, task, gold[i], root, base, judge_client,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        **extra,
+        ^^^^^^^^
+    )
+    ^
+  File "/Users/igorcoutrimlacerda/memory-machine/eval/e2e_bench.py", line 365, in run_external_case
+    machine, id_map = build_external_machine(
+                      ~~~~~~~~~~~~~~~~~~~~~~^
+        root / f"{arm}_{index:02d}", task, cfg, tags, client,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        summary_limit=ingest_summary, why_limit=ingest_why,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/igorcoutrimlacerda/memory-machine/eval/e2e_bench.py", line 340, in build_external_machine
+    result = machine.add_memory(record, save=False)
+  File "/Users/igorcoutrimlacerda/memory-machine/src/memory_machine/coordinator.py", line 723, in add_memory
+    record, group, agent, created = add_memory(
+                                    ~~~~~~~~~~^
+        self.tape, self.manifest, record, model=self.config.model
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/igorcoutrimlacerda/memory-machine/src/memory_machine/groups.py", line 213, in add_memory
+    record = tape.append(record)
+  File "/Users/igorcoutrimlacerda/memory-machine/src/memory_machine/tape.py", line 147, in append
+    assert_clean(record.text())
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/Users/igorcoutrimlacerda/memory-machine/src/memory_machine/secrets.py", line 50, in assert_clean
+    raise SecretError(f"secret-like content detected ({rules})")
+memory_machine.secrets.SecretError: secret-like content detected (openai-style api key)

@@ -1,0 +1,4 @@
+p4000 base     wrong=22  {'insufficient_evidence': 16, 'temporal_misread': 4, 'reasoning_error': 1, 'abstention': 1}
+p4000 memory   wrong=25  {'insufficient_evidence': 19, 'abstention': 1, 'temporal_misread': 5}
+oracle memory  wrong=24  {'insufficient_evidence': 22, 'temporal_misread': 1, 'ignored_memory': 1}
+oracle base: missing

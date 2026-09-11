@@ -1,0 +1,11 @@
+tasks: [13, 17, 19, 20, 23, 24, 27, 31] | repeats: 5
+
+arm              task  modal  jaccard  ecomp  calls router  attn  both
+view_bm25_prior    13   1.00     1.00   1.00    3.0      0     0    15
+view_bm25_prior    17   1.00     1.00   0.00    5.0      0     0    25
+view_bm25_prior    19   1.00     1.00   1.00    3.0      0     0    15
+view_bm25_prior    20   1.00     1.00   1.00    3.0      0     0    15
+view_bm25_prior    23   1.00     1.00   1.00    6.4      0     0    30
+view_bm25_prior    24   1.00     1.00   1.00    7.0      0     0    30
+view_bm25_prior    27   1.00     1.00   1.00    2.0      0     0    10
+view_bm25_prior    31   1.00     1.00   1.00    4.0      0     0    20

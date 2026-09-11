@@ -1,0 +1,1145 @@
+{
+  "tasks": [
+    {
+      "q": "why was the semantic router turned off?",
+      "required": [
+        "router_embed"
+      ],
+      "cat": "single"
+    },
+    {
+      "q": "what recall ceiling does lexical routing hit?",
+      "required": [
+        "router_lexical"
+      ],
+      "cat": "single"
+    },
+    {
+      "q": "how is the conversational benchmark different?",
+      "required": [
+        "bench_locomo"
+      ],
+      "cat": "single"
+    },
+    {
+      "q": "what did the answer-accuracy judge find?",
+      "required": [
+        "bench_judge"
+      ],
+      "cat": "single"
+    },
+    {
+      "q": "how are views stored relative to the tape?",
+      "required": [
+        "views_foundation"
+      ],
+      "cat": "single"
+    },
+    {
+      "q": "how do agents keep checklists fresh without extra calls?",
+      "required": [
+        "agents_fused"
+      ],
+      "cat": "single"
+    },
+    {
+      "q": "when is the whiteboard consolidated?",
+      "required": [
+        "wb_bounded"
+      ],
+      "cat": "single"
+    },
+    {
+      "q": "what are our routing defaults and their limits?",
+      "required": [
+        "router_llm",
+        "router_lexical"
+      ],
+      "cat": "same_view"
+    },
+    {
+      "q": "summarize our benchmark findings so far",
+      "required": [
+        "bench_locomo",
+        "bench_longmemeval",
+        "bench_judge"
+      ],
+      "cat": "same_view"
+    },
+    {
+      "q": "what are the rules for views and expansion?",
+      "required": [
+        "views_foundation",
+        "views_index",
+        "views_expand"
+      ],
+      "cat": "same_view"
+    },
+    {
+      "q": "how do memory agents work?",
+      "required": [
+        "agents_fused",
+        "agents_budget",
+        "agents_parallel"
+      ],
+      "cat": "same_view"
+    },
+    {
+      "q": "what does the whiteboard hold and when does it shrink?",
+      "required": [
+        "wb_bounded",
+        "wb_metacognition"
+      ],
+      "cat": "same_view"
+    },
+    {
+      "q": "what do we know about sourdough and hydration?",
+      "required": [
+        "bread_ferment",
+        "bread_hydration"
+      ],
+      "cat": "same_view"
+    },
+    {
+      "q": "why did we change the routing strategy after the benchmarks?",
+      "required": [
+        "router_embed",
+        "bench_locomo"
+      ],
+      "cat": "cross_view"
+    },
+    {
+      "q": "how do views interact with routing experiments?",
+      "required": [
+        "views_foundation",
+        "router_lexical"
+      ],
+      "cat": "cross_view"
+    },
+    {
+      "q": "what limits the agentic memory path in practice?",
+      "required": [
+        "agents_budget",
+        "bench_timeout"
+      ],
+      "cat": "cross_view"
+    },
+    {
+      "q": "how is the whiteboard kept stable across turns?",
+      "required": [
+        "wb_cache",
+        "agents_fused"
+      ],
+      "cat": "cross_view"
+    },
+    {
+      "q": "what should we know before benchmarking retrieval again?",
+      "required": [
+        "bench_judge",
+        "router_lexical"
+      ],
+      "cat": "cross_view"
+    },
+    {
+      "q": "how do views help keep the tape canonical?",
+      "required": [
+        "views_index",
+        "views_expand"
+      ],
+      "cat": "cross_view"
+    },
+    {
+      "q": "why did we revert the router to opt-in after the first external benchmark?",
+      "required": [
+        "adv_missing"
+      ],
+      "cat": "adversarial"
+    },
+    {
+      "q": "why is router top-k fixed at five?",
+      "required": [
+        "adv_wrong"
+      ],
+      "cat": "adversarial"
+    },
+    {
+      "q": "what did we learn about the router's similarity mode?",
+      "required": [
+        "adv_terminology"
+      ],
+      "cat": "adversarial"
+    },
+    {
+      "q": "what did the last experiment show?",
+      "required": [
+        "bench_judge"
+      ],
+      "cat": "adversarial",
+      "context": "We are reviewing the memory machine's benchmark results."
+    },
+    {
+      "q": "what changed between the first router decision and the recent benchmark?",
+      "required": [
+        "router_llm",
+        "bench_judge"
+      ],
+      "cat": "adversarial",
+      "dims": [
+        "semantic",
+        "temporal"
+      ]
+    },
+    {
+      "q": "what changed about the router since July?",
+      "required": [
+        "router_digest",
+        "adv_dual"
+      ],
+      "cat": "temporal",
+      "dims": [
+        "semantic",
+        "temporal"
+      ]
+    },
+    {
+      "q": "what did we decide about views in September?",
+      "required": [
+        "views_foundation",
+        "views_index"
+      ],
+      "cat": "temporal",
+      "dims": [
+        "semantic",
+        "temporal"
+      ]
+    },
+    {
+      "q": "list the decisions made in May and June",
+      "required": [
+        "router_llm",
+        "adv_missing"
+      ],
+      "cat": "temporal",
+      "dims": [
+        "temporal",
+        "structural"
+      ]
+    },
+    {
+      "q": "which lessons did we learn in February?",
+      "required": [
+        "riemann_siegel",
+        "riemann_gmpy2",
+        "sieve_segmented"
+      ],
+      "cat": "temporal",
+      "dims": [
+        "temporal",
+        "structural"
+      ]
+    },
+    {
+      "q": "which decisions did we make about routing?",
+      "required": [
+        "router_llm",
+        "router_digest"
+      ],
+      "cat": "structural",
+      "dims": [
+        "semantic",
+        "structural"
+      ]
+    },
+    {
+      "q": "which lessons did we record about benchmarks?",
+      "required": [
+        "bench_locomo",
+        "bench_longmemeval",
+        "bench_timeout"
+      ],
+      "cat": "structural",
+      "dims": [
+        "semantic",
+        "structural"
+      ]
+    },
+    {
+      "q": "what did we work on in September?",
+      "required": [
+        "views_foundation",
+        "views_index",
+        "views_expand",
+        "adv_dual"
+      ],
+      "cat": "temporal",
+      "dims": [
+        "temporal"
+      ]
+    },
+    {
+      "q": "what did we decide recently about routing?",
+      "required": [
+        "router_digest",
+        "adv_dual"
+      ],
+      "cat": "ambiguous",
+      "dims": [
+        "semantic",
+        "temporal",
+        "structural"
+      ]
+    }
+  ],
+  "arms": {
+    "cascade_bm25_dim_judge": [
+      {
+        "arm": "cascade_bm25_dim_judge",
+        "cat": "single",
+        "q": "why was the semantic router turned off?",
+        "view_recall": 1.0,
+        "view_precision": 0.3333333333333333,
+        "dimension_recall": 1.0,
+        "dimension_precision": 1.0,
+        "recovery_redundancy": 1.0,
+        "evidence_recall": 1.0,
+        "complete_evidence": 1,
+        "agent_recall": 1.0,
+        "complete_agent": 1,
+        "reduction": 0.3802816901408451,
+        "expansion": 1.0,
+        "level": 1,
+        "fallback": 0,
+        "reasons": [],
+        "coverage_signal": "complete",
+        "level1_complete": 1,
+        "intersection_mode": "single",
+        "calls": 16,
+        "tokens": 13955.5,
+        "latency": 22.42329504200461,
+        "attribution": ""
+      },
+      {
+        "arm": "cascade_bm25_dim_judge",
+        "cat": "single",
+        "q": "what recall ceiling does lexical routing hit?",
+        "view_recall": 1.0,
+        "view_precision": 0.3333333333333333,
+        "dimension_recall": 1.0,
+        "dimension_precision": 1.0,
+        "recovery_redundancy": 1.0,
+        "evidence_recall": 1.0,
+        "complete_evidence": 1,
+        "agent_recall": 1.0,
+        "complete_agent": 1,
+        "reduction": 0.46478873239436624,
+        "expansion": 1.0,
+        "level": 1,
+        "fallback": 0,
+        "reasons": [],
+        "coverage_signal": "complete",
+        "level1_complete": 1,
+        "intersection_mode": "single",
+        "calls": 16,
+        "tokens": 13346.75,
+        "latency": 20.796956792000856,
+        "attribution": ""
+      },
+      {
+        "arm": "cascade_bm25_dim_judge",
+        "cat": "single",
+        "q": "how is the conversational benchmark different?",
+        "view_recall": 1.0,
+        "view_precision": 0.14285714285714285,
+        "dimension_recall": 1.0,
+        "dimension_precision": 1.0,
+        "recovery_redundancy": 1.0,
+        "evidence_recall": 1.0,
+        "complete_evidence": 1,
+        "agent_recall": 1.0,
+        "complete_agent": 1,
+        "reduction": 0.46478873239436624,
+        "expansion": 1.0,
+        "level": 2,
+        "fallback": 1,
+        "reasons": [
+          "coverage_partial"
+        ],
+        "coverage_signal": "complete",
+        "level1_complete": 0,
+        "intersection_mode": "single",
+        "calls": 32,
+        "tokens": 29572.25,
+        "latency": 56.07810137500201,
+        "attribution": ""
+      },
+      {
+        "arm": "cascade_bm25_dim_judge",
+        "cat": "single",
+        "q": "what did the answer-accuracy judge find?",
+        "view_recall": 1.0,
+        "view_precision": 1.0,
+        "dimension_recall": 1.0,
+        "dimension_precision": 1.0,
+        "recovery_redundancy": 1.0,
+        "evidence_recall": 1.0,
+        "complete_evidence": 1,
+        "agent_recall": 1.0,
+        "complete_agent": 1,
+        "reduction": 0.8873239436619719,
+        "expansion": 1.0,
+        "level": 1,
+        "fallback": 0,
+        "reasons": [],
+        "coverage_signal": "complete",
+        "level1_complete": 1,
+        "intersection_mode": "single",
+        "calls": 8,
+        "tokens": 5384.25,
+        "latency": 11.143755040997348,
+        "attribution": ""
+      },
+      {
+        "arm": "cascade_bm25_dim_judge",
+        "cat": "single",
+        "q": "how are views stored relative to the tape?",
+        "view_recall": 1.0,
+        "view_precision": 0.3333333333333333,
+        "dimension_recall": 1.0,
+        "dimension_precision": 1.0,
+        "recovery_redundancy": 1.0,
+        "evidence_recall": 1.0,
+        "complete_evidence": 1,
+        "agent_recall": 1.0,
+        "complete_agent": 1,
+        "reduction": 0.46478873239436624,
+        "expansion": 1.0,
+        "level": 1,
+        "fallback": 0,
+        "reasons": [],
+        "coverage_signal": "complete",
+        "level1_complete": 1,
+        "intersection_mode": "single",
+        "calls": 16,
+        "tokens": 12744.0,
+        "latency": 25.49042937500053,
+        "attribution": ""
+      },
+      {
+        "arm": "cascade_bm25_dim_judge",
+        "cat": "single",
+        "q": "how do agents keep checklists fresh without extra calls?",
+        "view_recall": 1.0,
+        "view_precision": 0.3333333333333333,
+        "dimension_recall": 1.0,
+        "dimension_precision": 1.0,
+        "recovery_redundancy": 1.0,
+        "evidence_recall": 1.0,
+        "complete_evidence": 1,
+        "agent_recall": 1.0,
+        "complete_agent": 1,
+        "reduction": 0.46478873239436624,
+        "expansion": 1.0,
+        "level": 1,
+        "fallback": 0,
+        "reasons": [],
+        "coverage_signal": "complete",
+        "level1_complete": 1,
+        "intersection_mode": "single",
+        "calls": 16,
+        "tokens": 13548.75,
+        "latency": 43.8432679999969,
+        "attribution": ""
+      },
+      {
+        "arm": "cascade_bm25_dim_judge",
+        "cat": "single",
+        "q": "when is the whiteboard consolidated?",
+        "view_recall": 1.0,
+        "view_precision": 0.3333333333333333,
+        "dimension_recall": 1.0,
+        "dimension_precision": 0.5,
+        "recovery_redundancy": 1.0,
+        "evidence_recall": 1.0,
+        "complete_evidence": 1,
+        "agent_recall": 1.0,
+        "complete_agent": 1,
+        "reduction": 0.46478873239436624,
+        "expansion": 1.0,
+        "level": 1,
+        "fallback": 0,
+        "reasons": [],
+        "coverage_signal": "complete",
+        "level1_complete": 1,
+        "intersection_mode": "single",
+        "calls": 16,
+        "tokens": 12883.25,
+        "latency": 20.968605916998058,
+        "attribution": ""
+      },
+      {
+        "arm": "cascade_bm25_dim_judge",
+        "cat": "same_view",
+        "q": "what are our routing defaults and their limits?",
+        "view_recall": 1.0,
+        "view_precision": 1.0,
+        "dimension_recall": 1.0,
+        "dimension_precision": 1.0,
+        "recovery_redundancy": 1.0,
+        "evidence_recall": 1.0,
+        "complete_evidence": 1,
+        "agent_recall": 1.0,
+        "complete_agent": 1,
+        "reduction": 0.8873239436619719,
+        "expansion": 1.0,
+        "level": 1,
+        "fallback": 0,
+        "reasons": [],
+        "coverage_signal": "complete",
+        "level1_complete": 1,
+        "intersection_mode": "single",
+        "calls": 9,
+        "tokens": 6000.5,
+        "latency": 13.081380792005803,
+        "attribution": ""
+      },
+      {
+        "arm": "cascade_bm25_dim_judge",
+        "cat": "same_view",
+        "q": "summarize our benchmark findings so far",
+        "view_recall": 0.0,
+        "view_precision": 0.0,
+        "dimension_recall": 1.0,
+        "dimension_precision": 1.0,
+        "recovery_redundancy": 1.0,
+        "evidence_recall": 1.0,
+        "complete_evidence": 1,
+        "agent_recall": 1.0,
+        "complete_agent": 1,
+        "reduction": 0.46478873239436624,
+        "expansion": 1.0,
+        "level": 1,
+        "fallback": 0,
+        "reasons": [],
+        "coverage_signal": "complete",
+        "level1_complete": 1,
+        "intersection_mode": "single",
+        "calls": 16,
+        "tokens": 13083.75,
+        "latency": 47.48765249999997,
+        "attribution": "view_miss"
+      },
+      {
+        "arm": "cascade_bm25_dim_judge",
+        "cat": "same_view",
+        "q": "what are the rules for views and expansion?",
+        "view_recall": 1.0,
+        "view_precision": 0.25,
+        "dimension_recall": 1.0,
+        "dimension_precision": 0.5,
+        "recovery_redundancy": 1.0,
+        "evidence_recall": 1.0,
+        "complete_evidence": 1,
+        "agent_recall": 1.0,
+        "complete_agent": 1,
+        "reduction": 0.9577464788732395,
+        "expansion": 1.0,
+        "level": 1,
+        "fallback": 0,
+        "reasons": [],
+        "coverage_signal": "complete",
+        "level1_complete": 1,
+        "intersection_mode": "strict",
+        "calls": 4,
+        "tokens": 2526.5,
+        "latency": 5.517136624999694,
+        "attribution": ""
+      },
+      {
+        "arm": "cascade_bm25_dim_judge",
+        "cat": "same_view",
+        "q": "how do memory agents work?",
+        "view_recall": 1.0,
+        "view_precision": 0.3333333333333333,
+        "dimension_recall": 1.0,
+        "dimension_precision": 1.0,
+        "recovery_redundancy": 1.0,
+        "evidence_recall": 1.0,
+        "complete_evidence": 1,
+        "agent_recall": 1.0,
+        "complete_agent": 1,
+        "reduction": 0.46478873239436624,
+        "expansion": 1.0,
+        "level": 1,
+        "fallback": 0,
+        "reasons": [],
+        "coverage_signal": "complete",
+        "level1_complete": 1,
+        "intersection_mode": "single",
+        "calls": 16,
+        "tokens": 12706.0,
+        "latency": 27.534668833002797,
+        "attribution": ""
+      },
+      {
+        "arm": "cascade_bm25_dim_judge",
+        "cat": "same_view",
+        "q": "what does the whiteboard hold and when does it shrink?",
+        "view_recall": 1.0,
+        "view_precision": 0.3333333333333333,
+        "dimension_recall": 1.0,
+        "dimension_precision": 0.5,
+        "recovery_redundancy": 1.0,
+        "evidence_recall": 1.0,
+        "complete_evidence": 1,
+        "agent_recall": 1.0,
+        "complete_agent": 1,
+        "reduction": 0.46478873239436624,
+        "expansion": 1.0,
+        "level": 1,
+        "fallback": 0,
+        "reasons": [],
+        "coverage_signal": "complete",
+        "level1_complete": 1,
+        "intersection_mode": "single",
+        "calls": 16,
+        "tokens": 13171.25,
+        "latency": 30.035109166004986,
+        "attribution": ""
+      },
+      {
+        "arm": "cascade_bm25_dim_judge",
+        "cat": "same_view",
+        "q": "what do we know about sourdough and hydration?",
+        "view_recall": 1.0,
+        "view_precision": 0.25,
+        "dimension_recall": 1.0,
+        "dimension_precision": 0.5,
+        "recovery_redundancy": 1.0,
+        "evidence_recall": 1.0,
+        "complete_evidence": 1,
+        "agent_recall": 1.0,
+        "complete_agent": 1,
+        "reduction": 0.9295774647887324,
+        "expansion": 1.0,
+        "level": 1,
+        "fallback": 0,
+        "reasons": [],
+        "coverage_signal": "complete",
+        "level1_complete": 1,
+        "intersection_mode": "relaxed_temporal",
+        "calls": 6,
+        "tokens": 3637.5,
+        "latency": 13.650303207999968,
+        "attribution": ""
+      },
+      {
+        "arm": "cascade_bm25_dim_judge",
+        "cat": "cross_view",
+        "q": "why did we change the routing strategy after the benchmarks?",
+        "view_recall": 1.0,
+        "view_precision": 0.6666666666666666,
+        "dimension_recall": 1.0,
+        "dimension_precision": 0.5,
+        "recovery_redundancy": 1.0,
+        "evidence_recall": 1.0,
+        "complete_evidence": 1,
+        "agent_recall": 1.0,
+        "complete_agent": 1,
+        "reduction": 0.46478873239436624,
+        "expansion": 1.0,
+        "level": 1,
+        "fallback": 0,
+        "reasons": [],
+        "coverage_signal": "complete",
+        "level1_complete": 1,
+        "intersection_mode": "single",
+        "calls": 16,
+        "tokens": 13102.75,
+        "latency": 27.675483499995607,
+        "attribution": ""
+      },
+      {
+        "arm": "cascade_bm25_dim_judge",
+        "cat": "cross_view",
+        "q": "how do views interact with routing experiments?",
+        "view_recall": 1.0,
+        "view_precision": 0.6666666666666666,
+        "dimension_recall": 1.0,
+        "dimension_precision": 1.0,
+        "recovery_redundancy": 1.0,
+        "evidence_recall": 1.0,
+        "complete_evidence": 1,
+        "agent_recall": 1.0,
+        "complete_agent": 1,
+        "reduction": 0.704225352112676,
+        "expansion": 1.0,
+        "level": 1,
+        "fallback": 0,
+        "reasons": [],
+        "coverage_signal": "complete",
+        "level1_complete": 1,
+        "intersection_mode": "single",
+        "calls": 11,
+        "tokens": 8826.25,
+        "latency": 19.034095750001143,
+        "attribution": ""
+      },
+      {
+        "arm": "cascade_bm25_dim_judge",
+        "cat": "cross_view",
+        "q": "what limits the agentic memory path in practice?",
+        "view_recall": 1.0,
+        "view_precision": 0.6666666666666666,
+        "dimension_recall": 1.0,
+        "dimension_precision": 1.0,
+        "recovery_redundancy": 1.0,
+        "evidence_recall": 1.0,
+        "complete_evidence": 1,
+        "agent_recall": 1.0,
+        "complete_agent": 1,
+        "reduction": 0.46478873239436624,
+        "expansion": 1.0,
+        "level": 1,
+        "fallback": 0,
+        "reasons": [],
+        "coverage_signal": "complete",
+        "level1_complete": 1,
+        "intersection_mode": "single",
+        "calls": 16,
+        "tokens": 13774.25,
+        "latency": 22.72237879200111,
+        "attribution": ""
+      },
+      {
+        "arm": "cascade_bm25_dim_judge",
+        "cat": "cross_view",
+        "q": "how is the whiteboard kept stable across turns?",
+        "view_recall": 1.0,
+        "view_precision": 0.6666666666666666,
+        "dimension_recall": 1.0,
+        "dimension_precision": 1.0,
+        "recovery_redundancy": 1.0,
+        "evidence_recall": 1.0,
+        "complete_evidence": 1,
+        "agent_recall": 0.5,
+        "complete_agent": 0,
+        "reduction": 0.7183098591549295,
+        "expansion": 1.0,
+        "level": 1,
+        "fallback": 0,
+        "reasons": [],
+        "coverage_signal": "complete",
+        "level1_complete": 1,
+        "intersection_mode": "single",
+        "calls": 13,
+        "tokens": 9527.0,
+        "latency": 24.98292075000063,
+        "attribution": "agent_miss"
+      },
+      {
+        "arm": "cascade_bm25_dim_judge",
+        "cat": "cross_view",
+        "q": "what should we know before benchmarking retrieval again?",
+        "view_recall": 0.5,
+        "view_precision": 0.2,
+        "dimension_recall": 1.0,
+        "dimension_precision": 0.5,
+        "recovery_redundancy": 0.0,
+        "evidence_recall": 0.5,
+        "complete_evidence": 0,
+        "agent_recall": 0.5,
+        "complete_agent": 0,
+        "reduction": 0.9577464788732395,
+        "expansion": 1.0,
+        "level": 1,
+        "fallback": 0,
+        "reasons": [],
+        "coverage_signal": "complete",
+        "level1_complete": 0,
+        "intersection_mode": "relaxed_semantic",
+        "calls": 4,
+        "tokens": 2572.0,
+        "latency": 6.671962916996563,
+        "attribution": "view_miss"
+      },
+      {
+        "arm": "cascade_bm25_dim_judge",
+        "cat": "cross_view",
+        "q": "how do views help keep the tape canonical?",
+        "view_recall": 1.0,
+        "view_precision": 0.3333333333333333,
+        "dimension_recall": 1.0,
+        "dimension_precision": 1.0,
+        "recovery_redundancy": 1.0,
+        "evidence_recall": 1.0,
+        "complete_evidence": 1,
+        "agent_recall": 1.0,
+        "complete_agent": 1,
+        "reduction": 0.46478873239436624,
+        "expansion": 1.0,
+        "level": 1,
+        "fallback": 0,
+        "reasons": [],
+        "coverage_signal": "complete",
+        "level1_complete": 1,
+        "intersection_mode": "single",
+        "calls": 16,
+        "tokens": 13233.25,
+        "latency": 28.67226741700142,
+        "attribution": ""
+      },
+      {
+        "arm": "cascade_bm25_dim_judge",
+        "cat": "adversarial",
+        "q": "why did we revert the router to opt-in after the first external benchmark?",
+        "view_recall": 1.0,
+        "view_precision": 0.3333333333333333,
+        "dimension_recall": 1.0,
+        "dimension_precision": 0.5,
+        "recovery_redundancy": 1.0,
+        "evidence_recall": 1.0,
+        "complete_evidence": 1,
+        "agent_recall": 1.0,
+        "complete_agent": 1,
+        "reduction": 0.3943661971830986,
+        "expansion": 1.0,
+        "level": 1,
+        "fallback": 0,
+        "reasons": [],
+        "coverage_signal": "complete",
+        "level1_complete": 1,
+        "intersection_mode": "single",
+        "calls": 16,
+        "tokens": 14252.75,
+        "latency": 38.90894224999647,
+        "attribution": ""
+      },
+      {
+        "arm": "cascade_bm25_dim_judge",
+        "cat": "adversarial",
+        "q": "why is router top-k fixed at five?",
+        "view_recall": 1.0,
+        "view_precision": 0.3333333333333333,
+        "dimension_recall": 1.0,
+        "dimension_precision": 1.0,
+        "recovery_redundancy": 1.0,
+        "evidence_recall": 1.0,
+        "complete_evidence": 1,
+        "agent_recall": 1.0,
+        "complete_agent": 1,
+        "reduction": 0.7323943661971831,
+        "expansion": 1.0,
+        "level": 1,
+        "fallback": 0,
+        "reasons": [],
+        "coverage_signal": "complete",
+        "level1_complete": 1,
+        "intersection_mode": "single",
+        "calls": 15,
+        "tokens": 10088.5,
+        "latency": 22.424252374999924,
+        "attribution": ""
+      },
+      {
+        "arm": "cascade_bm25_dim_judge",
+        "cat": "adversarial",
+        "q": "what did we learn about the router's similarity mode?",
+        "view_recall": 1.0,
+        "view_precision": 0.3333333333333333,
+        "dimension_recall": 1.0,
+        "dimension_precision": 1.0,
+        "recovery_redundancy": 1.0,
+        "evidence_recall": 1.0,
+        "complete_evidence": 1,
+        "agent_recall": 1.0,
+        "complete_agent": 1,
+        "reduction": 0.46478873239436624,
+        "expansion": 1.0,
+        "level": 1,
+        "fallback": 0,
+        "reasons": [],
+        "coverage_signal": "complete",
+        "level1_complete": 1,
+        "intersection_mode": "single",
+        "calls": 16,
+        "tokens": 13014.0,
+        "latency": 26.827448916999856,
+        "attribution": ""
+      },
+      {
+        "arm": "cascade_bm25_dim_judge",
+        "cat": "adversarial",
+        "q": "what did the last experiment show?",
+        "view_recall": 0.0,
+        "view_precision": 0.0,
+        "dimension_recall": 1.0,
+        "dimension_precision": 0.5,
+        "recovery_redundancy": 1.0,
+        "evidence_recall": 1.0,
+        "complete_evidence": 1,
+        "agent_recall": 1.0,
+        "complete_agent": 1,
+        "reduction": 0.8309859154929577,
+        "expansion": 1.0,
+        "level": 1,
+        "fallback": 0,
+        "reasons": [],
+        "coverage_signal": "complete",
+        "level1_complete": 1,
+        "intersection_mode": "single",
+        "calls": 7,
+        "tokens": 5593.5,
+        "latency": 11.364855667001393,
+        "attribution": "view_miss"
+      },
+      {
+        "arm": "cascade_bm25_dim_judge",
+        "cat": "adversarial",
+        "q": "what changed between the first router decision and the recent benchmark?",
+        "view_recall": 0.5,
+        "view_precision": 0.16666666666666666,
+        "dimension_recall": 1.0,
+        "dimension_precision": 0.6666666666666666,
+        "recovery_redundancy": 1.0,
+        "evidence_recall": 1.0,
+        "complete_evidence": 1,
+        "agent_recall": 1.0,
+        "complete_agent": 1,
+        "reduction": 0.647887323943662,
+        "expansion": 2.7777777777777777,
+        "level": 3,
+        "fallback": 1,
+        "reasons": [
+          "coverage_partial",
+          "expansion_failed"
+        ],
+        "coverage_signal": "partial",
+        "level1_complete": 0,
+        "intersection_mode": "strict",
+        "calls": 18,
+        "tokens": 17013.5,
+        "latency": 45.36099995800032,
+        "attribution": "view_miss"
+      },
+      {
+        "arm": "cascade_bm25_dim_judge",
+        "cat": "temporal",
+        "q": "what changed about the router since July?",
+        "view_recall": 1.0,
+        "view_precision": 0.16666666666666666,
+        "dimension_recall": 1.0,
+        "dimension_precision": 1.0,
+        "recovery_redundancy": 1.0,
+        "evidence_recall": 0.5,
+        "complete_evidence": 0,
+        "agent_recall": 1.0,
+        "complete_agent": 1,
+        "reduction": 0.647887323943662,
+        "expansion": 12.5,
+        "level": 3,
+        "fallback": 1,
+        "reasons": [
+          "coverage_partial",
+          "expansion_failed"
+        ],
+        "coverage_signal": "partial",
+        "level1_complete": 1,
+        "intersection_mode": "strict",
+        "calls": 12,
+        "tokens": 9716.75,
+        "latency": 51.505181165994145,
+        "attribution": "evidence_miss"
+      },
+      {
+        "arm": "cascade_bm25_dim_judge",
+        "cat": "temporal",
+        "q": "what did we decide about views in September?",
+        "view_recall": 1.0,
+        "view_precision": 0.2,
+        "dimension_recall": 1.0,
+        "dimension_precision": 0.6666666666666666,
+        "recovery_redundancy": 1.0,
+        "evidence_recall": 1.0,
+        "complete_evidence": 1,
+        "agent_recall": 1.0,
+        "complete_agent": 1,
+        "reduction": 0.9577464788732395,
+        "expansion": 1.0,
+        "level": 1,
+        "fallback": 0,
+        "reasons": [],
+        "coverage_signal": "complete",
+        "level1_complete": 1,
+        "intersection_mode": "strict",
+        "calls": 4,
+        "tokens": 2494.5,
+        "latency": 5.938544917000399,
+        "attribution": ""
+      },
+      {
+        "arm": "cascade_bm25_dim_judge",
+        "cat": "temporal",
+        "q": "list the decisions made in May and June",
+        "view_recall": 0.0,
+        "view_precision": 0.0,
+        "dimension_recall": 1.0,
+        "dimension_precision": 0.6666666666666666,
+        "recovery_redundancy": 1.0,
+        "evidence_recall": 1.0,
+        "complete_evidence": 1,
+        "agent_recall": 1.0,
+        "complete_agent": 1,
+        "reduction": 0.647887323943662,
+        "expansion": 12.5,
+        "level": 3,
+        "fallback": 1,
+        "reasons": [
+          "coverage_partial",
+          "expansion_failed"
+        ],
+        "coverage_signal": "partial",
+        "level1_complete": 1,
+        "intersection_mode": "strict",
+        "calls": 12,
+        "tokens": 9914.5,
+        "latency": 39.7618834169989,
+        "attribution": "view_miss"
+      },
+      {
+        "arm": "cascade_bm25_dim_judge",
+        "cat": "temporal",
+        "q": "which lessons did we learn in February?",
+        "view_recall": 0.0,
+        "view_precision": 0.0,
+        "dimension_recall": 1.0,
+        "dimension_precision": 0.6666666666666666,
+        "recovery_redundancy": 1.0,
+        "evidence_recall": 1.0,
+        "complete_evidence": 1,
+        "agent_recall": 1.0,
+        "complete_agent": 1,
+        "reduction": 0.9577464788732395,
+        "expansion": 1.0,
+        "level": 2,
+        "fallback": 1,
+        "reasons": [
+          "coverage_partial"
+        ],
+        "coverage_signal": "complete",
+        "level1_complete": 0,
+        "intersection_mode": "relaxed_semantic",
+        "calls": 6,
+        "tokens": 3886.5,
+        "latency": 23.517669540997304,
+        "attribution": "view_miss"
+      },
+      {
+        "arm": "cascade_bm25_dim_judge",
+        "cat": "structural",
+        "q": "which decisions did we make about routing?",
+        "view_recall": 1.0,
+        "view_precision": 0.5,
+        "dimension_recall": 1.0,
+        "dimension_precision": 1.0,
+        "recovery_redundancy": 1.0,
+        "evidence_recall": 1.0,
+        "complete_evidence": 1,
+        "agent_recall": 1.0,
+        "complete_agent": 1,
+        "reduction": 0.9577464788732395,
+        "expansion": 1.0,
+        "level": 1,
+        "fallback": 0,
+        "reasons": [],
+        "coverage_signal": "complete",
+        "level1_complete": 1,
+        "intersection_mode": "strict",
+        "calls": 4,
+        "tokens": 2400.0,
+        "latency": 6.854818207997596,
+        "attribution": ""
+      },
+      {
+        "arm": "cascade_bm25_dim_judge",
+        "cat": "structural",
+        "q": "which lessons did we record about benchmarks?",
+        "view_recall": 1.0,
+        "view_precision": 0.3333333333333333,
+        "dimension_recall": 1.0,
+        "dimension_precision": 1.0,
+        "recovery_redundancy": 1.0,
+        "evidence_recall": 1.0,
+        "complete_evidence": 1,
+        "agent_recall": 1.0,
+        "complete_agent": 1,
+        "reduction": 0.9154929577464789,
+        "expansion": 1.0,
+        "level": 1,
+        "fallback": 0,
+        "reasons": [],
+        "coverage_signal": "complete",
+        "level1_complete": 1,
+        "intersection_mode": "strict",
+        "calls": 7,
+        "tokens": 4474.75,
+        "latency": 9.83168737500091,
+        "attribution": ""
+      },
+      {
+        "arm": "cascade_bm25_dim_judge",
+        "cat": "temporal",
+        "q": "what did we work on in September?",
+        "view_recall": 0.0,
+        "view_precision": 0.0,
+        "dimension_recall": 1.0,
+        "dimension_precision": 0.5,
+        "recovery_redundancy": 0.5,
+        "evidence_recall": 0.5,
+        "complete_evidence": 0,
+        "agent_recall": 1.0,
+        "complete_agent": 1,
+        "reduction": 0.647887323943662,
+        "expansion": 6.25,
+        "level": 3,
+        "fallback": 1,
+        "reasons": [
+          "coverage_partial",
+          "expansion_failed"
+        ],
+        "coverage_signal": "partial",
+        "level1_complete": 1,
+        "intersection_mode": "single",
+        "calls": 16,
+        "tokens": 13054.75,
+        "latency": 123.99680029199953,
+        "attribution": "view_miss"
+      },
+      {
+        "arm": "cascade_bm25_dim_judge",
+        "cat": "ambiguous",
+        "q": "what did we decide recently about routing?",
+        "view_recall": 1.0,
+        "view_precision": 0.25,
+        "dimension_recall": 1.0,
+        "dimension_precision": 1.0,
+        "recovery_redundancy": 1.0,
+        "evidence_recall": 0.5,
+        "complete_evidence": 0,
+        "agent_recall": 0.5,
+        "complete_agent": 0,
+        "reduction": 0.9859154929577465,
+        "expansion": 1.0,
+        "level": 1,
+        "fallback": 0,
+        "reasons": [],
+        "coverage_signal": "complete",
+        "level1_complete": 0,
+        "intersection_mode": "strict",
+        "calls": 2,
+        "tokens": 944.75,
+        "latency": 5.359061125003791,
+        "attribution": "evidence_miss"
+      }
+    ]
+  }
+}

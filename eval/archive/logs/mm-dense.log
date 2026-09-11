@@ -1,0 +1,9 @@
+tagging 2312 sessions ...
+running vector ...
+  n=50 evidence=0.24 strict=0.16 lenient=0.24 AUR=0.58 calls=1.0
+
+final table:
+arm                   n   evid  strict  lenient    AUR   calls
+vector               50   0.24    0.16     0.24   0.58     1.0
+
+audit (deepseek-v4-flash): 11/12 agreement (0.92) -> /Users/igorcoutrimlacerda/memory-machine/eval/out/judge_audit_vector_longmemeval_ing0.jsonl

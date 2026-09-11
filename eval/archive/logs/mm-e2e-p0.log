@@ -1,0 +1,6 @@
+running agents_view ...
+  n=10 evidence=0.90 strict=0.70 lenient=1.00 AUR=0.78 calls=4.0
+
+final table:
+arm                 n   evid  strict  lenient    AUR   calls
+agents_view        10   0.90    0.70     1.00   0.78     4.0

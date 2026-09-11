@@ -1,0 +1,8 @@
+running agents_view ...
+  n=32 evidence=0.97 strict=0.72 lenient=0.94 AUR=0.74 calls=4.1
+
+final table:
+arm                 n   evid  strict  lenient    AUR   calls
+agents_view        32   0.97    0.72     0.94   0.74     4.1
+
+audit (deepseek-v4-flash): 8/8 agreement (1.00) -> /Users/igorcoutrimlacerda/memory-machine/eval/out/judge_audit_agents_view.jsonl

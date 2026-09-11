@@ -116,6 +116,11 @@ Use `-C <dir>` to operate on a specific project directory. Run
   cap lifts Gold Fact Retention from 0.42 to 0.83 and strict accuracy from 0.33
   to 0.50 (evidence recall constant at 0.75 — the loss was upstream of
   retrieval).
+- **H4 (refuted)** — a memory-aware answer prompt (explicitly telling the
+  answerer the context is recalled history) did not help: payload 4000 dropped
+  0.56 -> 0.50 strict and the oracle stayed at 0.52. The dominant remaining
+  failure is evidence insufficiency (16-22 of ~25 errors), not temporal
+  misreading (1-5).
 - **Compression curve (H3)** — on LongMemEval 50q with full ingestion, payload
   6000 matches the full context (0.60 vs 0.58 strict) with a 57% context
   reduction, and payload 4000 stays within noise at 70% reduction; 2500 loses

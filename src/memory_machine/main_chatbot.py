@@ -40,18 +40,51 @@ keys or secrets."""
 MEMORIES_RE = re.compile(r'\{\s*"memories"\s*:\s*', re.S)
 
 
+MAIN_SYSTEM_PROMPT_MEMORY = """You are the main assistant working on a long-running project. \
+You are given a whiteboard representing the current work: the subject, the \
+objective, the context, pending items, and "Remembered" notes contributed by \
+memory agents.
+
+Use the remembered information to continue the task accurately. Do not ignore \
+relevant memories; do not contradict a settled decision unless the new work \
+clearly supersedes it.
+
+You may also receive "Recalled memory evidence": factual excerpts recovered \
+from the user's persistent memory. Treat it as records of the conversation's \
+history, including for questions about past events, decisions, states and \
+facts. Use the date and provenance in each item to distinguish past state from \
+current state. When the question asks about the past, do not discard a memory \
+just because it describes an earlier state, and do not assume that a more \
+recent memory supersedes an older one.
+
+You MAY also receive external context (relevant documents and web search \
+results). Use it to answer accurately, but it is NOT part of long-term memory: \
+do not treat it as a settled decision unless you explicitly turn a durable \
+fact into a memory.
+
+After your reply, if you produced durable facts worth remembering (a decision, \
+lesson, preference, bugfix, or build note), append a JSON block on its own line:
+
+{"memories":[{"type":"decision","summary":"...","why":"...","files":["..."]}]}
+
+If nothing durable was produced, omit the JSON entirely. Never include API \
+keys or secrets."""
+
+
 def main_user_prompt(
     whiteboard: Whiteboard,
     task: str,
     history: str = "",
     extra_context: str = "",
+    *,
+    evidence_label: str = "External context",
 ) -> str:
     parts = []
     if history:
         parts.append(history)
     parts.append("## Whiteboard\n\n" + whiteboard.render())
     if extra_context:
-        parts.append("## External context\n\n" + extra_context)
+        parts.append(f"## {evidence_label}\n\n" + extra_context)
     parts.append("## Task\n\n" + task)
     return "\n\n".join(parts)
 
@@ -98,6 +131,7 @@ def run_main_chatbot(
     *,
     history: str = "",
     extra_context: str = "",
+    memory_aware: bool = False,
     temperature: float = 0.0,
     on_token: Any = None,
 ) -> tuple[str, list[MemoryRecord], str]:
@@ -108,11 +142,20 @@ def run_main_chatbot(
     stripped from the streamed content.
     """
     messages = [
-        {"role": "system", "content": MAIN_SYSTEM_PROMPT},
+        {
+            "role": "system",
+            "content": MAIN_SYSTEM_PROMPT_MEMORY if memory_aware else MAIN_SYSTEM_PROMPT,
+        },
         {
             "role": "user",
             "content": main_user_prompt(
-                whiteboard, task, history=history, extra_context=extra_context
+                whiteboard,
+                task,
+                history=history,
+                extra_context=extra_context,
+                evidence_label=(
+                    "Recalled memory evidence" if memory_aware else "External context"
+                ),
             ),
         },
     ]

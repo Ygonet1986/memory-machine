@@ -65,9 +65,16 @@ def load_longmemeval(path: Path, limit: int, seed: int) -> list[dict[str, Any]]:
     sample = data if limit <= 0 else rng.sample(data, min(limit, len(data)))
     out = []
     for item in sample:
+        dates = item.get("haystack_dates") or []
         sessions = [
-            {"id": sid, "text": _turns_text(sess)}
-            for sid, sess in zip(item["haystack_session_ids"], item["haystack_sessions"])
+            {
+                "id": sid,
+                "text": _turns_text(sess),
+                "date": dates[i] if i < len(dates) else "",
+            }
+            for i, (sid, sess) in enumerate(
+                zip(item["haystack_session_ids"], item["haystack_sessions"])
+            )
         ]
         out.append(
             {
@@ -75,6 +82,7 @@ def load_longmemeval(path: Path, limit: int, seed: int) -> list[dict[str, Any]]:
                 "expected": set(item.get("answer_session_ids") or []),
                 "sessions": sessions,
                 "type": item.get("question_type", ""),
+                "question_date": item.get("question_date", ""),
             }
         )
     return out

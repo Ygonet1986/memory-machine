@@ -72,9 +72,15 @@ def _allocations(sizes: list[int], weights: list[float], budget: int, min_item_c
     return allocations
 
 
+def _header(record: Any) -> str:
+    """Compact provenance header; carries the most precise timestamp available."""
+    stamp = (record.created_at or "")[:16].replace("T", " ")
+    return f"[{record.id} | {record.type} | {stamp}]"
+
+
 def _full_text(record: Any, records: dict[str, Any]) -> tuple[str, str]:
     """The untruncated text of one item and its source kind."""
-    header = f"[{record.id} | {record.type} | {record.created_at[:10]}]"
+    header = _header(record)
     if record.derived_from:
         sources = [records[s] for s in record.derived_from if s in records]
         body = (
@@ -90,7 +96,7 @@ def _truncate(record: Any, full: str, allocation: int) -> tuple[str, bool]:
     """Cut ``why`` before ``summary``: preserve the summary when possible."""
     if len(full) <= allocation:
         return full, False
-    header = f"[{record.id} | {record.type} | {record.created_at[:10]}]"
+    header = _header(record)
     if record.derived_from:
         allowed = max(0, allocation - len(header) - 1)
         body = full[len(header) + 1 :][:allowed]

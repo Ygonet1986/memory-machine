@@ -179,3 +179,17 @@ def test_run_agents_skips_empty_groups(tmp_path):
     anns = run_agents(tape, manifest, wb, client)
     assert anns == []
     assert len(client.calls) == 0
+
+
+def test_run_agents_parses_digest(tmp_path):
+    tape = Tape(tmp_path / "tape.jsonl")
+    manifest = Manifest(capacity=10)
+    tape.append(MemoryRecord(id="M0001", type="decision", summary="Use Postgres"))
+    manifest, _g, a1, _ = ensure_group(manifest, 1)
+    wb = Whiteboard(subject="x")
+    client = FakeClient(
+        lambda messages, temperature: '{"digest":"database decisions","checklist":[],"annotations":[]}'
+    )
+    run_agents(tape, manifest, wb, client)
+    assert a1.digest == "database decisions"
+    assert a1.digest_records == 1

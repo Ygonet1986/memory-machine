@@ -38,6 +38,10 @@ class Config:
     consolidate_threshold: int = DEFAULT_CONSOLIDATE_THRESHOLD
     context_consolidate_threshold: int = DEFAULT_CONTEXT_CONSOLIDATE_THRESHOLD
     attach_chunk_size: int = 600
+    router_enabled: bool = True
+    router_top_k: int = 5
+    router_fallback: str = "full"
+    router_full_every: int = 0
     model: str = DEFAULT_MODEL
     base_url: str = DEFAULT_BASE_URL
     api_key_env: str = DEFAULT_API_KEY_ENV
@@ -64,6 +68,12 @@ class Config:
             _int(self.context_consolidate_threshold, DEFAULT_CONTEXT_CONSOLIDATE_THRESHOLD),
         )
         self.attach_chunk_size = max(100, _int(self.attach_chunk_size, 600))
+        self.router_enabled = bool(self.router_enabled)
+        self.router_top_k = max(1, _int(self.router_top_k, 5))
+        self.router_fallback = (
+            self.router_fallback if self.router_fallback in {"full", "recent"} else "full"
+        )
+        self.router_full_every = max(0, _int(self.router_full_every, 0))
         self.model = (self.model or DEFAULT_MODEL).strip()
         self.base_url = (self.base_url or DEFAULT_BASE_URL).strip().rstrip("/")
         self.api_key_env = (self.api_key_env or DEFAULT_API_KEY_ENV).strip()

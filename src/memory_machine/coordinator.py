@@ -30,6 +30,7 @@ from .groups import Manifest, add_memory, load_manifest, save_manifest
 from .llm import LLMClient, LLMError
 from .main_chatbot import memory_from_spec, run_main_chatbot
 from .metacognition import update_metacognition
+from .router import select_groups
 from .secrets import SecretError
 from .sessions import save_session_meta, search_sessions, sessions_dir_for
 from .tape import MemoryRecord, Tape
@@ -71,6 +72,25 @@ class Machine:
         self.manifest: Manifest = load_manifest(self.manifest_path, capacity=self.config.capacity)
         self.whiteboard: Whiteboard = load_whiteboard(self.whiteboard_path)
         self.context: ChatContext = load_context(self.context_path)
+        self._recall_count = 0
+
+    def _select_groups(self, question: str) -> list[Any] | None:
+        """Groups to consult, or None to consult all (full sweep)."""
+        if not self.config.router_enabled or not self.manifest.groups:
+            return None
+        self._recall_count += 1
+        if (
+            self.config.router_full_every
+            and self._recall_count % self.config.router_full_every == 0
+        ):
+            return None
+        return select_groups(
+            self.tape,
+            self.manifest,
+            question,
+            top_k=self.config.router_top_k,
+            fallback=self.config.router_fallback,
+        )
 
     def _ensure_client(self) -> Any:
         if self.client is None:
@@ -157,11 +177,13 @@ class Machine:
         if not self.whiteboard.subject:
             self.whiteboard.subject = task[:120]
 
+        selected = self._select_groups(task)
         raw_annotations = run_agents(
             self.tape,
             self.manifest,
             self.whiteboard,
             client,
+            groups=selected,
             temperature=temperature,
             max_workers=max_workers,
         )
@@ -265,6 +287,8 @@ class Machine:
             "skipped_secrets": skipped_secrets,
             "new_agents": new_agents,
             "checklists_updated": checklists_updated,
+            "routed_groups": len(selected) if selected is not None else len(self.manifest.groups),
+            "total_groups": len(self.manifest.groups),
             "tape_records": len(self.tape),
             "groups": len(self.manifest.groups),
             "agents": len(self.manifest.agents),
@@ -306,11 +330,13 @@ class Machine:
         client = self._ensure_client()
         self.whiteboard.subject = question
 
+        selected = self._select_groups(question)
         raw_annotations = run_agents(
             self.tape,
             self.manifest,
             self.whiteboard,
             client,
+            groups=selected,
             temperature=temperature,
             max_workers=max_workers,
         )
@@ -348,6 +374,8 @@ class Machine:
                 if a.checklist
             ],
             "consolidated": consolidated,
+            "routed_groups": len(selected) if selected is not None else len(self.manifest.groups),
+            "total_groups": len(self.manifest.groups),
             "tape_records": len(self.tape),
             "agents": len(self.manifest.agents),
             "render": self.whiteboard.render(),

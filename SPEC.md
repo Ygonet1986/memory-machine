@@ -87,12 +87,25 @@ tape for audit but are excluded from the memory agents' context.
 | Field | Required | Type | Description |
 |-------|----------|------|-------------|
 | id | REQUIRED | string | Stable identity (`M0001`) |
-| type | REQUIRED | string | `decision`, `lesson`, `preference`, `bugfix`, `build`, `memory`, ... |
+| type | REQUIRED | string | `decision`, `lesson`, ... |
 | summary | REQUIRED | string | One-sentence description |
 | why | OPTIONAL | string | Reasoning |
 | files | OPTIONAL | list | Related file paths |
 | created_at | OPTIONAL | string | ISO 8601 timestamp |
 | status | OPTIONAL | string | `active` (default), `archived`, `superseded` |
+| source | OPTIONAL | string | Origin (e.g. `spec.txt#hash`), for dedup |
+| derived_from | OPTIONAL | list | Source ids of a rollup (provenance) |
+| views | OPTIONAL | list | Organizational projections (see 4.4) |
+
+### 4.3 Views (organizational projections)
+
+A record belongs to one canonical tape but MAY belong to several **views**
+without physical duplication: `time/<YYYY-MM>`, `type/<type>`,
+`source/<file>`, and explicit `topic/…` / `subject/…` tags. The view index is a
+**rebuildable projection** derived from the records' `views`; the tape remains
+the single source of truth. This separates storage (what happened),
+organization (which views it belongs to) and attention (which views are
+active) — the foundation of the v0.5 multidimensional topology.
 
 ### 4.3 Secret scanning
 

@@ -324,6 +324,7 @@ class Machine:
         question: str,
         *,
         cross_session: bool = False,
+        views: list[str] | None = None,
         temperature: float = 0.0,
         max_workers: int | None = None,
     ) -> dict[str, Any]:
@@ -360,6 +361,7 @@ class Machine:
             self.whiteboard,
             client,
             groups=selected,
+            views_filter=set(views) if views else None,
             temperature=temperature,
             max_workers=max_workers,
             include_checklist=not self.config.ablation_no_checklist,
@@ -399,6 +401,7 @@ class Machine:
                 if a.checklist
             ],
             "consolidated": consolidated,
+            "views": views or [],
             "routed_groups": len(selected) if selected is not None else len(self.manifest.groups),
             "total_groups": len(self.manifest.groups),
             "tape_records": len(self.tape),

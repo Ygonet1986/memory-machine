@@ -94,19 +94,32 @@ Use `-C <dir>` to operate on a specific project directory. Run
   cheapest but unsafe for lexically-distant memories). It is opt-in because
   measurements show it trades recall for cost: on external benchmarks the full
   sweep scored 0.83-0.93 evidence recall vs 0.63-0.70 for the router.
-- **Evaluation** (`eval/`) — `agent_bench.py` (synthetic, lexically distant) and
+- **Evaluation** (`eval/`) — `agent_bench.py` (synthetic, lexically distant),
   `external_bench.py` (LongMemEval / LoCoMo, with BM25, dense vector, full
   agents and routed agents; `--arms` and `--embedding-models` select arms and
-  dense models). Measured: on LongMemEval dense retrieval beats BM25 and ties
-  the agents (no agentic advantage); on LoCoMo the agents lead (0.90 vs BM25
-  0.78 and dense 0.56). The agentic advantage is benchmark-dependent: it
-  emerges where relevance is contextual, not directly similar.
+  dense models) and `view_router_bench.py` (controlled topology: full vs
+  similarity vs view-BM25 vs view-LLM vs view-oracle vs cascades, with view
+  recall/precision, evidence and agent recall, reduction, expansion, fallback
+  reasons, calls/tokens/latency). Measured: on LongMemEval dense retrieval
+  beats BM25 and ties the agents (no agentic advantage); on LoCoMo the agents
+  lead (0.90 vs BM25 0.78 and dense 0.56). The agentic advantage is
+  benchmark-dependent: it emerges where relevance is contextual, not directly
+  similar.
 - **Provenance** — rollups record `derived_from`; `rehydrate <id>` recovers the
   original (archived) memories so compression is never a dead end.
 - **Views (projections)** — a memory belongs to one canonical tape but can
   appear in several views (`time/…`, `type/…`, `source/…`, `topic/…`,
   `subject/…`) without physical duplication; the view index is a rebuildable
   projection. List with `views`, filter recall with `--views`.
+- **View router** (opt-in) — uses the write-time organization as a structural
+  retrieval prior: `router_mode: views` selects views (BM25 over view digests,
+  or an LLM call with the whiteboard) and consults only their records;
+  `router_mode: cascade` adds a recall-safe fallback (expand co-occurring
+  views → similarity router → full sweep) and records why it fell back. An
+  explicit `recall --views` overrides routing. Controlled benchmark (24 tasks):
+  view-BM25 keeps 0.96 complete evidence vs 0.83 for the similarity router
+  (reduction 0.67 vs 0.79), and the ground-truth-views oracle reaches 1.00 at
+  0.86 reduction — so the router, not the topology, is the bottleneck.
 
 ## Configuration
 
@@ -118,6 +131,13 @@ Use `-C <dir>` to operate on a specific project directory. Run
 | `whiteboard_budget` | 4000 | char budget for reminders on the whiteboard |
 | `consolidate_threshold` | 6000 | whiteboard size that triggers consolidation |
 | `context_consolidate_threshold` | 6000 | chatbot context size that triggers its own consolidation |
+| `router_enabled` | `false` | enable partition routing (opt-in) |
+| `router_mode` | `llm` | `lexical` / `embedding` / `llm` / `views` / `cascade` |
+| `router_top_k` | 5 | partitions selected by the similarity router |
+| `view_router_mode` | `lexical` | view selection: `lexical` (BM25) / `llm` (contextual) |
+| `view_top_k` | 5 | views selected by the view router |
+| `cascade_min_score` | 0.0 | selection score below which the cascade expands |
+| `cascade_expand_top_k` | 5 | co-occurring views added on expansion |
 | `model` | `deepseek-v4-flash` | LLM model for agents, chatbot and consolidators |
 | `base_url` | `https://api.deepseek.com` | OpenAI-compatible endpoint |
 | `api_key_env` | `DEEPSEEK_API_KEY` | env var that holds the API key |

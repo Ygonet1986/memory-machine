@@ -43,6 +43,10 @@ class Config:
     router_top_k: int = 5
     router_fallback: str = "full"
     router_full_every: int = 0
+    view_router_mode: str = "lexical"
+    view_top_k: int = 5
+    cascade_min_score: float = 0.0
+    cascade_expand_top_k: int = 5
     embedding_model: str = ""
     embedding_base_url: str = ""
     embedding_api_key_env: str = ""
@@ -75,13 +79,24 @@ class Config:
         self.attach_chunk_size = max(100, _int(self.attach_chunk_size, 600))
         self.router_enabled = bool(self.router_enabled)
         self.router_mode = (
-            self.router_mode if self.router_mode in {"lexical", "embedding", "llm"} else "lexical"
+            self.router_mode
+            if self.router_mode in {"lexical", "embedding", "llm", "views", "cascade"}
+            else "lexical"
         )
         self.router_top_k = max(1, _int(self.router_top_k, 5))
         self.router_fallback = (
             self.router_fallback if self.router_fallback in {"full", "recent"} else "full"
         )
         self.router_full_every = max(0, _int(self.router_full_every, 0))
+        self.view_router_mode = (
+            self.view_router_mode if self.view_router_mode in {"lexical", "llm"} else "lexical"
+        )
+        self.view_top_k = max(1, _int(self.view_top_k, 5))
+        try:
+            self.cascade_min_score = float(self.cascade_min_score)
+        except (TypeError, ValueError):
+            self.cascade_min_score = 0.0
+        self.cascade_expand_top_k = max(1, _int(self.cascade_expand_top_k, 5))
         self.embedding_model = (self.embedding_model or "").strip()
         self.embedding_base_url = (self.embedding_base_url or self.base_url).strip().rstrip("/")
         self.embedding_api_key_env = (self.embedding_api_key_env or self.api_key_env).strip()

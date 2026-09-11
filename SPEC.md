@@ -750,6 +750,42 @@ never exceeds the budget and the external sample is too small. The absolute
 external accuracy (0.33 for both arms) is a downstream/ingestion limitation to
 investigate separately.
 
+### 15.12 External ingestion ablation (v0.9b)
+
+The external harness ingested each session as `summary = text[:300]` and
+`why = text[:2000]`. LongMemEval sessions have a median of ~10.4k characters,
+so ~80% of every session was being discarded **before** retrieval. The ablation
+varies only that cap (`--ingest-why 2000|4000|8000|0`) while holding everything
+else fixed (same 12 questions, view agents + payload 4000, answerer and judge
+v1), and measures **Gold Fact Retention** (GFR): does the fact needed to answer
+survive ingestion? (one judge call over the evidence session's ingested text).
+
+| ingestion | GFR | evidence | strict | AUR | context chars |
+|-----------|-----|----------|--------|-----|---------------|
+| 2000 (current) | 0.42 | 0.75 | 0.33 | 0.44 | 3170 |
+| 4000 | 0.50 | 0.75 | 0.33 | 0.44 | 3782 |
+| 8000 | 0.58 | 0.75 | 0.42 | 0.56 | 3782 |
+| full text | **0.83** | 0.75 | **0.50** | **0.67** | 4003 |
+
+Readings:
+
+- **The ingestion cap was a real bottleneck**: at 2K only 42% of the gold facts
+  survived ingestion; with the full session text, 83% survive and strict
+  accuracy rises 0.33 -> 0.50 (AUR 0.44 -> 0.67).
+- **Evidence recall stayed constant (0.75)**, confirming the loss was upstream
+  of retrieval, not in the router: the right session was still found, but its
+  content had been cut at write time.
+- The low external accuracy reported earlier (0.23-0.33) is therefore **partly
+  a harness artifact**, not purely an architecture limit. The product's
+  attachment ingestion chunks text (600-char overlapping chunks) instead of
+  truncating, so it does not lose content this way.
+- GFR 0.83 < 1.00 at full text: some facts are spread across sessions or the
+  judge is strict; the remaining downstream gap (GFR 0.83 vs strict 0.50)
+  points to the answerer/prompt as the next target (v0.9a).
+
+`external_bench.py` now exposes `--ingest-why` (default 2000 keeps historical
+comparability; future runs should use 8000 or 0).
+
 ## 16. Failure Modes
 
 | Failure | Required behavior |

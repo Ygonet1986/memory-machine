@@ -115,6 +115,8 @@ def build_machine(
     sessions: list[dict[str, Any]],
     cfg: Config,
     tags: dict[str, dict[str, Any]] | None = None,
+    *,
+    ingest_why: int = 2000,
 ) -> tuple[Machine, dict[str, str]]:
     if root.exists():
         shutil.rmtree(root)
@@ -125,7 +127,7 @@ def build_machine(
         rec = MemoryRecord(
             type="memory",
             summary=s["text"][:300] or s["id"],
-            why=s["text"][:2000],
+            why=(s["text"][:ingest_why] if ingest_why else s["text"]),
             source=s["id"],
             views=views_for((tags or {}).get(s["id"])),
         )
@@ -189,6 +191,8 @@ def main() -> None:
     p.add_argument("--embedding-base-url", default="http://localhost:11434/v1")
     p.add_argument("--no-checklist", action="store_true", help="ablation: agents skip the checklist")
     p.add_argument("--tag", action="store_true", help="tag sessions with views at write time (Fase 2)")
+    p.add_argument("--ingest-why", type=int, default=2000,
+                   help="session chars stored at ingestion (0 = full text; default 2000 keeps history)")
     p.add_argument("--tag-batch", type=int, default=8, help="sessions per tagging call")
     p.add_argument("--keep", action="store_true", help="keep the temp memory dir")
     args = p.parse_args()
@@ -252,7 +256,8 @@ def main() -> None:
             continue
 
         m, id_map = build_machine(
-            root, t["sessions"], Config(capacity=args.capacity, router_enabled=False), tags
+            root, t["sessions"], Config(capacity=args.capacity, router_enabled=False), tags,
+            ingest_why=args.ingest_why
         )
         expected_ids = {id_map[s] for s in expected if s in id_map}
         if not expected_ids:
@@ -288,6 +293,7 @@ def main() -> None:
                     view_top_k=args.top_k,
                 ),
                 tags,
+                ingest_why=args.ingest_why,
             )
             expected_ids3 = {id_map3[s] for s in expected if s in id_map3}
             if expected_ids3:
@@ -309,6 +315,7 @@ def main() -> None:
                     ablation_no_checklist=args.no_checklist,
                 ),
                 tags,
+                ingest_why=args.ingest_why,
             )
             expected_ids2 = {id_map2[s] for s in expected if s in id_map2}
             if expected_ids2:

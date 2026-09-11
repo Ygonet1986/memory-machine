@@ -116,6 +116,11 @@ Use `-C <dir>` to operate on a specific project directory. Run
   cap lifts Gold Fact Retention from 0.42 to 0.83 and strict accuracy from 0.33
   to 0.50 (evidence recall constant at 0.75 — the loss was upstream of
   retrieval).
+- **H5' (partial)** — restoring the real session timestamps and the question
+  date (`--ingest-dates`) improves temporal-reasoning 0.29 -> 0.43 (n=14)
+  consistently, though overall strict stays flat (0.56); an oracle with all
+  expected sessions and no context cap collapses on multi-session, showing that
+  more evidence can hurt.
 - **H4 (refuted)** — a memory-aware answer prompt (explicitly telling the
   answerer the context is recalled history) did not help: payload 4000 dropped
   0.56 -> 0.50 strict and the oracle stayed at 0.52. The dominant remaining

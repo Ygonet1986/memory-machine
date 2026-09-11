@@ -158,15 +158,20 @@ ARMS: dict[str, dict[str, Any]] = {
     "agents_view_ctx": dict(VIEW_CONFIG),
     "agents_view_payload": dict(VIEW_CONFIG, evidence_payload="budgeted"),
     "agents_view_payload_memory": dict(VIEW_CONFIG, evidence_payload="budgeted"),
+    "agents_view_payload_dates": dict(VIEW_CONFIG, evidence_payload="budgeted"),
     "oracle": {},
     "oracle_memory": {},
+    "oracle_dates": {},
 }
 
 MEMORY_AWARE_ARMS = {"agents_view_payload_memory", "oracle_memory"}
+DATES_ARMS = {"agents_view_payload_dates", "oracle_dates"}
+ORACLE_BUDGETS = {"oracle": 6000, "oracle_memory": 6000, "oracle_dates": 0}
 
 RECALL_ARMS = {
     "agents_group", "agents_view", "agents_view_ctx",
     "agents_view_payload", "agents_view_payload_memory",
+    "agents_view_payload_dates",
 }
 
 
@@ -175,6 +180,7 @@ def load_gold() -> dict[int, str]:
 
 
 def full_text(machine: Any, ids: list[str], *, budget: int = 6000) -> str:
+    """Full text of the records; ``budget <= 0`` means no cap (oracle)."""
     by_id = {r.id: r for r in machine.tape.read()}
     blocks: list[str] = []
     used = 0
@@ -183,11 +189,25 @@ def full_text(machine: Any, ids: list[str], *, budget: int = 6000) -> str:
         if record is None:
             continue
         block = f"[{record.id}] {record.summary}\n{record.why}"
-        if blocks and used + len(block) > budget:
+        if budget > 0 and blocks and used + len(block) > budget:
             break
         blocks.append(block)
         used += len(block)
+        if used > 2_000_000:  # technical guard only
+            break
     return "\n\n".join(blocks)
+
+
+DATE_RE = __import__("re").compile(r"(\d{4})/(\d{2})/(\d{2}).*?(\d{2}):(\d{2})")
+
+
+def parse_date(raw: str) -> str:
+    """'2023/05/20 (Sat) 02:21' -> '2023-05-20T02:21:00' ('' when unparseable)."""
+    m = DATE_RE.search(raw or "")
+    if not m:
+        return ""
+    y, mo, d, h, mi = m.groups()
+    return f"{y}-{mo}-{d}T{h}:{mi}:00"
 
 
 def answer_with(
@@ -256,6 +276,7 @@ def _run_arm(
     ctx_budget: int,
     expected_sessions: list[str] | None = None,
     error_classify: bool = False,
+    question_date: str = "",
 ) -> dict[str, Any]:
     required = set(required_ids)
     before = client.calls
@@ -265,8 +286,13 @@ def _run_arm(
     res: dict[str, Any] | None = None
 
     memory_aware = arm in MEMORY_AWARE_ARMS
+    provenance = (
+        f"\n\n(Question asked on {question_date}.)" if question_date else ""
+    )
     if arm == "no_memory":
-        answer = answer_with(client, machine, question, memory_aware=memory_aware)
+        answer = answer_with(
+            client, machine, question + provenance, memory_aware=memory_aware
+        )
     elif arm == "bm25":
         records = machine.tape.read()
         docs = [r.text() for r in records]
@@ -275,7 +301,8 @@ def _run_arm(
         context = full_text(machine, top, budget=ctx_budget)
         evidence_complete = int(required <= set(top))
         answer = answer_with(
-            client, machine, question, extra_context=context, memory_aware=memory_aware
+            client, machine, question + provenance, extra_context=context,
+            memory_aware=memory_aware,
         )
     elif arm in RECALL_ARMS:
         machine._invalidate_recall_cache()
@@ -289,13 +316,15 @@ def _run_arm(
         elif arm in {"agents_view_payload", "agents_view_payload_memory"}:
             context = payload_as_context(res.get("evidence_payload") or [])
         answer = answer_with(
-            client, machine, question, extra_context=context, memory_aware=memory_aware
+            client, machine, question + provenance, extra_context=context,
+            memory_aware=memory_aware,
         )
     else:  # oracle
         context = full_text(machine, required_ids, budget=ctx_budget)
         evidence_complete = 1
         answer = answer_with(
-            client, machine, question, extra_context=context, memory_aware=memory_aware
+            client, machine, question + provenance, extra_context=context,
+            memory_aware=memory_aware,
         )
 
     latency = time.monotonic() - start
@@ -304,7 +333,7 @@ def _run_arm(
         "## Whiteboard\n\n"
         + machine.whiteboard.render()
         + (f"\n\n## External context\n\n{context}" if context else "")
-        + f"\n\n## Task\n\n{question}"
+        + f"\n\n## Task\n\n{question}{provenance}"
     )
     before_judge = judge_client.calls
     verdict, reason = judge(judge_client, question, gold, answer)
@@ -372,7 +401,9 @@ def run_synthetic_case(
     gfr: bool = False,
 ) -> dict[str, Any]:
     cfg = Config(**ARMS[arm])
-    if payload_budget and arm in {"agents_view_payload", "agents_view_payload_memory"}:
+    if payload_budget and arm in {
+        "agents_view_payload", "agents_view_payload_memory", "agents_view_payload_dates",
+    }:
         cfg.evidence_payload_budget = payload_budget
     machine, _ = build_machine(root / f"{arm}_{index:02d}", cfg, client)
     required_ids = [id_map[k] for k in task["required"]]
@@ -391,6 +422,7 @@ def build_external_machine(
     *,
     summary_limit: int = 300,
     why_limit: int = 2000,
+    dates: bool = False,
 ) -> tuple[Any, dict[str, str]]:
     if path.exists():
         shutil.rmtree(path)
@@ -404,6 +436,7 @@ def build_external_machine(
             type="memory",
             summary=(text[:summary_limit] if summary_limit else text) or session["id"],
             why=text[:why_limit] if why_limit else text,
+            created_at=parse_date(session.get("date", "")) if dates else "",
             source=session["id"],
             views=views_for(tags.get(session["id"])),
         )
@@ -436,13 +469,17 @@ def run_external_case(
     ingest_why: int = 2000,
     gfr: bool = False,
     error_classify: bool = False,
+    ingest_dates: bool = False,
 ) -> dict[str, Any]:
+    use_dates = ingest_dates or arm in DATES_ARMS
     cfg = Config(**ARMS[arm])
-    if payload_budget and arm in {"agents_view_payload", "agents_view_payload_memory"}:
+    if payload_budget and arm in {
+        "agents_view_payload", "agents_view_payload_memory", "agents_view_payload_dates",
+    }:
         cfg.evidence_payload_budget = payload_budget
     machine, id_map = build_external_machine(
         root / f"{arm}_{index:02d}", task, cfg, tags, client,
-        summary_limit=ingest_summary, why_limit=ingest_why,
+        summary_limit=ingest_summary, why_limit=ingest_why, dates=use_dates,
     )
     expected = [s for s in task["expected"] if s in id_map]
     required_ids = [id_map[s] for s in expected]
@@ -450,10 +487,17 @@ def run_external_case(
         arm, index, task["question"], task.get("type", "external"), gold, required_ids,
         machine, client, judge_client, ctx_budget=ctx_budget, expected_sessions=expected,
         error_classify=error_classify,
+        question_date=task.get("question_date", "") if use_dates else "",
     )
     row["ingest_summary"] = ingest_summary
     row["ingest_why"] = ingest_why
     row["ingest_skipped"] = int(getattr(machine, "_e2e_skipped", 0))
+    row["ingest_dates"] = use_dates
+    if use_dates:
+        time_views = sorted({v for r in machine.tape.read() for v in r.views if v.startswith("time/")})
+        row["time_views"] = time_views
+        sample = next((r.created_at[:16] for r in machine.tape.read() if r.created_at), "")
+        row["created_at_sample"] = sample
     if gfr:
         by_id = {r.id: r for r in machine.tape.read()}
         evidence_text = "\n\n".join(
@@ -523,6 +567,8 @@ def main() -> None:
     p.add_argument("--ingest-why", type=int, default=2000, help="why chars at ingestion (0 = full text)")
     p.add_argument("--gfr", action="store_true", help="measure Gold Fact Retention per case")
     p.add_argument("--error-classify", action="store_true", help="classify answerer failures")
+    p.add_argument("--ingest-dates", action="store_true",
+                   help="restore real session timestamps and the question date (H5')")
     p.add_argument("--seed", type=int, default=7)
     p.add_argument("--tag", action="store_true", help="tag external sessions at write time")
     p.add_argument("--api-key", default="")
@@ -596,6 +642,7 @@ def main() -> None:
         "ingest_why": args.ingest_why,
         "gfr": args.gfr,
         "error_classify": args.error_classify,
+        "ingest_dates": args.ingest_dates,
         "git_commit": commit,
         "fixture_version": "frozen-32" if args.dataset == "synthetic" else "longmemeval",
         "started_at": datetime.now(timezone.utc).isoformat(),
@@ -630,6 +677,7 @@ def main() -> None:
                         ctx_budget=args.ctx_budget, payload_budget=args.payload_budget,
                         ingest_summary=args.ingest_summary, ingest_why=args.ingest_why,
                         gfr=args.gfr, error_classify=args.error_classify,
+                        ingest_dates=args.ingest_dates,
                         **extra,
                     )
                 )

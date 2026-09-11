@@ -859,6 +859,49 @@ Readings:
 - Negative results are recorded as such: the prompt variant is implemented
   (`memory_aware=True` in `run_main_chatbot`) but not enabled by default.
 
+### 15.15 H5' — Temporal provenance restoration (partial)
+
+The external loader dropped `haystack_dates` and `question_date`, so every
+session fell into the ingestion month and the payload header showed the
+ingestion date. `--ingest-dates` restores the real timestamps (ISO, to the
+minute), makes the `time/*` views real, and appends the question date to the
+task as provenance. Everything else is frozen (full ingestion, prompt, model,
+judge v1, budget 4000).
+
+| arm | evidence | strict | lenient | AUR |
+|-----|----------|--------|---------|-----|
+| payload 4000 (base) | 0.74 | 0.56 | 0.66 | 0.76 |
+| payload 4000 + dates | 0.72 | 0.56 | 0.58 | 0.72 |
+| oracle (base, 6k cap) | 1.00 | 0.52 | 0.58 | 0.52 |
+| oracle + dates (no cap) | 1.00 | 0.54 | 0.56 | 0.54 |
+
+By question type (base -> dates):
+
+| type | base | dates | n |
+|------|------|-------|---|
+| temporal-reasoning | 0.29 | **0.43** | 14 |
+| single-session-user | 0.60 | 0.73 | 15 |
+| multi-session | 0.77 | 0.77 | 13 |
+| single-session-assistant | 1.00 | 0.00 | 3 |
+| knowledge-update | 0.33 | 0.00 | 3 |
+
+Readings:
+
+- **H5' is partially confirmed**: the date restoration improves the
+  date-sensitive category consistently — temporal-reasoning 0.29 -> 0.43 in
+  **both** the payload and the oracle arm (+0.14 each, 4 -> 6 of 14) — but the
+  overall strict is flat (0.56) because of small-n regressions in
+  single-session-assistant (3 cases; complete evidence in both arms, so these
+  are answer variance, not a systematic date effect) and knowledge-update (3).
+- Controls held: GFR 0.80-0.84 and evidence recall 0.72-0.74 across arms.
+- **Unlimited context is not a valid ceiling**: the oracle with *all* expected
+  sessions and no cap collapses on multi-session (0.08 base, 0.00 dates) and
+  scores below the 4000-char payload. More evidence can hurt; the payload's
+  budget is protective. Earlier "oracle ceiling" readings need this caveat.
+- The residual temporal failures (6/14) now look like answerer arithmetic
+  rather than missing anchors: the timestamps are in the evidence and in the
+  task, and the oracle sees the full sessions.
+
 ## 16. Failure Modes
 
 | Failure | Required behavior |

@@ -61,6 +61,12 @@ def _build_parser() -> argparse.ArgumentParser:
     recall.add_argument("--max-workers", type=int, default=None)
     recall.add_argument("--cross-session", action="store_true", help="also search other sessions' tapes")
     recall.add_argument("--views", default="", help="comma-separated view filter (e.g. time/2026-09,type/decision)")
+    recall.add_argument("--agent-mode", default="", choices=["", "group", "view"],
+                        help="override the agent mode for this recall")
+    recall.add_argument("--whiteboard-mode", default="", choices=["", "single", "dimension"],
+                        help="override the whiteboard mode for this recall")
+    recall.add_argument("--dimension-mode", default="", choices=["", "off", "auto"],
+                        help="override dimension-aware routing for this recall")
 
     sub.add_parser("sessions", help="list sessions (JSON)")
     sub.add_parser("views", help="list memory views / projections (JSON)")
@@ -212,6 +218,18 @@ def _j(obj: dict[str, Any]) -> int:
 
 def cmd_recall(args: argparse.Namespace) -> int:
     m = _machine(args)
+    if getattr(args, "agent_mode", ""):
+        m.config.agent_mode = args.agent_mode
+        if args.agent_mode == "view":
+            m.config.router_enabled = True
+            if m.config.router_mode not in {"views", "cascade"}:
+                m.config.router_mode = "views"
+            if m.config.view_dimension_mode == "off":
+                m.config.view_dimension_mode = "auto"
+    if getattr(args, "whiteboard_mode", ""):
+        m.config.whiteboard_mode = args.whiteboard_mode
+    if getattr(args, "dimension_mode", ""):
+        m.config.view_dimension_mode = args.dimension_mode
     views = [v.strip() for v in (args.views or "").split(",") if v.strip()]
     try:
         result = m.recall(

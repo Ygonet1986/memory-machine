@@ -27,6 +27,8 @@ from memory_machine.llm import LLMClient
 from memory_machine.retrieval import Embedder, rank, rank_semantic
 from memory_machine.tape import MemoryRecord
 
+from tag_sessions import tag_sessions, views_for
+
 DATA = Path(__file__).resolve().parent / "data"
 
 
@@ -108,7 +110,12 @@ def load_locomo(path: Path, limit: int, seed: int) -> list[dict[str, Any]]:
     return out
 
 
-def build_machine(root: Path, sessions: list[dict[str, Any]], cfg: Config) -> tuple[Machine, dict[str, str]]:
+def build_machine(
+    root: Path,
+    sessions: list[dict[str, Any]],
+    cfg: Config,
+    tags: dict[str, dict[str, Any]] | None = None,
+) -> tuple[Machine, dict[str, str]]:
     if root.exists():
         shutil.rmtree(root)
     root.mkdir(parents=True, exist_ok=True)
@@ -120,6 +127,7 @@ def build_machine(root: Path, sessions: list[dict[str, Any]], cfg: Config) -> tu
             summary=s["text"][:300] or s["id"],
             why=s["text"][:2000],
             source=s["id"],
+            views=views_for((tags or {}).get(s["id"])),
         )
         res = m.add_memory(rec, save=False)
         id_map[s["id"]] = res["record"]["id"]
@@ -171,7 +179,7 @@ def main() -> None:
     p.add_argument(
         "--arms",
         default="bm25,vector,agents_full,agents_router",
-        help="comma-separated: bm25, vector, agents_full, agents_router",
+        help="comma-separated: bm25, vector, agents_full, agents_router, agents_view_lex",
     )
     p.add_argument(
         "--embedding-models",
@@ -180,13 +188,15 @@ def main() -> None:
     )
     p.add_argument("--embedding-base-url", default="http://localhost:11434/v1")
     p.add_argument("--no-checklist", action="store_true", help="ablation: agents skip the checklist")
+    p.add_argument("--tag", action="store_true", help="tag sessions with views at write time (Fase 2)")
+    p.add_argument("--tag-batch", type=int, default=8, help="sessions per tagging call")
     p.add_argument("--keep", action="store_true", help="keep the temp memory dir")
     args = p.parse_args()
 
     import os
 
     selected = {a.strip() for a in args.arms.split(",") if a.strip()}
-    needs_llm = bool(selected & {"agents_full", "agents_router"})
+    needs_llm = bool(selected & {"agents_full", "agents_router", "agents_view_lex"})
     api_key = args.api_key or os.environ.get("DEEPSEEK_API_KEY", "")
     if needs_llm and not api_key:
         raise SystemExit("set DEEPSEEK_API_KEY (or --api-key)")
@@ -207,6 +217,18 @@ def main() -> None:
     base = CountingClient(
         LLMClient("https://api.deepseek.com", api_key, args.model, retries=1, backoff=0.5)
     )
+
+    tags: dict[str, dict[str, Any]] = {}
+    if args.tag:
+        unique: dict[str, dict[str, Any]] = {}
+        for t in tasks:
+            for s in t["sessions"]:
+                unique.setdefault(s["id"], s)
+        print(f"tagging {len(unique)} sessions ...", flush=True)
+        tags = tag_sessions(
+            args.dataset, list(unique.values()), base, batch=args.tag_batch
+        )
+        print(f"tagged {len(tags)} sessions", flush=True)
     embedders = [
         (m.strip(), Embedder(args.embedding_base_url, "", m.strip()))
         for m in args.embedding_models.split(",")
@@ -219,7 +241,7 @@ def main() -> None:
         arms["bm25"] = [0, 0]
     for name, _emb in embedders:
         arms[f"vector:{name}"] = [0, 0]
-    for a in ("agents_full", "agents_router"):
+    for a in ("agents_full", "agents_router", "agents_view_lex"):
         if a in selected:
             arms[a] = [0, 0]
             lat[a] = 0.0
@@ -230,7 +252,7 @@ def main() -> None:
             continue
 
         m, id_map = build_machine(
-            root, t["sessions"], Config(capacity=args.capacity, router_enabled=False)
+            root, t["sessions"], Config(capacity=args.capacity, router_enabled=False), tags
         )
         expected_ids = {id_map[s] for s in expected if s in id_map}
         if not expected_ids:
@@ -252,6 +274,29 @@ def main() -> None:
             arms["agents_full"][0] += int(hit)
             arms["agents_full"][1] += calls
 
+        if "agents_view_lex" in selected:
+            m3, id_map3 = build_machine(
+                root,
+                t["sessions"],
+                Config(
+                    capacity=args.capacity,
+                    router_enabled=True,
+                    router_mode="views",
+                    view_router_mode="lexical",
+                    view_dimension_mode="auto",
+                    agent_mode="view",
+                    view_top_k=args.top_k,
+                ),
+                tags,
+            )
+            expected_ids3 = {id_map3[s] for s in expected if s in id_map3}
+            if expected_ids3:
+                start = time.monotonic()
+                hit, calls = arm_agents(m3, t["question"], expected_ids3, base)
+                lat["agents_view_lex"] += time.monotonic() - start
+                arms["agents_view_lex"][0] += int(hit)
+                arms["agents_view_lex"][1] += calls
+
         if "agents_router" in selected:
             m2, id_map2 = build_machine(
                 root,
@@ -263,6 +308,7 @@ def main() -> None:
                     router_top_k=args.top_k,
                     ablation_no_checklist=args.no_checklist,
                 ),
+                tags,
             )
             expected_ids2 = {id_map2[s] for s in expected if s in id_map2}
             if expected_ids2:

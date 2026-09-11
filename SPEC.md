@@ -536,6 +536,54 @@ is architectural: per-dimension understanding, checklist and annotations are
 now separate and inspectable, ready for dimension-specific consolidation and
 for multiple active boards selected by context.
 
+### 15.6 Per-dimension consolidation and multi-turn continuity
+
+- **Per-dimension consolidation**: in `whiteboard_mode: dimension`, each board
+  is consolidated independently when it exceeds the threshold: its working
+  state is persisted to the tape first (lossless continuity), then shrunk;
+  other boards are untouched. Dimension boards are excluded from the primary's
+  consolidation size.
+- **Multi-turn continuity benchmark** (`eval/continuity_bench.py`): 3 scenarios
+  x 3 turns on the same machine, comparing persistent state with a stateless
+  arm (state cleared every turn). Both arms scored complete evidence 1.00 and
+  agent recall 1.00 on all turns; persistence accumulated more state
+  (checklists 6375 vs 4577 chars; board annotations 48 vs 34) at a similar cost
+  (4.1 vs 3.9 calls). On this fixture persistence is a continuity guarantee,
+  not an evidence gain — the turns do not *learn* new memories (the chatbot
+  path is what writes them), which is the next continuity experiment.
+
+### 15.7 External data (Fase 2): write-time auto-tagging
+
+`eval/tag_sessions.py` labels LongMemEval/LoCoMo sessions with a coarse topic
+taxonomy (12 reusable topics) plus a free subject slug, in batched LLM calls
+(8 sessions per call) cached per session id under `eval/data/tags_*.json`.
+`external_bench.py --tag` applies the labels as `topic/*`/`subject/*` views at
+build time, so the dimension-aware view router and the view agents run on
+external data with inferred views.
+
+First look (LongMemEval, n=8 questions, 389 tagged sessions):
+
+| arm | evidence recall | calls/query |
+|-----|-----------------|-------------|
+| bm25 | 0.88 | 0.0 |
+| agents (full) | 1.00 | 10.1 |
+| agents (view, lexical plan) | 0.88 | 3.0 |
+
+The pipeline works end-to-end (inferred views + dimension routing + view
+agents) at 3x lower cost, but the coarse taxonomy loses one question (7/8).
+This is a small sample and the taxonomy is deliberately reusable; a finer
+tagger or a larger sample is the next step.
+
+### 15.8 CLI and app integration
+
+- CLI: `recall --agent-mode {group,view} --whiteboard-mode {single,dimension}
+  --dimension-mode {off,auto}` override the config for a single recall; choosing
+  `view` enables the view router automatically.
+- Desktop app: the settings dialog exposes a **Memory mode** selector
+  (partition agents / view agents / view agents + dimension boards) that maps
+  to `agent_mode`/`whiteboard_mode` (and enables the view router for view
+  modes).
+
 ## 16. Failure Modes
 
 | Failure | Required behavior |

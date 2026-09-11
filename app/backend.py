@@ -39,10 +39,22 @@ class Backend:
 
     def _build_machine(self, topic_id: str, settings: dict[str, Any]) -> Machine:
         root = topics_mod.topic_root(self._base(), topic_id)
+        extra: dict[str, Any] = {}
+        memory_mode = settings.get("memory_mode", "partition")
+        if memory_mode in {"view", "view_boards"}:
+            extra.update(
+                router_enabled=True,
+                router_mode="views",
+                view_dimension_mode="auto",
+                agent_mode="view",
+            )
+        if memory_mode == "view_boards":
+            extra["whiteboard_mode"] = "dimension"
         cfg = Config(
             model=settings["model"],
             base_url=settings["base_url"],
             api_key_env="MEMORY_MACHINE_API_KEY",
+            **extra,
         )
         client = LLMClient(settings["base_url"], settings["api_key"], settings["model"])
         return Machine(root, config=cfg, client=client)

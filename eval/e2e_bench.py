@@ -1,16 +1,17 @@
-"""End-to-end answer accuracy with an LLM judge (v0.8).
+"""End-to-end answer accuracy with an LLM judge (v0.8/v0.9).
 
-For each frozen synthetic task and each arm the pipeline is:
+For each task and each arm the pipeline is:
 
     recall -> whiteboard -> main chatbot -> answer -> LLM judge (vs gold)
 
 Arms:
-  no_memory        closed-book: empty whiteboard (floor)
-  bm25             top-k BM25 memories as full-text context (flat RAG)
-  agents_group     group agents recall -> whiteboard (annotation notes only)
-  agents_view      view agents + lexical dimension plan + attention prior
-  agents_view_ctx  same retrieval, plus the full text of annotated memories
-  oracle           gold evidence memories as full-text context (ceiling)
+  no_memory            closed-book: empty whiteboard (floor)
+  bm25                 top-k BM25 memories as full-text context (flat RAG)
+  agents_group         group agents recall -> whiteboard (annotation notes only)
+  agents_view          view agents + lexical dimension plan + attention prior
+  agents_view_ctx      same retrieval, plus the full text of annotated memories
+  agents_view_payload  same retrieval, plus the budgeted evidence payload (v0.9)
+  oracle               gold evidence memories as full-text context (ceiling)
 
 Every boundary is snapshotted to ``eval/out/e2e_<arm>.jsonl`` so a wrong answer
 can be attributed to retrieval / context loss / the answerer / the judge. The
@@ -18,7 +19,12 @@ judge is 3-way (correct|partial|incorrect) with a frozen prompt; a stratified
 sample gets a second pass (audit) to measure judge agreement. The Answer
 Utilization Rate (AUR) is ``P(correct | evidence complete)``.
 
-Run:  PYTHONPATH=src python3 eval/e2e_bench.py --arms no_memory,bm25,agents_view
+Datasets: the frozen synthetic fixture (32 tasks, authored gold answers) or
+LongMemEval (reference answers, sessions tagged into views at write time).
+
+Run:  PYTHONPATH=src python3 eval/e2e_bench.py --arms agents_view_payload
+      PYTHONPATH=src python3 eval/e2e_bench.py --dataset longmemeval --limit 12 \
+          --arms agents_view_ctx,agents_view_payload --tag
 """
 
 from __future__ import annotations
@@ -32,13 +38,17 @@ import tempfile
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 from memory_machine.config import Config
+from memory_machine.coordinator import Machine
 from memory_machine.llm import LLMClient, extract_json_object
 from memory_machine.main_chatbot import run_main_chatbot
+from memory_machine.payload import payload_as_context
 from memory_machine.retrieval import rank, tokenize
+from memory_machine.tape import MemoryRecord
 
+from tag_sessions import tag_sessions, views_for
 from view_router_bench import CountingClient, TASKS, build_machine
 
 HERE = Path(__file__).resolve().parent
@@ -77,8 +87,11 @@ ARMS: dict[str, dict[str, Any]] = {
     "agents_group": dict(capacity=5, router_enabled=False, agent_mode="group"),
     "agents_view": dict(VIEW_CONFIG),
     "agents_view_ctx": dict(VIEW_CONFIG),
+    "agents_view_payload": dict(VIEW_CONFIG, evidence_payload="budgeted"),
     "oracle": {},
 }
+
+RECALL_ARMS = {"agents_group", "agents_view", "agents_view_ctx", "agents_view_payload"}
 
 
 def load_gold() -> dict[int, str]:
@@ -102,11 +115,7 @@ def full_text(machine: Any, ids: list[str], *, budget: int = 6000) -> str:
 
 
 def answer_with(
-    client: CountingClient,
-    machine: Any,
-    question: str,
-    *,
-    extra_context: str = "",
+    client: CountingClient, machine: Any, question: str, *, extra_context: str = ""
 ) -> str:
     machine.whiteboard.subject = question
     clean, _memories, _reasoning = run_main_chatbot(
@@ -148,52 +157,53 @@ def fact_coverage(machine: Any, required_ids: list[str], prompt: str) -> float:
     return len(tokens & set(tokenize(prompt))) / len(tokens)
 
 
-def run_case(
+def _run_arm(
     arm: str,
     index: int,
-    task: dict[str, Any],
+    question: str,
+    cat: str,
     gold: str,
-    root: Path,
+    required_ids: list[str],
+    machine: Any,
     client: CountingClient,
     judge_client: CountingClient,
-    id_map: dict[str, str],
     *,
     ctx_budget: int,
+    expected_sessions: list[str] | None = None,
 ) -> dict[str, Any]:
-    cfg = Config(**ARMS[arm])
-    machine, _ = build_machine(root / f"{arm}_{index:02d}", cfg, client)
-    required_ids = [id_map[k] for k in task["required"]]
     required = set(required_ids)
-
     before = client.calls
     start = time.monotonic()
     context = ""
     evidence_complete: int | None = None
+    res: dict[str, Any] | None = None
 
     if arm == "no_memory":
-        answer = answer_with(client, machine, task["q"])
+        answer = answer_with(client, machine, question)
     elif arm == "bm25":
         records = machine.tape.read()
         docs = [r.text() for r in records]
         ids = [r.id for r in records]
-        top = [ids[j] for j, _s in rank(task["q"], docs, limit=5)]
+        top = [ids[j] for j, _s in rank(question, docs, limit=5)]
         context = full_text(machine, top, budget=ctx_budget)
         evidence_complete = int(required <= set(top))
-        answer = answer_with(client, machine, task["q"], extra_context=context)
-    elif arm in {"agents_group", "agents_view", "agents_view_ctx"}:
+        answer = answer_with(client, machine, question, extra_context=context)
+    elif arm in RECALL_ARMS:
         machine._invalidate_recall_cache()
-        res = machine.recall(task["q"], debug=True)
+        res = machine.recall(question, debug=True)
         routing = res.get("routing") or {}
         consulted = set(routing.get("consulted_ids") or [])
         annotated = [a["memory_id"] for a in res.get("annotations") or []]
         evidence_complete = int(required <= consulted)
         if arm == "agents_view_ctx":
             context = full_text(machine, annotated, budget=ctx_budget)
-        answer = answer_with(client, machine, task["q"], extra_context=context)
+        elif arm == "agents_view_payload":
+            context = payload_as_context(res.get("evidence_payload") or [])
+        answer = answer_with(client, machine, question, extra_context=context)
     else:  # oracle
         context = full_text(machine, required_ids, budget=ctx_budget)
         evidence_complete = 1
-        answer = answer_with(client, machine, task["q"], extra_context=context)
+        answer = answer_with(client, machine, question, extra_context=context)
 
     latency = time.monotonic() - start
     prompt = machine.whiteboard.render() + ("\n\n" + context if context else "")
@@ -201,24 +211,37 @@ def run_case(
         "## Whiteboard\n\n"
         + machine.whiteboard.render()
         + (f"\n\n## External context\n\n{context}" if context else "")
-        + f"\n\n## Task\n\n{task['q']}"
+        + f"\n\n## Task\n\n{question}"
     )
     before_judge = judge_client.calls
-    verdict, reason = judge(judge_client, task["q"], gold, answer)
+    verdict, reason = judge(judge_client, question, gold, answer)
     judge_calls = judge_client.calls - before_judge
 
     return {
         "arm": arm,
         "task": index,
-        "cat": task["cat"],
-        "question": task["q"],
+        "cat": cat,
+        "question": question,
         "gold": gold,
+        "expected_sessions": expected_sessions or [],
         "required_ids": required_ids,
         "retrieved_ids": sorted(set((res.get("routing") or {}).get("consulted_ids") or []))
-        if arm in {"agents_group", "agents_view", "agents_view_ctx"}
+        if res is not None
         else [],
         "evidence_complete": evidence_complete,
         "context_chars": len(context),
+        "payload_chars": int(res.get("evidence_payload_chars", 0)) if res is not None else 0,
+        "payload_items": [
+            {
+                "memory_id": item["memory_id"],
+                "used_chars": item["used_chars"],
+                "source": item["source"],
+                "truncated": item["truncated"],
+            }
+            for item in (res.get("evidence_payload") or [])
+        ]
+        if res is not None
+        else [],
         "whiteboard_rendered": machine.whiteboard.render(),
         "dimension_boards_rendered": {
             d: b.render() for d, b in machine.whiteboard.boards.items()
@@ -232,6 +255,79 @@ def run_case(
         "judge_calls": judge_calls,
         "latency": round(latency, 2),
     }
+
+
+def run_synthetic_case(
+    arm: str,
+    index: int,
+    task: dict[str, Any],
+    gold: str,
+    root: Path,
+    client: CountingClient,
+    judge_client: CountingClient,
+    id_map: dict[str, str],
+    *,
+    ctx_budget: int,
+    payload_budget: int = 0,
+) -> dict[str, Any]:
+    cfg = Config(**ARMS[arm])
+    if payload_budget and arm == "agents_view_payload":
+        cfg.evidence_payload_budget = payload_budget
+    machine, _ = build_machine(root / f"{arm}_{index:02d}", cfg, client)
+    required_ids = [id_map[k] for k in task["required"]]
+    return _run_arm(
+        arm, index, task["q"], task["cat"], gold, required_ids, machine,
+        client, judge_client, ctx_budget=ctx_budget,
+    )
+
+
+def build_external_machine(
+    path: Path, task: dict[str, Any], cfg: Config, tags: dict[str, dict[str, Any]], client: Any
+) -> tuple[Any, dict[str, str]]:
+    if path.exists():
+        shutil.rmtree(path)
+    path.mkdir(parents=True, exist_ok=True)
+    machine = Machine(path, config=cfg, client=client)
+    id_map: dict[str, str] = {}
+    for session in task["sessions"]:
+        record = MemoryRecord(
+            type="memory",
+            summary=session["text"][:300] or session["id"],
+            why=session["text"][:2000],
+            source=session["id"],
+            views=views_for(tags.get(session["id"])),
+        )
+        result = machine.add_memory(record, save=False)
+        id_map[session["id"]] = result["record"]["id"]
+    machine.save()
+    return machine, id_map
+
+
+def run_external_case(
+    arm: str,
+    index: int,
+    task: dict[str, Any],
+    gold: str,
+    root: Path,
+    client: CountingClient,
+    judge_client: CountingClient,
+    tags: dict[str, dict[str, Any]],
+    *,
+    ctx_budget: int,
+    payload_budget: int = 0,
+) -> dict[str, Any]:
+    cfg = Config(**ARMS[arm])
+    if payload_budget and arm == "agents_view_payload":
+        cfg.evidence_payload_budget = payload_budget
+    machine, id_map = build_external_machine(
+        root / f"{arm}_{index:02d}", task, cfg, tags, client
+    )
+    expected = [s for s in task["expected"] if s in id_map]
+    required_ids = [id_map[s] for s in expected]
+    return _run_arm(
+        arm, index, task["question"], task.get("type", "external"), gold, required_ids,
+        machine, client, judge_client, ctx_budget=ctx_budget, expected_sessions=expected,
+    )
 
 
 def summarize(rows: list[dict[str, Any]]) -> dict[str, Any]:
@@ -275,7 +371,8 @@ def audit_sample(rows: list[dict[str, Any]], fraction: float, seed: int) -> list
 
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("--arms", default="no_memory,bm25,agents_group,agents_view,agents_view_ctx,oracle")
+    p.add_argument("--dataset", choices=["synthetic", "longmemeval"], default="synthetic")
+    p.add_argument("--arms", default="no_memory,bm25,agents_group,agents_view,agents_view_ctx,agents_view_payload,oracle")
     p.add_argument("--indices", default="", help="comma-separated task indices")
     p.add_argument("--limit", type=int, default=0, help="0 = all")
     p.add_argument("--model", default="deepseek-v4-flash")
@@ -283,7 +380,9 @@ def main() -> None:
     p.add_argument("--audit-model", default="", help="default: same as judge model")
     p.add_argument("--audit-fraction", type=float, default=0.25)
     p.add_argument("--ctx-budget", type=int, default=6000)
+    p.add_argument("--payload-budget", type=int, default=0, help="override the v0.9 payload budget")
     p.add_argument("--seed", type=int, default=7)
+    p.add_argument("--tag", action="store_true", help="tag external sessions at write time")
     p.add_argument("--api-key", default="")
     p.add_argument("--no-audit", action="store_true")
     p.add_argument("--keep", action="store_true")
@@ -295,12 +394,6 @@ def main() -> None:
     if not api_key:
         raise SystemExit("set DEEPSEEK_API_KEY (or --api-key)")
 
-    gold = load_gold()
-    indices = [int(x) for x in args.indices.split(",") if x.strip()] or list(range(len(TASKS)))
-    if args.limit > 0:
-        indices = indices[: args.limit]
-    arms = [a.strip() for a in args.arms.split(",") if a.strip()]
-
     base = CountingClient(
         LLMClient("https://api.deepseek.com", api_key, args.model, retries=1, backoff=0.5)
     )
@@ -308,7 +401,36 @@ def main() -> None:
         LLMClient("https://api.deepseek.com", api_key, args.judge_model, retries=1, backoff=0.5)
     )
     root = Path(tempfile.mkdtemp(prefix="mm-e2e-"))
-    _machine, id_map = build_machine(root / "_fixture", Config(capacity=5))
+    arms = [a.strip() for a in args.arms.split(",") if a.strip()]
+
+    tags: dict[str, dict[str, Any]] = {}
+    if args.dataset == "synthetic":
+        gold = load_gold()
+        indices = [int(x) for x in args.indices.split(",") if x.strip()] or list(range(len(TASKS)))
+        if args.limit > 0:
+            indices = indices[: args.limit]
+        _machine, id_map = build_machine(root / "_fixture", Config(capacity=5))
+        runner: Callable[..., dict[str, Any]] = run_synthetic_case
+        extra: dict[str, Any] = {"id_map": id_map}
+        tasks: dict[int, dict[str, Any]] = {i: TASKS[i] for i in indices}
+    else:
+        from external_bench import DATA, load_longmemeval
+
+        tasks_list = load_longmemeval(DATA / "longmemeval_s_cleaned.json", args.limit, args.seed)
+        raw = json.loads((DATA / "longmemeval_s_cleaned.json").read_text(encoding="utf-8"))
+        by_q = {item["question"]: item.get("answer", "") for item in raw}
+        gold = {i: by_q.get(t["question"], "") for i, t in enumerate(tasks_list)}
+        indices = [i for i in range(len(tasks_list)) if gold.get(i)]
+        tasks = {i: tasks_list[i] for i in indices}
+        if args.tag:
+            unique: dict[str, dict[str, Any]] = {}
+            for t in tasks.values():
+                for s in t["sessions"]:
+                    unique.setdefault(s["id"], s)
+            print(f"tagging {len(unique)} sessions ...", flush=True)
+            tags = tag_sessions("longmemeval", list(unique.values()), base, batch=8)
+        runner = run_external_case
+        extra = {"tags": tags}
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     try:
@@ -317,21 +439,24 @@ def main() -> None:
         ).strip()
     except Exception:
         commit = ""
+    run_id = datetime.now(timezone.utc).strftime("%Y-%m-%d-e2e-%H%M%S")
     manifest = {
-        "run_id": datetime.now(timezone.utc).strftime("%Y-%m-%d-e2e-%H%M%S"),
+        "run_id": run_id,
+        "dataset": args.dataset,
         "model": args.model,
         "judge_model": args.judge_model,
         "audit_judge_model": args.audit_model or args.judge_model,
         "judge_prompt_version": JUDGE_PROMPT_VERSION,
         "ctx_budget": args.ctx_budget,
         "git_commit": commit,
-        "fixture_version": "frozen-32",
+        "fixture_version": "frozen-32" if args.dataset == "synthetic" else "longmemeval",
         "started_at": datetime.now(timezone.utc).isoformat(),
         "arms": arms,
         "indices": indices,
     }
+    suffix = f"_{args.dataset}" if args.dataset != "synthetic" else ""
     manifest_name = (
-        f"run_manifest_{arms[0]}.json" if len(arms) == 1 else "run_manifest.json"
+        f"run_manifest_{arms[0]}{suffix}.json" if len(arms) == 1 else f"run_manifest{suffix}.json"
     )
     (OUT_DIR / manifest_name).write_text(
         json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8"
@@ -342,16 +467,17 @@ def main() -> None:
         rows: list[dict[str, Any]] = []
         print(f"running {arm} ...", flush=True)
         for i in indices:
-            task = TASKS[i]
-            if i not in gold:
+            task = tasks[i]
+            if not gold.get(i):
                 continue
             rows.append(
-                run_case(
-                    arm, i, task, gold[i], root, base, judge_client, id_map,
-                    ctx_budget=args.ctx_budget,
+                runner(
+                    arm, i, task, gold[i], root, base, judge_client,
+                    ctx_budget=args.ctx_budget, payload_budget=args.payload_budget,
+                    **extra,
                 )
             )
-        path = OUT_DIR / f"e2e_{arm}.jsonl"
+        path = OUT_DIR / f"e2e_{arm}{suffix}.jsonl"
         with path.open("w", encoding="utf-8") as fh:
             for row in rows:
                 fh.write(json.dumps(row, ensure_ascii=False) + "\n")
@@ -365,13 +491,13 @@ def main() -> None:
         )
 
     print("\nfinal table:")
-    print(f"{'arm':<17} {'n':>3} {'evid':>6} {'strict':>7} {'lenient':>8} {'AUR':>6} {'calls':>7}")
+    print(f"{'arm':<19} {'n':>3} {'evid':>6} {'strict':>7} {'lenient':>8} {'AUR':>6} {'calls':>7}")
     for arm in arms:
         rows = [r for r in all_rows if r["arm"] == arm]
         s = summarize(rows)
         aur = f"{s['aur']:.2f}" if s["aur"] is not None else "  - "
         print(
-            f"{arm:<17} {s['n']:>3} {s['evidence_complete']:>6.2f} {s['strict']:>7.2f} "
+            f"{arm:<19} {s['n']:>3} {s['evidence_complete']:>6.2f} {s['strict']:>7.2f} "
             f"{s['lenient']:>8.2f} {aur:>6} {s['calls']:>7.1f}"
         )
 
@@ -383,9 +509,7 @@ def main() -> None:
         )
         audit_rows: list[dict[str, Any]] = []
         for row in sample:
-            verdict, reason = judge(
-                audit_client, row["question"], row["gold"], row["answer"]
-            )
+            verdict, reason = judge(audit_client, row["question"], row["gold"], row["answer"])
             audit_rows.append(
                 {
                     "arm": row["arm"],
@@ -397,7 +521,7 @@ def main() -> None:
                 }
             )
         audit_name = (
-            f"judge_audit_{arms[0]}.jsonl" if len(arms) == 1 else "judge_audit.jsonl"
+            f"judge_audit_{arms[0]}{suffix}.jsonl" if len(arms) == 1 else f"judge_audit{suffix}.jsonl"
         )
         path = OUT_DIR / audit_name
         with path.open("w", encoding="utf-8") as fh:

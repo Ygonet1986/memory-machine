@@ -276,6 +276,28 @@ class Machine:
             include_checklist=include_checklist,
         )
 
+    def _merge_by_dimension(self, run: RecallRun) -> list[Any]:
+        """Merge annotations into the board of the dimension that produced them.
+
+        View agents carry ``view:<name>`` as agent id, so each dimension keeps
+        its own working memory; the primary board receives the union for
+        backward compatibility.
+        """
+        groups: dict[str, list[Any]] = {}
+        for annotation in run.annotations:
+            agent_id = annotation.agent_id or ""
+            view = agent_id.split(":", 1)[1] if agent_id.startswith("view:") else ""
+            dimension = (dimension_of(view) if view else None) or "semantic"
+            groups.setdefault(dimension, []).append(annotation)
+        kept: list[Any] = []
+        for dimension, annotations in groups.items():
+            board = self.whiteboard.for_dimension(dimension)
+            kept.extend(
+                merge_annotations(board, annotations, budget=self.config.whiteboard_budget)
+            )
+        self.whiteboard.annotations = kept
+        return kept
+
     @staticmethod
     def _merge_runs(first: RecallRun, second: RecallRun) -> RecallRun:
         return RecallRun(
@@ -442,8 +464,9 @@ class Machine:
             level1 = len(ids)
             run = run_view_agents(
                 self.tape, self.manifest, self.whiteboard, client,
-                views=plan.selected_views, temperature=temperature,
-                max_workers=max_workers,
+                views=plan.selected_views,
+                per_dimension=cfg.whiteboard_mode == "dimension",
+                temperature=temperature, max_workers=max_workers,
             )
         else:
             ids, mode = self._plan_ids(plan)
@@ -481,8 +504,9 @@ class Machine:
                 expanded.intersection_size = len(ids2)
                 new = run_view_agents(
                     self.tape, self.manifest, self.whiteboard, client,
-                    views=expanded.selected_views, temperature=temperature,
-                    max_workers=max_workers,
+                    views=expanded.selected_views,
+                    per_dimension=cfg.whiteboard_mode == "dimension",
+                    temperature=temperature, max_workers=max_workers,
                 )
             else:
                 ids2, mode2 = self._plan_ids(expanded)
@@ -838,11 +862,14 @@ class Machine:
         if not debug:
             plan.consulted_ids = []
             plan.level1_ids = []
-        kept = merge_annotations(
-            self.whiteboard,
-            raw_annotations,
-            budget=self.config.whiteboard_budget,
-        )
+        if self.config.whiteboard_mode == "dimension":
+            kept = self._merge_by_dimension(run)
+        else:
+            kept = merge_annotations(
+                self.whiteboard,
+                raw_annotations,
+                budget=self.config.whiteboard_budget,
+            )
 
         consolidated = False
         if whiteboard_needs_consolidation(
@@ -880,6 +907,16 @@ class Machine:
             "tape_records": len(self.tape),
             "agents": len(self.manifest.agents),
             "render": self.whiteboard.render(),
+            "boards": (
+                {
+                    d: b.render()
+                    for d, b in self.whiteboard.active_boards(
+                        [x for x in DIMENSIONS if x in self.whiteboard.boards]
+                    ).items()
+                }
+                if self.config.whiteboard_mode == "dimension"
+                else {}
+            ),
             "cached": False,
         }
         self._save_recall_cache(question, result)

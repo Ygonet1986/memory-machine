@@ -610,6 +610,11 @@ ARM_CONFIGS: dict[str, Config] = {
         router_enabled=True, router_mode="views", view_router_mode="llm",
         view_top_k=5, view_prune="subject", agent_mode="view",
     ),
+    "view_agents_lex_boards": Config(
+        router_enabled=True, router_mode="views", view_router_mode="lexical",
+        view_dimension_mode="auto", view_top_k=3, agent_mode="view",
+        whiteboard_mode="dimension",
+    ),
 }
 
 

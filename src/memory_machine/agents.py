@@ -280,7 +280,7 @@ def view_agent_prompt(
 def _run_view_one(
     view: str,
     records: list[MemoryRecord],
-    whiteboard: Whiteboard,
+    board: Whiteboard,
     client: Any,
     view_agent: Any,
     *,
@@ -288,7 +288,7 @@ def _run_view_one(
 ) -> tuple[list[Annotation], CoverageSignal]:
     messages = [
         {"role": "system", "content": view_agent_prompt(view, records, view_agent)},
-        {"role": "user", "content": agent_user_prompt(whiteboard)},
+        {"role": "user", "content": agent_user_prompt(board)},
     ]
     content = client.complete(messages, temperature=temperature)
     obj = extract_json_object(content)
@@ -310,6 +310,7 @@ def run_view_agents(
     client: Any,
     *,
     views: list[str],
+    per_dimension: bool = False,
     temperature: float = 0.0,
     max_workers: int | None = None,
     on_error: str = "skip",
@@ -319,21 +320,31 @@ def run_view_agents(
     Unlike group agents (which see a chronological partition), a view agent
     sees every active memory in its view, so several agents can examine the
     same memory from different perspectives without duplicating it. Each view
-    keeps its own persistent digest and checklist in the manifest.
+    keeps its own persistent digest and checklist in the manifest. With
+    ``per_dimension`` each agent reads the working board of its dimension.
     """
-    tasks: list[tuple[str, list[MemoryRecord], Any]] = []
+    from .routing import dimension_of
+
+    tasks: list[tuple[str, list[MemoryRecord], Any, Whiteboard]] = []
     for view in dict.fromkeys(views):
         records = records_in_views(tape, [view])
         if records:
-            tasks.append((view, records, manifest.view_agent(view)))
+            board = (
+                whiteboard.for_dimension(dimension_of(view) or "semantic")
+                if per_dimension
+                else whiteboard
+            )
+            tasks.append((view, records, manifest.view_agent(view), board))
 
     if not tasks:
         return RecallRun()
 
-    def work(item: tuple[str, list[MemoryRecord], Any]) -> tuple[list[Annotation], CoverageSignal]:
-        view, records, view_agent = item
+    def work(
+        item: tuple[str, list[MemoryRecord], Any, Whiteboard]
+    ) -> tuple[list[Annotation], CoverageSignal]:
+        view, records, view_agent, board = item
         return _run_view_one(
-            view, records, whiteboard, client, view_agent, temperature=temperature
+            view, records, board, client, view_agent, temperature=temperature
         )
 
     run = RecallRun()

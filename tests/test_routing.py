@@ -379,3 +379,37 @@ def test_cascade_views_expands_to_detected_gap(tmp_path):
     assert routing["level1_coverage_missing"] == ["topic/benchmarks"]
     assert routing["level"] == 2
     assert any(a["memory_id"] == "M0002" for a in res["annotations"])
+
+
+def test_judge_coverage_v2_sees_candidate_regions(tmp_path):
+    from memory_machine.routing import judge_coverage
+
+    tape = _tape_with(
+        [
+            {"type": "decision", "summary": "router opt-in", "views": ["topic/router"]},
+            {"type": "lesson", "summary": "benchmarks changed the router",
+             "views": ["topic/benchmarks"]},
+        ],
+        tmp_path,
+    )
+    plan = RoutingPlan(
+        views_by_dimension={"semantic": ["topic/router"]},
+        candidate_views=["topic/router", "topic/benchmarks"],
+    )
+    captured: dict[str, str] = {}
+
+    def handler(messages, temperature):
+        captured["sys"] = text(messages, "system")
+        return '{"coverage":"partial","missing":["topic/benchmarks"]}'
+
+    signal, missing = judge_coverage(
+        "why did the benchmark change the router?",
+        [],
+        FakeClient(handler),
+        plan=plan,
+        tape=tape,
+    )
+    assert signal == "partial"
+    assert missing == ["topic/benchmarks"]
+    assert "topic/benchmarks" in captured["sys"]
+    assert "benchmarks changed the router" in captured["sys"]

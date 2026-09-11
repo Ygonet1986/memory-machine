@@ -23,3 +23,6 @@ settings.json
 
 # Benchmark datasets (large; download on demand)
 eval/data/
+
+# E2E benchmark outputs (snapshots; keep locally)
+eval/out/

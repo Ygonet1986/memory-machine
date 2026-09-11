@@ -295,3 +295,87 @@ def test_recall_coverage_cascade_fallback(tmp_path):
     assert routing["level"] == 2
     assert routing["coverage_signal"] == "complete"
     assert any(a["memory_id"] == "M0002" for a in res["annotations"])
+
+
+# ------------------------------------------------- per-required-view coverage
+
+
+def test_view_coverage_signal_detects_gap(tmp_path):
+    from memory_machine.routing import view_coverage_signal
+
+    tape = _tape_with(
+        [
+            {"type": "decision", "summary": "router opt-in", "views": ["topic/router"]},
+            {"type": "lesson", "summary": "benchmarks changed the router",
+             "views": ["topic/benchmarks"]},
+        ],
+        tmp_path,
+    )
+    plan = RoutingPlan(
+        views_by_dimension={"semantic": ["topic/router"]},
+        candidate_views=["topic/router", "topic/benchmarks"],
+    )
+    signal, missing = view_coverage_signal(plan, {"M0001"}, tape)
+    assert signal == "partial"
+    assert missing == ["topic/benchmarks"]
+
+
+def test_view_coverage_signal_complete_when_candidates_covered(tmp_path):
+    from memory_machine.routing import view_coverage_signal
+
+    tape = _tape_with(
+        [
+            {"type": "decision", "summary": "router opt-in", "views": ["topic/router"]},
+            {"type": "lesson", "summary": "benchmarks changed the router",
+             "views": ["topic/benchmarks"]},
+        ],
+        tmp_path,
+    )
+    plan = RoutingPlan(
+        views_by_dimension={"semantic": ["topic/router"]},
+        candidate_views=["topic/router", "topic/benchmarks"],
+    )
+    signal, missing = view_coverage_signal(plan, {"M0001", "M0002"}, tape)
+    assert signal == "complete"
+    assert missing == []
+
+
+def test_cascade_views_expands_to_detected_gap(tmp_path):
+    calls = {"agents": 0}
+
+    def handler(messages, temperature):
+        calls["agents"] += 1
+        if calls["agents"] == 1:
+            return (
+                '{"digest":"d","checklist":[],"annotations":'
+                '[{"memory_id":"M0001","note":"router","relevance":0.9}],"coverage":"complete"}'
+            )
+        return (
+            '{"digest":"d","checklist":[],"annotations":'
+            '[{"memory_id":"M0002","note":"benchmark","relevance":0.9}],"coverage":"complete"}'
+        )
+
+    m = _machine(
+        tmp_path,
+        handler,
+        router_enabled=True,
+        router_mode="cascade",
+        view_router_mode="lexical",
+        view_dimension_mode="auto",
+        coverage_mode="views",
+        view_top_k=1,
+    )
+    m.add_memory(
+        MemoryRecord(type="decision", summary="router opt-in", views=["topic/router"])
+    )
+    m.add_memory(
+        MemoryRecord(type="lesson", summary="benchmarks changed the router",
+                     views=["topic/benchmarks"])
+    )
+    res = m.recall("why did the benchmark change the router?")
+    routing = res["routing"]
+    assert routing["fallback_reasons"] == ["coverage_partial"]
+    assert routing["level1_coverage_signal"] == "partial"
+    assert routing["level1_coverage_missing"] == ["topic/benchmarks"]
+    assert routing["level"] == 2
+    assert any(a["memory_id"] == "M0002" for a in res["annotations"])

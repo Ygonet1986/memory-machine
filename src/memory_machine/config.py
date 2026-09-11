@@ -98,7 +98,7 @@ class Config:
             self.view_dimension_mode if self.view_dimension_mode in {"off", "auto"} else "off"
         )
         self.coverage_mode = (
-            self.coverage_mode if self.coverage_mode in {"off", "agents", "structural", "both", "judge"} else "off"
+            self.coverage_mode if self.coverage_mode in {"off", "agents", "structural", "both", "judge", "views"} else "off"
         )
         try:
             self.cascade_min_score = float(self.cascade_min_score)

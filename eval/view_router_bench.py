@@ -447,7 +447,7 @@ def run_arm(
             "level": routing.get("level", 0),
             "fallback": int(routing.get("level", 0) > 1),
             "reasons": reasons,
-            "coverage_signal": routing.get("coverage_signal") or "",
+            "coverage_signal": routing.get("level1_coverage_signal") or routing.get("coverage_signal") or "",
             "level1_complete": int(required <= level1) if level1 else 0,
             "intersection_mode": routing.get("intersection_mode") or "",
             "calls": calls,
@@ -573,6 +573,14 @@ ARM_CONFIGS: dict[str, Config] = {
     "cascade_bm25_dim_judge": Config(
         router_enabled=True, router_mode="cascade", view_router_mode="lexical",
         view_dimension_mode="auto", view_top_k=3, coverage_mode="judge",
+    ),
+    "view_bm25_dim_vcov": Config(
+        router_enabled=True, router_mode="views", view_router_mode="lexical",
+        view_dimension_mode="auto", view_top_k=3, coverage_mode="views",
+    ),
+    "cascade_bm25_dim_vcov": Config(
+        router_enabled=True, router_mode="cascade", view_router_mode="lexical",
+        view_dimension_mode="auto", view_top_k=3, coverage_mode="views",
     ),
 }
 

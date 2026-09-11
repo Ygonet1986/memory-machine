@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from .agents import deterministic_digest
 from .groups import Group, Manifest
-from .retrieval import rank
+from .retrieval import Embedder, rank, rank_semantic
 from .tape import MemoryRecord, Tape, parse_id
 
 
@@ -51,8 +51,14 @@ def select_groups(
     *,
     top_k: int = 5,
     fallback: str = "full",
+    embedder: Embedder | None = None,
 ) -> list[Group]:
-    """Return the groups to consult for ``query`` (top-K, or a fallback)."""
+    """Return the groups to consult for ``query`` (top-K, or a fallback).
+
+    With an ``embedder`` the selection is semantic; otherwise it is lexical
+    (BM25). Lexical routing can miss partitions whose vocabulary does not
+    overlap the query, which is why it is opt-in.
+    """
     groups = list(manifest.groups)
     if not groups:
         return []
@@ -63,7 +69,11 @@ def select_groups(
         records = group_records_by_num(by_num, g)
         docs.append(group_digest(manifest, g, records))
 
-    hits = rank(query, docs, limit=max(1, top_k))
+    if embedder is not None:
+        hits = rank_semantic(query, docs, embedder, limit=max(1, top_k))
+    else:
+        hits = rank(query, docs, limit=max(1, top_k))
+
     if not hits:
         if fallback == "recent":
             return sorted(groups, key=lambda g: g.end, reverse=True)[:top_k]

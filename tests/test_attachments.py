@@ -56,7 +56,7 @@ def test_ingest_skips_secret_chunks(tmp_path):
 
 
 def test_attach_invalidates_cache(tmp_path):
-    m = Machine(tmp_path, config=Config(capacity=50), client=FakeClient(lambda msg, t: '{"annotations":[]}'))
+    m = Machine(tmp_path, config=Config(capacity=50, router_enabled=False), client=FakeClient(lambda msg, t: '{"annotations":[]}'))
     m.add_memory(MemoryRecord(type="decision", summary="x"))
     m.recall("a question")
     assert m._recall_cache_path().exists()
@@ -73,7 +73,7 @@ def test_recall_returns_attached_content(tmp_path):
             return '{"checklist":[],"annotations":[{"memory_id":"M0001","note":"attached spec","relevance":0.9}]}'
         return '{"annotations":[]}'
 
-    m = Machine(tmp_path, config=Config(capacity=50), client=FakeClient(handler))
+    m = Machine(tmp_path, config=Config(capacity=50, router_enabled=False), client=FakeClient(handler))
     src = tmp_path / "spec.txt"
     src.write_text("The spec says to use PostgreSQL.")
     m.attach(src)

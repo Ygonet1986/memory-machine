@@ -298,19 +298,21 @@ optimization, and measurements show it trades recall for calls:
 | agents + embedding router (`nomic-embed-text`) | 1.00 | 5.0 |
 | agents + LLM router | 1.00 | 3.0 |
 
-*External benchmarks* (evidence-session recall):
+*External benchmarks* (evidence-session recall; 30 questions, dense baseline =
+local embeddings):
 
-| dataset | BM25 | agents (full) | agents + router |
-|---------|------|---------------|-----------------|
-| LongMemEval (10q) | 0.90 | **1.00** | 0.60 |
-| LongMemEval (20q) | 0.85 | **0.95** | 0.75 |
-| LoCoMo (10q) | 0.60 | **0.90** | 0.60 |
-| LoCoMo (20q) | 0.65 | **0.70** | 0.45 |
+| dataset | BM25 | vector (dense) | agents (full) | agents + router |
+|---------|------|----------------|---------------|-----------------|
+| LongMemEval (30q) | 0.80 | 0.93 | 0.93 | 0.63 |
+| LoCoMo (30q) | 0.70 | 0.53 | 0.83 | 0.70 |
 
-The router cuts calls (~10 -> ~5) but loses 5-40 recall points on real
-conversational data, because the evidence partition is not always selected.
-It is therefore opt-in, recommended only when the tape is large enough that a
-full sweep is impractical. Lexical routing is unsafe (measured ceiling 0.61).
+The agentic advantage over similarity retrieval is **benchmark-dependent**: it
+holds on the lexically-distant fixture and on LoCoMo (where dense retrieval
+fails), but not on LongMemEval (where dense RAG ties the agents). The router
+cuts calls (~10 -> ~5) but loses 5-40 recall points on real conversational
+data, because the evidence partition is not always selected. It is therefore
+opt-in, recommended only when the tape is large enough that a full sweep is
+impractical. Lexical routing is unsafe (measured ceiling 0.61).
 
 ## 16. Failure Modes
 

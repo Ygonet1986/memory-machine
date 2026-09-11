@@ -57,12 +57,50 @@ Rules:
 - Do not invent memory ids or facts outside your group."""
 
 
+AGENT_INSTRUCTIONS_NO_CHECKLIST = """You are a memory agent ({agent_id}). You watch group {group_id} \
+of the persistent memory tape (records {start}..{end}).
+
+Your memories (only these; never invent others):
+
+{records}
+
+The shared whiteboard below describes the work happening right now.
+
+Do two things in one response:
+
+1. Write a short digest (1-2 sentences) of what this group covers, so a router \
+can decide later whether this group is worth consulting.
+
+2. Identify which of YOUR memories MUST be remembered for the current work \
+and annotate them.
+
+Return ONLY a JSON object, nothing else:
+
+{{"digest":"<what this group covers>","annotations":[{{"memory_id":"M0001","note":"<why this matters now>","relevance":0.0}}]}}
+
+Rules:
+- Only annotate memory ids that appear in YOUR list above.
+- relevance is a number from 0.0 (marginal) to 1.0 (critical).
+- If nothing must be remembered, return "annotations":[].
+- Do not invent memory ids or facts outside your group."""
+
+
 def agent_system_prompt(
     agent: Agent,
     group: Group,
     records: list[MemoryRecord],
+    *,
+    include_checklist: bool = True,
 ) -> str:
     body = "\n".join(r.text() for r in records) if records else "(no memories in this group)"
+    if not include_checklist:
+        return AGENT_INSTRUCTIONS_NO_CHECKLIST.format(
+            agent_id=agent.id,
+            group_id=group.id,
+            start=group.start,
+            end=group.end,
+            records=body,
+        )
     if agent.checklist:
         checklist_section = (
             "\nYour previous checklist (refine it, do not just repeat it):\n" + agent.checklist
@@ -136,16 +174,23 @@ def _run_one(
     client: Any,
     *,
     temperature: float,
+    include_checklist: bool = True,
 ) -> list[Annotation]:
     messages = [
-        {"role": "system", "content": agent_system_prompt(agent, group, records)},
+        {
+            "role": "system",
+            "content": agent_system_prompt(
+                agent, group, records, include_checklist=include_checklist
+            ),
+        },
         {"role": "user", "content": agent_user_prompt(whiteboard)},
     ]
     content = client.complete(messages, temperature=temperature)
     obj = extract_json_object(content)
-    checklist = _checklist_from_obj(obj) or _deterministic_checklist(records)
-    agent.checklist = checklist[:1500]
-    agent.checklist_records = len(records)
+    if include_checklist:
+        checklist = _checklist_from_obj(obj) or _deterministic_checklist(records)
+        agent.checklist = checklist[:1500]
+        agent.checklist_records = len(records)
     digest = _digest_from_obj(obj) or deterministic_digest(records)
     agent.digest = digest[:600]
     agent.digest_records = len(records)
@@ -162,6 +207,7 @@ def run_agents(
     temperature: float = 0.0,
     max_workers: int | None = None,
     on_error: str = "skip",
+    include_checklist: bool = True,
 ) -> list[Annotation]:
     """Dispatch one LLM call per (group, agent) pair, in parallel.
 
@@ -188,7 +234,15 @@ def run_agents(
 
     def work(item: tuple[Agent, Group, list[MemoryRecord]]) -> list[Annotation]:
         agent, group, records = item
-        return _run_one(agent, group, records, whiteboard, client, temperature=temperature)
+        return _run_one(
+            agent,
+            group,
+            records,
+            whiteboard,
+            client,
+            temperature=temperature,
+            include_checklist=include_checklist,
+        )
 
     results: list[Annotation] = []
     with ThreadPoolExecutor(max_workers=max_workers or len(tasks)) as pool:

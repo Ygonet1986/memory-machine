@@ -208,6 +208,7 @@ class Machine:
             groups=selected,
             temperature=temperature,
             max_workers=max_workers,
+            include_checklist=not self.config.ablation_no_checklist,
         )
         checklists_updated = [a.id for a in self.manifest.agents if a.checklist]
         kept = merge_annotations(
@@ -361,6 +362,7 @@ class Machine:
             groups=selected,
             temperature=temperature,
             max_workers=max_workers,
+            include_checklist=not self.config.ablation_no_checklist,
         )
         kept = merge_annotations(
             self.whiteboard,

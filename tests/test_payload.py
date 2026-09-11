@@ -126,3 +126,29 @@ def test_run_appends_payload_to_context(tmp_path):
     res = m.run("why is the router opt-in?")
     assert res["evidence_payload_chars"] > 0
     assert "router opt-in" in seen["user"]
+
+
+def test_memory_aware_prompt_labels_and_system(tmp_path):
+    from memory_machine.main_chatbot import main_user_prompt, run_main_chatbot
+    from memory_machine.whiteboard import Whiteboard
+
+    prompt = main_user_prompt(
+        Whiteboard(subject="s"), "q", extra_context="EVIDENCE",
+        evidence_label="Recalled memory evidence",
+    )
+    assert "## Recalled memory evidence" in prompt
+
+    seen: dict[str, str] = {}
+
+    def handler(messages, temperature):
+        seen["sys"] = "\n".join(
+            m.get("content", "") for m in messages if m.get("role") == "system"
+        )
+        return "ok"
+
+    run_main_chatbot(
+        FakeClient(handler), Whiteboard(subject="s"), "q",
+        extra_context="EVIDENCE", memory_aware=True,
+    )
+    assert "Recalled memory evidence" in seen["sys"]
+    assert "persistent memory" in seen["sys"]

@@ -823,6 +823,42 @@ Readings:
 - One session per machine was skipped by the secret scanner (M0005); the
   harness records `ingest_skipped` and never bypasses the gate.
 
+### 15.14 H4 — memory-aware answer prompt (v0.9a, refuted)
+
+Hypothesis H4: with the same retrieval and evidence payload, a prompt that
+explicitly tells the answerer that the context contains recalled persistent
+memory (history, not external documents) would raise final accuracy. Arms:
+`agents_view_payload` (payload 4000, current prompt), `agents_view_payload_memory`
+(same + memory-aware prompt), and `oracle_memory` (gold evidence + memory-aware
+prompt), all on LongMemEval 50q with full ingestion; `oracle` (base prompt) was
+added afterwards as the ceiling.
+
+| arm | evidence | strict | AUR | context chars | dominant error kinds |
+|-----|----------|--------|-----|---------------|----------------------|
+| payload 4000 (base) | 0.74 | **0.56** | 0.76 | 3836 | 16 insufficient evidence, 4 temporal, 1 reasoning, 1 abstention |
+| payload 4000 (memory prompt) | 0.74 | 0.50 | 0.68 | 3791 | 19 insufficient evidence, 5 temporal, 1 abstention |
+| oracle (base) | 1.00 | 0.52 | 0.52 | ~14k | 19 insufficient evidence, 2 temporal, 1 reasoning, 2 abstention |
+| oracle (memory prompt) | 1.00 | 0.52 | 0.52 | 14751 | 22 insufficient evidence, 1 temporal, 1 ignored |
+
+Readings:
+
+- **H4 is refuted**: the memory-aware prompt did not improve accuracy — it
+  slightly hurt the payload arm (0.56 -> 0.50 strict, AUR 0.76 -> 0.68) and
+  changed nothing for the oracle (0.52 both). The controls held (evidence 0.74,
+  GFR ~0.78-0.86).
+- **The LongMemEval answerer ceiling is ~0.52-0.56**, and the payload arm even
+  edges out the oracle (0.56 vs 0.52), which only receives the gold evidence
+  sessions — the whiteboard understanding and the broader annotated context
+  help.
+- **The dominant remaining failure is evidence insufficiency** (16-22 of the
+  ~22-25 errors per arm), even for the oracle with the full evidence session.
+  Temporal misreading — the phenomenon that motivated H4 — is small (1-5).
+  The bottleneck is therefore *evidence sufficiency/aggregation* (answers that
+  span sessions or need reasoning), not the answerer's interpretation of
+  memory.
+- Negative results are recorded as such: the prompt variant is implemented
+  (`memory_aware=True` in `run_main_chatbot`) but not enabled by default.
+
 ## 16. Failure Modes
 
 | Failure | Required behavior |

@@ -79,6 +79,45 @@ Return ONLY a JSON object, nothing else:
 "contains" is true when the memory text holds the fact the reference answer states (a paraphrase counts; a partial fact counts only if it is enough to give the reference answer)."""
 
 
+ERROR_SYSTEM = """You classify why an answer failed, given the question, the reference answer and the evidence that was available.
+
+Return ONLY a JSON object, nothing else:
+{"kind":"<one of: temporal_misread, ignored_memory, insufficient_evidence, reasoning_error, abstention, other>","reason":"<short>"}
+
+Kinds:
+- temporal_misread: the evidence had the fact but the answer mixed past/current state.
+- ignored_memory: the evidence clearly contained the fact and the answer did not use it.
+- insufficient_evidence: the evidence did not contain the fact needed.
+- reasoning_error: the fact was present but the answer reasoned incorrectly.
+- abstention: the answer declined although the evidence had the fact.
+- other: anything else."""
+
+
+def classify_error(
+    client: CountingClient, question: str, gold: str, evidence: str, answer: str
+) -> tuple[str, str]:
+    messages = [
+        {"role": "system", "content": ERROR_SYSTEM},
+        {
+            "role": "user",
+            "content": (
+                f"Question: {question}\nReference answer: {gold}\n"
+                f"Evidence available:\n{evidence or '(none)'}\n"
+                f"Candidate answer: {answer}"
+            ),
+        },
+    ]
+    content = client.complete(messages, temperature=0.0)
+    obj = extract_json_object(content)
+    kind = str(obj.get("kind") or "").strip().lower()
+    if kind not in {
+        "temporal_misread", "ignored_memory", "insufficient_evidence",
+        "reasoning_error", "abstention", "other",
+    }:
+        kind = "other"
+    return kind, str(obj.get("reason") or "").strip()
+
+
 def gfr_check(
     client: CountingClient, question: str, gold: str, memory_text: str
 ) -> tuple[int, str]:
@@ -118,10 +157,17 @@ ARMS: dict[str, dict[str, Any]] = {
     "agents_view": dict(VIEW_CONFIG),
     "agents_view_ctx": dict(VIEW_CONFIG),
     "agents_view_payload": dict(VIEW_CONFIG, evidence_payload="budgeted"),
+    "agents_view_payload_memory": dict(VIEW_CONFIG, evidence_payload="budgeted"),
     "oracle": {},
+    "oracle_memory": {},
 }
 
-RECALL_ARMS = {"agents_group", "agents_view", "agents_view_ctx", "agents_view_payload"}
+MEMORY_AWARE_ARMS = {"agents_view_payload_memory", "oracle_memory"}
+
+RECALL_ARMS = {
+    "agents_group", "agents_view", "agents_view_ctx",
+    "agents_view_payload", "agents_view_payload_memory",
+}
 
 
 def load_gold() -> dict[int, str]:
@@ -145,11 +191,20 @@ def full_text(machine: Any, ids: list[str], *, budget: int = 6000) -> str:
 
 
 def answer_with(
-    client: CountingClient, machine: Any, question: str, *, extra_context: str = ""
+    client: CountingClient,
+    machine: Any,
+    question: str,
+    *,
+    extra_context: str = "",
+    memory_aware: bool = False,
 ) -> str:
     machine.whiteboard.subject = question
     clean, _memories, _reasoning = run_main_chatbot(
-        client, machine.whiteboard, question, extra_context=extra_context
+        client,
+        machine.whiteboard,
+        question,
+        extra_context=extra_context,
+        memory_aware=memory_aware,
     )
     return clean.strip()
 
@@ -200,6 +255,7 @@ def _run_arm(
     *,
     ctx_budget: int,
     expected_sessions: list[str] | None = None,
+    error_classify: bool = False,
 ) -> dict[str, Any]:
     required = set(required_ids)
     before = client.calls
@@ -208,8 +264,9 @@ def _run_arm(
     evidence_complete: int | None = None
     res: dict[str, Any] | None = None
 
+    memory_aware = arm in MEMORY_AWARE_ARMS
     if arm == "no_memory":
-        answer = answer_with(client, machine, question)
+        answer = answer_with(client, machine, question, memory_aware=memory_aware)
     elif arm == "bm25":
         records = machine.tape.read()
         docs = [r.text() for r in records]
@@ -217,7 +274,9 @@ def _run_arm(
         top = [ids[j] for j, _s in rank(question, docs, limit=5)]
         context = full_text(machine, top, budget=ctx_budget)
         evidence_complete = int(required <= set(top))
-        answer = answer_with(client, machine, question, extra_context=context)
+        answer = answer_with(
+            client, machine, question, extra_context=context, memory_aware=memory_aware
+        )
     elif arm in RECALL_ARMS:
         machine._invalidate_recall_cache()
         res = machine.recall(question, debug=True)
@@ -227,13 +286,17 @@ def _run_arm(
         evidence_complete = int(required <= consulted)
         if arm == "agents_view_ctx":
             context = full_text(machine, annotated, budget=ctx_budget)
-        elif arm == "agents_view_payload":
+        elif arm in {"agents_view_payload", "agents_view_payload_memory"}:
             context = payload_as_context(res.get("evidence_payload") or [])
-        answer = answer_with(client, machine, question, extra_context=context)
+        answer = answer_with(
+            client, machine, question, extra_context=context, memory_aware=memory_aware
+        )
     else:  # oracle
         context = full_text(machine, required_ids, budget=ctx_budget)
         evidence_complete = 1
-        answer = answer_with(client, machine, question, extra_context=context)
+        answer = answer_with(
+            client, machine, question, extra_context=context, memory_aware=memory_aware
+        )
 
     latency = time.monotonic() - start
     prompt = machine.whiteboard.render() + ("\n\n" + context if context else "")
@@ -246,6 +309,9 @@ def _run_arm(
     before_judge = judge_client.calls
     verdict, reason = judge(judge_client, question, gold, answer)
     judge_calls = judge_client.calls - before_judge
+    error_kind = ""
+    if error_classify and verdict != "correct":
+        error_kind, _er = classify_error(judge_client, question, gold, context, answer)
 
     return {
         "arm": arm,
@@ -281,6 +347,8 @@ def _run_arm(
         "fact_coverage": round(fact_coverage(machine, required_ids, prompt), 3),
         "answer": answer,
         "judge": {"verdict": verdict, "reason": reason, "prompt_version": JUDGE_PROMPT_VERSION},
+        "error_kind": error_kind,
+        "memory_aware": memory_aware,
         "calls": client.calls - before,
         "judge_calls": judge_calls,
         "latency": round(latency, 2),
@@ -304,7 +372,7 @@ def run_synthetic_case(
     gfr: bool = False,
 ) -> dict[str, Any]:
     cfg = Config(**ARMS[arm])
-    if payload_budget and arm == "agents_view_payload":
+    if payload_budget and arm in {"agents_view_payload", "agents_view_payload_memory"}:
         cfg.evidence_payload_budget = payload_budget
     machine, _ = build_machine(root / f"{arm}_{index:02d}", cfg, client)
     required_ids = [id_map[k] for k in task["required"]]
@@ -367,9 +435,10 @@ def run_external_case(
     ingest_summary: int = 300,
     ingest_why: int = 2000,
     gfr: bool = False,
+    error_classify: bool = False,
 ) -> dict[str, Any]:
     cfg = Config(**ARMS[arm])
-    if payload_budget and arm == "agents_view_payload":
+    if payload_budget and arm in {"agents_view_payload", "agents_view_payload_memory"}:
         cfg.evidence_payload_budget = payload_budget
     machine, id_map = build_external_machine(
         root / f"{arm}_{index:02d}", task, cfg, tags, client,
@@ -380,6 +449,7 @@ def run_external_case(
     row = _run_arm(
         arm, index, task["question"], task.get("type", "external"), gold, required_ids,
         machine, client, judge_client, ctx_budget=ctx_budget, expected_sessions=expected,
+        error_classify=error_classify,
     )
     row["ingest_summary"] = ingest_summary
     row["ingest_why"] = ingest_why
@@ -452,6 +522,7 @@ def main() -> None:
     p.add_argument("--ingest-summary", type=int, default=300, help="summary chars at ingestion")
     p.add_argument("--ingest-why", type=int, default=2000, help="why chars at ingestion (0 = full text)")
     p.add_argument("--gfr", action="store_true", help="measure Gold Fact Retention per case")
+    p.add_argument("--error-classify", action="store_true", help="classify answerer failures")
     p.add_argument("--seed", type=int, default=7)
     p.add_argument("--tag", action="store_true", help="tag external sessions at write time")
     p.add_argument("--api-key", default="")
@@ -524,6 +595,7 @@ def main() -> None:
         "ingest_summary": args.ingest_summary,
         "ingest_why": args.ingest_why,
         "gfr": args.gfr,
+        "error_classify": args.error_classify,
         "git_commit": commit,
         "fixture_version": "frozen-32" if args.dataset == "synthetic" else "longmemeval",
         "started_at": datetime.now(timezone.utc).isoformat(),
@@ -557,7 +629,7 @@ def main() -> None:
                         arm, i, task, gold[i], root, base, judge_client,
                         ctx_budget=args.ctx_budget, payload_budget=args.payload_budget,
                         ingest_summary=args.ingest_summary, ingest_why=args.ingest_why,
-                        gfr=args.gfr,
+                        gfr=args.gfr, error_classify=args.error_classify,
                         **extra,
                     )
                 )

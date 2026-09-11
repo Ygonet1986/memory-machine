@@ -285,7 +285,9 @@ an optional layer that selects which partitions to consult:
   - `lexical` — BM25 over the digests (no extra call; opt-in only).
 - No match → full sweep (`router_fallback: full`), or the most recent K.
 
-`router_enabled` is **false by default**. Measured on a synthetic benchmark of
+`router_enabled` is **true by default** (with `router_mode: llm`), because the
+semantic router preserves full recall while cutting the per-turn fan-out. The
+`lexical` mode remains opt-in only. Measured on a synthetic benchmark of
 lexically-distant tasks (24-48 memories, 6-12 partitions):
 
 | arm | recall | calls/query |

@@ -7,7 +7,7 @@ from fakes import FakeClient, text
 
 def _machine(tmp_path, handler):
     client = FakeClient(handler)
-    cfg = Config(capacity=3)
+    cfg = Config(capacity=3, router_enabled=False)
     return Machine(tmp_path, config=cfg, client=client)
 
 
@@ -188,7 +188,7 @@ def test_recall_cross_session(tmp_path):
     b = sdir / "ses_b"
     b.mkdir(parents=True)
 
-    m = Machine(b, config=Config(capacity=10), client=FakeClient(lambda m_, t: '{"annotations":[]}'))
+    m = Machine(b, config=Config(capacity=10, router_enabled=False), client=FakeClient(lambda m_, t: "{\"annotations\":[]}"))
     res = m.recall("which database should we use", cross_session=True)
     assert res["past_hits"]
     assert res["past_hits"][0]["session_id"] == "ses_a"

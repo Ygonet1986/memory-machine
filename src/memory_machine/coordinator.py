@@ -42,6 +42,7 @@ from .routing import (
     judge_coverage,
     select_plan_lexical,
     select_plan_llm,
+    view_coverage_signal,
 )
 from .secrets import SecretError
 from .sessions import save_session_meta, search_sessions, sessions_dir_for
@@ -288,14 +289,20 @@ class Machine:
             return coverage_signal(plan, annotated, [], self.tape)
         if mode == "agents":
             return coverage_signal(plan, annotated, run.coverage, self.tape, structural=False)
+        if mode == "views":
+            return view_coverage_signal(plan, annotated, self.tape)
         return coverage_signal(plan, annotated, run.coverage, self.tape)
 
     def _needs_fallback(
         self, plan: RoutingPlan, run: RecallRun, question: str, client: Any
     ) -> tuple[bool, str]:
-        signal, _missing = self._coverage_of(plan, run, question, client)
+        signal, missing = self._coverage_of(plan, run, question, client)
         if self.config.coverage_mode != "off":
             plan.coverage_signal = signal
+            plan.coverage_missing = list(missing)
+            if not plan.level1_coverage_signal:
+                plan.level1_coverage_signal = signal
+                plan.level1_coverage_missing = list(missing)
             plan.coverage = [
                 {"agent_id": c.agent_id, "coverage": c.coverage, "missing": list(c.missing)}
                 for c in run.coverage
@@ -315,16 +322,26 @@ class Machine:
         self, plan: RoutingPlan, run: RecallRun, question: str, client: Any
     ) -> bool:
         if self.config.coverage_mode != "off":
-            signal, _missing = self._coverage_of(plan, run, question, client)
+            signal, missing = self._coverage_of(plan, run, question, client)
             plan.coverage_signal = signal
+            plan.coverage_missing = list(missing)
             return signal == "complete"
         return bool(run.annotations)
 
-    def _expand_plan(self, plan: RoutingPlan) -> RoutingPlan | None:
-        related = related_views(
-            self.tape, plan.selected_views, top_k=self.config.cascade_expand_top_k
-        )
-        new_views = [v for v in related if v not in plan.selected_views]
+    def _expand_plan(
+        self, plan: RoutingPlan, missing_views: list[str] | None = None
+    ) -> RoutingPlan | None:
+        """Expand to the detected gaps first, then to co-occurring views."""
+        new_views = [
+            v
+            for v in (missing_views or [])
+            if v not in plan.selected_views and dimension_of(v) is not None
+        ]
+        if not new_views:
+            related = related_views(
+                self.tape, plan.selected_views, top_k=self.config.cascade_expand_top_k
+            )
+            new_views = [v for v in related if v not in plan.selected_views]
         if not new_views:
             return None
         expanded = RoutingPlan(
@@ -332,10 +349,14 @@ class Machine:
             dimensions=list(plan.dimensions),
             dimension_sources=dict(plan.dimension_sources),
             views_by_dimension={k: list(v) for k, v in plan.views_by_dimension.items()},
+            candidate_views=list(plan.candidate_views),
+            candidate_scores=dict(plan.candidate_scores),
             combination=plan.combination,
             confidence=plan.confidence,
             score=plan.score,
         )
+        expanded.level1_coverage_signal = plan.level1_coverage_signal
+        expanded.level1_coverage_missing = list(plan.level1_coverage_missing)
         for view in new_views:
             dim = dimension_of(view)
             if dim:
@@ -393,8 +414,11 @@ class Machine:
         self._fill_plan(plan, 1, ids, total, level1, reasons)
         if not cascade:
             if cfg.coverage_mode != "off":
-                signal, _missing = self._coverage_of(plan, run, question, client)
+                signal, missing = self._coverage_of(plan, run, question, client)
                 plan.coverage_signal = signal
+                plan.coverage_missing = list(missing)
+                plan.level1_coverage_signal = signal
+                plan.level1_coverage_missing = list(missing)
                 plan.coverage = [
                     {"agent_id": c.agent_id, "coverage": c.coverage, "missing": list(c.missing)}
                     for c in run.coverage
@@ -406,7 +430,7 @@ class Machine:
             return run, plan
         reasons.append(reason)
 
-        expanded = self._expand_plan(plan)
+        expanded = self._expand_plan(plan, plan.coverage_missing)
         if expanded is not None:
             ids2, mode2 = self._plan_ids(expanded)
             expanded.intersection_mode = mode2

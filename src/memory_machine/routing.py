@@ -137,6 +137,8 @@ class RoutingPlan:
     dimensions: list[str] = field(default_factory=list)
     dimension_sources: dict[str, str] = field(default_factory=dict)
     views_by_dimension: dict[str, list[str]] = field(default_factory=dict)
+    candidate_views: list[str] = field(default_factory=list)
+    candidate_scores: dict[str, float] = field(default_factory=dict)
     combination: str = "single"
     intersection_mode: str = ""
     intersection_size: int = 0
@@ -147,6 +149,9 @@ class RoutingPlan:
     fallback_reasons: list[str] = field(default_factory=list)
     coverage: list[dict[str, Any]] = field(default_factory=list)
     coverage_signal: str = ""
+    coverage_missing: list[str] = field(default_factory=list)
+    level1_coverage_signal: str = ""
+    level1_coverage_missing: list[str] = field(default_factory=list)
     consulted_ids: list[str] = field(default_factory=list)
     level1_ids: list[str] = field(default_factory=list)
     records_consulted: int = 0
@@ -164,6 +169,8 @@ class RoutingPlan:
             "dimensions": list(self.dimensions),
             "dimension_sources": dict(self.dimension_sources),
             "views_by_dimension": {k: list(v) for k, v in self.views_by_dimension.items()},
+            "candidate_views": list(self.candidate_views),
+            "candidate_scores": dict(self.candidate_scores),
             "combination": self.combination,
             "intersection_mode": self.intersection_mode,
             "intersection_size": self.intersection_size,
@@ -174,6 +181,9 @@ class RoutingPlan:
             "fallback_reasons": list(self.fallback_reasons),
             "coverage": list(self.coverage),
             "coverage_signal": self.coverage_signal,
+            "coverage_missing": list(self.coverage_missing),
+            "level1_coverage_signal": self.level1_coverage_signal,
+            "level1_coverage_missing": list(self.level1_coverage_missing),
             "consulted_ids": list(self.consulted_ids),
             "level1_ids": list(self.level1_ids),
             "records_consulted": self.records_consulted,
@@ -249,8 +259,14 @@ def ids_for_plan(tape: Tape, plan: RoutingPlan) -> tuple[set[str], str]:
     return union, "union_fallback"
 
 
-def select_plan_lexical(tape: Tape, query: str, *, view_top_k: int = 5) -> RoutingPlan:
-    """Deterministic dimension-aware plan (no LLM)."""
+def select_plan_lexical(
+    tape: Tape, query: str, *, view_top_k: int = 5, candidate_k: int = 6
+) -> RoutingPlan:
+    """Deterministic dimension-aware plan (no LLM).
+
+    ``candidate_views`` keeps the ranked regions beyond the selected ones, so a
+    coverage check can detect a plausible view the router did not select.
+    """
     index = build_index(tape)
     time_views = [v for v in index if dimension_of(v) == "temporal"]
     sources = detect_dimensions(query, available_time=time_views)
@@ -260,28 +276,44 @@ def select_plan_lexical(tape: Tape, query: str, *, view_top_k: int = 5) -> Routi
         dimension_sources=sources,
     )
     top_score = 0.0
+    candidates: list[str] = []
+    scores: dict[str, float] = {}
 
     if "semantic" in sources:
-        hits = rank_views(tape, query, limit=view_top_k, prefixes=SEMANTIC_PREFIXES)
+        hits = rank_views(tape, query, limit=candidate_k, prefixes=SEMANTIC_PREFIXES)
         if hits:
-            plan.views_by_dimension["semantic"] = [v for v, _s in hits]
+            plan.views_by_dimension["semantic"] = [v for v, _s in hits[:view_top_k]]
+            for view, score in hits:
+                candidates.append(view)
+                scores[view] = score
             top_score = max(top_score, hits[0][1])
 
     if "temporal" in sources:
         views = parse_time_views(query, time_views)
         if views:
             plan.views_by_dimension["temporal"] = views
+            for view in views:
+                candidates.append(view)
+                scores[view] = 1.0
 
     if "structural" in sources:
         tokens = set(re.findall(r"[a-z0-9_]+", query.lower()))
         views = [f"type/{TYPE_WORDS[t]}" for t in tokens if t in TYPE_WORDS]
         views = [v for v in dict.fromkeys(views) if v in index]
+        marker = bool(views)
         if not views:
-            hits = rank_views(tape, query, limit=view_top_k, prefixes=STRUCTURAL_PREFIXES)
+            hits = rank_views(tape, query, limit=candidate_k, prefixes=STRUCTURAL_PREFIXES)
             views = [v for v, _s in hits]
+            for view, score in hits:
+                scores[view] = score
         if views:
-            plan.views_by_dimension["structural"] = views
+            plan.views_by_dimension["structural"] = views[:view_top_k]
+            for view in views:
+                candidates.append(view)
+                scores.setdefault(view, 1.0 if marker else scores.get(view, 1.0))
 
+    plan.candidate_views = list(dict.fromkeys(candidates))
+    plan.candidate_scores = scores
     active = [d for d in DIMENSIONS if plan.views_by_dimension.get(d)]
     plan.combination = "intersection" if len(active) > 1 else "single"
     plan.score = top_score if top_score > 0 else None
@@ -364,11 +396,12 @@ def select_plan_llm(
         return None
     obj = extract_json_object(content)
     known = set(index)
-    views = [v for v in (obj.get("views") or []) if isinstance(v, str) and v in known][:top_k]
-    if not views:
+    candidates = [v for v in (obj.get("views") or []) if isinstance(v, str) and v in known][:10]
+    if not candidates:
         return None
+    selected = candidates[:top_k]
     views_by_dimension: dict[str, list[str]] = {}
-    for view in views:
+    for view in selected:
         dim = dimension_of(view)
         if dim:
             views_by_dimension.setdefault(dim, []).append(view)
@@ -384,6 +417,7 @@ def select_plan_llm(
         dimensions=dims,
         dimension_sources={d: SOURCE_LLM for d in dims},
         views_by_dimension=views_by_dimension,
+        candidate_views=candidates,
         combination="intersection" if len(active) > 1 else "single",
         confidence=max(0.0, min(1.0, confidence)),
     )
@@ -494,4 +528,36 @@ def coverage_signal(
             covered |= set(record.views)
     if selected and not (selected & covered):
         return "partial", ["annotated memories are outside the selected views"]
+    return "complete", []
+
+
+def view_coverage_signal(
+    plan: RoutingPlan,
+    annotated_ids: set[str],
+    tape: Tape,
+    *,
+    candidate_k: int = 6,
+    min_ratio: float = 0.6,
+) -> tuple[str, list[str]]:
+    """Coverage of the plan's *candidate* views: did we leave a plausible region out?
+
+    Unlike :func:`coverage_signal`, this detects a region the router did NOT
+    select: candidate views ranked for the query (beyond the selected ones)
+    with no annotated memory are reported as gaps, so the cascade can expand
+    straight to them. Returns the raw view names in ``missing``.
+    """
+    covered: set[str] = set()
+    for record in tape.read():
+        if record.id in annotated_ids:
+            covered |= set(record.views)
+    scores = plan.candidate_scores or {}
+    top = max(scores.values()) if scores else 1.0
+    required = [
+        v
+        for v in plan.candidate_views[:candidate_k]
+        if v not in plan.selected_views and scores.get(v, 1.0) >= min_ratio * top
+    ]
+    gaps = [v for v in required if v not in covered]
+    if gaps:
+        return "partial", gaps
     return "complete", []

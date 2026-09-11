@@ -437,6 +437,16 @@ Readings (v0.5b):
   primary target (>= 0.98) is not met; the oracle (1.00 at 7.7 calls / 0.84
   reduction) shows the remaining headroom is in the router and the coverage
   signal, not the topology.
+- **M3b — per-required-view coverage is waste-calibrated but gap-blind**: the
+  plan keeps the ranked candidate views beyond the selected ones
+  (`candidate_views`/`candidate_scores`); with a relative score threshold
+  (>= 0.6 of the top), an uncovered candidate is a gap and the cascade expands
+  straight to it (`coverage_mode: views`). Measured: 31/32 `complete` with only
+  1 wasted fallback, but none of the 3 real misses is flagged (false-safe 3/3)
+  — the required view never entered the lexical candidate ranking ("retrieval"
+  vs "router"). End-to-end it is C1d plus one fallback (0.91 complete evidence
+  at 10.0 calls). The remaining gap is *semantic*: detecting a region the
+  lexical ranking never proposed.
 
 ## 16. Failure Modes
 

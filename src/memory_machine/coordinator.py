@@ -32,7 +32,7 @@ from .llm import LLMClient, LLMError
 from .main_chatbot import memory_from_spec, run_main_chatbot
 from .metacognition import update_metacognition
 from .retrieval import Embedder
-from .router import select_groups
+from .router import select_groups, select_groups_llm
 from .secrets import SecretError
 from .sessions import save_session_meta, search_sessions, sessions_dir_for
 from .tape import MemoryRecord, Tape
@@ -79,12 +79,10 @@ class Machine:
     def _embedder(self) -> Any:
         if not self.config.embedding_model:
             return None
-        key = os.environ.get(self.config.embedding_api_key_env, "")
-        if not key:
-            return None
-        return Embedder(
-            self.config.embedding_base_url, key, self.config.embedding_model
-        )
+        key = ""
+        if self.config.embedding_api_key_env:
+            key = os.environ.get(self.config.embedding_api_key_env, "")
+        return Embedder(self.config.embedding_base_url, key, self.config.embedding_model)
 
     def _select_groups(self, question: str) -> list[Any] | None:
         """Groups to consult, or None to consult all (full sweep)."""
@@ -96,6 +94,16 @@ class Machine:
             and self._recall_count % self.config.router_full_every == 0
         ):
             return None
+        if self.config.router_mode == "llm":
+            selected = select_groups_llm(
+                self.tape,
+                self.manifest,
+                question,
+                self.ensure_client_optional(),
+                top_k=self.config.router_top_k,
+            )
+            if selected is not None:
+                return selected
         embedder = self._embedder() if self.config.router_mode == "embedding" else None
         return select_groups(
             self.tape,

@@ -10,8 +10,11 @@ partition is never silently skipped.
 
 from __future__ import annotations
 
+from typing import Any
+
 from .agents import deterministic_digest
 from .groups import Group, Manifest
+from .llm import extract_json_object
 from .retrieval import Embedder, rank, rank_semantic
 from .tape import MemoryRecord, Tape, parse_id
 
@@ -79,3 +82,62 @@ def select_groups(
             return sorted(groups, key=lambda g: g.end, reverse=True)[:top_k]
         return groups  # full sweep
     return [groups[i] for i, _score in hits]
+
+
+ROUTER_PROMPT = """You route a query to the memory partitions that may hold \
+memories relevant to it. Partitions and what they cover:
+
+{partitions}
+
+Query: {query}
+
+Return ONLY JSON, nothing else:
+{{"groups":["G1","G3"]}}
+
+Choose up to {top_k} partition ids whose memories are most likely relevant to \
+the query, even if the wording differs (match by meaning, not just words). If \
+none could be relevant, return {{"groups":[]}}."""
+
+
+def select_groups_llm(
+    tape: Tape,
+    manifest: Manifest,
+    query: str,
+    client: Any,
+    *,
+    top_k: int = 5,
+    temperature: float = 0.0,
+) -> list[Group] | None:
+    """Semantic routing via one LLM call over the partition digests.
+
+    Returns the selected groups, or ``None`` on failure (caller falls back).
+    """
+    groups = list(manifest.groups)
+    if not groups or client is None:
+        return None
+
+    by_num = _active_by_num(tape)
+    lines: list[str] = []
+    for g in groups:
+        records = group_records_by_num(by_num, g)
+        digest = group_digest(manifest, g, records)[:300] or "(no digest)"
+        lines.append(f"{g.id}: {digest}")
+
+    messages = [
+        {
+            "role": "system",
+            "content": ROUTER_PROMPT.format(
+                partitions="\n".join(lines), query=query, top_k=top_k
+            ),
+        },
+        {"role": "user", "content": query},
+    ]
+    try:
+        content = client.complete(messages, temperature=temperature)
+    except Exception:
+        return None
+
+    ids = extract_json_object(content).get("groups") or []
+    by_id = {g.id: g for g in groups}
+    selected = [by_id[i] for i in ids if isinstance(i, str) and i in by_id][:top_k]
+    return selected or None

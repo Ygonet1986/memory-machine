@@ -73,7 +73,9 @@ class Config:
         )
         self.attach_chunk_size = max(100, _int(self.attach_chunk_size, 600))
         self.router_enabled = bool(self.router_enabled)
-        self.router_mode = self.router_mode if self.router_mode in {"lexical", "embedding"} else "lexical"
+        self.router_mode = (
+            self.router_mode if self.router_mode in {"lexical", "embedding", "llm"} else "lexical"
+        )
         self.router_top_k = max(1, _int(self.router_top_k, 5))
         self.router_fallback = (
             self.router_fallback if self.router_fallback in {"full", "recent"} else "full"

@@ -160,6 +160,7 @@ def main() -> None:
     p.add_argument("--scale", type=int, default=1)
     p.add_argument("--model", default="deepseek-v4-flash")
     p.add_argument("--api-key", default="")
+    p.add_argument("--router-mode", default="lexical", choices=["lexical", "llm", "embedding"])
     args = p.parse_args()
 
     import os
@@ -176,8 +177,16 @@ def main() -> None:
     # Full agents: router disabled.
     full_cfg = Config(capacity=args.capacity, router_enabled=False)
     full = Machine(root, config=full_cfg)
-    # Router arm: default top_k=2 (from config.json).
-    router = Machine(root, config=Config(capacity=args.capacity, router_top_k=2))
+    # Router arm: enabled with the chosen mode, top_k=2.
+    router = Machine(
+        root,
+        config=Config(
+            capacity=args.capacity,
+            router_enabled=True,
+            router_mode=args.router_mode,
+            router_top_k=2,
+        ),
+    )
 
     print(
         f"memories: {len(machine.tape)} | groups: {len(machine.manifest.groups)} "

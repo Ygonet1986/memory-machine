@@ -1,7 +1,7 @@
 from memory_machine.config import Config
 from memory_machine.coordinator import Machine
 from memory_machine.groups import Manifest, ensure_group
-from memory_machine.router import select_groups
+from memory_machine.router import select_groups, select_groups_llm
 from memory_machine.tape import MemoryRecord, Tape
 
 from fakes import FakeClient
@@ -104,3 +104,24 @@ def test_select_groups_semantic(tmp_path):
         tape, manifest, "which RDBMS holds accounts?", top_k=1, embedder=_FakeEmbedder()
     )
     assert [g.id for g in selected] == ["G1"]
+
+
+def test_select_groups_llm(tmp_path):
+    tape, manifest, g1, g2, _a1, _a2 = _two_groups(tmp_path)
+    client = FakeClient(lambda messages, temperature: '{"groups":["G1"]}')
+    selected = select_groups_llm(
+        tape, manifest, "which RDBMS holds accounts?", client, top_k=1
+    )
+    assert [g.id for g in selected] == ["G1"]
+
+
+def test_select_groups_llm_empty_returns_none(tmp_path):
+    tape, manifest, *_ = _two_groups(tmp_path)
+    client = FakeClient(lambda messages, temperature: '{"groups":[]}')
+    assert select_groups_llm(tape, manifest, "x", client) is None
+
+
+def test_select_groups_llm_ignores_unknown_ids(tmp_path):
+    tape, manifest, *_ = _two_groups(tmp_path)
+    client = FakeClient(lambda messages, temperature: '{"groups":["G99"]}')
+    assert select_groups_llm(tape, manifest, "x", client) is None

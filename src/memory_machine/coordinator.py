@@ -171,8 +171,16 @@ class Machine:
         views, score = self._select_views(question)
         if not views:
             return None
+        candidates = list(views)
+        selected = list(views)
+        if self.config.view_prune == "subject" and any(
+            v.startswith("topic/") for v in views
+        ):
+            # Specific beats broad: drop subject views when a topic view matched,
+            # keeping them as candidates so coverage can expand back to them.
+            selected = [v for v in views if not v.startswith("subject/")]
         by_dim: dict[str, list[str]] = {}
-        for view in views:
+        for view in selected:
             dim = dimension_of(view)
             if dim:
                 by_dim.setdefault(dim, []).append(view)
@@ -182,6 +190,7 @@ class Machine:
             dimensions=dims,
             dimension_sources={d: "legacy" for d in dims},
             views_by_dimension=by_dim,
+            candidate_views=candidates,
             combination="union",
             intersection_mode="union",
             score=score,
@@ -340,12 +349,25 @@ class Machine:
     def _expand_plan(
         self, plan: RoutingPlan, missing_views: list[str] | None = None
     ) -> RoutingPlan | None:
-        """Expand to the detected gaps first, then to co-occurring views."""
+        """Expand to the detected gaps first, then to co-occurring views.
+
+        Gap strings from a judge are matched back to candidate views (by view
+        name or its suffix) before falling back to co-occurrence.
+        """
+        missing = list(missing_views or [])
         new_views = [
             v
-            for v in (missing_views or [])
+            for v in missing
             if v not in plan.selected_views and dimension_of(v) is not None
         ]
+        if not new_views and missing:
+            lowered = [m.lower() for m in missing]
+            for view in plan.candidate_views:
+                if view in plan.selected_views:
+                    continue
+                name = view.split("/", 1)[-1].lower()
+                if any(view.lower() in m or name in m for m in lowered):
+                    new_views.append(view)
         if not new_views:
             related = related_views(
                 self.tape, plan.selected_views, top_k=self.config.cascade_expand_top_k

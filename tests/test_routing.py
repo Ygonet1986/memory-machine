@@ -413,3 +413,81 @@ def test_judge_coverage_v2_sees_candidate_regions(tmp_path):
     assert missing == ["topic/benchmarks"]
     assert "topic/benchmarks" in captured["sys"]
     assert "benchmarks changed the router" in captured["sys"]
+
+
+# ------------------------------------------------------------------- pruning
+
+
+def test_view_prune_subject_keeps_it_as_candidate(tmp_path):
+    seen: dict[str, str] = {}
+
+    def handler(messages, temperature):
+        sys_text = text(messages, "system")
+        if "regions (views)" in sys_text:
+            return '{"views":["topic/router","subject/memory-machine"],"confidence":0.9}'
+        seen["sys"] = sys_text
+        return '{"digest":"d","checklist":[],"annotations":[],"coverage":"complete"}'
+
+    m = _machine(
+        tmp_path,
+        handler,
+        router_enabled=True,
+        router_mode="views",
+        view_router_mode="llm",
+        view_prune="subject",
+    )
+    m.add_memory(MemoryRecord(type="decision", summary="router opt-in", views=["topic/router"]))
+    m.add_memory(
+        MemoryRecord(type="lesson", summary="subject only note",
+                     views=["subject/memory-machine"])
+    )
+    res = m.recall("what about the router?")
+    routing = res["routing"]
+    assert routing["selected_views"] == ["topic/router"]
+    assert routing["candidate_views"] == ["topic/router", "subject/memory-machine"]
+    assert "router opt-in" in seen["sys"]
+    assert "subject only note" not in seen["sys"]
+
+
+def test_cascade_expands_missing_judge_region(tmp_path):
+    calls = {"agents": 0, "judge": 0}
+
+    def handler(messages, temperature):
+        sys_text = text(messages, "system")
+        if "regions (views)" in sys_text:
+            return '{"views":["topic/router","subject/memory-machine"],"confidence":0.9}'
+        if "You judge whether the memories" in sys_text:
+            calls["judge"] += 1
+            if calls["judge"] == 1:
+                return '{"coverage":"partial","missing":["subject/memory-machine"],"reason":"region missing"}'
+            return '{"coverage":"complete","missing":[],"reason":"covered"}'
+        calls["agents"] += 1
+        if calls["agents"] == 1:
+            return (
+                '{"digest":"d","checklist":[],"annotations":'
+                '[{"memory_id":"M0001","note":"router","relevance":0.9}],"coverage":"complete"}'
+            )
+        return (
+            '{"digest":"d","checklist":[],"annotations":'
+            '[{"memory_id":"M0002","note":"subject note","relevance":0.9}],"coverage":"complete"}'
+        )
+
+    m = _machine(
+        tmp_path,
+        handler,
+        router_enabled=True,
+        router_mode="cascade",
+        view_router_mode="llm",
+        view_prune="subject",
+        coverage_mode="judge_views",
+    )
+    m.add_memory(MemoryRecord(type="decision", summary="router opt-in", views=["topic/router"]))
+    m.add_memory(
+        MemoryRecord(type="lesson", summary="subject only note",
+                     views=["subject/memory-machine"])
+    )
+    res = m.recall("what about the router?")
+    routing = res["routing"]
+    assert routing["level1_coverage_signal"] == "partial"
+    assert routing["level"] == 2
+    assert any(a["memory_id"] == "M0002" for a in res["annotations"])

@@ -590,6 +590,14 @@ ARM_CONFIGS: dict[str, Config] = {
         router_enabled=True, router_mode="cascade", view_router_mode="lexical",
         view_dimension_mode="auto", view_top_k=3, coverage_mode="judge_views",
     ),
+    "view_llm_prune": Config(
+        router_enabled=True, router_mode="views", view_router_mode="llm",
+        view_top_k=5, view_prune="subject",
+    ),
+    "cascade_llm_prune_judge2": Config(
+        router_enabled=True, router_mode="cascade", view_router_mode="llm",
+        view_top_k=5, view_prune="subject", coverage_mode="judge_views",
+    ),
 }
 
 

@@ -46,6 +46,7 @@ class Config:
     view_router_mode: str = "lexical"
     view_top_k: int = 5
     view_dimension_mode: str = "off"
+    view_prune: str = "none"
     coverage_mode: str = "off"
     cascade_min_score: float = 0.0
     cascade_expand_top_k: int = 5
@@ -97,6 +98,7 @@ class Config:
         self.view_dimension_mode = (
             self.view_dimension_mode if self.view_dimension_mode in {"off", "auto"} else "off"
         )
+        self.view_prune = self.view_prune if self.view_prune in {"none", "subject"} else "none"
         self.coverage_mode = (
             self.coverage_mode if self.coverage_mode in {"off", "agents", "structural", "both", "judge", "judge_views", "views"} else "off"
         )

@@ -15,7 +15,7 @@ import os
 from pathlib import Path
 from typing import Any
 
-from .agents import RecallRun, run_agents
+from .agents import RecallRun, run_agents, run_view_agents
 from .attachments import ingest_attachment
 from .config import Config, resolve_path
 from .consolidate import consolidate_whiteboard
@@ -434,14 +434,25 @@ class Machine:
                 include_checklist, total,
             )
 
-        ids, mode = self._plan_ids(plan)
-        plan.intersection_mode = mode
-        plan.intersection_size = len(ids)
-        level1 = len(ids)
-        run = self._run_level(
-            client, ids=ids, temperature=temperature,
-            max_workers=max_workers, include_checklist=include_checklist,
-        )
+        if cfg.agent_mode == "view":
+            ids = ids_in_views(self.tape, plan.selected_views)
+            plan.intersection_mode = "views"
+            plan.intersection_size = len(ids)
+            level1 = len(ids)
+            run = run_view_agents(
+                self.tape, self.whiteboard, client,
+                views=plan.selected_views, temperature=temperature,
+                max_workers=max_workers,
+            )
+        else:
+            ids, mode = self._plan_ids(plan)
+            plan.intersection_mode = mode
+            plan.intersection_size = len(ids)
+            level1 = len(ids)
+            run = self._run_level(
+                client, ids=ids, temperature=temperature,
+                max_workers=max_workers, include_checklist=include_checklist,
+            )
         self._fill_plan(plan, 1, ids, total, level1, reasons)
         if not cascade:
             if cfg.coverage_mode != "off":
@@ -463,13 +474,23 @@ class Machine:
 
         expanded = self._expand_plan(plan, plan.coverage_missing)
         if expanded is not None:
-            ids2, mode2 = self._plan_ids(expanded)
-            expanded.intersection_mode = mode2
-            expanded.intersection_size = len(ids2)
-            new = self._run_level(
-                client, ids=ids2, temperature=temperature,
-                max_workers=max_workers, include_checklist=include_checklist,
-            )
+            if cfg.agent_mode == "view":
+                ids2 = ids_in_views(self.tape, expanded.selected_views)
+                expanded.intersection_mode = "views"
+                expanded.intersection_size = len(ids2)
+                new = run_view_agents(
+                    self.tape, self.whiteboard, client,
+                    views=expanded.selected_views, temperature=temperature,
+                    max_workers=max_workers,
+                )
+            else:
+                ids2, mode2 = self._plan_ids(expanded)
+                expanded.intersection_mode = mode2
+                expanded.intersection_size = len(ids2)
+                new = self._run_level(
+                    client, ids=ids2, temperature=temperature,
+                    max_workers=max_workers, include_checklist=include_checklist,
+                )
             run = self._merge_runs(run, new)
             if self._resolved(expanded, new, question, client):
                 self._fill_plan(expanded, 2, ids2, total, level1, reasons)

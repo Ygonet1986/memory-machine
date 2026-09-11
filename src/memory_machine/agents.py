@@ -20,6 +20,7 @@ from typing import Any
 from .groups import Agent, Group, Manifest, group_records
 from .llm import extract_json_object
 from .tape import MemoryRecord, Tape
+from .views import records_in_views
 from .whiteboard import Annotation, Whiteboard
 
 
@@ -195,6 +196,126 @@ def _deterministic_checklist(records: list[MemoryRecord], max_items: int = 8) ->
 def _digest_from_obj(obj: dict[str, Any]) -> str:
     digest = obj.get("digest")
     return digest.strip() if isinstance(digest, str) else ""
+
+
+# ---------------------------------------------------------------- view agents
+# A view agent watches a *region* of the memory (a view) instead of a
+# chronological group. The same memory can be examined by several perspectives
+# without being duplicated: a topic agent looks for domain facts and decisions,
+# a temporal agent for evolution and sequence, a structural agent for kinds.
+
+VIEW_PERSPECTIVES = {
+    "semantic": "Look for facts, decisions, relations and constraints in this domain.",
+    "temporal": "Look for evolution, sequence, changes, versions and earlier decisions.",
+    "structural": "Look for items of this kind and where they came from.",
+}
+
+VIEW_AGENT_INSTRUCTIONS = """You are a {dimension} memory agent watching the view \
+`{view}` of the memory tape. {perspective}
+
+Your memories (only these; never invent others):
+
+{records}
+
+The shared whiteboard below describes the work happening right now.
+
+Do three things in one response:
+
+1. Write a short digest of what this view covers.
+
+2. Identify which of YOUR memories MUST be remembered for the current work \
+and annotate them.
+
+3. Judge whether YOUR view is sufficient for the current work: "coverage" is \
+"complete" (it covers what the work needs), "partial" (something relevant is \
+missing) or "uncertain" (you cannot tell), and "missing" lists what is missing \
+(empty when complete).
+
+Return ONLY a JSON object, nothing else:
+
+{{"digest":"<what this view covers>","annotations":[{{"memory_id":"M0001","note":"<why this matters now>","relevance":0.0}}],"coverage":"complete","missing":[]}}
+
+Rules:
+- Only annotate memory ids that appear in YOUR list above.
+- relevance is a number from 0.0 (marginal) to 1.0 (critical).
+- If nothing must be remembered, return "annotations":[].
+- coverage/missing are telemetry about THIS question only, never memories.
+- Do not invent memory ids or facts outside your view."""
+
+
+def view_agent_prompt(view: str, records: list[MemoryRecord]) -> str:
+    """System prompt for a view agent, with a perspective per dimension."""
+    from .routing import dimension_of
+
+    dimension = dimension_of(view) or "semantic"
+    body = "\n".join(r.text() for r in records) if records else "(no memories in this view)"
+    return VIEW_AGENT_INSTRUCTIONS.format(
+        dimension=dimension,
+        view=view,
+        perspective=VIEW_PERSPECTIVES.get(dimension, VIEW_PERSPECTIVES["semantic"]),
+        records=body,
+    )
+
+
+def _run_view_one(
+    view: str,
+    records: list[MemoryRecord],
+    whiteboard: Whiteboard,
+    client: Any,
+    *,
+    temperature: float,
+) -> tuple[list[Annotation], CoverageSignal]:
+    messages = [
+        {"role": "system", "content": view_agent_prompt(view, records)},
+        {"role": "user", "content": agent_user_prompt(whiteboard)},
+    ]
+    content = client.complete(messages, temperature=temperature)
+    obj = extract_json_object(content)
+    return _annotations_from_obj(obj, f"view:{view}"), _coverage_from_obj(obj, f"view:{view}")
+
+
+def run_view_agents(
+    tape: Tape,
+    whiteboard: Whiteboard,
+    client: Any,
+    *,
+    views: list[str],
+    temperature: float = 0.0,
+    max_workers: int | None = None,
+    on_error: str = "skip",
+) -> RecallRun:
+    """Dispatch one perspective agent per selected view, in parallel.
+
+    Unlike group agents (which see a chronological partition), a view agent
+    sees every active memory in its view, so several agents can examine the
+    same memory from different perspectives without duplicating it.
+    """
+    tasks: list[tuple[str, list[MemoryRecord]]] = []
+    for view in dict.fromkeys(views):
+        records = records_in_views(tape, [view])
+        if records:
+            tasks.append((view, records))
+
+    if not tasks:
+        return RecallRun()
+
+    def work(item: tuple[str, list[MemoryRecord]]) -> tuple[list[Annotation], CoverageSignal]:
+        view, records = item
+        return _run_view_one(view, records, whiteboard, client, temperature=temperature)
+
+    run = RecallRun()
+    with ThreadPoolExecutor(max_workers=max_workers or len(tasks)) as pool:
+        futures = [pool.submit(work, t) for t in tasks]
+        for fut in futures:
+            try:
+                annotations, coverage = fut.result()
+            except Exception:
+                if on_error == "raise":
+                    raise
+                continue
+            run.annotations.extend(annotations)
+            run.coverage.append(coverage)
+    return run
 
 
 def _coverage_from_obj(obj: dict[str, Any], agent_id: str) -> CoverageSignal:

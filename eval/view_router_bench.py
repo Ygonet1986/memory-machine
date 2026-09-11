@@ -598,6 +598,18 @@ ARM_CONFIGS: dict[str, Config] = {
         router_enabled=True, router_mode="cascade", view_router_mode="llm",
         view_top_k=5, view_prune="subject", coverage_mode="judge_views",
     ),
+    "view_agents_lex": Config(
+        router_enabled=True, router_mode="views", view_router_mode="lexical",
+        view_dimension_mode="auto", view_top_k=3, agent_mode="view",
+    ),
+    "view_agents_llm": Config(
+        router_enabled=True, router_mode="views", view_router_mode="llm",
+        view_dimension_mode="auto", view_top_k=3, agent_mode="view",
+    ),
+    "view_agents_llm_prune": Config(
+        router_enabled=True, router_mode="views", view_router_mode="llm",
+        view_top_k=5, view_prune="subject", agent_mode="view",
+    ),
 }
 
 

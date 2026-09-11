@@ -20,6 +20,7 @@ import re
 from dataclasses import dataclass, field
 from typing import Any
 
+from .attention import blend, classify, normalize
 from .llm import extract_json_object
 from .tape import Tape
 from .views import build_index, rank_views
@@ -144,6 +145,11 @@ class RoutingPlan:
     intersection_size: int = 0
     confidence: float | None = None
     score: float | None = None
+    view_scores: dict[str, dict[str, float | str]] = field(default_factory=dict)
+    attention_before: dict[str, float] = field(default_factory=dict)
+    attention_after: dict[str, float] = field(default_factory=dict)
+    anaphoric: bool = False
+    attention_gate: str = ""
     # execution metadata, filled while running
     level: int = 1
     fallback_reasons: list[str] = field(default_factory=list)
@@ -177,6 +183,11 @@ class RoutingPlan:
             "confidence": self.confidence,
             "score": self.score,
             "view_score": self.score,
+            "view_scores": {k: dict(v) for k, v in self.view_scores.items()},
+            "attention_before": dict(self.attention_before),
+            "attention_after": dict(self.attention_after),
+            "anaphoric": self.anaphoric,
+            "attention_gate": self.attention_gate,
             "level": self.level,
             "fallback_reasons": list(self.fallback_reasons),
             "coverage": list(self.coverage),
@@ -259,8 +270,62 @@ def ids_for_plan(tape: Tape, plan: RoutingPlan) -> tuple[set[str], str]:
     return union, "union_fallback"
 
 
+def _apply_attention(
+    plan: RoutingPlan,
+    index: dict[str, list[str]],
+    attention: dict[str, float],
+    weight: float,
+    *,
+    view_top_k: int,
+    candidate_k: int,
+) -> None:
+    """Re-rank the plan with the attention prior; active views are guaranteed."""
+    active = {v: w for v, w in attention.items() if w > 0 and v in index}
+    if not active:
+        return
+    router = dict(plan.candidate_scores)
+    views = list(dict.fromkeys(list(plan.candidate_views) + list(active)))
+    final = blend(router, active, weight)
+    router_norm = normalize(router)
+    by_dim: dict[str, list[str]] = {}
+    for view in views:
+        dim = dimension_of(view)
+        if dim:
+            by_dim.setdefault(dim, []).append(view)
+    new_selected: dict[str, list[str]] = {}
+    new_candidates: list[str] = []
+    scores: dict[str, dict[str, float | str]] = {}
+    for dim, dim_views in by_dim.items():
+        ranked = sorted(dim_views, key=lambda v: (-final.get(v, 0.0), v))
+        # Active views are guaranteed *candidates* (they are in ``views`` via the
+        # union above) but not guaranteed slots: on a topic shift the new topic's
+        # router score must be able to outrank the decaying prior.
+        selected = ranked if dim == "temporal" else ranked[:view_top_k]
+        new_selected[dim] = selected
+        new_candidates.extend(ranked[:candidate_k])
+        for view in selected:
+            weighted = weight * active.get(view, 0.0)
+            scores[view] = {
+                "router": round(router_norm.get(view, 0.0), 4),
+                "attention": round(active.get(view, 0.0), 4),
+                "attention_weighted": round(weighted, 4),
+                "final": round(final.get(view, 0.0), 4),
+                "contribution": classify(router_norm.get(view, 0.0), weighted),
+            }
+    plan.views_by_dimension = new_selected
+    plan.candidate_views = list(dict.fromkeys(new_candidates))
+    plan.dimensions = [d for d in DIMENSIONS if new_selected.get(d)]
+    plan.view_scores = scores
+
+
 def select_plan_lexical(
-    tape: Tape, query: str, *, view_top_k: int = 5, candidate_k: int = 6
+    tape: Tape,
+    query: str,
+    *,
+    view_top_k: int = 5,
+    candidate_k: int = 6,
+    attention: dict[str, float] | None = None,
+    attention_weight: float = 0.0,
 ) -> RoutingPlan:
     """Deterministic dimension-aware plan (no LLM).
 
@@ -314,6 +379,27 @@ def select_plan_lexical(
 
     plan.candidate_views = list(dict.fromkeys(candidates))
     plan.candidate_scores = scores
+    if attention and attention_weight > 0:
+        _apply_attention(
+            plan,
+            index,
+            attention,
+            attention_weight,
+            view_top_k=view_top_k,
+            candidate_k=candidate_k,
+        )
+    if not plan.view_scores:
+        router_norm = normalize(plan.candidate_scores)
+        plan.view_scores = {
+            view: {
+                "router": round(router_norm.get(view, 0.0), 4),
+                "attention": 0.0,
+                "attention_weighted": 0.0,
+                "final": round(router_norm.get(view, 0.0), 4),
+                "contribution": classify(router_norm.get(view, 0.0), 0.0),
+            }
+            for view in plan.selected_views
+        }
     active = [d for d in DIMENSIONS if plan.views_by_dimension.get(d)]
     plan.combination = "intersection" if len(active) > 1 else "single"
     plan.score = top_score if top_score > 0 else None
@@ -330,6 +416,8 @@ indexed by views grouped into three dimensions:
 Available views, by dimension:
 
 {views}
+
+{attention}
 
 Current working context:
 
@@ -353,6 +441,7 @@ def select_plan_llm(
     client: Any,
     *,
     whiteboard: Any = None,
+    attention: dict[str, float] | None = None,
     top_k: int = 5,
     max_views: int = 40,
 ) -> RoutingPlan | None:
@@ -379,11 +468,22 @@ def select_plan_llm(
             if hasattr(whiteboard, "render")
             else str(whiteboard)
         )
+    attention_block = ""
+    if attention:
+        active = sorted(
+            ((v, w) for v, w in attention.items() if w > 0), key=lambda x: -x[1]
+        )[:8]
+        if active:
+            attention_block = (
+                "Currently active views (previous turn; the new message may refer to them):\n"
+                + ", ".join(f"{v} ({w:.2f})" for v, w in active)
+            )
     messages = [
         {
             "role": "system",
             "content": DIMENSION_ROUTER_PROMPT.format(
                 views="\n".join(lines),
+                attention=attention_block,
                 whiteboard=board or "(empty whiteboard)",
                 query=query,
             ),

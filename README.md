@@ -87,9 +87,12 @@ Use `-C <dir>` to operate on a specific project directory. Run
   context (`context.json`) and consolidates it on its own schedule, independent
   of the whiteboard, so it never runs out of context over a long project.
 - **Memory router** (opt-in) — selects the top-K partitions (via group digests)
-  instead of consulting every agent, cutting fan-out. Off by default because
-  *lexical* routing can miss lexically-distant memories; use
-  `router_mode: embedding` for semantic routing.
+  instead of consulting every agent, cutting fan-out from O(N) to O(K). Off by
+  default. Modes: `llm` (one routing call, semantic; recommended), `embedding`
+  (cosine over digests; needs an embeddings provider like Ollama), or `lexical`
+  (BM25; cheapest but unsafe for lexically-distant memories). Measured:
+  full sweep = 12 calls/query at recall 1.00; LLM router = 3 calls/query at
+  recall 1.00; lexical router = 5.5 calls at recall 0.39.
 - **Provenance** — rollups record `derived_from`; `rehydrate <id>` recovers the
   original (archived) memories so compression is never a dead end.
 

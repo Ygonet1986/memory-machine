@@ -161,6 +161,9 @@ def main() -> None:
     p.add_argument("--model", default="deepseek-v4-flash")
     p.add_argument("--api-key", default="")
     p.add_argument("--router-mode", default="lexical", choices=["lexical", "llm", "embedding"])
+    p.add_argument("--top-k", type=int, default=2)
+    p.add_argument("--embedding-model", default="")
+    p.add_argument("--embedding-base-url", default="")
     args = p.parse_args()
 
     import os
@@ -184,7 +187,9 @@ def main() -> None:
             capacity=args.capacity,
             router_enabled=True,
             router_mode=args.router_mode,
-            router_top_k=2,
+            router_top_k=args.top_k,
+            embedding_model=args.embedding_model,
+            embedding_base_url=args.embedding_base_url,
         ),
     )
 

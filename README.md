@@ -116,6 +116,10 @@ Use `-C <dir>` to operate on a specific project directory. Run
   cap lifts Gold Fact Retention from 0.42 to 0.83 and strict accuracy from 0.33
   to 0.50 (evidence recall constant at 0.75 — the loss was upstream of
   retrieval).
+- **H6a (refuted)** — an explicit temporal-computation procedure in the
+  answerer prompt (gated by markers) fixed none of the four audited
+  arithmetic/anchor errors: temporal | evidence complete stayed 5/9. Together
+  with H4, prompt-only interventions do not move the answerer.
 - **H5' (partial)** — restoring the real session timestamps and the question
   date (`--ingest-dates`) improves temporal-reasoning 0.29 -> 0.43 (n=14)
   consistently, though overall strict stays flat (0.56); an oracle with all
@@ -165,6 +169,17 @@ Use `-C <dir>` to operate on a specific project directory. Run
   calls; the ground-truth-views oracle reaches 1.00 at 7.7 calls / 0.84
   reduction, so the router and the coverage signal — not the topology — are the
   bottleneck (manual 40.4/40.5).
+
+## Status (v1.0)
+
+The experimental program tested one layer at a time. Confirmed: perspective
+agents over views (H1), factual-content delivery (H2), budgeted evidence with
+relative parity at -70% context (H3). Refuted: the memory-aware prompt (H4),
+multi-session aggregation as the bottleneck (H5), the temporal-computation
+prompt (H6a). Partial: real timestamps for temporal reasoning (H5').
+Two findings stand out: the external ingestion cap was losing ~80% of each
+session at write time, and an oracle with unlimited context scores *below* the
+4000-char payload — the budget is a protective filter, not just a cost play.
 
 ## Configuration
 

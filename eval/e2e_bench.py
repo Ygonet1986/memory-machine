@@ -159,19 +159,23 @@ ARMS: dict[str, dict[str, Any]] = {
     "agents_view_payload": dict(VIEW_CONFIG, evidence_payload="budgeted"),
     "agents_view_payload_memory": dict(VIEW_CONFIG, evidence_payload="budgeted"),
     "agents_view_payload_dates": dict(VIEW_CONFIG, evidence_payload="budgeted"),
+    "agents_view_payload_dates_temporal": dict(VIEW_CONFIG, evidence_payload="budgeted"),
     "oracle": {},
     "oracle_memory": {},
     "oracle_dates": {},
 }
 
 MEMORY_AWARE_ARMS = {"agents_view_payload_memory", "oracle_memory"}
-DATES_ARMS = {"agents_view_payload_dates", "oracle_dates"}
+DATES_ARMS = {
+    "agents_view_payload_dates", "agents_view_payload_dates_temporal", "oracle_dates",
+}
+TEMPORAL_ARMS = {"agents_view_payload_dates_temporal"}
 ORACLE_BUDGETS = {"oracle": 6000, "oracle_memory": 6000, "oracle_dates": 0}
 
 RECALL_ARMS = {
     "agents_group", "agents_view", "agents_view_ctx",
     "agents_view_payload", "agents_view_payload_memory",
-    "agents_view_payload_dates",
+    "agents_view_payload_dates", "agents_view_payload_dates_temporal",
 }
 
 
@@ -200,6 +204,26 @@ def full_text(machine: Any, ids: list[str], *, budget: int = 6000) -> str:
 
 DATE_RE = __import__("re").compile(r"(\d{4})/(\d{2})/(\d{2}).*?(\d{2}):(\d{2})")
 
+TEMPORAL_GATE_RE = __import__("re").compile(
+    r"how many (days|weeks|months|years|hours)"
+    r"|how long"
+    r"|\bago\b"
+    r"|between .* and"
+    r"|how (long|many) .*(before|after)"
+    r"|(days|weeks|months|years|hours) (before|after)"
+    r"|what (happened|came) (before|after)"
+    r"|which (came|happened) (before|after)"
+    r"|\bsince\b"
+    r"|last (week|month|year)",
+    __import__("re").I,
+)
+
+
+def temporal_gate(question: str) -> bool:
+    """Conservative marker gate: only questions that look like temporal
+    computation get the procedure (avoids changing unrelated questions)."""
+    return bool(TEMPORAL_GATE_RE.search(question or ""))
+
 
 def parse_date(raw: str) -> str:
     """'2023/05/20 (Sat) 02:21' -> '2023-05-20T02:21:00' ('' when unparseable)."""
@@ -217,6 +241,7 @@ def answer_with(
     *,
     extra_context: str = "",
     memory_aware: bool = False,
+    temporal_instruction: bool = False,
 ) -> str:
     machine.whiteboard.subject = question
     clean, _memories, _reasoning = run_main_chatbot(
@@ -225,6 +250,7 @@ def answer_with(
         question,
         extra_context=extra_context,
         memory_aware=memory_aware,
+        temporal_instruction=temporal_instruction,
     )
     return clean.strip()
 
@@ -286,12 +312,14 @@ def _run_arm(
     res: dict[str, Any] | None = None
 
     memory_aware = arm in MEMORY_AWARE_ARMS
+    temporal_instruction = arm in TEMPORAL_ARMS and temporal_gate(question)
     provenance = (
         f"\n\n(Question asked on {question_date}.)" if question_date else ""
     )
     if arm == "no_memory":
         answer = answer_with(
-            client, machine, question + provenance, memory_aware=memory_aware
+            client, machine, question + provenance, memory_aware=memory_aware,
+            temporal_instruction=temporal_instruction,
         )
     elif arm == "bm25":
         records = machine.tape.read()
@@ -302,7 +330,7 @@ def _run_arm(
         evidence_complete = int(required <= set(top))
         answer = answer_with(
             client, machine, question + provenance, extra_context=context,
-            memory_aware=memory_aware,
+            memory_aware=memory_aware, temporal_instruction=temporal_instruction,
         )
     elif arm in RECALL_ARMS:
         machine._invalidate_recall_cache()
@@ -317,14 +345,14 @@ def _run_arm(
             context = payload_as_context(res.get("evidence_payload") or [])
         answer = answer_with(
             client, machine, question + provenance, extra_context=context,
-            memory_aware=memory_aware,
+            memory_aware=memory_aware, temporal_instruction=temporal_instruction,
         )
     else:  # oracle
         context = full_text(machine, required_ids, budget=ctx_budget)
         evidence_complete = 1
         answer = answer_with(
             client, machine, question + provenance, extra_context=context,
-            memory_aware=memory_aware,
+            memory_aware=memory_aware, temporal_instruction=temporal_instruction,
         )
 
     latency = time.monotonic() - start
@@ -378,6 +406,7 @@ def _run_arm(
         "judge": {"verdict": verdict, "reason": reason, "prompt_version": JUDGE_PROMPT_VERSION},
         "error_kind": error_kind,
         "memory_aware": memory_aware,
+        "temporal_instruction": temporal_instruction,
         "calls": client.calls - before,
         "judge_calls": judge_calls,
         "latency": round(latency, 2),
@@ -402,7 +431,8 @@ def run_synthetic_case(
 ) -> dict[str, Any]:
     cfg = Config(**ARMS[arm])
     if payload_budget and arm in {
-        "agents_view_payload", "agents_view_payload_memory", "agents_view_payload_dates",
+        "agents_view_payload", "agents_view_payload_memory",
+        "agents_view_payload_dates", "agents_view_payload_dates_temporal",
     }:
         cfg.evidence_payload_budget = payload_budget
     machine, _ = build_machine(root / f"{arm}_{index:02d}", cfg, client)
@@ -474,7 +504,8 @@ def run_external_case(
     use_dates = ingest_dates or arm in DATES_ARMS
     cfg = Config(**ARMS[arm])
     if payload_budget and arm in {
-        "agents_view_payload", "agents_view_payload_memory", "agents_view_payload_dates",
+        "agents_view_payload", "agents_view_payload_memory",
+        "agents_view_payload_dates", "agents_view_payload_dates_temporal",
     }:
         cfg.evidence_payload_budget = payload_budget
     machine, id_map = build_external_machine(

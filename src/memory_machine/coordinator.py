@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Any
 
 from .agents import RecallRun, run_agents, run_view_agents
+from .attention import confidence, contribution_summary, decay_reinforce, is_anaphoric
 from .attachments import ingest_attachment
 from .config import Config, resolve_path
 from .consolidate import consolidate_whiteboard
@@ -47,7 +48,7 @@ from .routing import (
 from .secrets import SecretError
 from .sessions import save_session_meta, search_sessions, sessions_dir_for
 from .tape import MemoryRecord, Tape, parse_id
-from .views import ids_in_views, rank_views, related_views, select_views_llm
+from .views import build_index, ids_in_views, rank_views, related_views, select_views_llm
 from .whiteboard import (
     load_whiteboard,
     merge_annotations,
@@ -151,21 +152,91 @@ class Machine:
             return [], 0.0
         return [v for v, _score in hits], hits[0][1]
 
+    def _attention_gate(self, question: str) -> RoutingPlan | None:
+        """Reuse the active attention for an anaphoric follow-up (no router call).
+
+        Fires only when the attention is concentrated (top1 and margin above the
+        gate) and the message is anaphoric — a fresh session with residual noise
+        must not hijack the routing.
+        """
+        cfg = self.config
+        top1, margin = confidence(self.whiteboard.attention)
+        if top1 < cfg.attention_gate_min or margin < cfg.attention_gate_margin:
+            return None
+        index = build_index(self.tape)
+        if not is_anaphoric(question, view_names=list(index)):
+            return None
+        ranked = sorted(
+            ((v, w) for v, w in self.whiteboard.attention.items() if w > 0 and v in index),
+            key=lambda x: -x[1],
+        )[: cfg.view_top_k]
+        if not ranked:
+            return None
+        by_dim: dict[str, list[str]] = {}
+        for view, _w in ranked:
+            dim = dimension_of(view)
+            if dim:
+                by_dim.setdefault(dim, []).append(view)
+        plan = RoutingPlan(
+            mode="views",
+            dimensions=[d for d in DIMENSIONS if by_dim.get(d)],
+            dimension_sources={d: "attention" for d in by_dim},
+            views_by_dimension=by_dim,
+            candidate_views=[v for v, _w in ranked],
+            combination="union",
+            intersection_mode="union",
+        )
+        plan.anaphoric = True
+        plan.attention_gate = "reused"
+        plan.view_scores = {
+            view: {
+                "router": 0.0,
+                "attention": round(weight, 4),
+                "attention_weighted": round(weight * cfg.attention_weight, 4),
+                "final": round(weight * cfg.attention_weight, 4),
+                "contribution": "attention",
+            }
+            for view, weight in ranked
+        }
+        return plan
+
     def _plan_routing(self, question: str) -> RoutingPlan | None:
         """Build the structural access plan (dimension-aware or legacy)."""
         cfg = self.config
         if cfg.view_dimension_mode == "auto":
+            if cfg.attention_mode == "state":
+                gated = self._attention_gate(question)
+                if gated is not None:
+                    return gated
             if cfg.view_router_mode == "llm":
                 plan = select_plan_llm(
                     self.tape,
                     question,
                     self.ensure_client_optional(),
                     whiteboard=self.whiteboard,
+                    attention=(
+                        self.whiteboard.attention
+                        if cfg.attention_mode in {"context", "state"}
+                        else None
+                    ),
                     top_k=cfg.view_top_k,
                 )
                 if plan is not None and plan.selected_views:
+                    plan.attention_gate = "routed"
                     return plan
-            plan = select_plan_lexical(self.tape, question, view_top_k=cfg.view_top_k)
+            plan = select_plan_lexical(
+                self.tape,
+                question,
+                view_top_k=cfg.view_top_k,
+                attention=(
+                    self.whiteboard.attention
+                    if cfg.attention_mode in {"prior", "state"}
+                    else None
+                ),
+                attention_weight=cfg.attention_weight,
+            )
+            if plan is not None:
+                plan.attention_gate = "routed"
             return plan if plan.selected_views else None
 
         views, score = self._select_views(question)
@@ -297,6 +368,38 @@ class Machine:
             )
         self.whiteboard.annotations = kept
         return kept
+
+    def _update_attention(self, plan: RoutingPlan, run: RecallRun) -> None:
+        """Decay by neglect, reinforce selected views and those that found evidence.
+
+        Views whose view agent annotated a memory get the extra found boost.
+        With no view plan (group/similarity modes) attention only decays.
+        """
+        found = {
+            annotation.agent_id.split(":", 1)[1]
+            for annotation in run.annotations
+            if annotation.agent_id.startswith("view:")
+        }
+        found_boost = self.config.attention_found_boost
+        signal = plan.level1_coverage_signal
+        if self.config.coverage_mode != "off" and signal:
+            # complete + evidence reinforces; partial keeps a smaller boost;
+            # uncertain does not reinforce.
+            if signal == "partial":
+                found_boost *= 0.5
+            elif signal == "uncertain":
+                found_boost = 0.0
+        before = dict(self.whiteboard.attention)
+        plan.attention_before = before
+        self.whiteboard.attention = decay_reinforce(
+            before,
+            plan.selected_views,
+            found,
+            decay=self.config.attention_decay,
+            boost=self.config.attention_boost,
+            found_boost=found_boost,
+        )
+        plan.attention_after = dict(self.whiteboard.attention)
 
     def _consolidate_dimension_boards(self, client: Any, temperature: float) -> bool:
         """Consolidate each dimension board independently when it grows too big.
@@ -891,6 +994,8 @@ class Machine:
                 raw_annotations,
                 budget=self.config.whiteboard_budget,
             )
+        if self.config.attention_mode != "off":
+            self._update_attention(plan, run)
 
         consolidated = False
         if whiteboard_needs_consolidation(
@@ -926,6 +1031,8 @@ class Machine:
             ],
             "consolidated": consolidated,
             "views": views or plan.selected_views,
+            "attention": dict(self.whiteboard.attention),
+            "attention_contribution": contribution_summary(plan.view_scores),
             "routing": plan.to_dict(),
             "routed_groups": plan.groups_consulted,
             "total_groups": len(self.manifest.groups),

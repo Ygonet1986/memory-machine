@@ -49,6 +49,13 @@ class Config:
     view_prune: str = "none"
     agent_mode: str = "group"
     whiteboard_mode: str = "single"
+    attention_mode: str = "off"
+    attention_decay: float = 0.6
+    attention_boost: float = 0.8
+    attention_found_boost: float = 0.3
+    attention_weight: float = 0.5
+    attention_gate_min: float = 0.5
+    attention_gate_margin: float = 0.1
     coverage_mode: str = "off"
     cascade_min_score: float = 0.0
     cascade_expand_top_k: int = 5
@@ -105,6 +112,24 @@ class Config:
         self.whiteboard_mode = (
             self.whiteboard_mode if self.whiteboard_mode in {"single", "dimension"} else "single"
         )
+        self.attention_mode = (
+            self.attention_mode
+            if self.attention_mode in {"off", "prior", "context", "state"}
+            else "off"
+        )
+        for name, default in (
+            ("attention_decay", 0.6),
+            ("attention_boost", 0.8),
+            ("attention_found_boost", 0.3),
+            ("attention_weight", 0.5),
+            ("attention_gate_min", 0.5),
+            ("attention_gate_margin", 0.1),
+        ):
+            try:
+                value = float(getattr(self, name))
+            except (TypeError, ValueError):
+                value = default
+            setattr(self, name, max(0.0, min(1.0, value)))
         self.coverage_mode = (
             self.coverage_mode if self.coverage_mode in {"off", "agents", "structural", "both", "judge", "judge_views", "views"} else "off"
         )

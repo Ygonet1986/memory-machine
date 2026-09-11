@@ -584,6 +584,66 @@ tagger or a larger sample is the next step.
   to `agent_mode`/`whiteboard_mode` (and enables the view router for view
   modes).
 
+### 15.9 Attention state (v0.7)
+
+`Whiteboard.attention` is a session-level, recency-weighted prior over views:
+`{view: weight 0-1}`, global and independent (not normalized per dimension).
+It decays by neglect and saturates on reinforcement:
+
+    w[v] *= decay
+    w[v] += boost * (1 - w[v])        # selected this turn
+    w[v] += found_boost * (1 - w[v])  # its agent annotated evidence
+
+`attention_mode`:
+- `prior`: the lexical plan blends the normalized router score with
+  `attention_weight * attention[v]`; active views are guaranteed **candidates**
+  (not slots — a new topic's router score must be able to outrank the prior).
+- `context`: the LLM plan prompt lists the active views ("the new message may
+  refer to them").
+- `state`: `prior` plus a gate: if the message is anaphoric AND the attention
+  is concentrated (`top1 >= attention_gate_min`, `margin >= attention_gate_margin`),
+  the active views are reused without a router call.
+
+Every selected view records `router` / `attention` / `final` scores and a
+`contribution` (`router` | `attention` | `both`), so a view chosen by continuity
+can be told apart from one chosen by similarity. Coverage feedback: `complete`
+keeps the found boost, `partial` halves it, `uncertain` drops it.
+
+Measured (frozen fixture, `deepseek-v4-flash`):
+
+**Stability** (N=5 repetitions x 8 focused tasks, fresh session each):
+
+| arm | modal selection | mean Jaccard | complete evidence |
+|-----|-----------------|--------------|-------------------|
+| view-LLM | 0.75 | 0.80 | 0.90 |
+| view-BM25 | 1.00 | 1.00 | 0.875 |
+| view-BM25 + attention prior | 1.00 | 1.00 | 0.875 |
+
+The LLM plan's selection is not reproducible (modal 0.40-1.00 per task); the
+lexical plan, with or without the prior, is deterministic. The prior does not
+change single-turn stability because the lexical router already resolves the
+query — its value is on follow-ups.
+
+**Conversation** (2 scenarios x 4 turns, anaphoric follow-ups and a topic shift):
+
+| arm | anaphora evidence | anaphora calls | shift evidence | old-topic residual |
+|-----|-------------------|----------------|----------------|--------------------|
+| lexical, attention off | 1.00 | 10.7 | 1.00 | 0.00 |
+| lexical + prior | 1.00 | 5.7 | 1.00 | 0.56 |
+| lexical + state | 1.00 | 5.7 | 1.00 | 0.56 |
+| LLM, attention off | 0.67 | 3.3 | 1.00 | 0.00 |
+| LLM + state | 1.00 | 3.3 | 1.00 | 0.56 |
+
+Readings: with attention off, an anaphoric follow-up ("e por que mudamos
+isso?") falls back to the full sweep (15-16 calls) or the LLM router misses it
+(0.67 evidence). The prior/state resolves the reference from the active views
+at ~5.7 calls with complete evidence, and LLM+state recovers the anaphora the
+LLM router missed. After a topic shift the new topic is covered (1.00) and the
+old topic's attention decays 0.94 -> 0.56. An earlier version that *forced*
+active views into the selection starved the new topic (0.00 evidence); the fix
+was to guarantee active views as candidates, not slots — exactly the
+attention-stickiness failure the benchmark was designed to catch.
+
 ## 16. Failure Modes
 
 | Failure | Required behavior |

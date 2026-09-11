@@ -111,6 +111,12 @@ Use `-C <dir>` to operate on a specific project directory. Run
   appear in several views (`time/…`, `type/…`, `source/…`, `topic/…`,
   `subject/…`) without physical duplication; the view index is a rebuildable
   projection. List with `views`, filter recall with `--views`.
+- **Attention state** (opt-in) — `Whiteboard.attention` is a recency-weighted
+  prior over views (decay + saturating boost) that keeps the conversation's
+  active regions across turns: `prior` blends it into lexical routing,
+  `context` shows it to the LLM plan, `state` reuses it for anaphoric
+  follow-ups. Measured: anaphora resolved at 5.7 calls vs 10.7 (full sweep),
+  and the old topic decays 0.94 -> 0.56 after a topic shift.
 - **CLI/app modes** — `recall --agent-mode view --whiteboard-mode dimension
   --dimension-mode auto` switches a single recall to perspective agents and
   per-dimension boards; the app's settings expose the same as a "Memory mode"
@@ -150,6 +156,10 @@ Use `-C <dir>` to operate on a specific project directory. Run
 | `view_prune` | `none` | `subject` = drop broad `subject/*` views when a topic matched |
 | `agent_mode` | `group` | `view` = one perspective agent per selected view |
 | `whiteboard_mode` | `single` | `dimension` = one working board per dimension |
+| `attention_mode` | `off` | persistent attention prior: `prior` / `context` / `state` |
+| `attention_decay` / `boost` / `found_boost` | 0.6 / 0.8 / 0.3 | attention decay and saturation boosts |
+| `attention_weight` | 0.5 | weight of the attention prior in view scoring |
+| `attention_gate_min` / `margin` | 0.5 / 0.1 | concentration required for the `state` gate |
 | `coverage_mode` | `off` | recall-local coverage signal: `agents` / `structural` / `views` / `judge` |
 | `cascade_min_score` | 0.0 | selection score below which the cascade expands |
 | `cascade_expand_top_k` | 5 | co-occurring views added on expansion |

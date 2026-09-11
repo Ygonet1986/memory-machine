@@ -49,6 +49,7 @@ class Whiteboard:
     consolidated_from: str = ""
     updated_at: str = ""
     boards: dict[str, "Whiteboard"] = field(default_factory=dict)
+    attention: dict[str, float] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -62,6 +63,7 @@ class Whiteboard:
             "consolidated_from": self.consolidated_from,
             "updated_at": self.updated_at,
             "boards": {name: board.to_dict() for name, board in self.boards.items()},
+            "attention": {view: float(weight) for view, weight in self.attention.items()},
         }
 
     @classmethod
@@ -79,6 +81,10 @@ class Whiteboard:
             boards={
                 str(name): cls.from_dict(board)
                 for name, board in (data.get("boards") or {}).items()
+            },
+            attention={
+                str(view): float(weight)
+                for view, weight in (data.get("attention") or {}).items()
             },
         )
 

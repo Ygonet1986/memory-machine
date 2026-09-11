@@ -111,6 +111,11 @@ Use `-C <dir>` to operate on a specific project directory. Run
   appear in several views (`time/…`, `type/…`, `source/…`, `topic/…`,
   `subject/…`) without physical duplication; the view index is a rebuildable
   projection. List with `views`, filter recall with `--views`.
+- **Ingestion ablation** (`eval/e2e_bench.py --gfr --ingest-why N`) — the
+  external harness truncated sessions to 2k chars at write time; raising the
+  cap lifts Gold Fact Retention from 0.42 to 0.83 and strict accuracy from 0.33
+  to 0.50 (evidence recall constant at 0.75 — the loss was upstream of
+  retrieval).
 - **Evidence payload** (`evidence_payload: budgeted`) — the agents say *why* a
   memory matters; the payload delivers *what it says* under a character budget
   (relevance-ordered, `why` truncated first, rollups rehydrated from their

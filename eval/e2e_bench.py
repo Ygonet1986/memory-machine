@@ -70,6 +70,35 @@ piece, or is vaguer than the reference.
 - "incorrect": the candidate contradicts the reference, does not answer, or says \
 it does not know when the reference contains the answer."""
 
+GFR_SYSTEM = """You check whether a memory contains the information needed to answer a question. Judge only the memory text, not your own knowledge.
+
+Return ONLY a JSON object, nothing else:
+{"contains":true,"reason":"<short>"}
+
+"contains" is true when the memory text holds the fact the reference answer states (a paraphrase counts; a partial fact counts only if it is enough to give the reference answer)."""
+
+
+def gfr_check(
+    client: CountingClient, question: str, gold: str, memory_text: str
+) -> tuple[int, str]:
+    """Gold Fact Retention: did the needed fact survive ingestion?"""
+    if not memory_text.strip():
+        return 0, "no evidence session in memory"
+    messages = [
+        {"role": "system", "content": GFR_SYSTEM},
+        {
+            "role": "user",
+            "content": (
+                f"Question: {question}\nReference answer: {gold}\n"
+                f"Memory:\n{memory_text}"
+            ),
+        },
+    ]
+    content = client.complete(messages, temperature=0.0)
+    obj = extract_json_object(content)
+    return int(obj.get("contains") is True), str(obj.get("reason") or "").strip()
+
+
 VIEW_CONFIG = dict(
     capacity=5,
     router_enabled=True,
@@ -269,6 +298,9 @@ def run_synthetic_case(
     *,
     ctx_budget: int,
     payload_budget: int = 0,
+    ingest_summary: int = 300,
+    ingest_why: int = 2000,
+    gfr: bool = False,
 ) -> dict[str, Any]:
     cfg = Config(**ARMS[arm])
     if payload_budget and arm == "agents_view_payload":
@@ -282,7 +314,14 @@ def run_synthetic_case(
 
 
 def build_external_machine(
-    path: Path, task: dict[str, Any], cfg: Config, tags: dict[str, dict[str, Any]], client: Any
+    path: Path,
+    task: dict[str, Any],
+    cfg: Config,
+    tags: dict[str, dict[str, Any]],
+    client: Any,
+    *,
+    summary_limit: int = 300,
+    why_limit: int = 2000,
 ) -> tuple[Any, dict[str, str]]:
     if path.exists():
         shutil.rmtree(path)
@@ -290,10 +329,11 @@ def build_external_machine(
     machine = Machine(path, config=cfg, client=client)
     id_map: dict[str, str] = {}
     for session in task["sessions"]:
+        text = session["text"]
         record = MemoryRecord(
             type="memory",
-            summary=session["text"][:300] or session["id"],
-            why=session["text"][:2000],
+            summary=(text[:summary_limit] if summary_limit else text) or session["id"],
+            why=text[:why_limit] if why_limit else text,
             source=session["id"],
             views=views_for(tags.get(session["id"])),
         )
@@ -315,19 +355,36 @@ def run_external_case(
     *,
     ctx_budget: int,
     payload_budget: int = 0,
+    ingest_summary: int = 300,
+    ingest_why: int = 2000,
+    gfr: bool = False,
 ) -> dict[str, Any]:
     cfg = Config(**ARMS[arm])
     if payload_budget and arm == "agents_view_payload":
         cfg.evidence_payload_budget = payload_budget
     machine, id_map = build_external_machine(
-        root / f"{arm}_{index:02d}", task, cfg, tags, client
+        root / f"{arm}_{index:02d}", task, cfg, tags, client,
+        summary_limit=ingest_summary, why_limit=ingest_why,
     )
     expected = [s for s in task["expected"] if s in id_map]
     required_ids = [id_map[s] for s in expected]
-    return _run_arm(
+    row = _run_arm(
         arm, index, task["question"], task.get("type", "external"), gold, required_ids,
         machine, client, judge_client, ctx_budget=ctx_budget, expected_sessions=expected,
     )
+    row["ingest_summary"] = ingest_summary
+    row["ingest_why"] = ingest_why
+    if gfr:
+        by_id = {r.id: r for r in machine.tape.read()}
+        evidence_text = "\n\n".join(
+            f"[{mid}] {by_id[mid].summary}\n{by_id[mid].why}"
+            for mid in required_ids
+            if mid in by_id
+        )
+        contains, reason = gfr_check(judge_client, task["question"], gold, evidence_text)
+        row["gfr"] = contains
+        row["gfr_reason"] = reason
+    return row
 
 
 def summarize(rows: list[dict[str, Any]]) -> dict[str, Any]:
@@ -381,6 +438,9 @@ def main() -> None:
     p.add_argument("--audit-fraction", type=float, default=0.25)
     p.add_argument("--ctx-budget", type=int, default=6000)
     p.add_argument("--payload-budget", type=int, default=0, help="override the v0.9 payload budget")
+    p.add_argument("--ingest-summary", type=int, default=300, help="summary chars at ingestion")
+    p.add_argument("--ingest-why", type=int, default=2000, help="why chars at ingestion (0 = full text)")
+    p.add_argument("--gfr", action="store_true", help="measure Gold Fact Retention per case")
     p.add_argument("--seed", type=int, default=7)
     p.add_argument("--tag", action="store_true", help="tag external sessions at write time")
     p.add_argument("--api-key", default="")
@@ -448,6 +508,9 @@ def main() -> None:
         "audit_judge_model": args.audit_model or args.judge_model,
         "judge_prompt_version": JUDGE_PROMPT_VERSION,
         "ctx_budget": args.ctx_budget,
+        "ingest_summary": args.ingest_summary,
+        "ingest_why": args.ingest_why,
+        "gfr": args.gfr,
         "git_commit": commit,
         "fixture_version": "frozen-32" if args.dataset == "synthetic" else "longmemeval",
         "started_at": datetime.now(timezone.utc).isoformat(),
@@ -455,6 +518,8 @@ def main() -> None:
         "indices": indices,
     }
     suffix = f"_{args.dataset}" if args.dataset != "synthetic" else ""
+    if args.dataset == "longmemeval" and args.ingest_why != 2000:
+        suffix += f"_ing{args.ingest_why}"
     manifest_name = (
         f"run_manifest_{arms[0]}{suffix}.json" if len(arms) == 1 else f"run_manifest{suffix}.json"
     )
@@ -474,6 +539,8 @@ def main() -> None:
                 runner(
                     arm, i, task, gold[i], root, base, judge_client,
                     ctx_budget=args.ctx_budget, payload_budget=args.payload_budget,
+                    ingest_summary=args.ingest_summary, ingest_why=args.ingest_why,
+                    gfr=args.gfr,
                     **extra,
                 )
             )

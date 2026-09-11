@@ -35,7 +35,8 @@ from .retrieval import Embedder
 from .router import select_groups, select_groups_llm
 from .secrets import SecretError
 from .sessions import save_session_meta, search_sessions, sessions_dir_for
-from .tape import MemoryRecord, Tape
+from .tape import MemoryRecord, Tape, parse_id
+from .views import ids_in_views, rank_views, related_views, select_views_llm
 from .whiteboard import (
     load_whiteboard,
     merge_annotations,
@@ -84,6 +85,31 @@ class Machine:
             key = os.environ.get(self.config.embedding_api_key_env, "")
         return Embedder(self.config.embedding_base_url, key, self.config.embedding_model)
 
+    def _select_similarity(self, question: str, mode: str | None = None) -> list[Any] | None:
+        """Similarity router: LLM first, then lexical/embedding; None = full."""
+        mode = mode or self.config.router_mode
+        if mode in {"views", "cascade"}:
+            mode = "llm"
+        if mode == "llm":
+            selected = select_groups_llm(
+                self.tape,
+                self.manifest,
+                question,
+                self.ensure_client_optional(),
+                top_k=self.config.router_top_k,
+            )
+            if selected is not None:
+                return selected
+        embedder = self._embedder() if mode == "embedding" else None
+        return select_groups(
+            self.tape,
+            self.manifest,
+            question,
+            top_k=self.config.router_top_k,
+            fallback=self.config.router_fallback,
+            embedder=embedder,
+        )
+
     def _select_groups(self, question: str) -> list[Any] | None:
         """Groups to consult, or None to consult all (full sweep)."""
         if not self.config.router_enabled or not self.manifest.groups:
@@ -94,25 +120,198 @@ class Machine:
             and self._recall_count % self.config.router_full_every == 0
         ):
             return None
-        if self.config.router_mode == "llm":
-            selected = select_groups_llm(
+        return self._select_similarity(question)
+
+    def _select_views(self, question: str) -> tuple[list[str], float]:
+        """Select views for the query (lexical or contextual). Returns (views, score)."""
+        cfg = self.config
+        if cfg.view_router_mode == "llm":
+            result = select_views_llm(
                 self.tape,
-                self.manifest,
                 question,
                 self.ensure_client_optional(),
-                top_k=self.config.router_top_k,
+                whiteboard=self.whiteboard,
+                top_k=cfg.view_top_k,
             )
-            if selected is not None:
-                return selected
-        embedder = self._embedder() if self.config.router_mode == "embedding" else None
-        return select_groups(
+            if result is not None:
+                return result
+        hits = rank_views(self.tape, question, limit=cfg.view_top_k)
+        if not hits:
+            return [], 0.0
+        return [v for v, _score in hits], hits[0][1]
+
+    def _active_ids(self) -> set[str]:
+        return {r.id for r in self.tape.read() if r.status == "active" and r.id}
+
+    def _consulted_ids(self, groups: list[Any] | None) -> set[str]:
+        """Active records the agents would see for the given groups (None = all)."""
+        active = [r for r in self.tape.read() if r.status == "active" and r.id]
+        if groups is None:
+            return {r.id for r in active}
+        ids: set[str] = set()
+        for r in active:
+            try:
+                num = parse_id(r.id)
+            except ValueError:
+                continue
+            if any(g.contains(num) for g in groups):
+                ids.add(r.id)
+        return ids
+
+    def _groups_consulted(self, consulted: set[str]) -> int:
+        groups: set[str] = set()
+        for i in consulted:
+            try:
+                num = parse_id(i)
+            except ValueError:
+                continue
+            g = self.manifest.group_for_id(num)
+            if g is not None:
+                groups.add(g.id)
+        return len(groups)
+
+    def _routing_meta(
+        self,
+        mode: str,
+        level: int,
+        selected_views: list[str],
+        view_score: float | None,
+        consulted: set[str],
+        total: int,
+        *,
+        reasons: list[str] | None = None,
+        level1: int = 0,
+    ) -> dict[str, Any]:
+        return {
+            "mode": mode,
+            "level": level,
+            "fallback_reasons": list(reasons or []),
+            "selected_views": list(selected_views),
+            "view_score": view_score,
+            "records_consulted": len(consulted),
+            "records_total": total,
+            "records_level1": level1 or len(consulted),
+            "groups_consulted": self._groups_consulted(consulted),
+            "consulted_ids": sorted(consulted),
+        }
+
+    def _run_level(
+        self,
+        client: Any,
+        *,
+        views: list[str] | None = None,
+        groups: list[Any] | None = None,
+        temperature: float,
+        max_workers: int | None,
+        include_checklist: bool,
+    ) -> list[Any]:
+        return run_agents(
             self.tape,
             self.manifest,
-            question,
-            top_k=self.config.router_top_k,
-            fallback=self.config.router_fallback,
-            embedder=embedder,
+            self.whiteboard,
+            client,
+            groups=groups,
+            views_filter=set(views) if views else None,
+            temperature=temperature,
+            max_workers=max_workers,
+            include_checklist=include_checklist,
         )
+
+    def _run_view_routed(
+        self,
+        question: str,
+        client: Any,
+        *,
+        temperature: float,
+        max_workers: int | None,
+        include_checklist: bool,
+        total: int,
+    ) -> tuple[list[Any], dict[str, Any]]:
+        """View routing with a recall-safe cascade (OR of both confidence signals).
+
+        Level 1: selected views. If the selection is weak (``no_annotation`` OR
+        ``low_view_score``), expand to co-occurring views (2), then the
+        similarity router (3), then a full sweep (4). Fallback reasons are
+        recorded so failures can be attributed to the router or the topology.
+        """
+        cfg = self.config
+        cascade = cfg.router_mode == "cascade"
+        reasons: list[str] = []
+        views, score = self._select_views(question)
+        routing = self._routing_meta("cascade" if cascade else "views", 1, views, score, set(), total, reasons=reasons)
+
+        if not views:
+            reasons.append("no_view_selected")
+            if not cascade:
+                consulted = self._active_ids()
+                routing.update(self._routing_meta("views", 0, [], None, consulted, total, reasons=reasons))
+                return self._run_level(client, groups=None, temperature=temperature, max_workers=max_workers, include_checklist=include_checklist), routing
+            return self._cascade_fallback(question, client, routing, reasons, temperature, max_workers, include_checklist, total)
+
+        level1_ids = ids_in_views(self.tape, views)
+        annotations = self._run_level(
+            client, views=views, temperature=temperature, max_workers=max_workers,
+            include_checklist=include_checklist,
+        )
+        level1 = len(level1_ids)
+        routing = self._routing_meta("cascade" if cascade else "views", 1, views, score, level1_ids, total, reasons=reasons, level1=level1)
+        low = score < cfg.cascade_min_score
+        no_ann = not annotations
+        if not cascade or (not low and not no_ann):
+            return annotations, routing
+
+        if no_ann and low:
+            reasons.append("both")
+        elif no_ann:
+            reasons.append("no_annotation")
+        else:
+            reasons.append("low_view_score")
+
+        expanded = list(dict.fromkeys(views + related_views(self.tape, views, top_k=cfg.cascade_expand_top_k)))
+        if len(expanded) > len(views):
+            new = self._run_level(
+                client, views=expanded, temperature=temperature, max_workers=max_workers,
+                include_checklist=include_checklist,
+            )
+            annotations += new
+            if new:
+                routing = self._routing_meta("cascade", 2, expanded, score, ids_in_views(self.tape, expanded), total, reasons=reasons, level1=level1)
+                return annotations, routing
+        reasons.append("expansion_failed")
+        return self._cascade_fallback(question, client, routing, reasons, temperature, max_workers, include_checklist, total, level1=level1, annotations=annotations)
+
+    def _cascade_fallback(
+        self,
+        question: str,
+        client: Any,
+        routing: dict[str, Any],
+        reasons: list[str],
+        temperature: float,
+        max_workers: int | None,
+        include_checklist: bool,
+        total: int,
+        *,
+        level1: int = 0,
+        annotations: list[Any] | None = None,
+    ) -> tuple[list[Any], dict[str, Any]]:
+        annotations = list(annotations or [])
+        groups = self._select_similarity(question, mode="llm")
+        new = self._run_level(
+            client, groups=groups, temperature=temperature, max_workers=max_workers,
+            include_checklist=include_checklist,
+        )
+        annotations += new
+        if new:
+            routing = self._routing_meta("cascade", 3, routing.get("selected_views", []), routing.get("view_score"), self._consulted_ids(groups), total, reasons=reasons, level1=level1)
+            return annotations, routing
+        reasons.append("similarity_failed")
+        consulted = self._active_ids()
+        annotations += self._run_level(
+            client, groups=None, temperature=temperature, max_workers=max_workers,
+            include_checklist=include_checklist,
+        )
+        routing = self._routing_meta("cascade", 4, routing.get("selected_views", []), routing.get("view_score"), consulted, total, reasons=reasons, level1=level1)
+        return annotations, routing
 
     def _ensure_client(self) -> Any:
         if self.client is None:
@@ -319,6 +518,47 @@ class Machine:
             "context_chars": self.context.total_chars(),
         }
 
+    def _dispatch_agents(
+        self,
+        question: str,
+        client: Any,
+        *,
+        views: list[str] | None = None,
+        temperature: float = 0.0,
+        max_workers: int | None = None,
+    ) -> tuple[list[Any], dict[str, Any]]:
+        """Run the agents under the configured routing and report how it went."""
+        cfg = self.config
+        include_checklist = not cfg.ablation_no_checklist
+        total = len(self._active_ids())
+
+        if views:
+            selected = list(views)
+            consulted = ids_in_views(self.tape, selected)
+            raw = self._run_level(
+                client, views=selected, temperature=temperature,
+                max_workers=max_workers, include_checklist=include_checklist,
+            )
+            return raw, self._routing_meta("override", 1, selected, None, consulted, total)
+
+        if cfg.router_enabled and cfg.router_mode in {"views", "cascade"} and self.manifest.groups:
+            return self._run_view_routed(
+                question, client, temperature=temperature, max_workers=max_workers,
+                include_checklist=include_checklist, total=total,
+            )
+
+        selected_groups = self._select_groups(question)
+        raw = self._run_level(
+            client, groups=selected_groups, temperature=temperature,
+            max_workers=max_workers, include_checklist=include_checklist,
+        )
+        consulted = self._consulted_ids(selected_groups)
+        if selected_groups is not None:
+            routing = self._routing_meta("similarity", 1, [], None, consulted, total)
+        else:
+            routing = self._routing_meta("full", 0, [], None, consulted, total)
+        return raw, routing
+
     def recall(
         self,
         question: str,
@@ -327,6 +567,7 @@ class Machine:
         views: list[str] | None = None,
         temperature: float = 0.0,
         max_workers: int | None = None,
+        debug: bool = False,
     ) -> dict[str, Any]:
         """Run the memory agents only (no chatbot) and return the whiteboard.
 
@@ -354,18 +595,11 @@ class Machine:
         client = self._ensure_client()
         self.whiteboard.subject = question
 
-        selected = self._select_groups(question)
-        raw_annotations = run_agents(
-            self.tape,
-            self.manifest,
-            self.whiteboard,
-            client,
-            groups=selected,
-            views_filter=set(views) if views else None,
-            temperature=temperature,
-            max_workers=max_workers,
-            include_checklist=not self.config.ablation_no_checklist,
+        raw_annotations, routing = self._dispatch_agents(
+            question, client, views=views, temperature=temperature, max_workers=max_workers
         )
+        if not debug:
+            routing.pop("consulted_ids", None)
         kept = merge_annotations(
             self.whiteboard,
             raw_annotations,
@@ -401,8 +635,9 @@ class Machine:
                 if a.checklist
             ],
             "consolidated": consolidated,
-            "views": views or [],
-            "routed_groups": len(selected) if selected is not None else len(self.manifest.groups),
+            "views": views or routing.get("selected_views") or [],
+            "routing": routing,
+            "routed_groups": routing.get("groups_consulted", len(self.manifest.groups)),
             "total_groups": len(self.manifest.groups),
             "tape_records": len(self.tape),
             "agents": len(self.manifest.agents),

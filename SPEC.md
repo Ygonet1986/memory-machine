@@ -331,6 +331,58 @@ rather than directly similar — not as a universal win over RAG. The router
 cuts calls (~10 -> ~5) but loses recall, so it stays opt-in; lexical routing is
 unsafe (measured ceiling 0.61).
 
+### 15.2 View Router and recall-safe cascade
+
+Instead of inferring relevance from the query alone, the **view router** uses
+the write-time organization (section 4.3) as a structural retrieval prior:
+
+- `router_mode: views` — select views, then run agents only on the records in
+  them. `view_router_mode`:
+  - `lexical` — BM25 over each view's name + member summaries (`rank_views`).
+  - `llm` — one LLM call receives the view digests plus the whiteboard and
+    returns `{"views":[...],"confidence":0..1}` (contextual selection).
+- `router_mode: cascade` — recall-safe fallback. Level 1 selects views; if the
+  selection is weak (`no_annotation` OR `low_view_score`), level 2 expands to
+  co-occurring views (`related_views`, structural views excluded), level 3
+  falls back to the similarity router, level 4 to a full sweep. Fallback
+  reasons are recorded (`no_annotation`, `low_view_score`, `both`,
+  `expansion_failed`, `similarity_failed`) so failures can be attributed to
+  the router or to the topology.
+- An explicit `views=[...]` argument overrides routing (used for diagnostics
+  and manual filtering).
+
+`recall` returns a `routing` object with `mode`, `level`,
+`fallback_reasons`, `selected_views`, `view_score`, `records_consulted`,
+`records_total`, `records_level1` and `groups_consulted` (plus `consulted_ids`
+when `debug=true`). This separates "the router picked the wrong region" from
+"the agents missed the memory" instead of mixing both into one recall number.
+
+Measured on the controlled topology benchmark (`eval/view_router_bench.py`,
+synthetic fixture with known views, 71 memories, 24 tasks, `deepseek-v4-flash`):
+
+| arm | view recall | complete evidence | agent recall | calls/query | reduction |
+|-----|-------------|-------------------|--------------|-------------|-----------|
+| full (ceiling) | - | 1.00 | 1.00 | 15.0 | 0.00 |
+| similarity router | - | 0.83 | 0.83 | 3.9 | 0.79 |
+| view-BM25 | 0.69 | 0.96 | 0.96 | 10.7 | 0.67 |
+| view-LLM (n=15) | 1.00 | 1.00 | 1.00 | 15.5 | 0.46 |
+| view-oracle (ceiling) | 1.00 | 1.00 | 1.00 | 7.4 | 0.86 |
+| cascade-BM25 | 0.69 | 0.96 | 0.96 | 10.3 | 0.69 |
+| cascade-LLM (n=15) | 1.00 | 1.00 | 1.00 | 15.1 | 0.49 |
+
+Readings: the similarity router loses evidence on multi-memory and cross-view
+questions (complete evidence 0.83 vs 1.00) while cutting calls to 3.9; the
+lexical view router preserves more evidence (0.96) but its view recall is 0.69
+(it also selects broad `time/` views, inflating calls); the oracle (ground-truth
+views) reaches 1.00 at 7.4 calls and 0.86 reduction, so the gap to the oracle is
+the *router*, not the topology. The cascade barely triggered (fallback 0.04)
+because "some annotation exists" is a false-confidence signal: agents annotate
+something even when the target region was missed, so the fallback did not
+recover the 9 view-miss questions. The view-LLM arms were throttled by the
+provider at n=15 (no adversarial tasks); calls for the reconstructed arms are
+estimated as router calls + groups consulted. Full analysis in the manual,
+Part IV.
+
 ## 16. Failure Modes
 
 | Failure | Required behavior |
@@ -353,6 +405,14 @@ unsafe (measured ceiling 0.61).
 | `whiteboard_budget` | 4000 | char budget for annotations |
 | `consolidate_threshold` | 6000 | whiteboard size that triggers consolidation |
 | `context_consolidate_threshold` | 6000 | chatbot context size that triggers its consolidation |
+| `router_enabled` | `false` | enable partition routing |
+| `router_mode` | `llm` | `lexical` / `embedding` / `llm` / `views` / `cascade` |
+| `router_top_k` | 5 | partitions selected by the similarity router |
+| `router_fallback` | `full` | fallback when the router finds nothing |
+| `view_router_mode` | `lexical` | view selection: `lexical` (BM25) / `llm` (contextual) |
+| `view_top_k` | 5 | views selected by the view router |
+| `cascade_min_score` | 0.0 | below this selection score the cascade expands |
+| `cascade_expand_top_k` | 5 | co-occurring views added on expansion |
 | `model` | `deepseek-v4-flash` | LLM model |
 | `base_url` | `https://api.deepseek.com` | OpenAI-compatible endpoint |
 | `api_key_env` | `DEEPSEEK_API_KEY` | env var holding the API key |

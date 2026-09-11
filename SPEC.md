@@ -298,21 +298,25 @@ optimization, and measurements show it trades recall for calls:
 | agents + embedding router (`nomic-embed-text`) | 1.00 | 5.0 |
 | agents + LLM router | 1.00 | 3.0 |
 
-*External benchmarks* (evidence-session recall; 30 questions, dense baseline =
-local embeddings):
+*External benchmarks* (evidence-session recall; cheap arms over all questions,
+agents over subsamples; dense = local embeddings):
 
-| dataset | BM25 | vector (dense) | agents (full) | agents + router |
-|---------|------|----------------|---------------|-----------------|
-| LongMemEval (30q) | 0.80 | 0.93 | 0.93 | 0.63 |
-| LoCoMo (30q) | 0.70 | 0.53 | 0.83 | 0.70 |
+| dataset | BM25 | vector (dense) | agents (full) |
+|---------|------|----------------|---------------|
+| LongMemEval (100q) | 0.85 | 0.94 | - |
+| LongMemEval (50q) | 0.76 | 0.92-0.96 | - |
+| LongMemEval (30q) | 0.80 | 0.93 | 0.93 |
+| LoCoMo (150q) | 0.74 | 0.45-0.63 | - |
+| LoCoMo (50q) | 0.78 | 0.56 | 0.90 |
+| LoCoMo (30q) | 0.70 | 0.53 | 0.83 |
 
-The agentic advantage over similarity retrieval is **benchmark-dependent**: it
-holds on the lexically-distant fixture and on LoCoMo (where dense retrieval
-fails), but not on LongMemEval (where dense RAG ties the agents). The router
-cuts calls (~10 -> ~5) but loses 5-40 recall points on real conversational
-data, because the evidence partition is not always selected. It is therefore
-opt-in, recommended only when the tape is large enough that a full sweep is
-impractical. Lexical routing is unsafe (measured ceiling 0.61).
+The agentic advantage over similarity retrieval is **benchmark-dependent**:
+on LongMemEval the dense retriever beats BM25 and ties the agents (no agentic
+advantage); on LoCoMo the agents lead clearly while dense retrieval is the
+weakest arm. The advantage emerges where relevance is contextual/conversational
+rather than directly similar — not as a universal win over RAG. The router
+cuts calls (~10 -> ~5) but loses recall, so it stays opt-in; lexical routing is
+unsafe (measured ceiling 0.61).
 
 ## 16. Failure Modes
 

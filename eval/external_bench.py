@@ -121,8 +121,9 @@ def build_machine(root: Path, sessions: list[dict[str, Any]], cfg: Config) -> tu
             why=s["text"][:2000],
             source=s["id"],
         )
-        res = m.add_memory(rec)
+        res = m.add_memory(rec, save=False)
         id_map[s["id"]] = res["record"]["id"]
+    m.save()
     return m, id_map
 
 
@@ -161,13 +162,22 @@ def main() -> None:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--dataset", choices=["longmemeval", "locomo"], default="longmemeval")
     p.add_argument("--path", default="")
-    p.add_argument("--limit", type=int, default=12)
+    p.add_argument("--limit", type=int, default=12, help="0 = all questions")
     p.add_argument("--capacity", type=int, default=5)
     p.add_argument("--top-k", type=int, default=3)
     p.add_argument("--seed", type=int, default=7)
     p.add_argument("--model", default="deepseek-v4-flash")
     p.add_argument("--api-key", default="")
-    p.add_argument("--embedding-model", default="nomic-embed-text")
+    p.add_argument(
+        "--arms",
+        default="bm25,vector,agents_full,agents_router",
+        help="comma-separated: bm25, vector, agents_full, agents_router",
+    )
+    p.add_argument(
+        "--embedding-models",
+        default="nomic-embed-text",
+        help="comma-separated Ollama embedding models (one vector arm each)",
+    )
     p.add_argument("--embedding-base-url", default="http://localhost:11434/v1")
     p.add_argument("--no-checklist", action="store_true", help="ablation: agents skip the checklist")
     p.add_argument("--keep", action="store_true", help="keep the temp memory dir")
@@ -175,8 +185,10 @@ def main() -> None:
 
     import os
 
+    selected = {a.strip() for a in args.arms.split(",") if a.strip()}
+    needs_llm = bool(selected & {"agents_full", "agents_router"})
     api_key = args.api_key or os.environ.get("DEEPSEEK_API_KEY", "")
-    if not api_key:
+    if needs_llm and not api_key:
         raise SystemExit("set DEEPSEEK_API_KEY (or --api-key)")
 
     if args.path:
@@ -195,63 +207,83 @@ def main() -> None:
     base = CountingClient(
         LLMClient("https://api.deepseek.com", api_key, args.model, retries=1, backoff=0.5)
     )
-    embedder = Embedder(args.embedding_base_url, "", args.embedding_model)
+    embedders = [
+        (m.strip(), Embedder(args.embedding_base_url, "", m.strip()))
+        for m in args.embedding_models.split(",")
+        if m.strip() and "vector" in selected
+    ]
 
-    arms = {"bm25": [0, 0], "vector": [0, 0], "agents_full": [0, 0], "agents_router": [0, 0]}
-    lat = {"agents_full": 0.0, "agents_router": 0.0}
+    arms: dict[str, list[float]] = {}
+    lat: dict[str, float] = {}
+    if "bm25" in selected:
+        arms["bm25"] = [0, 0]
+    for name, _emb in embedders:
+        arms[f"vector:{name}"] = [0, 0]
+    for a in ("agents_full", "agents_router"):
+        if a in selected:
+            arms[a] = [0, 0]
+            lat[a] = 0.0
 
     for i, t in enumerate(tasks):
         expected = {sid for sid in t["expected"]}
         if not expected:
             continue
 
-        # bm25 + vector (router off, no LLM)
-        m, id_map = build_machine(root, t["sessions"], Config(capacity=args.capacity, router_enabled=False))
+        m, id_map = build_machine(
+            root, t["sessions"], Config(capacity=args.capacity, router_enabled=False)
+        )
         expected_ids = {id_map[s] for s in expected if s in id_map}
         if not expected_ids:
             continue
-        hit, calls = arm_bm25(m, t["question"], expected_ids, k=5)
-        arms["bm25"][0] += int(hit)
-        arms["bm25"][1] += calls
-        hit, calls = arm_vector(m, t["question"], expected_ids, embedder, k=5)
-        arms["vector"][0] += int(hit)
-        arms["vector"][1] += calls
 
-        # agents full
-        start = time.monotonic()
-        hit, calls = arm_agents(m, t["question"], expected_ids, base)
-        lat["agents_full"] += time.monotonic() - start
-        arms["agents_full"][0] += int(hit)
-        arms["agents_full"][1] += calls
+        if "bm25" in selected:
+            hit, calls = arm_bm25(m, t["question"], expected_ids, k=5)
+            arms["bm25"][0] += int(hit)
+            arms["bm25"][1] += calls
+        for name, emb in embedders:
+            hit, calls = arm_vector(m, t["question"], expected_ids, emb, k=5)
+            arms[f"vector:{name}"][0] += int(hit)
+            arms[f"vector:{name}"][1] += calls
 
-        # agents + router
-        m2, id_map2 = build_machine(
-            root,
-            t["sessions"],
-            Config(
-                capacity=args.capacity,
-                router_enabled=True,
-                router_mode="llm",
-                router_top_k=args.top_k,
-                ablation_no_checklist=args.no_checklist,
-            ),
-        )
-        expected_ids2 = {id_map2[s] for s in expected if s in id_map2}
-        start = time.monotonic()
-        hit, calls = arm_agents(m2, t["question"], expected_ids2, base)
-        lat["agents_router"] += time.monotonic() - start
-        arms["agents_router"][0] += int(hit)
-        arms["agents_router"][1] += calls
+        if "agents_full" in selected:
+            start = time.monotonic()
+            hit, calls = arm_agents(m, t["question"], expected_ids, base)
+            lat["agents_full"] += time.monotonic() - start
+            arms["agents_full"][0] += int(hit)
+            arms["agents_full"][1] += calls
 
-        print(f"  [{i + 1}/{len(tasks)}] done", flush=True)
+        if "agents_router" in selected:
+            m2, id_map2 = build_machine(
+                root,
+                t["sessions"],
+                Config(
+                    capacity=args.capacity,
+                    router_enabled=True,
+                    router_mode="llm",
+                    router_top_k=args.top_k,
+                    ablation_no_checklist=args.no_checklist,
+                ),
+            )
+            expected_ids2 = {id_map2[s] for s in expected if s in id_map2}
+            if expected_ids2:
+                start = time.monotonic()
+                hit, calls = arm_agents(m2, t["question"], expected_ids2, base)
+                lat["agents_router"] += time.monotonic() - start
+                arms["agents_router"][0] += int(hit)
+                arms["agents_router"][1] += calls
+
+        if i % 25 == 0 or i == len(tasks) - 1:
+            print(f"  [{i + 1}/{len(tasks)}] done", flush=True)
 
     n = max(len(tasks), 1)
-    print(f"\ndataset: {args.dataset} | questions: {len(tasks)} | "
-          f"capacity: {args.capacity} | top_k: {args.top_k}\n")
-    print(f"{'arm':<16} {'evidence recall':>15} {'calls/query':>12} {'latency(s)':>11}")
+    print(
+        f"\ndataset: {args.dataset} | questions: {len(tasks)} | "
+        f"capacity: {args.capacity} | arms: {','.join(arms)}\n"
+    )
+    print(f"{'arm':<28} {'evidence recall':>15} {'calls/query':>12} {'latency(s)':>11}")
     for name, (hits, calls) in arms.items():
         latency = lat.get(name, 0.0) / n
-        print(f"{name:<16} {hits / n:>15.2f} {calls / n:>12.1f} {latency:>11.2f}")
+        print(f"{name:<28} {hits / n:>15.2f} {calls / n:>12.1f} {latency:>11.2f}")
 
     if not args.keep and root.exists():
         shutil.rmtree(root)

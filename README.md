@@ -95,8 +95,11 @@ Use `-C <dir>` to operate on a specific project directory. Run
   sweep scored 0.83-0.93 evidence recall vs 0.63-0.70 for the router.
 - **Evaluation** (`eval/`) — `agent_bench.py` (synthetic, lexically distant) and
   `external_bench.py` (LongMemEval / LoCoMo, with BM25, dense vector, full
-  agents and routed agents). The agentic advantage over similarity retrieval is
-  benchmark-dependent: it holds where the lexical/semantic gap is large.
+  agents and routed agents; `--arms` and `--embedding-models` select arms and
+  dense models). Measured: on LongMemEval dense retrieval beats BM25 and ties
+  the agents (no agentic advantage); on LoCoMo the agents lead (0.90 vs BM25
+  0.78 and dense 0.56). The agentic advantage is benchmark-dependent: it
+  emerges where relevance is contextual, not directly similar.
 - **Provenance** — rollups record `derived_from`; `rehydrate <id>` recovers the
   original (archived) memories so compression is never a dead end.
 

@@ -38,10 +38,14 @@ class Config:
     consolidate_threshold: int = DEFAULT_CONSOLIDATE_THRESHOLD
     context_consolidate_threshold: int = DEFAULT_CONTEXT_CONSOLIDATE_THRESHOLD
     attach_chunk_size: int = 600
-    router_enabled: bool = True
+    router_enabled: bool = False
+    router_mode: str = "lexical"
     router_top_k: int = 5
     router_fallback: str = "full"
     router_full_every: int = 0
+    embedding_model: str = ""
+    embedding_base_url: str = ""
+    embedding_api_key_env: str = ""
     model: str = DEFAULT_MODEL
     base_url: str = DEFAULT_BASE_URL
     api_key_env: str = DEFAULT_API_KEY_ENV
@@ -69,11 +73,15 @@ class Config:
         )
         self.attach_chunk_size = max(100, _int(self.attach_chunk_size, 600))
         self.router_enabled = bool(self.router_enabled)
+        self.router_mode = self.router_mode if self.router_mode in {"lexical", "embedding"} else "lexical"
         self.router_top_k = max(1, _int(self.router_top_k, 5))
         self.router_fallback = (
             self.router_fallback if self.router_fallback in {"full", "recent"} else "full"
         )
         self.router_full_every = max(0, _int(self.router_full_every, 0))
+        self.embedding_model = (self.embedding_model or "").strip()
+        self.embedding_base_url = (self.embedding_base_url or self.base_url).strip().rstrip("/")
+        self.embedding_api_key_env = (self.embedding_api_key_env or self.api_key_env).strip()
         self.model = (self.model or DEFAULT_MODEL).strip()
         self.base_url = (self.base_url or DEFAULT_BASE_URL).strip().rstrip("/")
         self.api_key_env = (self.api_key_env or DEFAULT_API_KEY_ENV).strip()

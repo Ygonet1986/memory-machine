@@ -67,7 +67,7 @@ def test_recall_router_consults_only_selected(tmp_path):
 
     m = Machine(
         tmp_path,
-        config=Config(capacity=2, router_top_k=1),
+        config=Config(capacity=2, router_top_k=1, router_enabled=True),
         client=FakeClient(handler),
     )
     for s in [
@@ -83,3 +83,24 @@ def test_recall_router_consults_only_selected(tmp_path):
     assert res["total_groups"] == 2
     assert res["routed_groups"] == 1
     assert calls["n"] == 1  # only the selected group's agent was consulted
+
+
+class _FakeEmbedder:
+    """Deterministic fake: database-ish texts map to [1,0], others to [0,1]."""
+
+    def embed(self, texts):
+        out = []
+        for t in texts:
+            low = t.lower()
+            is_db = any(k in low for k in ("database", "postgres", "rdbms", "accounts"))
+            out.append([1.0, 0.0] if is_db else [0.0, 1.0])
+        return out
+
+
+def test_select_groups_semantic(tmp_path):
+    tape, manifest, g1, g2, _a1, _a2 = _two_groups(tmp_path)
+    # Lexically distant query that BM25 would miss, resolved by embeddings.
+    selected = select_groups(
+        tape, manifest, "which RDBMS holds accounts?", top_k=1, embedder=_FakeEmbedder()
+    )
+    assert [g.id for g in selected] == ["G1"]

@@ -298,6 +298,27 @@ class Machine:
         self.whiteboard.annotations = kept
         return kept
 
+    def _consolidate_dimension_boards(self, client: Any, temperature: float) -> bool:
+        """Consolidate each dimension board independently when it grows too big.
+
+        The board's working state is persisted to the tape first (lossless
+        continuity), then shrunk; other boards are untouched.
+        """
+        consolidated = False
+        for board in self.whiteboard.boards.values():
+            if size_chars(board) <= self.config.consolidate_threshold:
+                continue
+            consolidate_whiteboard(
+                board,
+                client=client,
+                tape=self.tape,
+                manifest=self.manifest,
+                model=self.config.model,
+                temperature=temperature,
+            )
+            consolidated = True
+        return consolidated
+
     @staticmethod
     def _merge_runs(first: RecallRun, second: RecallRun) -> RecallRun:
         return RecallRun(
@@ -884,6 +905,10 @@ class Machine:
                 temperature=temperature,
             )
             consolidated = True
+        if self.config.whiteboard_mode == "dimension":
+            consolidated = (
+                self._consolidate_dimension_boards(client, temperature) or consolidated
+            )
 
         self.save()
         result: dict[str, Any] = {

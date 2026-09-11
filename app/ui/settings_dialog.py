@@ -46,12 +46,21 @@ class SettingsDialog(QDialog):
         widx = self.web_search.findData(web_current)
         self.web_search.setCurrentIndex(widx if widx >= 0 else 0)
 
+        self.memory_mode = QComboBox()
+        self.memory_mode.addItem("Partition agents (default)", "partition")
+        self.memory_mode.addItem("View agents", "view")
+        self.memory_mode.addItem("View agents + dimension boards", "view_boards")
+        mode_current = settings.get("memory_mode", "partition")
+        midx = self.memory_mode.findData(mode_current)
+        self.memory_mode.setCurrentIndex(midx if midx >= 0 else 0)
+
         form = QFormLayout()
         form.addRow("DeepSeek API key", self.api_key)
         form.addRow("Model", self.model)
         form.addRow("Base URL", self.base_url)
         form.addRow("Auto topic", self.auto_topic)
         form.addRow("Web search", self.web_search)
+        form.addRow("Memory mode", self.memory_mode)
         form.addRow("Memory root", self.memory_root)
 
         buttons = QDialogButtonBox(
@@ -73,6 +82,7 @@ class SettingsDialog(QDialog):
                 "memory_root": self.memory_root.text().strip(),
                 "auto_topic": self.auto_topic.currentData(),
                 "web_search": self.web_search.currentData(),
+                "memory_mode": self.memory_mode.currentData(),
             }
         )
         self.accept()

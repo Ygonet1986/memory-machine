@@ -111,6 +111,11 @@ Use `-C <dir>` to operate on a specific project directory. Run
   appear in several views (`time/…`, `type/…`, `source/…`, `topic/…`,
   `subject/…`) without physical duplication; the view index is a rebuildable
   projection. List with `views`, filter recall with `--views`.
+- **CLI/app modes** — `recall --agent-mode view --whiteboard-mode dimension
+  --dimension-mode auto` switches a single recall to perspective agents and
+  per-dimension boards; the app's settings expose the same as a "Memory mode"
+  selector. External sessions can be auto-tagged into views with
+  `eval/tag_sessions.py` + `external_bench.py --tag` (Fase 2).
 - **View router** (opt-in) — uses the write-time organization as a structural
   retrieval prior: `router_mode: views` selects views (BM25 over view digests,
   or an LLM call with the whiteboard) and consults only their records;

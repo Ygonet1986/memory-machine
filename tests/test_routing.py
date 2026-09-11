@@ -698,3 +698,39 @@ def test_view_agent_reads_its_dimension_board(tmp_path):
     m.whiteboard.for_dimension("semantic").checklist = "- semantic reminder"
     m.recall("what about the router?")
     assert any("semantic reminder" in prompt for prompt in seen)
+
+
+def test_dimension_board_consolidates_independently(tmp_path):
+    def handler(messages, temperature):
+        sys_text = text(messages, "system")
+        if "memory agent watching the view" in sys_text:
+            note = "x" * 900
+            return (
+                '{"digest":"d","annotations":'
+                f'[{{"memory_id":"M0001","note":"{note}","relevance":0.9}}],'
+                '"coverage":"complete"}'
+            )
+        if "consolidator agent" in sys_text:
+            return "compact summary"
+        return '{"digest":"d","checklist":[],"annotations":[],"coverage":"complete"}'
+
+    m = _machine(
+        tmp_path,
+        handler,
+        router_enabled=True,
+        router_mode="views",
+        view_router_mode="lexical",
+        view_dimension_mode="auto",
+        agent_mode="view",
+        whiteboard_mode="dimension",
+        view_top_k=1,
+        whiteboard_budget=500,
+        consolidate_threshold=600,
+    )
+    m.add_memory(MemoryRecord(type="decision", summary="router opt-in", views=["topic/router"]))
+    res = m.recall("what about the router?")
+    board = m.whiteboard.boards["semantic"]
+    assert board.annotations == []
+    assert board.consolidated_from
+    assert res["consolidated"] is True
+    assert any(r.summary.startswith("Consolidated whiteboard") for r in m.tape.read())

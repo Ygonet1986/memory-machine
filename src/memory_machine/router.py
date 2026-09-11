@@ -94,9 +94,10 @@ Query: {query}
 Return ONLY JSON, nothing else:
 {{"groups":["G1","G3"]}}
 
-Choose up to {top_k} partition ids whose memories are most likely relevant to \
-the query, even if the wording differs (match by meaning, not just words). If \
-none could be relevant, return {{"groups":[]}}."""
+Return the {top_k} partition ids most likely to contain memories relevant to \
+the query, ranked best first. Be inclusive: include any partition that could \
+plausibly hold relevant memories, even if the wording differs (match by \
+meaning, not just words). Return fewer only if there are fewer partitions."""
 
 
 def select_groups_llm(

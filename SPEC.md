@@ -277,15 +277,28 @@ an optional layer that selects which partitions to consult:
 
 - Each group carries a **digest** (a short summary), produced by the agent's
   fused call (`agent.digest`) or derived deterministically when stale.
-- `select_groups` ranks digests against the query and returns the top-K groups.
-  With an embedder it is semantic (`router_mode: embedding`); otherwise lexical
-  (BM25).
+- `router_mode`:
+  - `llm` (default when enabled) — one LLM call ranks the digests and returns
+    the relevant group ids. Semantic; works with the existing chat provider.
+  - `embedding` — cosine similarity between the query and the digests
+    (requires an OpenAI-compatible embeddings provider, e.g. a local Ollama).
+  - `lexical` — BM25 over the digests (no extra call; opt-in only).
 - No match → full sweep (`router_fallback: full`), or the most recent K.
 
-`router_enabled` is **false by default**: lexical routing can miss partitions
-whose vocabulary does not overlap the query, and the benchmark showed the
-lexical router's recall ceiling saturating well below a full sweep for
-lexically-distant tasks. Semantic routing (embeddings) is the intended mode.
+`router_enabled` is **false by default**. Measured on a synthetic benchmark of
+lexically-distant tasks (24-48 memories, 6-12 partitions):
+
+| arm | recall | calls/query |
+|-----|--------|-------------|
+| BM25 retrieval | 0.33 | 0.0 |
+| agents (full sweep) | 1.00 | 12.0 |
+| agents + lexical router | 0.39 | 5.5 |
+| agents + embedding router (`nomic-embed-text`, top_k=5) | 1.00 | 5.0 |
+| agents + LLM router (top_k=2) | 1.00 | 3.0 |
+
+Lexical routing cannot select a partition whose digest shares no vocabulary
+with the query (measured ceiling 0.61, saturating). Semantic routing (`llm` or
+`embedding`) recovers full recall at a fraction of the calls.
 
 ## 16. Failure Modes
 

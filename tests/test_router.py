@@ -67,7 +67,7 @@ def test_recall_router_consults_only_selected(tmp_path):
 
     m = Machine(
         tmp_path,
-        config=Config(capacity=2, router_top_k=1, router_enabled=True),
+        config=Config(capacity=2, router_top_k=1, router_enabled=True, router_mode="lexical"),
         client=FakeClient(handler),
     )
     for s in [
@@ -125,3 +125,34 @@ def test_select_groups_llm_ignores_unknown_ids(tmp_path):
     tape, manifest, *_ = _two_groups(tmp_path)
     client = FakeClient(lambda messages, temperature: '{"groups":["G99"]}')
     assert select_groups_llm(tape, manifest, "x", client) is None
+
+
+def test_recall_router_llm_mode(tmp_path):
+    calls = {"agents": 0, "router": 0}
+
+    def handler(messages, temperature):
+        sys_text = "\n".join(m.get("content", "") for m in messages if m.get("role") == "system")
+        if "You route a query" in sys_text:
+            calls["router"] += 1
+            return '{"groups":["G1"]}'
+        calls["agents"] += 1
+        return '{"digest":"d","checklist":[],"annotations":[]}'
+
+    m = Machine(
+        tmp_path,
+        config=Config(capacity=2, router_top_k=1, router_enabled=True, router_mode="llm"),
+        client=FakeClient(handler),
+    )
+    for s in [
+        "Use PostgreSQL database",
+        "Pool database connections",
+        "Compose bossa nova guitar",
+        "Use FL Studio for beats",
+    ]:
+        m.add_memory(MemoryRecord(type="decision", summary=s))
+
+    res = m.recall("which database should we use")
+    assert res["total_groups"] == 2
+    assert res["routed_groups"] == 1
+    assert calls["agents"] == 1  # only the selected group's agent
+    assert calls["router"] == 1  # one routing call

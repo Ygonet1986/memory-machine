@@ -15,7 +15,7 @@ import os
 from pathlib import Path
 from typing import Any
 
-from .agents import run_agents
+from .agents import RecallRun, run_agents
 from .attachments import ingest_attachment
 from .config import Config, resolve_path
 from .consolidate import consolidate_whiteboard
@@ -33,6 +33,16 @@ from .main_chatbot import memory_from_spec, run_main_chatbot
 from .metacognition import update_metacognition
 from .retrieval import Embedder
 from .router import select_groups, select_groups_llm
+from .routing import (
+    DIMENSIONS,
+    RoutingPlan,
+    coverage_signal,
+    dimension_of,
+    ids_for_plan,
+    judge_coverage,
+    select_plan_lexical,
+    select_plan_llm,
+)
 from .secrets import SecretError
 from .sessions import save_session_meta, search_sessions, sessions_dir_for
 from .tape import MemoryRecord, Tape, parse_id
@@ -123,7 +133,7 @@ class Machine:
         return self._select_similarity(question)
 
     def _select_views(self, question: str) -> tuple[list[str], float]:
-        """Select views for the query (lexical or contextual). Returns (views, score)."""
+        """Legacy (v0.5a) view selection: flat BM25 or contextual LLM."""
         cfg = self.config
         if cfg.view_router_mode == "llm":
             result = select_views_llm(
@@ -139,6 +149,47 @@ class Machine:
         if not hits:
             return [], 0.0
         return [v for v, _score in hits], hits[0][1]
+
+    def _plan_routing(self, question: str) -> RoutingPlan | None:
+        """Build the structural access plan (dimension-aware or legacy)."""
+        cfg = self.config
+        if cfg.view_dimension_mode == "auto":
+            if cfg.view_router_mode == "llm":
+                plan = select_plan_llm(
+                    self.tape,
+                    question,
+                    self.ensure_client_optional(),
+                    whiteboard=self.whiteboard,
+                    top_k=cfg.view_top_k,
+                )
+                if plan is not None and plan.selected_views:
+                    return plan
+            plan = select_plan_lexical(self.tape, question, view_top_k=cfg.view_top_k)
+            return plan if plan.selected_views else None
+
+        views, score = self._select_views(question)
+        if not views:
+            return None
+        by_dim: dict[str, list[str]] = {}
+        for view in views:
+            dim = dimension_of(view)
+            if dim:
+                by_dim.setdefault(dim, []).append(view)
+        dims = [d for d in DIMENSIONS if by_dim.get(d)]
+        return RoutingPlan(
+            mode="views",
+            dimensions=dims,
+            dimension_sources={d: "legacy" for d in dims},
+            views_by_dimension=by_dim,
+            combination="union",
+            intersection_mode="union",
+            score=score,
+        )
+
+    def _plan_ids(self, plan: RoutingPlan) -> tuple[set[str], str]:
+        if self.config.view_dimension_mode == "auto":
+            return ids_for_plan(self.tape, plan)
+        return ids_in_views(self.tape, plan.selected_views), "union"
 
     def _active_ids(self) -> set[str]:
         return {r.id for r in self.tape.read() if r.status == "active" and r.id}
@@ -170,41 +221,38 @@ class Machine:
                 groups.add(g.id)
         return len(groups)
 
-    def _routing_meta(
+    def _fill_plan(
         self,
-        mode: str,
+        plan: RoutingPlan,
         level: int,
-        selected_views: list[str],
-        view_score: float | None,
         consulted: set[str],
         total: int,
-        *,
+        level1: int,
         reasons: list[str] | None = None,
-        level1: int = 0,
-    ) -> dict[str, Any]:
-        return {
-            "mode": mode,
-            "level": level,
-            "fallback_reasons": list(reasons or []),
-            "selected_views": list(selected_views),
-            "view_score": view_score,
-            "records_consulted": len(consulted),
-            "records_total": total,
-            "records_level1": level1 or len(consulted),
-            "groups_consulted": self._groups_consulted(consulted),
-            "consulted_ids": sorted(consulted),
-        }
+    ) -> None:
+        plan.level = level
+        merged = set(consulted) | set(plan.consulted_ids)
+        plan.consulted_ids = sorted(merged)
+        if level == 1:
+            plan.level1_ids = sorted(consulted)
+        plan.records_consulted = len(merged)
+        plan.records_total = total
+        plan.records_level1 = level1 or len(consulted)
+        plan.groups_consulted = self._groups_consulted(consulted)
+        if reasons is not None:
+            plan.fallback_reasons = list(reasons)
 
     def _run_level(
         self,
         client: Any,
         *,
+        ids: set[str] | None = None,
         views: list[str] | None = None,
         groups: list[Any] | None = None,
         temperature: float,
         max_workers: int | None,
         include_checklist: bool,
-    ) -> list[Any]:
+    ) -> RecallRun:
         return run_agents(
             self.tape,
             self.manifest,
@@ -212,10 +260,89 @@ class Machine:
             client,
             groups=groups,
             views_filter=set(views) if views else None,
+            ids_filter=ids,
             temperature=temperature,
             max_workers=max_workers,
             include_checklist=include_checklist,
         )
+
+    @staticmethod
+    def _merge_runs(first: RecallRun, second: RecallRun) -> RecallRun:
+        return RecallRun(
+            annotations=first.annotations + second.annotations,
+            coverage=first.coverage + second.coverage,
+        )
+
+    def _coverage_of(
+        self, plan: RoutingPlan, run: RecallRun, question: str, client: Any
+    ) -> tuple[str, list[str]]:
+        mode = self.config.coverage_mode
+        if mode == "off":
+            return "", []
+        annotated = {a.memory_id for a in run.annotations}
+        if mode == "judge":
+            return judge_coverage(
+                question, run.annotations, client, whiteboard=self.whiteboard
+            )
+        if mode == "structural":
+            return coverage_signal(plan, annotated, [], self.tape)
+        if mode == "agents":
+            return coverage_signal(plan, annotated, run.coverage, self.tape, structural=False)
+        return coverage_signal(plan, annotated, run.coverage, self.tape)
+
+    def _needs_fallback(
+        self, plan: RoutingPlan, run: RecallRun, question: str, client: Any
+    ) -> tuple[bool, str]:
+        signal, _missing = self._coverage_of(plan, run, question, client)
+        if self.config.coverage_mode != "off":
+            plan.coverage_signal = signal
+            plan.coverage = [
+                {"agent_id": c.agent_id, "coverage": c.coverage, "missing": list(c.missing)}
+                for c in run.coverage
+            ]
+            if signal != "complete":
+                return True, f"coverage_{signal}"
+            return False, ""
+        low = bool(plan.score is not None and plan.score < self.config.cascade_min_score)
+        no_ann = not run.annotations
+        if not (low or no_ann):
+            return False, ""
+        if no_ann and low:
+            return True, "both"
+        return True, "no_annotation" if no_ann else "low_view_score"
+
+    def _resolved(
+        self, plan: RoutingPlan, run: RecallRun, question: str, client: Any
+    ) -> bool:
+        if self.config.coverage_mode != "off":
+            signal, _missing = self._coverage_of(plan, run, question, client)
+            plan.coverage_signal = signal
+            return signal == "complete"
+        return bool(run.annotations)
+
+    def _expand_plan(self, plan: RoutingPlan) -> RoutingPlan | None:
+        related = related_views(
+            self.tape, plan.selected_views, top_k=self.config.cascade_expand_top_k
+        )
+        new_views = [v for v in related if v not in plan.selected_views]
+        if not new_views:
+            return None
+        expanded = RoutingPlan(
+            mode=plan.mode,
+            dimensions=list(plan.dimensions),
+            dimension_sources=dict(plan.dimension_sources),
+            views_by_dimension={k: list(v) for k, v in plan.views_by_dimension.items()},
+            combination=plan.combination,
+            confidence=plan.confidence,
+            score=plan.score,
+        )
+        for view in new_views:
+            dim = dimension_of(view)
+            if dim:
+                expanded.views_by_dimension.setdefault(dim, []).append(view)
+                if dim not in expanded.dimensions:
+                    expanded.dimensions.append(dim)
+        return expanded
 
     def _run_view_routed(
         self,
@@ -226,65 +353,83 @@ class Machine:
         max_workers: int | None,
         include_checklist: bool,
         total: int,
-    ) -> tuple[list[Any], dict[str, Any]]:
-        """View routing with a recall-safe cascade (OR of both confidence signals).
+    ) -> tuple[RecallRun, RoutingPlan]:
+        """Dimension-aware view routing with a coverage-driven cascade.
 
-        Level 1: selected views. If the selection is weak (``no_annotation`` OR
-        ``low_view_score``), expand to co-occurring views (2), then the
-        similarity router (3), then a full sweep (4). Fallback reasons are
-        recorded so failures can be attributed to the router or the topology.
+        Level 1 builds a structural plan (dimensions -> views -> intersection).
+        In cascade mode, a coverage signal that is not ``complete`` expands to
+        co-occurring views (2), then the similarity router (3), then a full
+        sweep (4). Fallback reasons are recorded so failures can be attributed
+        to the router, the topology or the coverage signal.
         """
         cfg = self.config
         cascade = cfg.router_mode == "cascade"
         reasons: list[str] = []
-        views, score = self._select_views(question)
-        routing = self._routing_meta("cascade" if cascade else "views", 1, views, score, set(), total, reasons=reasons)
-
-        if not views:
+        plan = self._plan_routing(question)
+        if plan is None:
             reasons.append("no_view_selected")
+            plan = RoutingPlan(mode="cascade" if cascade else "views", fallback_reasons=reasons)
             if not cascade:
                 consulted = self._active_ids()
-                routing.update(self._routing_meta("views", 0, [], None, consulted, total, reasons=reasons))
-                return self._run_level(client, groups=None, temperature=temperature, max_workers=max_workers, include_checklist=include_checklist), routing
-            return self._cascade_fallback(question, client, routing, reasons, temperature, max_workers, include_checklist, total)
-
-        level1_ids = ids_in_views(self.tape, views)
-        annotations = self._run_level(
-            client, views=views, temperature=temperature, max_workers=max_workers,
-            include_checklist=include_checklist,
-        )
-        level1 = len(level1_ids)
-        routing = self._routing_meta("cascade" if cascade else "views", 1, views, score, level1_ids, total, reasons=reasons, level1=level1)
-        low = score < cfg.cascade_min_score
-        no_ann = not annotations
-        if not cascade or (not low and not no_ann):
-            return annotations, routing
-
-        if no_ann and low:
-            reasons.append("both")
-        elif no_ann:
-            reasons.append("no_annotation")
-        else:
-            reasons.append("low_view_score")
-
-        expanded = list(dict.fromkeys(views + related_views(self.tape, views, top_k=cfg.cascade_expand_top_k)))
-        if len(expanded) > len(views):
-            new = self._run_level(
-                client, views=expanded, temperature=temperature, max_workers=max_workers,
-                include_checklist=include_checklist,
+                run = self._run_level(
+                    client, groups=None, temperature=temperature,
+                    max_workers=max_workers, include_checklist=include_checklist,
+                )
+                self._fill_plan(plan, 0, consulted, total, 0, reasons)
+                return run, plan
+            return self._cascade_fallback(
+                question, client, plan, reasons, temperature, max_workers,
+                include_checklist, total,
             )
-            annotations += new
-            if new:
-                routing = self._routing_meta("cascade", 2, expanded, score, ids_in_views(self.tape, expanded), total, reasons=reasons, level1=level1)
-                return annotations, routing
+
+        ids, mode = self._plan_ids(plan)
+        plan.intersection_mode = mode
+        plan.intersection_size = len(ids)
+        level1 = len(ids)
+        run = self._run_level(
+            client, ids=ids, temperature=temperature,
+            max_workers=max_workers, include_checklist=include_checklist,
+        )
+        self._fill_plan(plan, 1, ids, total, level1, reasons)
+        if not cascade:
+            if cfg.coverage_mode != "off":
+                signal, _missing = self._coverage_of(plan, run, question, client)
+                plan.coverage_signal = signal
+                plan.coverage = [
+                    {"agent_id": c.agent_id, "coverage": c.coverage, "missing": list(c.missing)}
+                    for c in run.coverage
+                ]
+            return run, plan
+
+        fallback, reason = self._needs_fallback(plan, run, question, client)
+        if not fallback:
+            return run, plan
+        reasons.append(reason)
+
+        expanded = self._expand_plan(plan)
+        if expanded is not None:
+            ids2, mode2 = self._plan_ids(expanded)
+            expanded.intersection_mode = mode2
+            expanded.intersection_size = len(ids2)
+            new = self._run_level(
+                client, ids=ids2, temperature=temperature,
+                max_workers=max_workers, include_checklist=include_checklist,
+            )
+            run = self._merge_runs(run, new)
+            if self._resolved(expanded, new, question, client):
+                self._fill_plan(expanded, 2, ids2, total, level1, reasons)
+                return run, expanded
         reasons.append("expansion_failed")
-        return self._cascade_fallback(question, client, routing, reasons, temperature, max_workers, include_checklist, total, level1=level1, annotations=annotations)
+        return self._cascade_fallback(
+            question, client, plan, reasons, temperature, max_workers,
+            include_checklist, total, level1=level1, run=run,
+        )
 
     def _cascade_fallback(
         self,
         question: str,
         client: Any,
-        routing: dict[str, Any],
+        plan: RoutingPlan,
         reasons: list[str],
         temperature: float,
         max_workers: int | None,
@@ -292,26 +437,27 @@ class Machine:
         total: int,
         *,
         level1: int = 0,
-        annotations: list[Any] | None = None,
-    ) -> tuple[list[Any], dict[str, Any]]:
-        annotations = list(annotations or [])
+        run: RecallRun | None = None,
+    ) -> tuple[RecallRun, RoutingPlan]:
+        run = run or RecallRun()
         groups = self._select_similarity(question, mode="llm")
         new = self._run_level(
-            client, groups=groups, temperature=temperature, max_workers=max_workers,
-            include_checklist=include_checklist,
+            client, groups=groups, temperature=temperature,
+            max_workers=max_workers, include_checklist=include_checklist,
         )
-        annotations += new
-        if new:
-            routing = self._routing_meta("cascade", 3, routing.get("selected_views", []), routing.get("view_score"), self._consulted_ids(groups), total, reasons=reasons, level1=level1)
-            return annotations, routing
+        run = self._merge_runs(run, new)
+        if new.annotations:
+            plan.level = 3
+            self._fill_plan(plan, 3, self._consulted_ids(groups), total, level1, reasons)
+            return run, plan
         reasons.append("similarity_failed")
-        consulted = self._active_ids()
-        annotations += self._run_level(
-            client, groups=None, temperature=temperature, max_workers=max_workers,
-            include_checklist=include_checklist,
+        full = self._run_level(
+            client, groups=None, temperature=temperature,
+            max_workers=max_workers, include_checklist=include_checklist,
         )
-        routing = self._routing_meta("cascade", 4, routing.get("selected_views", []), routing.get("view_score"), consulted, total, reasons=reasons, level1=level1)
-        return annotations, routing
+        run = self._merge_runs(run, full)
+        self._fill_plan(plan, 4, self._active_ids(), total, level1, reasons)
+        return run, plan
 
     def _ensure_client(self) -> Any:
         if self.client is None:
@@ -408,7 +554,7 @@ class Machine:
             temperature=temperature,
             max_workers=max_workers,
             include_checklist=not self.config.ablation_no_checklist,
-        )
+        ).annotations
         checklists_updated = [a.id for a in self.manifest.agents if a.checklist]
         kept = merge_annotations(
             self.whiteboard,
@@ -526,7 +672,7 @@ class Machine:
         views: list[str] | None = None,
         temperature: float = 0.0,
         max_workers: int | None = None,
-    ) -> tuple[list[Any], dict[str, Any]]:
+    ) -> tuple[RecallRun, RoutingPlan]:
         """Run the agents under the configured routing and report how it went."""
         cfg = self.config
         include_checklist = not cfg.ablation_no_checklist
@@ -535,11 +681,24 @@ class Machine:
         if views:
             selected = list(views)
             consulted = ids_in_views(self.tape, selected)
-            raw = self._run_level(
+            by_dim: dict[str, list[str]] = {}
+            for view in selected:
+                dim = dimension_of(view)
+                if dim:
+                    by_dim.setdefault(dim, []).append(view)
+            plan = RoutingPlan(
+                mode="override",
+                dimensions=[d for d in DIMENSIONS if by_dim.get(d)],
+                views_by_dimension=by_dim,
+                combination="union",
+                intersection_mode="union",
+            )
+            run = self._run_level(
                 client, views=selected, temperature=temperature,
                 max_workers=max_workers, include_checklist=include_checklist,
             )
-            return raw, self._routing_meta("override", 1, selected, None, consulted, total)
+            self._fill_plan(plan, 1, consulted, total, len(consulted))
+            return run, plan
 
         if cfg.router_enabled and cfg.router_mode in {"views", "cascade"} and self.manifest.groups:
             return self._run_view_routed(
@@ -548,16 +707,16 @@ class Machine:
             )
 
         selected_groups = self._select_groups(question)
-        raw = self._run_level(
+        run = self._run_level(
             client, groups=selected_groups, temperature=temperature,
             max_workers=max_workers, include_checklist=include_checklist,
         )
         consulted = self._consulted_ids(selected_groups)
-        if selected_groups is not None:
-            routing = self._routing_meta("similarity", 1, [], None, consulted, total)
-        else:
-            routing = self._routing_meta("full", 0, [], None, consulted, total)
-        return raw, routing
+        plan = RoutingPlan(mode="similarity" if selected_groups is not None else "full")
+        self._fill_plan(
+            plan, 1 if selected_groups is not None else 0, consulted, total, len(consulted)
+        )
+        return run, plan
 
     def recall(
         self,
@@ -595,11 +754,13 @@ class Machine:
         client = self._ensure_client()
         self.whiteboard.subject = question
 
-        raw_annotations, routing = self._dispatch_agents(
+        run, plan = self._dispatch_agents(
             question, client, views=views, temperature=temperature, max_workers=max_workers
         )
+        raw_annotations = run.annotations
         if not debug:
-            routing.pop("consulted_ids", None)
+            plan.consulted_ids = []
+            plan.level1_ids = []
         kept = merge_annotations(
             self.whiteboard,
             raw_annotations,
@@ -635,9 +796,9 @@ class Machine:
                 if a.checklist
             ],
             "consolidated": consolidated,
-            "views": views or routing.get("selected_views") or [],
-            "routing": routing,
-            "routed_groups": routing.get("groups_consulted", len(self.manifest.groups)),
+            "views": views or plan.selected_views,
+            "routing": plan.to_dict(),
+            "routed_groups": plan.groups_consulted,
             "total_groups": len(self.manifest.groups),
             "tape_records": len(self.tape),
             "agents": len(self.manifest.agents),

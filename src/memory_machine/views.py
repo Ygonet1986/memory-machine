@@ -46,11 +46,21 @@ def _view_digest(records: list[MemoryRecord], max_items: int = 10) -> str:
     return " | ".join(r.summary for r in records[:max_items] if r.summary)
 
 
-def rank_views(tape: Tape, query: str, *, limit: int = 5) -> list[tuple[str, float]]:
-    """Rank views by BM25 over their name + member summaries."""
+def rank_views(
+    tape: Tape,
+    query: str,
+    *,
+    limit: int = 5,
+    prefixes: tuple[str, ...] | None = None,
+) -> list[tuple[str, float]]:
+    """Rank views by BM25 over their name + member summaries.
+
+    ``prefixes`` restricts the candidates to views of certain dimensions
+    (e.g. ``("topic/", "subject/")`` for semantic views).
+    """
     records = {r.id: r for r in tape.read() if r.status == "active"}
     index = build_index(tape)
-    views = list(index.keys())
+    views = [v for v in index if prefixes is None or v.startswith(prefixes)]
     if not views:
         return []
     docs = [

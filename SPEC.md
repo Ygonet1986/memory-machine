@@ -383,6 +383,61 @@ provider at n=15 (no adversarial tasks); calls for the reconstructed arms are
 estimated as router calls + groups consulted. Full analysis in the manual,
 Part IV.
 
+### 15.3 Dimension-aware routing and coverage (v0.5b)
+
+Views have different cognitive roles, so they are grouped into **dimensions**:
+`semantic` (`topic/*`, `subject/*`), `temporal` (`time/*`) and `structural`
+(`type/*`, `source/*`). With `view_dimension_mode: auto`, the router builds a
+`RoutingPlan` (dimensions + views + combination) instead of a flat view list:
+
+- **Dimension selection**: deterministic markers (`detect_dimensions`:
+  default semantic; temporal parser for dates/ranges/recency; type/source
+  markers) for `view_router_mode: lexical`, or one LLM call returning
+  `{"dimensions":[...],"views":[...],"confidence":...}` for `llm`.
+- **Combination**: single dimension -> union of its views; multiple dimensions
+  -> **intersection** of their record sets, with progressive relaxation when
+  the strict intersection is empty: `strict` -> `relaxed_semantic` (next
+  semantic candidate) -> `relaxed_temporal` (drop the time constraint) ->
+  `union_fallback`. The mode and size are recorded (`intersection_mode`).
+- **Coverage** (`coverage_mode`): a recall-local signal (`complete` /
+  `partial` / `uncertain`) that is never persisted on the agent. Sources:
+  `agents` (telemetry from the fused agent call), `structural` (are the
+  annotated memories inside the planned views?), `both`, or `judge` (one extra
+  LLM call over the retrieved memories). In `router_mode: cascade`, a signal
+  that is not `complete` triggers expansion -> similarity -> full sweep.
+
+Measured on the frozen 32-task fixture (n=32, `deepseek-v4-flash`):
+
+| arm | view rec | view prec | dim rec | dim prec | recovery | complete evid | calls | reduction |
+|-----|----------|-----------|---------|----------|----------|---------------|-------|-----------|
+| C1 view-BM25 (v0.5a) | 0.67 | 0.25 | 0.83 | 0.42 | 0.97 | 0.97 | 10.9 | 0.63 |
+| C2 view-LLM (v0.5a) | 0.88 | 0.36 | 0.99 | 0.89 | 1.00 | 1.00 | 15.2 | 0.49 |
+| C1d dimension-aware | 0.81 | 0.35 | 1.00 | 0.82 | 0.94 | 0.91 | 9.6 | 0.70 |
+| C2d dimension-aware | 0.79 | 0.47 | 1.00 | 0.81 | 0.84 | 0.59 | 7.1 | 0.86 |
+| C1d + coverage judge | 0.81 | 0.35 | 1.00 | 0.82 | 0.94 | 0.91 | 10.6 | 0.70 |
+| D1d cascade + judge | 0.81 | 0.34 | 1.00 | 0.82 | 0.95 | 0.94 | 12.4 | 0.66 |
+| C3 oracle | 1.00 | 1.00 | 0.81 | 0.91 | 1.00 | 1.00 | 7.7 | 0.84 |
+
+Readings (v0.5b):
+
+- **M1 — dimensions help the region, cost and temporal tasks**: C1d raises view
+  recall 0.67 -> 0.81 and dimension precision 0.42 -> 0.82 while cutting calls
+  10.9 -> 9.6 and raising reduction 0.63 -> 0.70; temporal questions are fully
+  covered at ~2.6 calls. The strict intersection costs a little evidence
+  (0.97 -> 0.91) on cross-view composition and adversarial cases.
+- **C2d is a negative result**: the LLM dimension plan over-restricts
+  (complete evidence 0.59) even though it is the cheapest arm (7.1 calls,
+  0.86 reduction) — cheap is not enough.
+- **M2 — free coverage signals are uncalibrated**: agent-declared coverage says
+  `partial` on 32/32 queries (100% fallback waste); the structural check says
+  `complete` on 32/32 (100% false-safe on the incomplete cases). The judge is
+  better but still weak: false-safe 2/3, fallback waste 38%.
+- **M3 — the cascade recovers little at real cost**: with the judge, complete
+  evidence 0.91 -> 0.94 but calls 9.6 -> 12.4 and reduction 0.70 -> 0.66. The
+  primary target (>= 0.98) is not met; the oracle (1.00 at 7.7 calls / 0.84
+  reduction) shows the remaining headroom is in the router and the coverage
+  signal, not the topology.
+
 ## 16. Failure Modes
 
 | Failure | Required behavior |
@@ -411,6 +466,8 @@ Part IV.
 | `router_fallback` | `full` | fallback when the router finds nothing |
 | `view_router_mode` | `lexical` | view selection: `lexical` (BM25) / `llm` (contextual) |
 | `view_top_k` | 5 | views selected by the view router |
+| `view_dimension_mode` | `off` | `auto` = dimension-aware plan with progressive intersection |
+| `coverage_mode` | `off` | recall-local coverage signal: `agents` / `structural` |
 | `cascade_min_score` | 0.0 | below this selection score the cascade expands |
 | `cascade_expand_top_k` | 5 | co-occurring views added on expansion |
 | `model` | `deepseek-v4-flash` | LLM model |

@@ -14,12 +14,35 @@ This keeps the checklist fresh every turn without a separate LLM call.
 from __future__ import annotations
 
 from concurrent.futures import ThreadPoolExecutor
+from dataclasses import dataclass, field
 from typing import Any
 
 from .groups import Agent, Group, Manifest, group_records
 from .llm import extract_json_object
 from .tape import MemoryRecord, Tape
 from .whiteboard import Annotation, Whiteboard
+
+
+@dataclass
+class CoverageSignal:
+    """Recall-local telemetry: is this agent's set enough for this question?
+
+    Deliberately NOT persisted on the agent: it answers a question about the
+    current recall, not about what the agent must keep remembering.
+    """
+
+    agent_id: str = ""
+    coverage: str = ""  # complete | partial | uncertain
+    missing: list[str] = field(default_factory=list)
+
+
+@dataclass
+class RecallRun:
+    """Result of one agent sweep: annotations plus recall-local coverage."""
+
+    annotations: list[Annotation] = field(default_factory=list)
+    coverage: list[CoverageSignal] = field(default_factory=list)
+
 
 AGENT_INSTRUCTIONS = """You are a memory agent ({agent_id}). You watch group {group_id} \
 of the persistent memory tape (records {start}..{end}).
@@ -32,7 +55,7 @@ Your memories (only these; never invent others):
 
 The shared whiteboard below describes the work happening right now.
 
-Do three things in one response:
+Do four things in one response:
 
 1. Write a short digest (1-2 sentences) of what this group covers, so a router \
 can decide later whether this group is worth consulting. Keep it topical and \
@@ -46,14 +69,20 @@ new ones. Be concise.
 3. Identify which of YOUR memories MUST be remembered for the current work \
 and annotate them.
 
+4. Judge, from what you can see, whether YOUR memories are sufficient for the \
+current work: "coverage" is "complete" (they cover what the work needs), \
+"partial" (something relevant is missing) or "uncertain" (you cannot tell), \
+and "missing" lists what is missing (empty when complete).
+
 Return ONLY a JSON object, nothing else:
 
-{{"digest":"<what this group covers>","checklist":["...","..."],"annotations":[{{"memory_id":"M0001","note":"<why this matters now>","relevance":0.0}}]}}
+{{"digest":"<what this group covers>","checklist":["...","..."],"annotations":[{{"memory_id":"M0001","note":"<why this matters now>","relevance":0.0}}],"coverage":"complete","missing":[]}}
 
 Rules:
 - Only annotate memory ids that appear in YOUR list above.
 - relevance is a number from 0.0 (marginal) to 1.0 (critical).
 - If nothing must be remembered, return "annotations":[].
+- coverage/missing are telemetry about THIS question only, never memories.
 - Do not invent memory ids or facts outside your group."""
 
 
@@ -66,7 +95,7 @@ Your memories (only these; never invent others):
 
 The shared whiteboard below describes the work happening right now.
 
-Do two things in one response:
+Do three things in one response:
 
 1. Write a short digest (1-2 sentences) of what this group covers, so a router \
 can decide later whether this group is worth consulting.
@@ -74,14 +103,20 @@ can decide later whether this group is worth consulting.
 2. Identify which of YOUR memories MUST be remembered for the current work \
 and annotate them.
 
+3. Judge, from what you can see, whether YOUR memories are sufficient for the \
+current work: "coverage" is "complete" (they cover what the work needs), \
+"partial" (something relevant is missing) or "uncertain" (you cannot tell), \
+and "missing" lists what is missing (empty when complete).
+
 Return ONLY a JSON object, nothing else:
 
-{{"digest":"<what this group covers>","annotations":[{{"memory_id":"M0001","note":"<why this matters now>","relevance":0.0}}]}}
+{{"digest":"<what this group covers>","annotations":[{{"memory_id":"M0001","note":"<why this matters now>","relevance":0.0}}],"coverage":"complete","missing":[]}}
 
 Rules:
 - Only annotate memory ids that appear in YOUR list above.
 - relevance is a number from 0.0 (marginal) to 1.0 (critical).
 - If nothing must be remembered, return "annotations":[].
+- coverage/missing are telemetry about THIS question only, never memories.
 - Do not invent memory ids or facts outside your group."""
 
 
@@ -162,6 +197,19 @@ def _digest_from_obj(obj: dict[str, Any]) -> str:
     return digest.strip() if isinstance(digest, str) else ""
 
 
+def _coverage_from_obj(obj: dict[str, Any], agent_id: str) -> CoverageSignal:
+    level = str(obj.get("coverage") or "").strip().lower()
+    if level not in {"complete", "partial", "uncertain"}:
+        level = "uncertain"
+    raw_missing = obj.get("missing")
+    missing: list[str] = []
+    if isinstance(raw_missing, list):
+        missing = [str(m).strip() for m in raw_missing if str(m).strip()]
+    elif isinstance(raw_missing, str) and raw_missing.strip():
+        missing = [raw_missing.strip()]
+    return CoverageSignal(agent_id=agent_id, coverage=level, missing=missing)
+
+
 def deterministic_digest(records: list[MemoryRecord], max_items: int = 10) -> str:
     return " | ".join(r.summary for r in records[:max_items] if r.summary)
 
@@ -175,7 +223,7 @@ def _run_one(
     *,
     temperature: float,
     include_checklist: bool = True,
-) -> list[Annotation]:
+) -> tuple[list[Annotation], CoverageSignal]:
     messages = [
         {
             "role": "system",
@@ -194,7 +242,7 @@ def _run_one(
     digest = _digest_from_obj(obj) or deterministic_digest(records)
     agent.digest = digest[:600]
     agent.digest_records = len(records)
-    return _annotations_from_obj(obj, agent.id)
+    return _annotations_from_obj(obj, agent.id), _coverage_from_obj(obj, agent.id)
 
 
 def run_agents(
@@ -205,17 +253,21 @@ def run_agents(
     *,
     groups: list[Group] | None = None,
     views_filter: set[str] | None = None,
+    ids_filter: set[str] | None = None,
     temperature: float = 0.0,
     max_workers: int | None = None,
     on_error: str = "skip",
     include_checklist: bool = True,
-) -> list[Annotation]:
+) -> RecallRun:
     """Dispatch one LLM call per (group, agent) pair, in parallel.
 
     When ``groups`` is given, only those partitions are consulted (the memory
-    router's selection). Each call updates the agent's checklist and digest in
-    place and returns its annotations. ``on_error`` controls failure handling:
-    ``"skip"`` ignores a failed agent, ``"raise"`` propagates the exception.
+    router's selection). ``views_filter`` keeps records that belong to any of
+    the given views; ``ids_filter`` keeps only the given record ids (used for
+    dimension intersections). Each call updates the agent's checklist and
+    digest in place and returns its annotations plus recall-local coverage.
+    ``on_error`` controls failure handling: ``"skip"`` ignores a failed agent,
+    ``"raise"`` propagates the exception.
     """
     selected_ids = {g.id for g in groups} if groups is not None else None
     tasks: list[tuple[Agent, Group, list[MemoryRecord]]] = []
@@ -228,14 +280,16 @@ def run_agents(
         records = group_records(tape, group)
         if views_filter:
             records = [r for r in records if set(r.views) & views_filter]
+        if ids_filter is not None:
+            records = [r for r in records if r.id in ids_filter]
         if not records:
             continue
         tasks.append((agent, group, records))
 
     if not tasks:
-        return []
+        return RecallRun()
 
-    def work(item: tuple[Agent, Group, list[MemoryRecord]]) -> list[Annotation]:
+    def work(item: tuple[Agent, Group, list[MemoryRecord]]) -> tuple[list[Annotation], CoverageSignal]:
         agent, group, records = item
         return _run_one(
             agent,
@@ -247,14 +301,16 @@ def run_agents(
             include_checklist=include_checklist,
         )
 
-    results: list[Annotation] = []
+    run = RecallRun()
     with ThreadPoolExecutor(max_workers=max_workers or len(tasks)) as pool:
         futures = [pool.submit(work, t) for t in tasks]
         for fut in futures:
             try:
-                results.extend(fut.result())
+                annotations, coverage = fut.result()
             except Exception:
                 if on_error == "raise":
                     raise
                 continue
-    return results
+            run.annotations.extend(annotations)
+            run.coverage.append(coverage)
+    return run

@@ -302,6 +302,7 @@ class Machine:
                 whiteboard=self.whiteboard,
                 plan=plan,
                 tape=self.tape,
+                manifest=self.manifest,
             )
         if mode == "structural":
             return coverage_signal(plan, annotated, [], self.tape)
@@ -440,7 +441,7 @@ class Machine:
             plan.intersection_size = len(ids)
             level1 = len(ids)
             run = run_view_agents(
-                self.tape, self.whiteboard, client,
+                self.tape, self.manifest, self.whiteboard, client,
                 views=plan.selected_views, temperature=temperature,
                 max_workers=max_workers,
             )
@@ -479,7 +480,7 @@ class Machine:
                 expanded.intersection_mode = "views"
                 expanded.intersection_size = len(ids2)
                 new = run_view_agents(
-                    self.tape, self.whiteboard, client,
+                    self.tape, self.manifest, self.whiteboard, client,
                     views=expanded.selected_views, temperature=temperature,
                     max_workers=max_workers,
                 )

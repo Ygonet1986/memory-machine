@@ -513,8 +513,9 @@ def test_run_view_agents_dispatch(tmp_path):
         seen.append(sys_text)
         return '{"digest":"d","annotations":[],"coverage":"complete"}'
 
+    manifest = Manifest(capacity=10)
     run = run_view_agents(
-        tape, Whiteboard(subject="x"), FakeClient(handler),
+        tape, manifest, Whiteboard(subject="x"), FakeClient(handler),
         views=["topic/router", "topic/benchmarks"],
     )
     assert len(seen) == 2
@@ -524,6 +525,8 @@ def test_run_view_agents_dispatch(tmp_path):
     assert "Look for facts, decisions" in router_prompt
     assert len(run.coverage) == 2
     assert all(c.coverage == "complete" for c in run.coverage)
+    assert manifest.view_agents["topic/router"].digest == "d"
+    assert manifest.view_agents["topic/benchmarks"].digest == "d"
 
 
 def test_view_agent_temporal_perspective(tmp_path):
@@ -569,3 +572,38 @@ def test_recall_agent_mode_view(tmp_path):
     assert routing["intersection_mode"] == "views"
     assert calls["n"] == len(routing["selected_views"]) >= 1
     assert routing["records_consulted"] == 2
+
+
+def test_view_agent_state_persists_across_recalls(tmp_path):
+    seen: list[str] = []
+
+    def handler(messages, temperature):
+        sys_text = text(messages, "system")
+        if "memory agent watching the view" in sys_text:
+            seen.append(sys_text)
+            return (
+                '{"digest":"covers router","checklist":["keep me"],'
+                '"annotations":[],"coverage":"complete"}'
+            )
+        return '{"digest":"d","checklist":[],"annotations":[],"coverage":"complete"}'
+
+    m = _machine(
+        tmp_path,
+        handler,
+        router_enabled=True,
+        router_mode="views",
+        view_router_mode="lexical",
+        view_dimension_mode="auto",
+        agent_mode="view",
+        view_top_k=1,
+    )
+    m.add_memory(MemoryRecord(type="decision", summary="router opt-in", views=["topic/router"]))
+
+    res = m.recall("what about the router?")
+    view = res["routing"]["selected_views"][0]
+    agent = m.manifest.view_agents[view]
+    assert agent.checklist == "- keep me"
+    assert agent.digest == "covers router"
+
+    m.recall("tell me more about the router")
+    assert "keep me" in seen[-1]

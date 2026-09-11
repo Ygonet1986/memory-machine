@@ -66,11 +66,43 @@ class Agent:
 
 
 @dataclass
+class ViewAgent:
+    """Persistent state of a perspective agent watching a view.
+
+    Mirrors the group agent's state (digest + checklist) but is keyed by view,
+    so the same region keeps its own memory of what it covers across turns.
+    ``coverage`` is only the last recall-local judgment, for diagnostics.
+    """
+
+    view: str
+    checklist: str = ""
+    checklist_records: int = 0
+    digest: str = ""
+    digest_records: int = 0
+    coverage: str = ""
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "ViewAgent":
+        return cls(
+            view=str(data.get("view") or ""),
+            checklist=str(data.get("checklist") or ""),
+            checklist_records=int(data.get("checklist_records") or 0),
+            digest=str(data.get("digest") or ""),
+            digest_records=int(data.get("digest_records") or 0),
+            coverage=str(data.get("coverage") or ""),
+        )
+
+
+@dataclass
 class Manifest:
     version: int = 1
     capacity: int = 50
     groups: list[Group] = field(default_factory=list)
     agents: list[Agent] = field(default_factory=list)
+    view_agents: dict[str, ViewAgent] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -78,6 +110,7 @@ class Manifest:
             "capacity": self.capacity,
             "groups": [g.to_dict() for g in self.groups],
             "agents": [a.to_dict() for a in self.agents],
+            "view_agents": {v: a.to_dict() for v, a in self.view_agents.items()},
         }
 
     @classmethod
@@ -87,7 +120,19 @@ class Manifest:
             capacity=int(data.get("capacity") or 50),
             groups=[Group.from_dict(g) for g in (data.get("groups") or [])],
             agents=[Agent.from_dict(a) for a in (data.get("agents") or [])],
+            view_agents={
+                str(v): ViewAgent.from_dict(a)
+                for v, a in (data.get("view_agents") or {}).items()
+            },
         )
+
+    def view_agent(self, view: str) -> ViewAgent:
+        """Return (creating if needed) the persistent agent of a view."""
+        agent = self.view_agents.get(view)
+        if agent is None:
+            agent = ViewAgent(view=view)
+            self.view_agents[view] = agent
+        return agent
 
     def group_for_id(self, id_num: int) -> Group | None:
         for g in self.groups:

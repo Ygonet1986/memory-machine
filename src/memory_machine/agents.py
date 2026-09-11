@@ -217,23 +217,31 @@ Your memories (only these; never invent others):
 
 {records}
 
+{checklist_section}
+
 The shared whiteboard below describes the work happening right now.
 
-Do three things in one response:
+Do four things in one response:
 
-1. Write a short digest of what this view covers.
+1. Write a short digest of what this view covers, so the router can decide later \
+whether this view is worth consulting. Keep it topical and stable.
 
-2. Identify which of YOUR memories MUST be remembered for the current work \
+2. Update your checklist of the things you must NOT forget to remind the \
+assistant about (based on your memories and the current work). Keep it \
+dynamic: drop no-longer-relevant items, sharpen and keep relevant ones, add \
+new ones. Be concise.
+
+3. Identify which of YOUR memories MUST be remembered for the current work \
 and annotate them.
 
-3. Judge whether YOUR view is sufficient for the current work: "coverage" is \
+4. Judge whether YOUR view is sufficient for the current work: "coverage" is \
 "complete" (it covers what the work needs), "partial" (something relevant is \
 missing) or "uncertain" (you cannot tell), and "missing" lists what is missing \
 (empty when complete).
 
 Return ONLY a JSON object, nothing else:
 
-{{"digest":"<what this view covers>","annotations":[{{"memory_id":"M0001","note":"<why this matters now>","relevance":0.0}}],"coverage":"complete","missing":[]}}
+{{"digest":"<what this view covers>","checklist":["...","..."],"annotations":[{{"memory_id":"M0001","note":"<why this matters now>","relevance":0.0}}],"coverage":"complete","missing":[]}}
 
 Rules:
 - Only annotate memory ids that appear in YOUR list above.
@@ -243,17 +251,29 @@ Rules:
 - Do not invent memory ids or facts outside your view."""
 
 
-def view_agent_prompt(view: str, records: list[MemoryRecord]) -> str:
+def view_agent_prompt(
+    view: str,
+    records: list[MemoryRecord],
+    view_agent: Any = None,
+) -> str:
     """System prompt for a view agent, with a perspective per dimension."""
     from .routing import dimension_of
 
     dimension = dimension_of(view) or "semantic"
     body = "\n".join(r.text() for r in records) if records else "(no memories in this view)"
+    checklist = getattr(view_agent, "checklist", "") if view_agent is not None else ""
+    if checklist:
+        checklist_section = (
+            "\nYour previous checklist (refine it, do not just repeat it):\n" + checklist
+        )
+    else:
+        checklist_section = "\nYour previous checklist: (none yet)"
     return VIEW_AGENT_INSTRUCTIONS.format(
         dimension=dimension,
         view=view,
         perspective=VIEW_PERSPECTIVES.get(dimension, VIEW_PERSPECTIVES["semantic"]),
         records=body,
+        checklist_section=checklist_section,
     )
 
 
@@ -262,20 +282,30 @@ def _run_view_one(
     records: list[MemoryRecord],
     whiteboard: Whiteboard,
     client: Any,
+    view_agent: Any,
     *,
     temperature: float,
 ) -> tuple[list[Annotation], CoverageSignal]:
     messages = [
-        {"role": "system", "content": view_agent_prompt(view, records)},
+        {"role": "system", "content": view_agent_prompt(view, records, view_agent)},
         {"role": "user", "content": agent_user_prompt(whiteboard)},
     ]
     content = client.complete(messages, temperature=temperature)
     obj = extract_json_object(content)
-    return _annotations_from_obj(obj, f"view:{view}"), _coverage_from_obj(obj, f"view:{view}")
+    checklist = _checklist_from_obj(obj) or _deterministic_checklist(records)
+    view_agent.checklist = checklist[:1500]
+    view_agent.checklist_records = len(records)
+    digest = _digest_from_obj(obj) or deterministic_digest(records)
+    view_agent.digest = digest[:600]
+    view_agent.digest_records = len(records)
+    signal = _coverage_from_obj(obj, f"view:{view}")
+    view_agent.coverage = signal.coverage
+    return _annotations_from_obj(obj, f"view:{view}"), signal
 
 
 def run_view_agents(
     tape: Tape,
+    manifest: Manifest,
     whiteboard: Whiteboard,
     client: Any,
     *,
@@ -288,20 +318,23 @@ def run_view_agents(
 
     Unlike group agents (which see a chronological partition), a view agent
     sees every active memory in its view, so several agents can examine the
-    same memory from different perspectives without duplicating it.
+    same memory from different perspectives without duplicating it. Each view
+    keeps its own persistent digest and checklist in the manifest.
     """
-    tasks: list[tuple[str, list[MemoryRecord]]] = []
+    tasks: list[tuple[str, list[MemoryRecord], Any]] = []
     for view in dict.fromkeys(views):
         records = records_in_views(tape, [view])
         if records:
-            tasks.append((view, records))
+            tasks.append((view, records, manifest.view_agent(view)))
 
     if not tasks:
         return RecallRun()
 
-    def work(item: tuple[str, list[MemoryRecord]]) -> tuple[list[Annotation], CoverageSignal]:
-        view, records = item
-        return _run_view_one(view, records, whiteboard, client, temperature=temperature)
+    def work(item: tuple[str, list[MemoryRecord], Any]) -> tuple[list[Annotation], CoverageSignal]:
+        view, records, view_agent = item
+        return _run_view_one(
+            view, records, whiteboard, client, view_agent, temperature=temperature
+        )
 
     run = RecallRun()
     with ThreadPoolExecutor(max_workers=max_workers or len(tasks)) as pool:

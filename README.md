@@ -111,6 +111,11 @@ Use `-C <dir>` to operate on a specific project directory. Run
   appear in several views (`time/…`, `type/…`, `source/…`, `topic/…`,
   `subject/…`) without physical duplication; the view index is a rebuildable
   projection. List with `views`, filter recall with `--views`.
+- **End-to-end answer accuracy** (`eval/e2e_bench.py`) — measures whether the
+  memory actually improves the final answer, not just retrieval: view agents +
+  full memory content score 0.88 strict (AUR 0.90) vs 0.72 (AUR 0.74) with
+  annotation notes only, at the same cost — the bottleneck is context loss, not
+  retrieval.
 - **Attention state** (opt-in) — `Whiteboard.attention` is a recency-weighted
   prior over views (decay + saturating boost) that keeps the conversation's
   active regions across turns: `prior` blends it into lexical routing,

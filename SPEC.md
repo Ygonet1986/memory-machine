@@ -644,6 +644,59 @@ active views into the selection starved the new topic (0.00 evidence); the fix
 was to guarantee active views as candidates, not slots — exactly the
 attention-stickiness failure the benchmark was designed to catch.
 
+### 15.10 End-to-end answer accuracy (v0.8)
+
+`eval/e2e_bench.py` closes the loop: `recall -> whiteboard -> main chatbot ->
+answer -> LLM judge (vs gold)`. Six arms isolate the contribution of each
+layer: `no_memory` (floor), `bm25` (flat RAG), `agents_group` (v0.4 group
+agents), `agents_view` (view agents + dimension plan + attention), and
+`agents_view_ctx` (same retrieval plus the **full text** of the annotated
+memories). `oracle` injects the gold evidence directly (ceiling). Every boundary
+is snapshotted to `eval/out/e2e_<arm>.jsonl` (`retrieved_ids`,
+`whiteboard_rendered`, `attention`, `answer_prompt_final`, `answer`, `judge`),
+so a wrong answer is attributable to retrieval, context loss, the answerer or
+the judge. The judge is 3-way (`correct|partial|incorrect`) with a frozen
+prompt (`v1`), pointwise and blind to the arm; a stratified ~25% sample gets a
+second pass for agreement.
+
+Measured on the frozen fixture with 32 authored gold answers
+(`eval/gold_answers.json`; questions and routing ground truth unchanged):
+
+| arm | evidence | strict | lenient | AUR | fact_cov | calls |
+|-----|----------|--------|---------|-----|----------|-------|
+| no_memory | 0.00 | 0.00 | 0.12 | - | 0.15 | 1.0 |
+| bm25 | 0.28 | 0.31 | 0.66 | 1.00 | 0.48 | 1.0 |
+| agents_group | 1.00 | 0.62 | 0.88 | 0.62 | 0.72 | 16.1 |
+| agents_view | 0.97 | 0.72 | 0.94 | 0.74 | 0.73 | 4.1 |
+| **agents_view_ctx** | 0.97 | **0.88** | 0.97 | **0.90** | 0.99 | 4.0 |
+| oracle | 1.00 | 0.94 | 0.97 | 0.94 | 1.00 | 1.0 |
+
+Readings:
+
+- **H1 confirmed**: view-agent retrieval raises final-answer accuracy far above
+  no-memory and BM25, and beats group agents (0.72-0.88 vs 0.62) at ~4x fewer
+  calls (4.1 vs 16.1).
+- **H2 confirmed — the bottleneck was context loss, not retrieval**: with the
+  same retrieval (evidence 0.97) and cost, adding the full memory content
+  raises strict accuracy 0.72 -> 0.88 and the **Answer Utilization Rate**
+  `P(correct | evidence complete)` 0.74 -> 0.90, with `fact_cov` 0.73 -> 0.99.
+  The annotation notes lose the factual payload (Phase 0 showed notes turning
+  facts into meta-rules and dropping details such as "500-question").
+- **Failure taxonomy** (strict-incorrect): `agents_view` had 3 context-loss
+  errors; `agents_view_ctx` has 0. The remaining `agents_view_ctx` misses are
+  answerer errors (a temporal misreading) and one retrieval gap (the known
+  lexical "retrieval" vs "router" miss). `agents_group` had 9 answerer + 3
+  context-loss errors.
+- **Oracle caveat**: 0.94 is a lower bound — the answerer refuses facts passed
+  as "external context" on temporal questions (its prompt treats extra_context
+  as documents, not long-term memory), so the true answerer ceiling is higher.
+- **Judge audit**: 7-8/8 agreement per arm (0.88-1.00) on the stratified
+  sample; the disagreements fall on the hard partial/incorrect cases.
+
+The "rehydrated evidence payload" is therefore justified by H2 but not yet
+implemented: the next step is to deliver the needed slice of a memory's content
+(not only the note) under a budget, rather than whole memories.
+
 ## 16. Failure Modes
 
 | Failure | Required behavior |

@@ -46,6 +46,7 @@ class Config:
     embedding_model: str = ""
     embedding_base_url: str = ""
     embedding_api_key_env: str = ""
+    ablation_no_checklist: bool = False
     model: str = DEFAULT_MODEL
     base_url: str = DEFAULT_BASE_URL
     api_key_env: str = DEFAULT_API_KEY_ENV
@@ -84,6 +85,7 @@ class Config:
         self.embedding_model = (self.embedding_model or "").strip()
         self.embedding_base_url = (self.embedding_base_url or self.base_url).strip().rstrip("/")
         self.embedding_api_key_env = (self.embedding_api_key_env or self.api_key_env).strip()
+        self.ablation_no_checklist = bool(self.ablation_no_checklist)
         self.model = (self.model or DEFAULT_MODEL).strip()
         self.base_url = (self.base_url or DEFAULT_BASE_URL).strip().rstrip("/")
         self.api_key_env = (self.api_key_env or DEFAULT_API_KEY_ENV).strip()

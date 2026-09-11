@@ -24,7 +24,7 @@ from typing import Any
 from memory_machine.config import Config
 from memory_machine.coordinator import Machine
 from memory_machine.llm import LLMClient
-from memory_machine.retrieval import rank
+from memory_machine.retrieval import Embedder, rank, rank_semantic
 from memory_machine.tape import MemoryRecord
 
 DATA = Path(__file__).resolve().parent / "data"
@@ -134,6 +134,16 @@ def arm_bm25(m: Machine, question: str, expected_ids: set[str], k: int) -> tuple
     return bool(top & expected_ids), 0
 
 
+def arm_vector(
+    m: Machine, question: str, expected_ids: set[str], embedder: Embedder, k: int
+) -> tuple[bool, int]:
+    records = m.tape.read()
+    docs = [r.text() for r in records]
+    ids = [r.id for r in records]
+    top = {ids[i] for i, _s in rank_semantic(question, docs, embedder, limit=k)}
+    return bool(top & expected_ids), 0
+
+
 def arm_agents(
     m: Machine, question: str, expected_ids: set[str], client: CountingClient
 ) -> tuple[bool, int]:
@@ -157,6 +167,9 @@ def main() -> None:
     p.add_argument("--seed", type=int, default=7)
     p.add_argument("--model", default="deepseek-v4-flash")
     p.add_argument("--api-key", default="")
+    p.add_argument("--embedding-model", default="nomic-embed-text")
+    p.add_argument("--embedding-base-url", default="http://localhost:11434/v1")
+    p.add_argument("--no-checklist", action="store_true", help="ablation: agents skip the checklist")
     p.add_argument("--keep", action="store_true", help="keep the temp memory dir")
     args = p.parse_args()
 
@@ -182,8 +195,9 @@ def main() -> None:
     base = CountingClient(
         LLMClient("https://api.deepseek.com", api_key, args.model, retries=1, backoff=0.5)
     )
+    embedder = Embedder(args.embedding_base_url, "", args.embedding_model)
 
-    arms = {"bm25": [0, 0], "agents_full": [0, 0], "agents_router": [0, 0]}
+    arms = {"bm25": [0, 0], "vector": [0, 0], "agents_full": [0, 0], "agents_router": [0, 0]}
     lat = {"agents_full": 0.0, "agents_router": 0.0}
 
     for i, t in enumerate(tasks):
@@ -191,7 +205,7 @@ def main() -> None:
         if not expected:
             continue
 
-        # bm25 (router off, no LLM)
+        # bm25 + vector (router off, no LLM)
         m, id_map = build_machine(root, t["sessions"], Config(capacity=args.capacity, router_enabled=False))
         expected_ids = {id_map[s] for s in expected if s in id_map}
         if not expected_ids:
@@ -199,6 +213,9 @@ def main() -> None:
         hit, calls = arm_bm25(m, t["question"], expected_ids, k=5)
         arms["bm25"][0] += int(hit)
         arms["bm25"][1] += calls
+        hit, calls = arm_vector(m, t["question"], expected_ids, embedder, k=5)
+        arms["vector"][0] += int(hit)
+        arms["vector"][1] += calls
 
         # agents full
         start = time.monotonic()
@@ -211,7 +228,13 @@ def main() -> None:
         m2, id_map2 = build_machine(
             root,
             t["sessions"],
-            Config(capacity=args.capacity, router_enabled=True, router_mode="llm", router_top_k=args.top_k),
+            Config(
+                capacity=args.capacity,
+                router_enabled=True,
+                router_mode="llm",
+                router_top_k=args.top_k,
+                ablation_no_checklist=args.no_checklist,
+            ),
         )
         expected_ids2 = {id_map2[s] for s in expected if s in id_map2}
         start = time.monotonic()

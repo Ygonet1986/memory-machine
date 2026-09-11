@@ -92,8 +92,11 @@ Use `-C <dir>` to operate on a specific project directory. Run
   over digests; needs an embeddings provider like Ollama), or `lexical` (BM25;
   cheapest but unsafe for lexically-distant memories). It is opt-in because
   measurements show it trades recall for cost: on external benchmarks the full
-  sweep scored 0.90-1.00 evidence recall vs 0.45-0.75 for the router. Enable it
-  when the tape is large enough that a full sweep is impractical.
+  sweep scored 0.83-0.93 evidence recall vs 0.63-0.70 for the router.
+- **Evaluation** (`eval/`) — `agent_bench.py` (synthetic, lexically distant) and
+  `external_bench.py` (LongMemEval / LoCoMo, with BM25, dense vector, full
+  agents and routed agents). The agentic advantage over similarity retrieval is
+  benchmark-dependent: it holds where the lexical/semantic gap is large.
 - **Provenance** — rollups record `derived_from`; `rehydrate <id>` recovers the
   original (archived) memories so compression is never a dead end.
 

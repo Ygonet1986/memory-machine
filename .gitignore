@@ -20,3 +20,6 @@ dist/
 .env
 .env.*
 settings.json
+
+# Benchmark datasets (large; download on demand)
+eval/data/

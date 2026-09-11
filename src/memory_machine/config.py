@@ -38,7 +38,7 @@ class Config:
     consolidate_threshold: int = DEFAULT_CONSOLIDATE_THRESHOLD
     context_consolidate_threshold: int = DEFAULT_CONTEXT_CONSOLIDATE_THRESHOLD
     attach_chunk_size: int = 600
-    router_enabled: bool = True
+    router_enabled: bool = False
     router_mode: str = "llm"
     router_top_k: int = 5
     router_fallback: str = "full"

@@ -4,7 +4,7 @@
   "consolidate_threshold": 6000,
   "context_consolidate_threshold": 6000,
   "attach_chunk_size": 600,
-  "router_enabled": true,
+  "router_enabled": false,
   "router_mode": "llm",
   "router_top_k": 5,
   "router_fallback": "full",

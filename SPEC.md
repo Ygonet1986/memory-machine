@@ -285,22 +285,32 @@ an optional layer that selects which partitions to consult:
   - `lexical` — BM25 over the digests (no extra call; opt-in only).
 - No match → full sweep (`router_fallback: full`), or the most recent K.
 
-`router_enabled` is **true by default** (with `router_mode: llm`), because the
-semantic router preserves full recall while cutting the per-turn fan-out. The
-`lexical` mode remains opt-in only. Measured on a synthetic benchmark of
-lexically-distant tasks (24-48 memories, 6-12 partitions):
+`router_enabled` is **false by default**. The semantic router is a cost
+optimization, and measurements show it trades recall for calls:
+
+*Synthetic benchmark* (topically-pure partitions; 24-48 memories):
 
 | arm | recall | calls/query |
 |-----|--------|-------------|
 | BM25 retrieval | 0.33 | 0.0 |
 | agents (full sweep) | 1.00 | 12.0 |
 | agents + lexical router | 0.39 | 5.5 |
-| agents + embedding router (`nomic-embed-text`, top_k=5) | 1.00 | 5.0 |
-| agents + LLM router (top_k=2) | 1.00 | 3.0 |
+| agents + embedding router (`nomic-embed-text`) | 1.00 | 5.0 |
+| agents + LLM router | 1.00 | 3.0 |
 
-Lexical routing cannot select a partition whose digest shares no vocabulary
-with the query (measured ceiling 0.61, saturating). Semantic routing (`llm` or
-`embedding`) recovers full recall at a fraction of the calls.
+*External benchmarks* (evidence-session recall):
+
+| dataset | BM25 | agents (full) | agents + router |
+|---------|------|---------------|-----------------|
+| LongMemEval (10q) | 0.90 | **1.00** | 0.60 |
+| LongMemEval (20q) | 0.85 | **0.95** | 0.75 |
+| LoCoMo (10q) | 0.60 | **0.90** | 0.60 |
+| LoCoMo (20q) | 0.65 | **0.70** | 0.45 |
+
+The router cuts calls (~10 -> ~5) but loses 5-40 recall points on real
+conversational data, because the evidence partition is not always selected.
+It is therefore opt-in, recommended only when the tape is large enough that a
+full sweep is impractical. Lexical routing is unsafe (measured ceiling 0.61).
 
 ## 16. Failure Modes
 

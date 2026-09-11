@@ -368,6 +368,7 @@ class Machine:
             "checklist": self.whiteboard.checklist,
             "annotations": [a.to_dict() for a in kept],
             "attached_content": self._attached_content(kept),
+            "rehydrated": self._rehydrated(kept),
             "agents_checklists": [
                 {"id": a.id, "checklist": a.checklist}
                 for a in self.manifest.agents
@@ -415,6 +416,27 @@ class Machine:
             self._recall_cache_path().unlink(missing_ok=True)
         except OSError:
             pass
+
+    def _rehydrated(self, kept: list[Any], *, budget: int = 2000) -> list[dict[str, Any]]:
+        """Source summaries behind annotated rollups, so originals stay reachable."""
+        if not kept:
+            return []
+        by_id = {r.id: r for r in self.tape.read()}
+        out: list[dict[str, Any]] = []
+        used = 0
+        for a in kept:
+            r = by_id.get(a.memory_id)
+            if r is None or not r.derived_from:
+                continue
+            sources = [by_id[s].summary for s in r.derived_from if s in by_id]
+            if not sources:
+                continue
+            cost = sum(len(s) for s in sources) + 40
+            if out and used + cost > budget:
+                break
+            out.append({"memory_id": r.id, "sources": sources[:20]})
+            used += cost
+        return out
 
     def _attached_content(self, kept: list[Any], *, budget: int = 2000) -> list[dict[str, Any]]:
         """Full text of annotated attachment chunks, so the chatbot can read them."""
@@ -574,7 +596,12 @@ class Machine:
                 r.summary for r in old[:10]
             )
 
-        roll_rec = MemoryRecord(type="memory", summary=summary[:1500], why=body[:4000])
+        roll_rec = MemoryRecord(
+            type="memory",
+            summary=summary[:1500],
+            why=body[:4000],
+            derived_from=[r.id for r in old],
+        )
         rec, _g, _a, _created = add_memory(
             self.tape, self.manifest, roll_rec, model=self.config.model
         )
@@ -587,6 +614,32 @@ class Machine:
             "rollup_id": rec.id,
             "kept": len(records) - len(old),
             "archived": [r.id for r in old],
+        }
+
+    def rehydrate(self, memory_id: str, *, reactivate: bool = False) -> dict[str, Any]:
+        """Recover the original memories behind a rollup/consolidation record.
+
+        Archived sources stay on the tape but are invisible to the agents; this
+        makes them reachable again (and optionally active) so provenance is not
+        a dead end.
+        """
+        records = {r.id: r for r in self.tape.read()}
+        rec = records.get(memory_id)
+        if rec is None:
+            return {"ok": False, "error": f"{memory_id} not found"}
+        if not rec.derived_from:
+            return {"ok": False, "error": f"{memory_id} has no derived_from sources"}
+
+        sources = [records[s].to_dict() for s in rec.derived_from if s in records]
+        if reactivate:
+            self.tape.set_status_many(rec.derived_from, "active")
+            self.save()
+            self._invalidate_recall_cache()
+        return {
+            "ok": True,
+            "memory_id": memory_id,
+            "sources": sources,
+            "reactivated": reactivate,
         }
 
     def consolidate(self, *, temperature: float = 0.0, use_llm: bool = False) -> dict[str, Any]:

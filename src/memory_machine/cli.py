@@ -66,6 +66,10 @@ def _build_parser() -> argparse.ArgumentParser:
     roll.add_argument("--keep-recent", type=int, default=20)
     roll.add_argument("--temperature", type=float, default=0.0)
 
+    reh = sub.add_parser("rehydrate", help="recover the original memories behind a rollup (JSON)")
+    reh.add_argument("memory_id")
+    reh.add_argument("--reactivate", action="store_true")
+
     ckpt = sub.add_parser("checkpoint", help="record a turn back to memory (JSON)")
     ckpt.add_argument("question")
     ckpt.add_argument("summary")
@@ -229,6 +233,11 @@ def cmd_rollup(args: argparse.Namespace) -> int:
     return _j(m.rollup(keep_recent=args.keep_recent, temperature=args.temperature))
 
 
+def cmd_rehydrate(args: argparse.Namespace) -> int:
+    m = _machine(args)
+    return _j(m.rehydrate(args.memory_id, reactivate=args.reactivate))
+
+
 def cmd_checkpoint(args: argparse.Namespace) -> int:
     m = _machine(args)
     memories: list[dict[str, Any]] = []
@@ -301,6 +310,7 @@ def main(argv: list[str] | None = None) -> int:
         "delete": cmd_delete,
         "sessions": cmd_sessions,
         "rollup": cmd_rollup,
+        "rehydrate": cmd_rehydrate,
     }
     return handlers[args.command](args)
 

@@ -210,3 +210,59 @@ def test_rollup_archives_old_records(tmp_path):
     active = [r for r in m.tape.read() if r.status == "active"]
     assert len(active) == 3  # 2 kept + 1 rollup
     assert any(r.summary == "Rolled summary of old memories" for r in active)
+
+
+def test_rollup_derived_from_and_rehydrate(tmp_path):
+    def handler(messages, temperature):
+        sys_text = text(messages, "system")
+        if "consolidating older project memories" in sys_text:
+            return "Rolled summary"
+        return '{"digest":"d","checklist":[],"annotations":[]}'
+
+    m = _machine(tmp_path, handler)
+    for i in range(5):
+        m.add_memory(MemoryRecord(type="decision", summary=f"decision {i}"))
+    res = m.rollup(keep_recent=2)
+    rollup_id = res["rollup_id"]
+
+    rec = {r.id: r for r in m.tape.read()}[rollup_id]
+    assert rec.derived_from == res["archived"]
+
+    rh = m.rehydrate(rollup_id)
+    assert rh["ok"] is True
+    assert len(rh["sources"]) == 3
+    assert all(s["status"] == "archived" for s in rh["sources"])
+
+    rh2 = m.rehydrate(rollup_id, reactivate=True)
+    assert rh2["reactivated"] is True
+    active_ids = {r.id for r in m.tape.read() if r.status == "active"}
+    assert set(res["archived"]).issubset(active_ids)
+
+
+def test_recall_includes_rehydrated(tmp_path):
+    state: dict[str, str] = {}
+
+    def handler(messages, temperature):
+        sys_text = text(messages, "system")
+        if "consolidating older project memories" in sys_text:
+            return "Rolled"
+        if "You are a memory agent" in sys_text:
+            rid = state.get("rollup_id", "")
+            anns = (
+                f'{{"memory_id":"{rid}","note":"rollup","relevance":0.9}}'
+                if rid and rid in sys_text
+                else ""
+            )
+            return f'{{"digest":"d","checklist":[],"annotations":[{anns}]}}'
+        return '{"annotations":[]}'
+
+    m = _machine(tmp_path, handler)
+    for i in range(5):
+        m.add_memory(MemoryRecord(type="decision", summary=f"decision {i}"))
+    res = m.rollup(keep_recent=2)
+    state["rollup_id"] = res["rollup_id"]
+
+    out = m.recall("what decisions were made?")
+    assert out["rehydrated"]
+    assert out["rehydrated"][0]["memory_id"] == res["rollup_id"]
+    assert len(out["rehydrated"][0]["sources"]) == 3

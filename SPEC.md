@@ -500,8 +500,23 @@ calls. The perspective prompts make the per-view annotation stronger than the
 per-group annotation (the pruned group-agent arm scored 0.97 on the same
 selection). The lower reduction (0.59) reflects deliberate perspective
 redundancy: overlapping views let the same memory be examined by more than one
-agent. View agents are currently stateless (no digest/checklist persistence);
-persisting view state is the next step.
+agent.
+
+**Persistent view state.** Each view keeps its own state in the manifest
+(`view_agents`): digest, checklist and record counts, mirroring the group
+agents. The fused view call refines the checklist and rewrites the digest every
+turn, and the coverage judge prefers the persisted digest when describing
+unselected candidate regions. Coverage itself is stored only as a diagnostic
+(`last_coverage`), never fed back into the prompt. A re-run with persistence
+measured 0.97 @ 4.9 calls / 0.64 reduction (one task short of 1.00); the
+difference is router variance, not a persistence regression — see below.
+
+**Router stability limitation.** Across two identical runs of the same arm, the
+LLM view selection differed on **20/32 tasks** (temperature 0). Evidence stayed
+0.97-1.00 because the selected views still covered the required memories, but
+the selection itself is not stable; the lexical plan is deterministic (0.97 @
+3.0 calls). Reproducibility-sensitive deployments should prefer the lexical
+plan or pin the selection.
 
 ## 16. Failure Modes
 

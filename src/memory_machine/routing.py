@@ -453,20 +453,36 @@ the query's words."""
 
 
 def _candidate_digest(
-    tape: Tape | None, plan: RoutingPlan, *, limit: int = 4, max_chars: int = 220
+    tape: Tape | None,
+    plan: RoutingPlan,
+    *,
+    limit: int = 4,
+    max_chars: int = 220,
+    manifest: Any = None,
 ) -> list[str]:
-    """Compact digests of plausible views the plan did not select."""
+    """Compact digests of plausible views the plan did not select.
+
+    Prefers the view agent's persisted digest when it is current, so the router
+    and the judge see the region's own summary rather than raw member lines.
+    """
     if tape is None:
         return []
     records = {r.id: r for r in tape.read() if r.status == "active"}
     index = build_index(tape)
     selected = set(plan.selected_views)
+    view_agents = getattr(manifest, "view_agents", {}) if manifest is not None else {}
     out: list[str] = []
     for view in plan.candidate_views:
         if view in selected or view not in index:
             continue
-        summaries = [records[i].summary for i in index[view] if i in records and records[i].summary]
-        out.append(f"{view}: {' | '.join(summaries[:3])[:max_chars] or '(no summaries)'}")
+        agent = view_agents.get(view)
+        if agent is not None and agent.digest and agent.digest_records == len(index[view]):
+            out.append(f"{view}: {agent.digest[:max_chars]}")
+        else:
+            summaries = [
+                records[i].summary for i in index[view] if i in records and records[i].summary
+            ]
+            out.append(f"{view}: {' | '.join(summaries[:3])[:max_chars] or '(no summaries)'}")
         if len(out) >= limit:
             break
     return out
@@ -480,6 +496,7 @@ def judge_coverage(
     whiteboard: Any = None,
     plan: RoutingPlan | None = None,
     tape: Tape | None = None,
+    manifest: Any = None,
     temperature: float = 0.0,
 ) -> tuple[str, list[str]]:
     """One LLM call judging whether the retrieved memories cover the query.
@@ -491,7 +508,9 @@ def judge_coverage(
     if client is None:
         return "uncertain", []
     lines = [f"{a.memory_id}: {a.note}" for a in annotations if getattr(a, "note", "")]
-    candidates = _candidate_digest(tape, plan) if plan is not None else []
+    candidates = (
+        _candidate_digest(tape, plan, manifest=manifest) if plan is not None else []
+    )
     board = ""
     if whiteboard is not None:
         board = (

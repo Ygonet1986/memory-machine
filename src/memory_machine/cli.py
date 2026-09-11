@@ -14,6 +14,7 @@ from .llm import LLMError
 from .secrets import SecretError
 from .sessions import list_sessions, sessions_dir_for
 from .tape import PROJECT_TYPES, MemoryRecord
+from .views import list_views
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -59,8 +60,10 @@ def _build_parser() -> argparse.ArgumentParser:
     recall.add_argument("--temperature", type=float, default=0.0)
     recall.add_argument("--max-workers", type=int, default=None)
     recall.add_argument("--cross-session", action="store_true", help="also search other sessions' tapes")
+    recall.add_argument("--views", default="", help="comma-separated view filter (e.g. time/2026-09,type/decision)")
 
     sub.add_parser("sessions", help="list sessions (JSON)")
+    sub.add_parser("views", help="list memory views / projections (JSON)")
 
     roll = sub.add_parser("rollup", help="consolidate older tape records (JSON)")
     roll.add_argument("--keep-recent", type=int, default=20)
@@ -81,6 +84,7 @@ def _build_parser() -> argparse.ArgumentParser:
     rem.add_argument("--summary", required=True)
     rem.add_argument("--why", default="")
     rem.add_argument("--files", default="", help="comma-separated file paths")
+    rem.add_argument("--views", default="", help="comma-separated view tags (e.g. topic/router)")
 
     sub.add_parser("list", help="list tape records (JSON)")
 
@@ -208,16 +212,23 @@ def _j(obj: dict[str, Any]) -> int:
 
 def cmd_recall(args: argparse.Namespace) -> int:
     m = _machine(args)
+    views = [v.strip() for v in (args.views or "").split(",") if v.strip()]
     try:
         result = m.recall(
             args.question,
             cross_session=args.cross_session,
+            views=views or None,
             temperature=args.temperature,
             max_workers=args.max_workers,
         )
     except LLMError as e:
         return _j({"ok": False, "error": str(e)})
     return _j(result)
+
+
+def cmd_views(args: argparse.Namespace) -> int:
+    m = _machine(args)
+    return _j({"ok": True, "views": list_views(m.tape)})
 
 
 def cmd_sessions(args: argparse.Namespace) -> int:
@@ -260,7 +271,8 @@ def cmd_checkpoint(args: argparse.Namespace) -> int:
 def cmd_remember(args: argparse.Namespace) -> int:
     m = _machine(args)
     files = [f.strip() for f in args.files.split(",") if f.strip()]
-    rec = MemoryRecord(type=args.type, summary=args.summary, why=args.why, files=files)
+    views = [v.strip() for v in (args.views or "").split(",") if v.strip()]
+    rec = MemoryRecord(type=args.type, summary=args.summary, why=args.why, files=files, views=views)
     try:
         return _j(m.add_memory(rec))
     except SecretError as e:
@@ -309,6 +321,7 @@ def main(argv: list[str] | None = None) -> int:
         "archive": cmd_archive,
         "delete": cmd_delete,
         "sessions": cmd_sessions,
+        "views": cmd_views,
         "rollup": cmd_rollup,
         "rehydrate": cmd_rehydrate,
     }

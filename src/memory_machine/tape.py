@@ -33,6 +33,18 @@ def parse_id(memory_id: str) -> int:
     return int(m.group(1))
 
 
+def default_views(record: "MemoryRecord") -> list[str]:
+    """Deterministic organizational projections of a record (no duplication)."""
+    views: list[str] = []
+    if record.created_at:
+        views.append(f"time/{record.created_at[:7]}")
+    if record.type:
+        views.append(f"type/{record.type}")
+    if record.source:
+        views.append(f"source/{record.source.split('#', 1)[0]}")
+    return views
+
+
 @dataclass
 class MemoryRecord:
     type: str
@@ -44,6 +56,7 @@ class MemoryRecord:
     status: str = "active"
     source: str = ""
     derived_from: list[str] = field(default_factory=list)
+    views: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -56,6 +69,7 @@ class MemoryRecord:
             "status": self.status,
             "source": self.source,
             "derived_from": self.derived_from,
+            "views": self.views,
         }
 
     @classmethod
@@ -70,6 +84,7 @@ class MemoryRecord:
             status=str(data.get("status") or "active"),
             source=str(data.get("source") or ""),
             derived_from=list(data.get("derived_from") or []),
+            views=list(data.get("views") or []),
         )
 
     def text(self) -> str:
@@ -126,6 +141,9 @@ class Tape:
             record.id = format_id(self.max_id_num() + 1)
         if not record.created_at:
             record.created_at = datetime.now(timezone.utc).isoformat()
+        for view in default_views(record):
+            if view not in record.views:
+                record.views.append(view)
         assert_clean(record.text())
         self.path.parent.mkdir(parents=True, exist_ok=True)
         with self.path.open("a", encoding="utf-8") as fh:

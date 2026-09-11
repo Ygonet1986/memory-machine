@@ -53,12 +53,13 @@ python3 -m memory_machine run \
 | `status` | Show tape / groups / agents / whiteboard state |
 | `whiteboard` | Print the whiteboard |
 | `context` | Print the main chatbot's conversation context |
-| `recall Q [--cross-session]` | Run memory agents for a question (JSON); optionally search other sessions |
+| `recall Q [--cross-session] [--views v1,v2]` | Run memory agents for a question (JSON); optionally search other sessions / filter by views |
 | `checkpoint Q S [--memories JSON]` | Record a turn back to memory (JSON) |
-| `remember --summary S [--type T] [--why W]` | Append a memory (JSON) |
+| `remember --summary S [--type T] [--why W] [--views v1,v2]` | Append a memory (JSON) |
 | `list` / `archive ID` / `delete ID` | Manage tape records (JSON) |
 | `attach PATH [--chunk-size N]` | Ingest a `.txt` into the tape as labeled chunk memories |
 | `sessions` | List sessions (JSON) |
+| `views` | List memory views / projections (JSON) |
 | `rollup [--keep-recent N]` | Consolidate older tape records into one summary |
 | `rehydrate ID [--reactivate]` | Recover the original memories behind a rollup |
 
@@ -102,6 +103,10 @@ Use `-C <dir>` to operate on a specific project directory. Run
   emerges where relevance is contextual, not directly similar.
 - **Provenance** — rollups record `derived_from`; `rehydrate <id>` recovers the
   original (archived) memories so compression is never a dead end.
+- **Views (projections)** — a memory belongs to one canonical tape but can
+  appear in several views (`time/…`, `type/…`, `source/…`, `topic/…`,
+  `subject/…`) without physical duplication; the view index is a rebuildable
+  projection. List with `views`, filter recall with `--views`.
 
 ## Configuration
 

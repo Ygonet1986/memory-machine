@@ -204,6 +204,7 @@ def run_agents(
     client: Any,
     *,
     groups: list[Group] | None = None,
+    views_filter: set[str] | None = None,
     temperature: float = 0.0,
     max_workers: int | None = None,
     on_error: str = "skip",
@@ -225,6 +226,8 @@ def run_agents(
         if selected_ids is not None and group.id not in selected_ids:
             continue
         records = group_records(tape, group)
+        if views_filter:
+            records = [r for r in records if set(r.views) & views_filter]
         if not records:
             continue
         tasks.append((agent, group, records))

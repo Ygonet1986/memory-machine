@@ -285,6 +285,15 @@ class Machine:
             return judge_coverage(
                 question, run.annotations, client, whiteboard=self.whiteboard
             )
+        if mode == "judge_views":
+            return judge_coverage(
+                question,
+                run.annotations,
+                client,
+                whiteboard=self.whiteboard,
+                plan=plan,
+                tape=self.tape,
+            )
         if mode == "structural":
             return coverage_signal(plan, annotated, [], self.tape)
         if mode == "agents":

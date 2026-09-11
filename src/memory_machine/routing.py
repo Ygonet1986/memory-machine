@@ -424,12 +424,15 @@ def select_plan_llm(
 
 
 COVERAGE_JUDGE_PROMPT = """You judge whether the memories retrieved for a query \
-are sufficient to answer it. You see the query, the current working context, and \
-the memories the agents chose to remember (id: note).
+are sufficient to answer it.
 
-Retrieved memories:
+Retrieved memories (what the agents chose to remember):
 
 {memories}
+
+Other regions of the memory that were NOT retrieved (view: what it covers):
+
+{candidates}
 
 Current working context:
 
@@ -441,9 +444,32 @@ Return ONLY JSON, nothing else:
 {{"coverage":"complete","missing":[],"reason":"<short>"}}
 
 coverage is "complete" (the retrieved memories contain what the query needs), \
-"partial" (something relevant is missing) or "uncertain" (you cannot tell). \
-missing lists what is missing, empty when complete. Judge coverage, not \
-relevance: a relevant memory that does not answer the query is partial."""
+"partial" (something relevant is missing — name it in missing, e.g. a region \
+above that the query needs) or "uncertain" (you cannot tell). missing lists \
+what is missing, empty when complete. Judge coverage, not relevance: a relevant \
+memory that does not answer the query is partial. Pay attention to wording \
+differences: a region may cover what the query asks even when it does not share \
+the query's words."""
+
+
+def _candidate_digest(
+    tape: Tape | None, plan: RoutingPlan, *, limit: int = 4, max_chars: int = 220
+) -> list[str]:
+    """Compact digests of plausible views the plan did not select."""
+    if tape is None:
+        return []
+    records = {r.id: r for r in tape.read() if r.status == "active"}
+    index = build_index(tape)
+    selected = set(plan.selected_views)
+    out: list[str] = []
+    for view in plan.candidate_views:
+        if view in selected or view not in index:
+            continue
+        summaries = [records[i].summary for i in index[view] if i in records and records[i].summary]
+        out.append(f"{view}: {' | '.join(summaries[:3])[:max_chars] or '(no summaries)'}")
+        if len(out) >= limit:
+            break
+    return out
 
 
 def judge_coverage(
@@ -452,12 +478,20 @@ def judge_coverage(
     client: Any,
     *,
     whiteboard: Any = None,
+    plan: RoutingPlan | None = None,
+    tape: Tape | None = None,
     temperature: float = 0.0,
 ) -> tuple[str, list[str]]:
-    """One LLM call judging whether the retrieved memories cover the query."""
+    """One LLM call judging whether the retrieved memories cover the query.
+
+    With a ``plan``/``tape`` the judge also sees the plausible regions the
+    router did NOT select (v2), so it can flag a semantic gap the candidate
+    ranking alone cannot express.
+    """
     if client is None:
         return "uncertain", []
     lines = [f"{a.memory_id}: {a.note}" for a in annotations if getattr(a, "note", "")]
+    candidates = _candidate_digest(tape, plan) if plan is not None else []
     board = ""
     if whiteboard is not None:
         board = (
@@ -470,6 +504,7 @@ def judge_coverage(
             "role": "system",
             "content": COVERAGE_JUDGE_PROMPT.format(
                 memories="\n".join(lines) or "(none)",
+                candidates="\n".join(candidates) or "(none)",
                 whiteboard=board or "(empty whiteboard)",
                 query=question,
             ),

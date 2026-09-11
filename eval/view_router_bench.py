@@ -582,6 +582,14 @@ ARM_CONFIGS: dict[str, Config] = {
         router_enabled=True, router_mode="cascade", view_router_mode="lexical",
         view_dimension_mode="auto", view_top_k=3, coverage_mode="views",
     ),
+    "view_bm25_dim_judge2": Config(
+        router_enabled=True, router_mode="views", view_router_mode="lexical",
+        view_dimension_mode="auto", view_top_k=3, coverage_mode="judge_views",
+    ),
+    "cascade_bm25_dim_judge2": Config(
+        router_enabled=True, router_mode="cascade", view_router_mode="lexical",
+        view_dimension_mode="auto", view_top_k=3, coverage_mode="judge_views",
+    ),
 }
 
 

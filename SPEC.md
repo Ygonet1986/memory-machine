@@ -447,6 +447,19 @@ Readings (v0.5b):
   vs "router"). End-to-end it is C1d plus one fallback (0.91 complete evidence
   at 10.0 calls). The remaining gap is *semantic*: detecting a region the
   lexical ranking never proposed.
+- **M3c — the judge with candidate digests does not fix it either**: giving the
+  judge the digests of the plausible unselected views (`coverage_mode:
+  judge_views`) improves calibration (false-safe 2/3, waste 4/29 vs v1's 38%)
+  but not end-to-end: complete evidence stays 0.91 (10.6 calls), and on the
+  cascade the expansion fails (0.91 at 11.5 calls).
+- **Frontier on the frozen fixture (n=32)**: similarity 0.72 @ 4.0 calls / 0.79
+  reduction; C1 view-BM25 0.97 @ 10.9 / 0.63; C1d dimension-aware 0.91 @ 9.6 /
+  0.70; C1d + coverage signals 0.91 @ 9.6-11.5; view-LLM (v0.5a) **1.00 @ 15.2
+  / 0.49**; oracle 1.00 @ 7.7 / 0.84. The recall-safe operating point is the
+  view-LLM arm; the open problem is **precision** (keep 1.00 with fewer calls),
+  not recall. Every cheap coverage signal tested either over-triggers (agents
+  100% partial) or is false-safe on the semantic gaps (structural 3/3,
+  candidates 3/3, judge v2 2/3).
 
 ## 16. Failure Modes
 

@@ -199,7 +199,10 @@ delivering ~11k context characters — context size is not evidence. See
 | `capacity` | 500 | memories per group (per agent) |
 | `graph_enabled` | `false` | write-time graph extraction (opt-in) |
 | `graph_batch_size` / `graph_batch_max_chars` | 8 / 12000 | extraction batching limits |
-| `graph_recall_mode` | `off` | graph recall: `off` / `augment` / `only` |
+| `graph_recall_mode` | `off` | graph recall: `off` / `augment` / `augment_guarded` / `only` |
+| `graph_augment_min_score` / `graph_augment_max_items` | 0.80 / 5 | guarded augmentation: score floor and cap |
+| `graph_hub_degree` | 0 | guarded traversal: stop-expanding degree (0 = off) |
+| `graph_resolver_candidates` | 10 | resolver shortlist size (doc-vector cache is always on) |
 | `graph_depth` / `graph_top_k` | 2 / 8 | traversal depth (semantic hops) and evidence cap |
 | `whiteboard_budget` | 4000 | char budget for reminders on the whiteboard |
 | `consolidate_threshold` | 6000 | whiteboard size that triggers consolidation |

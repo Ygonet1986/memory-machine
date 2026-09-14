@@ -1,4 +1,4 @@
-"""Figures for the graph-recall measurement (M3).
+"""Figures for the graph-recall measurement (M3/V2).
 
 Reads the summaries produced by eval/graph_report.py and writes PDF/SVG plus
 the source CSV under docs/figures/. Matplotlib is confined to eval/.
@@ -26,41 +26,31 @@ import graph_report  # noqa: E402
 FIGS = HERE.parent / "docs" / "figures"
 
 
-def _bars(ax: Any, table: list[dict[str, Any]], title: str) -> None:
-    values = [item["value"] for item in table]
-    positions = range(len(values))
-    width = 0.27
-    ax.bar([i - width for i in positions], [item["agent_recall"] or 0 for item in table],
-           width=width, label="agents (off)")
-    ax.bar(list(positions), [item["graph_recall"] or 0 for item in table],
-           width=width, label="graph (only)")
-    ax.bar([i + width for i in positions], [item["union_recall"] or 0 for item in table],
-           width=width, label="union (augment)")
+def _strict_by_arm(ax: Any, summary: dict[str, Any], dataset: str) -> None:
+    arms = summary["arms"]
+    values = [summary["results"][arm]["strict"] or 0 for arm in arms]
+    positions = range(len(arms))
+    ax.bar(positions, values, width=0.55, color=["#6b7280", "#8b5cf6", "#10b981", "#f59e0b", "#94a3b8"][: len(arms)])
     ax.set_xticks(list(positions))
-    ax.set_xticklabels(values, rotation=20, ha="right", fontsize=8)
+    ax.set_xticklabels([arm.replace("graph_", "") for arm in arms], rotation=20, ha="right", fontsize=8)
     ax.set_ylim(0, 1.05)
-    ax.set_ylabel("gold evidence recall")
-    ax.set_title(title, fontsize=10)
+    ax.set_ylabel("strict accuracy (judged)")
+    ax.set_title(f"Answer accuracy by arm ({dataset})", fontsize=10)
     ax.grid(axis="y", alpha=0.3)
-    ax.legend(fontsize=8)
 
 
-def _novelty(ax: Any, table: list[dict[str, Any]], title: str) -> None:
-    values = [item["value"] for item in table]
-    positions = range(len(values))
-    width = 0.38
-    ax.bar([i - width / 2 for i in positions],
-           [item["graph_only_gold"] for item in table], width=width,
-           label="graph-only gold")
-    ax.bar([i + width / 2 for i in positions],
-           [item["agent_only_gold"] for item in table], width=width,
-           label="agent-only gold")
+def _novelty(ax: Any, summary: dict[str, Any], dataset: str) -> None:
+    label_arms = ["agent_only"] + summary["augment_arms"]
+    values = [summary["retrieval"]["graph_off"]["agent_only_gold"]]
+    values += [summary["retrieval"][arm]["graph_only_gold"] for arm in summary["augment_arms"]]
+    positions = range(len(label_arms))
+    ax.bar(positions, values, width=0.55, color=["#94a3b8", "#8b5cf6", "#10b981", "#f59e0b"][: len(label_arms)])
     ax.set_xticks(list(positions))
-    ax.set_xticklabels(values, rotation=20, ha="right", fontsize=8)
+    ax.set_xticklabels([name.replace("graph_augment", "aug").replace("_", " ") for name in label_arms],
+                       rotation=20, ha="right", fontsize=8)
     ax.set_ylabel("gold memories (count)")
-    ax.set_title(title, fontsize=10)
+    ax.set_title(f"Gold found only by one arm ({dataset})", fontsize=10)
     ax.grid(axis="y", alpha=0.3)
-    ax.legend(fontsize=8)
 
 
 def make(dataset: str) -> None:
@@ -68,15 +58,9 @@ def make(dataset: str) -> None:
     if not summary.get("n"):
         print(f"{dataset}: no snapshots")
         return
-    tables = summary["tables"]
-    panels = [("category", tables["category"])]
-    if dataset == "longmemeval":
-        panels.append(("lexical overlap", tables["lexical"]))
-
-    fig, axes = plt.subplots(2, len(panels), figsize=(5.2 * len(panels), 6.4), squeeze=False)
-    for column, (name, table) in enumerate(panels):
-        _bars(axes[0][column], table, f"Recall by {name} ({dataset})")
-        _novelty(axes[1][column], table, f"Novel gold by {name} ({dataset})")
+    fig, axes = plt.subplots(1, 2, figsize=(10.4, 3.8))
+    _strict_by_arm(axes[0], summary, dataset)
+    _novelty(axes[1], summary, dataset)
     fig.tight_layout()
     FIGS.mkdir(parents=True, exist_ok=True)
     fig.savefig(FIGS / f"graph_recall_{dataset}.pdf", bbox_inches="tight")
@@ -85,19 +69,15 @@ def make(dataset: str) -> None:
 
     with (FIGS / f"graph_recall_{dataset}.csv").open("w", encoding="utf-8", newline="") as handle:
         writer = csv.writer(handle)
-        writer.writerow([
-            "stratum", "value", "n", "agent_recall", "graph_recall", "union_recall",
-            "strict_off", "strict_augment", "aug_better", "aug_worse", "aug_equal",
-            "graph_only_gold", "agent_only_gold",
-        ])
-        for name, table in panels:
-            for item in table:
-                writer.writerow([
-                    name, item["value"], item["n"], item["agent_recall"], item["graph_recall"],
-                    item["union_recall"], item["strict_off"], item["strict_augment"],
-                    item["aug_better"], item["aug_worse"], item["aug_equal"],
-                    item["graph_only_gold"], item["agent_only_gold"],
-                ])
+        writer.writerow(["arm", "strict", "lenient", "aur", "graph_only_gold", "graph_precision", "evidence_complete"])
+        for arm in summary["arms"]:
+            data = summary["results"][arm]
+            retrieval = summary["retrieval"][arm]
+            writer.writerow([
+                arm, data["strict"], data["lenient"], data["aur"],
+                retrieval["graph_only_gold"], retrieval["graph_precision"],
+                retrieval["evidence_complete"],
+            ])
     print(f"{dataset}: wrote docs/figures/graph_recall_{dataset}.pdf/.svg/.csv")
 
 

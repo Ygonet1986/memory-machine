@@ -1180,3 +1180,29 @@ Default `graph_batch_size=8` (knee with margin under the response-size risk);
 logical equivalence of batch vs single is guaranteed by the pipeline and
 covered by deterministic tests (real-model output varies run to run, as any
 LLM extraction does).
+
+### 20.11 Admission control (v2)
+
+`augment` (v1) is unchanged and byte-compatible. `graph_recall_mode` gains
+`augment_guarded`, which passes graph-only evidence through three gates before
+it can compete for the single global budget:
+
+| flag | meaning |
+|------|---------|
+| `graph_hub_degree` | never expand the traversal *from* an entity above this non-resolution degree (0 = off); edges into the hub are still recorded |
+| `graph_augment_min_score` | score floor over edge-confidence × depth-penalty |
+| `graph_augment_max_items` | cap on graph-only additions (0 = unlimited) |
+| `graph_augment_weight` | optional ranking factor applied when merging with agent annotations (1.0 = neutral) |
+
+Defaults follow the V2-0 replay rule (preserve 100% of the recovered gold,
+minimize non-gold, least aggressive on ties): hub cap off, score 0.80, up to 5
+items, weight 1.0. The precision recipe (hub 20, score 0.80, 3 items) is
+available through the same flags and documented with its explicit trade-off in
+`docs/GRAPH_V2.md`. The resolver keeps an in-memory doc-vector cache and a
+shortlist of `graph_resolver_candidates` (default 10): same vectors, same
+resolutions, fewer recomputations.
+
+Admission control bounds mass dilution; it cannot repair a single
+question-irrelevant neighbour (behavioural interference) or the case where the
+answerer ignores admitted gold (utilization), both documented in
+`docs/GRAPH_V2.md`.

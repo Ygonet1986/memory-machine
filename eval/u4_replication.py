@@ -21,6 +21,7 @@ import json
 import os
 import sys
 import tempfile
+import time
 from collections import Counter
 from pathlib import Path
 from typing import Any
@@ -210,7 +211,16 @@ def main() -> None:
     )
     tasks = {t["question"]: t for t in load_longmemeval(DATA / "longmemeval_s_cleaned.json", 0, 7)}
     work_root = Path(tempfile.mkdtemp(prefix="mm-u42-"))
+    out_path = OUT_DIR / "u4_replication.jsonl"
     rows_out: list[dict[str, Any]] = []
+    done: set[tuple[str, int, str]] = set()
+    if out_path.exists():
+        for line in out_path.read_text(encoding="utf-8").splitlines():
+            if line.strip():
+                existing = json.loads(line)
+                rows_out.append(existing)
+                done.add((existing["slice"], existing["case"], existing["arm"]))
+        print(f"resuming: {len(done)} arm-cases already recorded", flush=True)
 
     for slice_name, spec in SLICES.items():
         arms = spec.get("arms", U3_ARMS)
@@ -224,6 +234,8 @@ def main() -> None:
             n = FLIP_N if row["case"] in flips else U3_N
             question_date = tasks.get(row["question"], {}).get("question_date", "")
             for arm in arms:
+                if (slice_name, row["case"], arm) in done:
+                    continue
                 context, machine, question_prompt = rebuild_delivery(
                     spec["root"], row, arm, question_date, work_root
                 )
@@ -231,14 +243,27 @@ def main() -> None:
                 verdicts: list[str] = []
                 for _replicate in range(n):
                     whiteboard_hash = sha(machine.whiteboard.render())
-                    answer = answer_with(
-                        agent_client, machine, question_prompt, extra_context=context
-                    )
-                    verdict, _reason = judge(judge_client, row["question"], row["gold"], answer)
+                    for attempt in range(5):
+                        try:
+                            answer = answer_with(
+                                agent_client, machine, question_prompt, extra_context=context
+                            )
+                            verdict, _reason = judge(
+                                judge_client, row["question"], row["gold"], answer
+                            )
+                            break
+                        except Exception as exc:  # transient API/response failures
+                            if attempt == 4:
+                                raise
+                            print(
+                                f"  retry {slice_name} case {row['case']} {arm}: "
+                                f"{type(exc).__name__}: {exc}",
+                                flush=True,
+                            )
+                            time.sleep(3 + 3 * attempt)
                     verdicts.append(verdict)
                 modal = Counter(verdicts).most_common(1)[0][0]
-                rows_out.append(
-                    {
+                record = {
                         "slice": slice_name,
                         "case": row["case"],
                         "cat": row.get("cat", ""),
@@ -252,18 +277,15 @@ def main() -> None:
                         ),
                         "context_sha256": context_hash,
                         "whiteboard_sha256": whiteboard_hash,
-                    }
-                )
+                }
+                rows_out.append(record)
+                with out_path.open("a", encoding="utf-8") as handle:
+                    handle.write(json.dumps(record, ensure_ascii=False) + "\n")
                 print(
                     f"{slice_name} case {row['case']:>3} {arm:<24} n={n} "
                     f"verdicts={verdicts} modal={modal}",
                     flush=True,
                 )
-        path = OUT_DIR / "u4_replication.jsonl"
-        with path.open("w", encoding="utf-8") as handle:
-            for item in rows_out:
-                handle.write(json.dumps(item, ensure_ascii=False) + "\n")
-
     print(f"\nwork root: {work_root}")
 
 

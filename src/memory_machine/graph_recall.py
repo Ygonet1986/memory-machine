@@ -332,6 +332,47 @@ class GraphRecall:
         return result
 
 
+QUESTION_STOP = {
+    "how", "many", "did", "i", "the", "a", "an", "to", "on", "in", "of", "my",
+    "was", "is", "it", "and", "for", "what", "when", "where", "that", "at",
+    "me", "you", "have", "has", "been", "much", "per", "day", "days", "there",
+}
+
+
+def question_coverage(question: str, text: str) -> float:
+    """Fraction of question content tokens present in a memory text.
+
+    Deterministic and deliberately simple: this is a *veto* signal, not a
+    retrieval score. It must not replace structural relevance — the gate is
+    opt-in precisely because taking it as a ranking would turn the graph into
+    another BM25.
+    """
+    from .retrieval import tokenize
+
+    tokens = {t for t in tokenize(question) if t not in QUESTION_STOP and len(t) > 2}
+    if not tokens:
+        return 0.0
+    have = set(tokenize(text))
+    return len(tokens & have) / len(tokens)
+
+
+def question_gate(
+    evidence: list[GraphEvidence],
+    records: dict[str, Any],
+    question: str,
+    *,
+    min_cov: float = 0.30,
+) -> list[GraphEvidence]:
+    """Drop graph evidence whose memory text does not answer-ish the question."""
+    out: list[GraphEvidence] = []
+    for item in evidence:
+        record = records.get(item.memory_id)
+        text = f"{record.summary} {record.why}" if record is not None else item.label
+        if question_coverage(question, text) >= min_cov:
+            out.append(item)
+    return out
+
+
 def guard_evidence(
     evidence: list[GraphEvidence],
     *,

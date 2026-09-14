@@ -31,71 +31,89 @@ trade-off, not an average.
 Implementation: `graph_hub_degree`, `graph_augment_min_score`,
 `graph_augment_max_items`, `graph_augment_weight`; guarded defaults = R5.
 
-## Judged replay (same tapes and graphs, zero re-extraction)
+## Judged replay (corrected: shared agent annotations)
 
-Five arms on the LME-12 cases; `graph_only` is retrieval-only.
+**Correction.** The first five-arm replay ran the LLM agents separately in each
+arm, so agent variance was confounded with graph admission. A case-5 flip
+reported earlier as "single-memory graph interference" was traced to the
+agents of that arm finding an extra memory (`graph_ids` under `precise` were
+exactly the agent gold; the added M0003 came from the arm's own agent recall).
+The confounded snapshot is preserved as
+`eval/graph_out/graph_bench_longmemeval_v2confounded.jsonl`; its case-5 reading
+is retracted. `eval/graph_replay_shared.py` re-runs the judged replay with the
+agents executed **once per case** and frozen; the variants differ only by the
+deterministically computed graph admission, and the harness asserts that
+building the union/payload makes no LLM call.
 
-| arm | strict | evidence complete | graph-only gold found |
-|---|---|---|---|
-| graph_off | 0.75 | 9/12 | — |
-| graph_augment (v1) | 0.75 | 11/12 | 2 |
-| graph_augment_guarded (R5) | 0.75 | 11/12 | 2 |
-| graph_augment_precise (R3) | 0.75 | 11/12 | 2 |
+Corrected LME-12 results (shared agents):
 
-Aggregate tie, but the case level separates three mechanisms:
+| arm | strict | paired vs off |
+|---|---|---|
+| graph_off | 0.750 | — |
+| graph_augment (v1) | 0.667 | 1 better / **2 worse** |
+| graph_augment_guarded (R5) | 0.750 | 1 better / 1 worse |
+| graph_augment_precise (R3) | **0.833** | **1 better / 0 worse** |
 
-1. **The causal gain survives every guard.** Case 4 (temporal): off incorrect
-   → v1, R5 and R3 **all correct**, with the recovered M0036 admitted as
-   `graph_only_gold` in all three. The v2 gates do not kill the benefit they
-   were meant to protect.
-2. **Dilution regressions are stochastic, and the guards shrink the surface.**
-   In the first measurement the flip was case 1; in this replay it is case 5.
-   Case 5 went correct → incorrect in all three augment arms, with 8 (v1), 5
-   (R5) and **2** (R3) payload items. With only **one** added memory (M0003, an
-   unrelated anniversary session reached through a hub) the answerer switched
-   from answering "12" to *refusing* ("I don't have an answer… explicitly
-   rejects 12"). This is not budget dilution: it is behavioural interference
-   from a single structurally-related, question-irrelevant neighbour.
-3. **Found is not used.** Case 9: all augment arms admitted the gold M0032 as
-   `graph_only_gold`, and all still answered incorrectly. Retrieval succeeded;
-   the answerer did not use it (the AUR-style utilization gap).
+Per-case mechanics:
 
-Run-to-run variance matters at n=12: `graph_off` itself moved 0.667 → 0.75
-between the two runs, and the flip cases differ. Aggregate accuracy is not the
-right instrument at this size; the retrieval-side facts (union complete 11/12
-vs agents 9/12; graph-only gold in cases 4 and 9 in both runs) and the
-per-case mechanisms are.
+- **Case 4 (temporal)**: off incorrect → all three augment variants correct,
+  graph-only gold M0036 admitted in all of them (the causal gain survives every
+  guard).
+- **Case 5 (single-session-user)**: off correct → v1 augment incorrect with 7
+  graph additions; R5 and R3 both answer correctly with **0** graph-only
+  additions (hub cap 20 zeroes this case's noise).
+- **Case 0 (multi-session)**: off correct → v1 augment correct, **R5 guarded
+  incorrect** (2 additions still admitted), **R3 correct** (0 additions).
+- **Case 3**: off correct → v1 augment *partial* (6 additions); R5 and R3
+  correct.
+- **Case 9 (single-session-user)**: every variant admits the graph-only gold
+  M0032 and every variant still answers incorrectly — the utilization gap is
+  independent of admission control.
+
+With the confound removed, the picture is causal: the v1 augment **loses cases
+to dilution**, the R5 guard only partially protects (case 0), and the R3
+recipe (hub ≤ 20, score ≥ 0.80, ≤ 3 items) preserves the causal win while
+netting **+1 over the un-augmented system**. The `augment_guarded` defaults are
+therefore promoted to the R3 recipe; `graph_hub_degree` remains the generic
+traversal override and `augment` (v1) is untouched.
 
 ## Resolver cost
 
 Case 0, same preserved tape, real extraction with the v2 resolver (in-memory
 vector cache + `max_candidates=10`):
 
-| | v1 | v2 |
-|---|---|---|
-| embedding calls | 790 | 755 |
-| embedding texts | 27,418 | **6,347 (−77%)** |
-| build time | 464 s | **383 s (−18%)** |
+| | v1 | v2 cache | v2 cache + batch (P4) |
+|---|---|---|---|
+| embedding calls | 790 | 755 | **49 (−94%)** |
+| embedding texts | 27,418 | 6,347 (−77%) | **1,388 (−95%)** |
+| build time | 464 s | 383 s (−18%) | 405 s (noise) |
 
-The cache removes recomputation (semantics unchanged: same vectors, same
-resolutions — covered by tests), but **per-request overhead dominates**, not
-text volume. The next lever is batching the resolutions themselves (one embed
-request per memory instead of per new entity).
+Batching resolutions (one embedding request per memory instead of per entity)
+removes essentially all embedding recomputation with identical resolutions
+(tested). The build time does **not** follow: with embeddings nearly free, the
+remaining ~400 s are dominated by the extraction LLM calls themselves, not the
+resolver. The earlier "embeddings dominate" attribution was wrong — the honest
+decomposition is: batched extraction ≈ 300-380 s, resolver ≤ 20 s after P4.
 
 ## Decision
 
-- `augment` untouched; `augment_guarded` (R5 defaults) and the precise recipe
-  (flags) are implemented and tested (342 tests). `graph_enabled` stays off.
-- Admission control demonstrably protects the payload (R3: −83% non-gold, +81%
-  agent-gold allocation) and preserves the one causal win. It does **not** fix
-  single-distractor interference (case 5) or utilization failures (case 9).
-- Next lever, in order: (1) **question-conditioned gate** over admitted
-  graph-only evidence (require question↔memory overlap, e.g. the path
-  endpoints or the memory text must match question terms), since confidence
-  and degree cannot distinguish "relevant to the graph" from "relevant to the
-  question"; (2) batch resolver resolutions; (3) only then consider a larger
-  enriched slice (lexical miss/top-5, seed-less) to re-test the structural
-  hypothesis with the guard active.
+- `augment` untouched; `augment_guarded` defaults = R3 recipe (hub 20,
+  score 0.80, ≤ 3 items), validated by the shared-agent replay above; 343
+  tests. `graph_enabled` stays off.
+- Admission control is now causally demonstrated: it removes two dilution
+  regressions and preserves the recovered gold, netting +1 over `off`.
+- The remaining limits are different in kind: **utilization** (case 9 admits
+  the gold and still answers wrong) is an answerer-side question, not an
+  admission one. The **question gate** calibration (`eval/graph_qgate_calib.py`,
+  P2) shows every deterministic rule keeps 2/2 graph-only gold on this slice,
+  with lexical coverage ≥ 0.30 blocking 45/46 non-gold — but this slice is
+  11/12 lexically top-1, so the gate is implemented as an **opt-in flag**
+  pending the enriched miss/top-5 slice (P5). The guard stays structural by
+  default: it must not become another BM25.
+- Next lever, in order: (1) enriched miss/top-5 slice to test the question
+  gate outside the easy lexical regime; (2) resolver batching (already
+  measured: 790 → 49 embed calls, 27,418 → 1,388 texts, same resolutions);
+  (3) utilization experiments at the answerer boundary, separately.
 
 ## Reproduce
 

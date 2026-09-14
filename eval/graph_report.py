@@ -233,7 +233,11 @@ def aggregate(dataset: str) -> dict[str, Any]:
             "extraction_ms": extraction_ms if not reused else fixture.get("build_ms"),
             "reused_fixture": reused,
             "graph_recall_ms_mean": mean(
-                [r["arms"]["graph_only"]["graph_metrics"].get("graph_recall_ms", 0.0) for r in rows]
+                [
+                    r["arms"][arm]["graph_metrics"].get("graph_recall_ms", 0.0)
+                    for r in rows
+                    for arm in [next((a for a in arms if a not in {"graph_off"}), arms[0])]
+                ]
             ),
             "embed_calls_total": rows[-1]["cost"]["embed_calls_total"] if rows else None,
         },

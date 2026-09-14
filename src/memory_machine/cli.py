@@ -151,6 +151,10 @@ def _build_parser() -> argparse.ArgumentParser:
     att = sub.add_parser("attach", help="ingest an attached .txt into the tape as chunk memories (JSON)")
     att.add_argument("path")
     att.add_argument("--chunk-size", type=int, default=None)
+    att.add_argument(
+        "--no-document-graph", action="store_true",
+        help="ingest into the tape without the document registry/graph (D3)",
+    )
 
     arch = sub.add_parser("archive", help="archive a memory (JSON)")
     arch.add_argument("memory_id")
@@ -535,7 +539,9 @@ def cmd_list(args: argparse.Namespace) -> int:
 
 def cmd_attach(args: argparse.Namespace) -> int:
     m = _machine(args)
-    return _j(m.attach(args.path, chunk_size=args.chunk_size))
+    if getattr(args, "no_document_graph", False):
+        return _j(m.ingest_document(args.path, chunk_size=args.chunk_size, enable_graph=False))
+    return _j(m.ingest_document(args.path, chunk_size=args.chunk_size))
 
 
 def cmd_archive(args: argparse.Namespace) -> int:

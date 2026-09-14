@@ -1482,6 +1482,58 @@ class Machine:
             self._invalidate_recall_cache()
         return result
 
+    def ingest_document(
+        self,
+        path: str | Path,
+        *,
+        chunk_size: int | None = None,
+        enable_graph: bool | None = None,
+    ) -> dict[str, Any]:
+        """Ingest a .txt as tape memories + document registry + graph (D3).
+
+        Commit order is strictly tape -> registry -> graph; the graph flag is
+        consulted only here (``--no-document-graph`` passes ``enable_graph=False``).
+        ``add_memory`` and ``ingest_attachment`` are untouched.
+        """
+        from .graph import GraphStore
+        from .graph_extract import GraphExtractor
+        from .graph_resolve import GraphResolver
+        from .ingest_document import ingest_document as _ingest_document
+
+        enabled = self.config.document_graph_enabled if enable_graph is None else enable_graph
+        store = extractor = resolver = None
+        if enabled:
+            store = GraphStore(resolve_path(self.root, self.config.graph_path))
+            try:
+                extractor = GraphExtractor(self._ensure_client())
+            except Exception:
+                extractor = None
+            resolver = GraphResolver(
+                embedder=self._embedder(),
+                auto=self.config.graph_confidence_auto,
+                hypothesis=self.config.graph_confidence_hypothesis,
+                max_candidates=self.config.graph_resolver_candidates,
+            )
+        result = _ingest_document(
+            self.tape,
+            self.manifest,
+            path,
+            chunk_size=chunk_size or self.config.attach_chunk_size,
+            model=self.config.model,
+            store=store,
+            extractor=extractor,
+            resolver=resolver,
+            enable_graph=enabled,
+            batch_size=self.config.graph_batch_size,
+            batch_max_chars=self.config.graph_batch_max_chars,
+            max_attempts=self.config.graph_max_attempts,
+        )
+        if result.get("ok") or result.get("skipped"):
+            self.save()
+            self._update_session_meta()
+            self._invalidate_recall_cache()
+        return result
+
     def rollup(self, *, keep_recent: int = 20, temperature: float = 0.0) -> dict[str, Any]:
         """Consolidate older active records into one rollup memory.
 

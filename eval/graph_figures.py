@@ -44,7 +44,8 @@ def _novelty(ax: Any, summary: dict[str, Any], dataset: str) -> None:
     values = [summary["retrieval"]["graph_off"]["agent_only_gold"]]
     values += [summary["retrieval"][arm]["graph_only_gold"] for arm in summary["augment_arms"]]
     positions = range(len(label_arms))
-    ax.bar(positions, values, width=0.55, color=["#94a3b8", "#8b5cf6", "#10b981", "#f59e0b"][: len(label_arms)])
+    palette = ["#94a3b8", "#8b5cf6", "#10b981", "#f59e0b", "#ef4444", "#0ea5e9"]
+    ax.bar(positions, values, width=0.55, color=palette[: len(label_arms)])
     ax.set_xticks(list(positions))
     ax.set_xticklabels([name.replace("graph_augment", "aug").replace("_", " ") for name in label_arms],
                        rotation=20, ha="right", fontsize=8)
@@ -82,7 +83,7 @@ def make(dataset: str) -> None:
 
 
 def main() -> None:
-    for dataset in ("synthetic", "longmemeval"):
+    for dataset in ("synthetic", "longmemeval", "longmemeval_lexmiss"):
         make(dataset)
 
 

@@ -298,6 +298,14 @@ def main() -> None:
     parser.add_argument("--no-judge", action="store_true")
     parser.add_argument("--tag", action="store_true", help="tag external sessions at write time")
     parser.add_argument("--seed", type=int, default=7)
+    parser.add_argument("--out-suffix", default="", help="append to the snapshot name (slice runs)")
+    parser.add_argument(
+        "--select-lexical",
+        default="",
+        help="select questions whose gold sessions rank in these BM25 buckets (miss,top5)",
+    )
+    parser.add_argument("--select-multi", action="store_true", help="keep only multi-session questions")
+    parser.add_argument("--select-max", type=int, default=12)
     parser.add_argument("--api-key", default="")
     parser.add_argument(
         "--reuse-root",
@@ -352,12 +360,31 @@ def main() -> None:
     else:
         from external_bench import DATA, load_longmemeval
 
-        tasks_list = load_longmemeval(DATA / "longmemeval_s_cleaned.json", args.limit, args.seed)
         raw = json.loads((DATA / "longmemeval_s_cleaned.json").read_text(encoding="utf-8"))
         by_q = {item["question"]: item.get("answer", "") for item in raw}
-        gold = {i: by_q.get(t["question"], "") for i, t in enumerate(tasks_list)}
-        indices = [i for i in range(len(tasks_list)) if gold.get(i)]
-        tasks = {i: tasks_list[i] for i in indices}
+        if args.select_lexical:
+            tasks_list = load_longmemeval(DATA / "longmemeval_s_cleaned.json", 0, args.seed)
+            wanted = {b.strip() for b in args.select_lexical.split(",") if b.strip()}
+            picked: list[int] = []
+            for i, task in enumerate(tasks_list):
+                if not by_q.get(task["question"]):
+                    continue
+                if args.select_multi and len(task.get("expected") or []) < 2:
+                    continue
+                if lexical_bucket(task["question"], task) not in wanted:
+                    continue
+                picked.append(i)
+                if len(picked) >= args.select_max:
+                    break
+            indices = picked
+            tasks = {i: tasks_list[i] for i in picked}
+            gold = {i: by_q.get(tasks_list[i]["question"], "") for i in picked}
+            print(f"selected {len(picked)} lexical buckets {sorted(wanted)} indices={picked}", flush=True)
+        else:
+            tasks_list = load_longmemeval(DATA / "longmemeval_s_cleaned.json", args.limit, args.seed)
+            gold = {i: by_q.get(t["question"], "") for i, t in enumerate(tasks_list)}
+            indices = [i for i in range(len(tasks_list)) if gold.get(i)]
+            tasks = {i: tasks_list[i] for i in indices}
         if args.tag:
             unique: dict[str, dict[str, Any]] = {}
             for task in tasks.values():
@@ -417,7 +444,8 @@ def main() -> None:
         "fixture_graph": fixture_result if args.dataset == "synthetic" else None,
         "started_at": datetime.now(timezone.utc).isoformat(),
     }
-    (OUT_DIR / f"run_manifest_graph_{args.dataset}.json").write_text(
+    slice_suffix = args.out_suffix or args.dataset
+    (OUT_DIR / f"run_manifest_graph_{slice_suffix}.json").write_text(
         json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8"
     )
 
@@ -530,21 +558,29 @@ def main() -> None:
                 question_date=question_date,
             )
 
-        off = arm_rows["graph_off"]
-        augment = arm_rows["graph_augment"]
-        only = arm_rows["graph_only"]
-        retrieval = retrieval_metrics(
-            required, off["annotations"], augment["annotations"], only["graph_ids"]
-        )
-        retrieval_by_arm = {
-            arm: retrieval_metrics(
-                required,
-                off["annotations"],
-                arm_rows[arm]["annotations"],
-                arm_rows[arm]["graph_ids"],
+        off = arm_rows.get("graph_off")
+        augment = arm_rows.get("graph_augment")
+        only = arm_rows.get("graph_only")
+        retrieval = (
+            retrieval_metrics(
+                required, off["annotations"], augment["annotations"], only["graph_ids"]
             )
-            for arm in selected_arms
-        }
+            if off is not None and augment is not None and only is not None
+            else {}
+        )
+        retrieval_by_arm = (
+            {
+                arm: retrieval_metrics(
+                    required,
+                    off["annotations"],
+                    arm_rows[arm]["annotations"],
+                    arm_rows[arm]["graph_ids"],
+                )
+                for arm in selected_arms
+            }
+            if off is not None
+            else {}
+        )
         row = {
             "case": index,
             "cat": task.get("cat") or task.get("type", ""),
@@ -574,18 +610,25 @@ def main() -> None:
             },
         }
         rows.append(row)
-        path = OUT_DIR / f"graph_bench_{args.dataset}.jsonl"
+        path = OUT_DIR / f"graph_bench_{slice_suffix}.jsonl"
         with path.open("w", encoding="utf-8") as handle:
             for item in rows:
                 handle.write(json.dumps(item, ensure_ascii=False) + "\n")
-        print(
-            f"  off={len(off['annotations'])} augment={len(augment['annotations'])} "
-            f"graph={len(only['graph_ids'])} graph_only_gold={len(retrieval['graph_only_gold'])} "
-            f"evidence(off/union)={retrieval['agent_evidence_complete']}/{retrieval['union_evidence_complete']}",
-            flush=True,
-        )
+        if retrieval:
+            print(
+                f"  off={len(off['annotations'])} augment={len(augment['annotations'])} "
+                f"graph={len(only['graph_ids'])} graph_only_gold={len(retrieval['graph_only_gold'])} "
+                f"evidence(off/union)={retrieval['agent_evidence_complete']}/{retrieval['union_evidence_complete']}",
+                flush=True,
+            )
+        else:
+            print(
+                f"  graph={len(only['graph_ids']) if only else 0} "
+                f"(arms={selected_arms}, no retrieval baseline)",
+                flush=True,
+            )
 
-    final = OUT_DIR / f"graph_bench_{args.dataset}.jsonl"
+    final = OUT_DIR / f"graph_bench_{slice_suffix}.jsonl"
     checksums = OUT_DIR / "CHECKSUMS_graph.txt"
     lines = []
     for file in sorted(OUT_DIR.rglob("*")):
@@ -603,8 +646,10 @@ def main() -> None:
             else None
         )
         print(f"  {arm:<14} n={len(rows_arm)} verdicts={len(judged)} strict={strict}")
-    graph_only_gold = sum(len(row["retrieval"]["graph_only_gold"]) for row in rows)
-    print(f"  graph_only_gold total: {graph_only_gold}")
+    graph_only_gold = sum(
+        len((row.get("retrieval") or {}).get("graph_only_gold") or []) for row in rows
+    )
+    print(f"  graph_only_gold total: {graph_only_gold} (needs graph_off+graph_augment+graph_only arms)")
     print(f"snapshots: {final}")
     if args.dataset == "longmemeval":
         print(f"root: {root}")

@@ -1,6 +1,5 @@
 arm,strict,lenient,aur,graph_only_gold,graph_precision,evidence_complete
 graph_off,0.75,0.75,1.0,0,,9
-graph_augment,0.75,0.75,0.8182,2,0.35,11
-graph_augment_guarded,0.75,0.75,0.8182,2,0.5333,11
-graph_augment_precise,0.75,0.75,0.8182,2,0.7167,11
-graph_only,,,,2,0.35,7
+graph_augment,0.6667,0.75,0.7273,2,0.0357,11
+graph_augment_guarded,0.75,0.75,0.8182,2,0.1,11
+graph_augment_precise,0.8333,0.8333,0.9091,2,0.25,11

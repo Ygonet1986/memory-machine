@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from PySide6.QtWidgets import (
+    QCheckBox,
     QComboBox,
     QDialog,
     QDialogButtonBox,
@@ -46,6 +47,24 @@ class SettingsDialog(QDialog):
         widx = self.web_search.findData(web_current)
         self.web_search.setCurrentIndex(widx if widx >= 0 else 0)
 
+        self.graph_enabled = QCheckBox("Enable graph projection")
+        self.graph_enabled.setToolTip(
+            "Project durable memories into a rebuildable entity/relation graph "
+            "(write-time extraction; off by default)"
+        )
+        self.graph_enabled.setChecked(bool(settings.get("graph_enabled", False)))
+
+        self.graph_recall_mode = QComboBox()
+        self.graph_recall_mode.addItem("Off", "off")
+        self.graph_recall_mode.addItem("Augment (agents + graph)", "augment")
+        self.graph_recall_mode.addItem("Graph only (still rehydrates the tape)", "only")
+        graph_mode = settings.get("graph_recall_mode", "off")
+        gidx = self.graph_recall_mode.findData(graph_mode)
+        self.graph_recall_mode.setCurrentIndex(gidx if gidx >= 0 else 0)
+        self.graph_recall_mode.setToolTip(
+            "How recall uses the graph. Evidence is always rehydrated from the tape."
+        )
+
         self.memory_mode = QComboBox()
         self.memory_mode.addItem("Partition agents (default)", "partition")
         self.memory_mode.addItem("View agents", "view")
@@ -61,6 +80,8 @@ class SettingsDialog(QDialog):
         form.addRow("Auto topic", self.auto_topic)
         form.addRow("Web search", self.web_search)
         form.addRow("Memory mode", self.memory_mode)
+        form.addRow("Graph Memory", self.graph_enabled)
+        form.addRow("Graph recall mode", self.graph_recall_mode)
         form.addRow("Memory root", self.memory_root)
 
         buttons = QDialogButtonBox(
@@ -83,6 +104,8 @@ class SettingsDialog(QDialog):
                 "auto_topic": self.auto_topic.currentData(),
                 "web_search": self.web_search.currentData(),
                 "memory_mode": self.memory_mode.currentData(),
+                "graph_enabled": self.graph_enabled.isChecked(),
+                "graph_recall_mode": self.graph_recall_mode.currentData(),
             }
         )
         self.accept()

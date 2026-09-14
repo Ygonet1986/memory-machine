@@ -25,6 +25,7 @@ from PySide6.QtWidgets import (
 
 from .. import topics as topics_mod
 from ..backend import Backend
+from .graph_dialog import GraphDialog
 from .settings_dialog import SettingsDialog
 from .tape_dialog import TapeDialog
 
@@ -188,12 +189,16 @@ class MainWindow(QMainWindow):
         self.clear_docs_btn.clicked.connect(self._clear_docs)
         self.memory_btn = QPushButton("Memory")
         self.memory_btn.clicked.connect(self._open_tape)
+        self.graph_btn = QPushButton("Graph")
+        self.graph_btn.setToolTip("Graph Memory viewer: entities, paths, provenance and review")
+        self.graph_btn.clicked.connect(self._open_graph)
         self.web_check = QCheckBox("Web search")
         self.web_check.setToolTip("Search the web for this message (does not touch memory)")
         row.addWidget(self.settings_btn)
         row.addWidget(self.add_files_btn)
         row.addWidget(self.clear_docs_btn)
         row.addWidget(self.memory_btn)
+        row.addWidget(self.graph_btn)
         row.addWidget(self.web_check)
         row.addStretch(1)
         self.send_btn = QPushButton("Send")
@@ -396,6 +401,10 @@ class MainWindow(QMainWindow):
         TapeDialog(self._backend, self).exec()
         self._refresh_status()
 
+    def _open_graph(self) -> None:
+        GraphDialog(self._backend, self).exec()
+        self._refresh_status()
+
     def _set_busy(self, busy: bool) -> None:
         self.send_btn.setEnabled(not busy)
         self.new_topic_btn.setEnabled(not busy)
@@ -406,6 +415,7 @@ class MainWindow(QMainWindow):
         self.settings_btn.setEnabled(not busy)
         self.add_files_btn.setEnabled(not busy)
         self.clear_docs_btn.setEnabled(not busy)
+        self.graph_btn.setEnabled(not busy)
         self.web_check.setEnabled(not busy)
         self.input.setEnabled(not busy)
         if busy:

@@ -318,3 +318,116 @@ def describe_evidence(
     if evidence.label:
         return evidence.label
     return "graph"
+
+
+# ---------------------------------------------------------- shared payloads
+# Used by both the CLI (``graph query/path``) and the desktop viewer so the
+# two surfaces can never diverge.
+
+
+def resolve_entity(index: GraphIndex, raw: str) -> str:
+    """Resolve a user-supplied name or ``E####`` id to a canonical entity."""
+    text = str(raw or "").strip()
+    if not text:
+        return ""
+    upper = text.upper()
+    if upper in index.entities:
+        return upper
+    return index.resolve(text)
+
+
+def relation_detail(index: GraphIndex, relation_id: str) -> dict[str, Any] | None:
+    """Read-only view of one relation, with entity names and provenance."""
+    relation = index.relations.get(relation_id)
+    if relation is None:
+        return None
+    source = index.entities.get(relation.source)
+    target = index.entities.get(relation.target)
+    return {
+        "id": relation.id,
+        "relation": relation.relation,
+        "source": relation.source,
+        "source_name": source.name if source else relation.source,
+        "target": relation.target,
+        "target_name": target.name if target else relation.target,
+        "memory_id": relation.memory_id,
+        "confidence": relation.confidence,
+        "kind": relation.kind,
+        "extractor": relation.extractor,
+        "extractor_version": relation.extractor_version,
+    }
+
+
+def graph_query_payload(
+    index: GraphIndex,
+    query: str,
+    *,
+    depth: int = 2,
+    top_k: int = 8,
+    embedder: Any = None,
+) -> dict[str, Any]:
+    """Entities → paths → evidence payload for a query string."""
+    recall = GraphRecall(index, embedder=embedder, depth=depth, top_k=top_k)
+    result = recall.recall(query)
+    payload = result.to_dict()
+    payload["ok"] = True
+    payload["entities"] = [
+        {
+            "id": entity_id,
+            "name": index.entities[entity_id].name,
+            "type": index.entities[entity_id].type,
+            "canonical": index.canonical(entity_id),
+        }
+        for entity_id in result.seeds
+        if entity_id in index.entities
+    ]
+    for item in payload["evidence"]:
+        item["path_details"] = [
+            detail
+            for path in item.get("paths", [])
+            for detail in (
+                [relation_detail(index, relation_id) for relation_id in path.get("relations", [])]
+            )
+            if detail
+        ]
+    return payload
+
+
+def graph_path_payload(
+    index: GraphIndex,
+    source_raw: str,
+    target_raw: str,
+    *,
+    depth: int = 2,
+    top_k: int = 8,
+) -> dict[str, Any]:
+    """Up to ``top_k`` explainable paths between two entities."""
+    source = resolve_entity(index, source_raw)
+    target = resolve_entity(index, target_raw)
+    if not source or not target:
+        return {
+            "ok": False,
+            "error": f"unknown entity: {source_raw!r} / {target_raw!r}",
+        }
+    trails = index.paths(source, target, max_depth=depth, limit=top_k)
+    paths: list[dict[str, Any]] = []
+    memories: list[str] = []
+    for trail in trails:
+        details = [d for d in (relation_detail(index, r.id) for r in trail) if d]
+        for detail in details:
+            if detail["memory_id"] and detail["memory_id"] not in memories:
+                memories.append(detail["memory_id"])
+        paths.append(
+            {
+                "nodes": [source] + [relation.target for relation in trail],
+                "relations": [relation.id for relation in trail],
+                "detail": details,
+            }
+        )
+    return {
+        "ok": True,
+        "source": {"id": source, "name": index.entities[source].name},
+        "target": {"id": target, "name": index.entities[target].name},
+        "paths": paths,
+        "evidence": memories,
+    }

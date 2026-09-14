@@ -26,6 +26,8 @@ DEFAULTS: dict[str, Any] = {
     "auto_topic": "day",
     "auto_idle_hours": 6,
     "web_search": "auto",
+    "graph_enabled": False,
+    "graph_recall_mode": "off",
 }
 
 

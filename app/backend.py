@@ -16,9 +16,9 @@ from typing import Any
 
 from memory_machine import documents as documents_mod
 from memory_machine.attachments import remove_attachments
-from memory_machine.config import Config
+from memory_machine.config import Config, resolve_path
 from memory_machine.coordinator import Machine
-from memory_machine.llm import LLMClient
+from memory_machine.llm import LLMClient, LLMError
 from memory_machine.tape import Tape
 
 from . import router, topics as topics_mod
@@ -56,6 +56,8 @@ class Backend:
             model=settings["model"],
             base_url=settings["base_url"],
             api_key_env="MEMORY_MACHINE_API_KEY",
+            graph_enabled=bool(settings.get("graph_enabled", False)),
+            graph_recall_mode=settings.get("graph_recall_mode", "off"),
             **extra,
         )
         client = LLMClient(settings["base_url"], settings["api_key"], settings["model"])
@@ -247,6 +249,247 @@ class Backend:
             dest = Path(path).expanduser()
             dest.write_text("\n".join(lines), encoding="utf-8")
             return {"ok": True, "path": str(dest), "count": len(records)}
+
+    # ----------------------------------------------------- graph projection
+
+    def _graph_store(self):
+        from memory_machine.graph import GraphStore
+
+        assert self._machine is not None
+        return GraphStore(resolve_path(self._machine.root, self._machine.config.graph_path))
+
+    def graph_status(self) -> dict[str, Any]:
+        from memory_machine.graph import graph_status
+
+        with self._lock:
+            store = self._graph_store()
+            tag = str(store.meta().get("tag") or "")
+            return graph_status(
+                store,
+                self._machine.tape,
+                extract_types=self._machine.config.graph_extract_types,
+                extractor_tag=tag,
+            )
+
+    def graph_entities(self, query: str = "", limit: int = 200) -> dict[str, Any]:
+        from memory_machine.graph import normalize_name
+
+        with self._lock:
+            store = self._graph_store()
+            index = store.index()
+            needle = normalize_name(query)
+            aliases: dict[str, list[str]] = {}
+            for alias in store.aliases():
+                aliases.setdefault(alias.entity_id, []).append(alias.alias)
+            rows = []
+            for entity in index.entities.values():
+                if needle:
+                    names = [entity.name, *aliases.get(entity.id, [])]
+                    if not any(needle in normalize_name(name) for name in names):
+                        continue
+                rows.append(
+                    {
+                        **entity.to_dict(),
+                        "canonical": index.canonical(entity.id),
+                        "aliases": aliases.get(entity.id, []),
+                    }
+                )
+            rows.sort(key=lambda row: row["name"].lower())
+            return {"ok": True, "entities": rows[:limit], "count": len(rows)}
+
+    def graph_entity(self, entity_id: str) -> dict[str, Any]:
+        from memory_machine.graph_recall import relation_detail
+
+        with self._lock:
+            index = self._graph_store().index()
+            entity_key = str(entity_id or "").strip().upper()
+            if entity_key not in index.entities:
+                return {"ok": False, "error": f"unknown entity: {entity_id}"}
+            relations = [
+                detail
+                for detail in (
+                    relation_detail(index, relation.id)
+                    for relation in index.edges_of(entity_key, include_resolution=True)
+                )
+                if detail
+            ]
+            return {
+                "ok": True,
+                "entity": index.entities[entity_key].to_dict(),
+                "canonical": index.canonical(entity_key),
+                "relations": relations,
+            }
+
+    def graph_query(self, query: str, *, depth: int = 0, top_k: int = 0) -> dict[str, Any]:
+        from memory_machine.graph_recall import graph_query_payload
+
+        with self._lock:
+            index = self._graph_store().index()
+            if not index.entities:
+                return {"ok": False, "error": "graph is empty (run graph build first)"}
+            return graph_query_payload(
+                index,
+                query,
+                depth=depth or self._machine.config.graph_depth,
+                top_k=top_k or self._machine.config.graph_top_k,
+                embedder=self._machine._embedder(),
+            )
+
+    def graph_path(
+        self, source: str, target: str, *, depth: int = 0, top_k: int = 0
+    ) -> dict[str, Any]:
+        from memory_machine.graph_recall import graph_path_payload
+
+        with self._lock:
+            index = self._graph_store().index()
+            if not index.entities:
+                return {"ok": False, "error": "graph is empty (run graph build first)"}
+            return graph_path_payload(
+                index,
+                source,
+                target,
+                depth=depth or self._machine.config.graph_depth,
+                top_k=top_k or self._machine.config.graph_top_k,
+            )
+
+    def graph_provenance(self, relation_id: str) -> dict[str, Any]:
+        from memory_machine.graph import explain_relation
+
+        with self._lock:
+            return explain_relation(self._graph_store(), self._machine.tape, relation_id)
+
+    def graph_review(self) -> dict[str, Any]:
+        with self._lock:
+            store = self._graph_store()
+            entities = {entity.id: entity for entity in store.entities()}
+            rows = []
+            for hypothesis in store.open_hypotheses():
+                source = entities.get(str(hypothesis.get("source_entity") or ""))
+                target = entities.get(str(hypothesis.get("target_entity") or ""))
+                rows.append(
+                    {
+                        **hypothesis,
+                        "source_name": source.name if source else "",
+                        "target_name": target.name if target else "",
+                    }
+                )
+            return {
+                "ok": True,
+                "open": rows,
+                "count": len(rows),
+                "decided": len(store.reviewed_pairs()),
+            }
+
+    def graph_decide(self, hypothesis_id: str, decision: str) -> dict[str, Any]:
+        with self._lock:
+            store = self._graph_store()
+            hypothesis = next(
+                (row for row in store.hypotheses() if row.get("id") == hypothesis_id),
+                None,
+            )
+            if hypothesis is None:
+                return {"ok": False, "error": f"unknown hypothesis: {hypothesis_id}"}
+            decision = decision if decision in {"accept", "reject", "skip"} else "skip"
+            store.decide_hypothesis(hypothesis_id, decision)
+            if decision == "accept":
+                store.add_alias(
+                    hypothesis["target_entity"],
+                    hypothesis["source_entity"],
+                    str(hypothesis.get("memory_id") or ""),
+                    float(hypothesis.get("confidence") or 0.8),
+                    "merge",
+                )
+            return {"ok": True, "id": hypothesis_id, "decision": decision}
+
+    def graph_pending(self) -> dict[str, Any]:
+        with self._lock:
+            rows = self._graph_store().pending_rows()
+            return {"ok": True, "pending": rows, "count": len(rows)}
+
+    def graph_failed(self) -> dict[str, Any]:
+        with self._lock:
+            rows = self._graph_store().failed_rows()
+            return {"ok": True, "failed": rows, "count": len(rows)}
+
+    def graph_retry(self, memory_id: str = "") -> dict[str, Any]:
+        from memory_machine.graph import apply_record_extraction
+        from memory_machine.graph_extract import GraphExtractor
+        from memory_machine.graph_resolve import GraphResolver
+
+        with self._lock:
+            machine = self._machine
+            store = self._graph_store()
+            tag = str(store.meta().get("tag") or "llm/v1")
+            if tag.split("/")[0] != "llm":
+                return {"ok": False, "error": "retry requires the llm extractor"}
+            try:
+                extractor = GraphExtractor(machine._ensure_client())
+            except LLMError as exc:
+                return {"ok": False, "error": str(exc)}
+            resolver = GraphResolver(
+                embedder=machine._embedder(),
+                auto=machine.config.graph_confidence_auto,
+                hypothesis=machine.config.graph_confidence_hypothesis,
+            )
+            records = {record.id: record for record in machine.tape.read()}
+            ids = (
+                [memory_id]
+                if memory_id
+                else [row["memory_id"] for row in store.pending_rows(tag)]
+            )
+            outcomes = []
+            for target in ids:
+                record = records.get(target)
+                if record is None:
+                    outcomes.append({"memory_id": target, "status": "missing"})
+                    continue
+                outcomes.append(
+                    {
+                        "memory_id": target,
+                        **apply_record_extraction(
+                            store,
+                            record,
+                            extractor.extract,
+                            tag=tag,
+                            extractor_name="llm",
+                            extractor_version=extractor.version,
+                            resolver=resolver,
+                            max_attempts=machine.config.graph_max_attempts,
+                        ),
+                    }
+                )
+            return {"ok": True, "retried": len(outcomes), "outcomes": outcomes}
+
+    def graph_rebuild(self) -> dict[str, Any]:
+        from memory_machine.graph import ExtractorSpec, build_graph
+        from memory_machine.graph_extract import GraphExtractor
+        from memory_machine.graph_resolve import GraphResolver
+
+        with self._lock:
+            machine = self._machine
+            store = self._graph_store()
+            try:
+                extractor = GraphExtractor(machine._ensure_client())
+            except LLMError as exc:
+                return {"ok": False, "error": str(exc)}
+            resolver = GraphResolver(
+                embedder=machine._embedder(),
+                auto=machine.config.graph_confidence_auto,
+                hypothesis=machine.config.graph_confidence_hypothesis,
+            )
+            return build_graph(
+                machine.tape,
+                store,
+                ExtractorSpec(extractor.extract, extractor.version),
+                extract_types=machine.config.graph_extract_types,
+                rebuild=True,
+                extractor_name="llm",
+                resolver=resolver,
+                max_attempts=machine.config.graph_max_attempts,
+                batch_size=machine.config.graph_batch_size,
+                batch_max_chars=machine.config.graph_batch_max_chars,
+                batch_fn=extractor.extract_batch,
+            )
 
     def _external_context(self, message: str, use_web: bool) -> str:
         parts: list[str] = []

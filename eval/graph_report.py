@@ -64,6 +64,24 @@ def mean(values: list[float]) -> float | None:
     return round(sum(values) / len(values), 4) if values else None
 
 
+VERDICT_RANK = {"incorrect": 0, "partial": 1, "correct": 2}
+
+
+def paired_delta(items: list[dict[str, Any]]) -> tuple[int, int, int]:
+    """Cases where augment beats/ties/loses to off (strict 3-way rank)."""
+    better = worse = equal = 0
+    for row in items:
+        off = row["arms"]["graph_off"]["verdict"]
+        augment = row["arms"]["graph_augment"]["verdict"]
+        if not off or not augment:
+            continue
+        delta = VERDICT_RANK[augment] - VERDICT_RANK[off]
+        better += int(delta > 0)
+        worse += int(delta < 0)
+        equal += int(delta == 0)
+    return better, worse, equal
+
+
 def strata_table(
     rows: list[dict[str, Any]],
     key_fn: Callable[[dict[str, Any]], str],
@@ -76,11 +94,15 @@ def strata_table(
     table = []
     for key in sorted(groups):
         items = groups[key]
+        better, worse, equal = paired_delta(items)
         table.append(
             {
                 "stratum": name,
                 "value": key,
                 "n": len(items),
+                "aug_better": better,
+                "aug_worse": worse,
+                "aug_equal": equal,
                 "agent_recall": mean([r["retrieval"]["agent_recall"] for r in items if r["retrieval"]["agent_recall"] is not None]),
                 "graph_recall": mean([r["retrieval"]["graph_recall"] for r in items if r["retrieval"]["graph_recall"] is not None]),
                 "union_recall": mean([r["retrieval"]["union_recall"] for r in items if r["retrieval"]["union_recall"] is not None]),
@@ -164,6 +186,7 @@ def aggregate(dataset: str) -> dict[str, Any]:
             "union_recall": mean([r["retrieval"]["union_recall"] for r in rows if r["retrieval"]["union_recall"] is not None]),
             "graph_precision": mean([r["retrieval"]["graph_precision"] for r in rows if r["retrieval"]["graph_precision"] is not None]),
         },
+        "paired_delta": dict(zip(("better", "worse", "equal"), paired_delta(rows))),
         "totals": totals,
         "paths": path_stats(rows),
         "cost": {
@@ -233,6 +256,8 @@ def markdown(summary: dict[str, Any]) -> str:
         f"| graph_only_count (total) | {totals['graph_only_count']} |",
         f"| evidence complete off / graph / union | {totals['agent_evidence_complete']} / "
         f"{totals['graph_evidence_complete']} / {totals['union_evidence_complete']} |",
+        f"| paired augment vs off (better/worse/equal) | {summary['paired_delta']['better']} / "
+        f"{summary['paired_delta']['worse']} / {summary['paired_delta']['equal']} |",
         "",
         "## Paths",
         "",
@@ -259,14 +284,15 @@ def markdown(summary: dict[str, Any]) -> str:
         lines += [
             f"## By {name}",
             "",
-            "| value | n | agent recall | graph recall | union recall | strict off | strict aug | graph_only_gold | agent_only_gold |",
-            "|---|---|---|---|---|---|---|---|---|",
+            "| value | n | agent recall | graph recall | union recall | strict off | strict aug | aug + | aug - | aug = | graph_only_gold | agent_only_gold |",
+            "|---|---|---|---|---|---|---|---|---|---|---|---|",
         ]
         for item in table:
             lines.append(
                 f"| {item['value']} | {item['n']} | {fmt(item['agent_recall'])} | "
                 f"{fmt(item['graph_recall'])} | {fmt(item['union_recall'])} | "
                 f"{fmt(item['strict_off'])} | {fmt(item['strict_augment'])} | "
+                f"{item['aug_better']} | {item['aug_worse']} | {item['aug_equal']} | "
                 f"{item['graph_only_gold']} | {item['agent_only_gold']} |"
             )
         lines.append("")
@@ -288,14 +314,16 @@ def main() -> None:
             writer = csv.writer(handle)
             writer.writerow(
                 ["stratum", "value", "n", "agent_recall", "graph_recall", "union_recall",
-                 "strict_off", "strict_augment", "graph_only_gold", "agent_only_gold"]
+             "strict_off", "strict_augment", "aug_better", "aug_worse", "aug_equal",
+             "graph_only_gold", "agent_only_gold"]
             )
             for table in summary["tables"].values():
                 for item in table:
                     writer.writerow([
                         item["stratum"], item["value"], item["n"], item["agent_recall"],
                         item["graph_recall"], item["union_recall"], item["strict_off"],
-                        item["strict_augment"], item["graph_only_gold"], item["agent_only_gold"],
+                        item["strict_augment"], item["aug_better"], item["aug_worse"],
+                        item["aug_equal"], item["graph_only_gold"], item["agent_only_gold"],
                     ])
         (OUT / f"report_graph_{dataset}.md").write_text(markdown(summary), encoding="utf-8")
         print(f"{dataset}: wrote summary/tables/report (n={summary['n']})")

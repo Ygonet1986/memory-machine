@@ -52,7 +52,13 @@ DEFAULT_ROOT = Path(
     "/var/folders/3z/9n8mh2p12ld771wy19z5v7rw0000gn/T/mm-graph-t5w86fv7"
 )
 OUT_DIR = HERE / "graph_out"
-VARIANTS = ["graph_off", "graph_augment", "graph_augment_guarded", "graph_augment_precise"]
+VARIANTS = [
+    "graph_off",
+    "graph_augment",
+    "graph_augment_guarded",
+    "graph_augment_precise",
+    "graph_augment_gated",
+]
 
 
 def copy_case(source: Path, dest: Path) -> None:
@@ -76,6 +82,7 @@ def variant_config(variant: str) -> Config:
         "graph_augment": "augment",
         "graph_augment_guarded": "augment_guarded",
         "graph_augment_precise": "augment_guarded",
+        "graph_augment_gated": "augment_guarded",
     }[variant]
     cfg = Config(
         **VIEW_CONFIG,
@@ -87,6 +94,12 @@ def variant_config(variant: str) -> Config:
     )
     for flag, value in ARM_FLAGS.get(variant, {}).items():
         setattr(cfg, flag, value)
+    if variant == "graph_augment_gated":
+        # R3 recipe + the optional question veto (P2 calibration)
+        cfg.graph_augment_hub_degree = 20
+        cfg.graph_augment_min_score = 0.80
+        cfg.graph_augment_max_items = 3
+        cfg.graph_augment_question_gate = True
     return cfg
 
 
@@ -106,6 +119,16 @@ def variant_evidence(case_dir: Path, cfg: Config, question: str) -> list[Any]:
             min_score=cfg.graph_augment_min_score,
             max_items=cfg.graph_augment_max_items,
         )
+        if cfg.graph_augment_question_gate:
+            from memory_machine.graph_recall import question_gate
+
+            records = {record.id: record for record in Tape(case_dir / "tape.jsonl").read()}
+            result.evidence = question_gate(
+                result.evidence,
+                records,
+                question,
+                min_cov=cfg.graph_augment_question_min_cov,
+            )
         result.paths_selected = sum(len(item.paths) for item in result.evidence)
     return result.evidence
 
@@ -117,6 +140,13 @@ def main() -> None:
     parser.add_argument("--judge-model", default="deepseek-v4-flash")
     parser.add_argument("--timeout", type=int, default=300)
     parser.add_argument("--limit", type=int, default=0)
+    parser.add_argument("--snapshot", default="graph_bench_longmemeval.jsonl")
+    parser.add_argument("--out-suffix", default="longmemeval")
+    parser.add_argument(
+        "--source-arm",
+        default="graph_augment",
+        help="arm directory in --reuse-root that holds tape+graph (graph_only builds use graph_only)",
+    )
     parser.add_argument("--api-key", default="")
     args = parser.parse_args()
     api_key = args.api_key or os.environ.get("DEEPSEEK_API_KEY", "")
@@ -125,13 +155,11 @@ def main() -> None:
 
     from external_bench import DATA, load_longmemeval
 
-    tasks = load_longmemeval(DATA / "longmemeval_s_cleaned.json", 12, 7)
+    tasks = load_longmemeval(DATA / "longmemeval_s_cleaned.json", 0, 7)
     by_question = {task["question"]: task for task in tasks}
     snapshot = [
         json.loads(line)
-        for line in (OUT_DIR / "graph_bench_longmemeval_v2confounded.jsonl")
-        .read_text(encoding="utf-8")
-        .splitlines()
+        for line in (OUT_DIR / args.snapshot).read_text(encoding="utf-8").splitlines()
         if line.strip()
     ]
     if args.limit:
@@ -155,7 +183,7 @@ def main() -> None:
         gold = case["gold"]
 
         base = root / f"case_{index:02d}"
-        source = args.reuse_root / f"case_{index:02d}" / "graph_augment"
+        source = args.reuse_root / f"case_{index:02d}" / args.source_arm
         copy_case(source, base)
 
         # ---- one agent recall per case, frozen for every variant
@@ -306,7 +334,7 @@ def main() -> None:
             "cost": case["cost"],
         }
         rows.append(row)
-        path = OUT_DIR / "graph_bench_longmemeval.jsonl"
+        path = OUT_DIR / f"graph_bench_{args.out_suffix}.jsonl"
         with path.open("w", encoding="utf-8") as handle:
             for item in rows:
                 handle.write(json.dumps(item, ensure_ascii=False) + "\n")
@@ -332,7 +360,7 @@ def main() -> None:
         ).strip(),
         "started_at": datetime.now(timezone.utc).isoformat(),
     }
-    (OUT_DIR / "run_manifest_graph_longmemeval.json").write_text(
+    (OUT_DIR / f"run_manifest_graph_{args.out_suffix}.json").write_text(
         json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8"
     )
     checksums = OUT_DIR / "CHECKSUMS_graph.txt"

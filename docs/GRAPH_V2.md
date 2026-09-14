@@ -115,6 +115,45 @@ decomposition is: batched extraction ≈ 300-380 s, resolver ≤ 20 s after P4.
   measured: 790 → 49 embed calls, 27,418 → 1,388 texts, same resolutions);
   (3) utilization experiments at the answerer boundary, separately.
 
+## P5 — enriched lexical-miss slice (out-of-sample)
+
+12 multi-session questions deliberately selected because their gold sessions
+rank **miss/top-5** under BM25 (indices 71, 73, 78, 86, 88, 89, 110, 119, 126,
+129, 131, 162 of the full 500). Graphs built once per case (batched extraction,
+vector-cache resolver) and judged with the shared-agent design.
+
+| arm | strict | paired vs off | graph-only gold admitted |
+|---|---|---|---|
+| graph_off | 0.583 | — | — |
+| graph_augment (v1) | 0.583 | 0 / 0 | **9** |
+| graph_augment_guarded (R5) | 0.500 | 0 / 1 | 7 |
+| graph_augment_precise (R3) | 0.500 | 0 / 1 | 6 |
+| graph_augment_gated (R3 + question gate) | **0.667** | 1 / 0 | **1** |
+
+The numbers tell three different stories, and only one of them favors more
+gating:
+
+1. **On hard lexical cases the graph finds much more gold** — 9 graph-only gold
+   across 12 cases versus 2 on the easy LME-12 slice (cases 78: 2, 89: 4, 126:
+   3). This is the strongest retrieval-side evidence yet that structural search
+   earns its keep exactly where lexical retrieval struggles.
+2. **None of it converts into answers.** Cases 78 and 89 recovered gold and
+   every variant still answered incorrectly (error classification: the
+   answerer does not use the admitted evidence). The bottleneck on this slice
+   is **utilization**, not admission or retrieval.
+3. **Every gate trades gold away, and the lexical gate is the most expensive.**
+   Admitted graph-only gold falls 9 → 7 (R5) → 6 (R3) → **1** (question gate).
+   The gate's apparent +1 (case 131) has **zero graph additions in every
+   variant** — its payload is agent-only, so the flip is judge variance, not a
+   gate win.
+
+**Decision after P5:** the question gate stays **opt-in, off by default** — on
+out-of-sample lexical-miss questions it blocks 8 of 9 recovered gold while its
+single "gain" is not evidence-driven. The R3 structural defaults stay (they
+were clearly better on the easy slice and neutral here). The next frontier is
+explicitly the **utilization boundary** (does the answerer see and use admitted
+gold?), not more admission machinery.
+
 ## Reproduce
 
 ```bash

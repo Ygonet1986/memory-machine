@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Any
 
 # Default group capacity: number of memories held by a single memory agent.
-DEFAULT_CAPACITY = 50
+DEFAULT_CAPACITY = 500
 
 # Char budget for annotations held on the whiteboard (token proxy: chars / 4).
 DEFAULT_WHITEBOARD_BUDGET = 4000

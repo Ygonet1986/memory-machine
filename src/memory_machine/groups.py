@@ -13,6 +13,7 @@ from dataclasses import dataclass, field, asdict
 from pathlib import Path
 from typing import Any
 
+from .config import DEFAULT_CAPACITY
 from .tape import MemoryRecord, Tape, parse_id
 
 
@@ -99,7 +100,7 @@ class ViewAgent:
 @dataclass
 class Manifest:
     version: int = 1
-    capacity: int = 50
+    capacity: int = DEFAULT_CAPACITY
     groups: list[Group] = field(default_factory=list)
     agents: list[Agent] = field(default_factory=list)
     view_agents: dict[str, ViewAgent] = field(default_factory=dict)
@@ -117,7 +118,7 @@ class Manifest:
     def from_dict(cls, data: dict[str, Any]) -> "Manifest":
         return cls(
             version=int(data.get("version") or 1),
-            capacity=int(data.get("capacity") or 50),
+            capacity=int(data.get("capacity") or DEFAULT_CAPACITY),
             groups=[Group.from_dict(g) for g in (data.get("groups") or [])],
             agents=[Agent.from_dict(a) for a in (data.get("agents") or [])],
             view_agents={
@@ -166,7 +167,7 @@ def load_manifest(path: Path, capacity: int | None = None) -> Manifest:
             return manifest
         except (json.JSONDecodeError, OSError):
             pass
-    return Manifest(capacity=capacity or 50)
+    return Manifest(capacity=capacity or DEFAULT_CAPACITY)
 
 
 def save_manifest(manifest: Manifest, path: Path) -> None:

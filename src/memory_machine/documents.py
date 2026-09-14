@@ -51,6 +51,18 @@ def remove_document(base: Path, name: str) -> bool:
     return False
 
 
+def remove_all_documents(base: Path) -> int:
+    """Delete every stored document. Returns the number of files removed."""
+    d = documents_dir(base)
+    if not d.exists():
+        return 0
+    removed = 0
+    for f in sorted(d.glob("*.txt")):
+        f.unlink()
+        removed += 1
+    return removed
+
+
 def _chunks(text: str, size: int = CHUNK_SIZE, overlap: int = CHUNK_OVERLAP) -> list[str]:
     return chunk_text(text, size=size, overlap=overlap)
 

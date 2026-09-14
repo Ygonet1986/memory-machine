@@ -169,6 +169,16 @@ class Tape:
         self._rewrite(records)
         return True
 
+    def delete_many(self, memory_ids: list[str]) -> int:
+        """Remove several records in a single rewrite. Returns the count."""
+        ids = set(memory_ids)
+        records = self._read_all()
+        kept = [r for r in records if r.id not in ids]
+        removed = len(records) - len(kept)
+        if removed:
+            self._rewrite(kept)
+        return removed
+
     def set_status(self, memory_id: str, status: str) -> bool:
         """Set a record's status (active/archived/superseded). Returns True if found."""
         records = self._read_all()

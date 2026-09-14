@@ -196,7 +196,7 @@ delivering ~11k context characters — context size is not evidence. See
 
 | Key | Default | Meaning |
 |-----|---------|---------|
-| `capacity` | 50 | memories per group (per agent) |
+| `capacity` | 500 | memories per group (per agent) |
 | `whiteboard_budget` | 4000 | char budget for reminders on the whiteboard |
 | `consolidate_threshold` | 6000 | whiteboard size that triggers consolidation |
 | `context_consolidate_threshold` | 6000 | chatbot context size that triggers its own consolidation |

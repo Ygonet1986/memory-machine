@@ -962,7 +962,7 @@ executed: experiments stop here and the project moves to the v1.0 consolidation.
 
 | Key | Default | Meaning |
 |-----|---------|---------|
-| `capacity` | 50 | memories per group (per agent) |
+| `capacity` | 500 | memories per group (per agent) |
 | `whiteboard_budget` | 4000 | char budget for annotations |
 | `consolidate_threshold` | 6000 | whiteboard size that triggers consolidation |
 | `context_consolidate_threshold` | 6000 | chatbot context size that triggers its consolidation |
@@ -992,7 +992,8 @@ CLI wrapper reads the key from the Keychain first, then the environment.
   for lexically-distant queries (measured).
 - Router false-negative rate and calibration of the full-sweep fallback.
 - Agent retirement / rebalancing when the tape is reorganized or shrunk.
-- Optimal `capacity` (default 50; to be calibrated).
+- Optimal `capacity` (default 500; prompts grow with it — see the
+  per-agent full-text rendering in `agents.py`).
 - Relevance threshold calibration and prompt tuning.
 - Multi-session concurrency over a shared whiteboard.
 - Objective evaluation metrics for continuity; ablation study and external

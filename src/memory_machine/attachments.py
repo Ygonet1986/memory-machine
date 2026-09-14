@@ -81,3 +81,17 @@ def ingest_attachment(
         "new_agents": new_agents,
         "memories": saved,
     }
+
+
+def remove_attachments(tape: Tape, *, source: str = "") -> int:
+    """Delete ``attachment`` records from the tape (optionally one source).
+
+    Only records of type ``attachment`` are touched; regular memories are
+    never removed. Returns the number of chunks deleted.
+    """
+    ids = [
+        r.id
+        for r in tape.read()
+        if r.type == "attachment" and (not source or r.source == source)
+    ]
+    return tape.delete_many(ids)

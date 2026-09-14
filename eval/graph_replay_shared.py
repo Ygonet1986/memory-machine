@@ -142,6 +142,7 @@ def main() -> None:
     parser.add_argument("--limit", type=int, default=0)
     parser.add_argument("--snapshot", default="graph_bench_longmemeval.jsonl")
     parser.add_argument("--out-suffix", default="longmemeval")
+    parser.add_argument("--variants", default=",".join(VARIANTS))
     parser.add_argument(
         "--source-arm",
         default="graph_augment",
@@ -170,6 +171,13 @@ def main() -> None:
     )
     judge_client = CountingClient(
         LLMClient("https://api.deepseek.com", api_key, args.judge_model, timeout=args.timeout, retries=1, backoff=0.5)
+    )
+    selected = [v.strip() for v in args.variants.split(",") if v.strip()]
+    for required in ("graph_off",):
+        if required not in selected:
+            selected.insert(0, required)
+    primary = "graph_augment" if "graph_augment" in selected else next(
+        (v for v in selected if v != "graph_off"), "graph_off"
     )
     root = Path(tempfile.mkdtemp(prefix="mm-graph-shared-"))
     rows: list[dict[str, Any]] = []
@@ -210,7 +218,7 @@ def main() -> None:
         arm_rows: dict[str, Any] = {}
         graph_only_by_arm: dict[str, list[str]] = {}
         agent_recall_calls = agent_client.calls
-        for variant in VARIANTS:
+        for variant in selected:
             calls_before_variant = agent_client.calls
             cfg = variant_config(variant)
             evidence = (
@@ -309,7 +317,7 @@ def main() -> None:
                 arm_rows[variant]["annotations"],
                 graph_only_by_arm[variant],
             )
-            for variant in VARIANTS
+            for variant in selected
         }
         row = {
             "case": index,
@@ -326,8 +334,8 @@ def main() -> None:
             "retrieval": retrieval_metrics(
                 required,
                 sorted(agent_ids),
-                arm_rows["graph_augment"]["annotations"],
-                graph_only_by_arm["graph_augment"],
+                arm_rows[primary]["annotations"],
+                graph_only_by_arm[primary],
             ),
             "retrieval_by_arm": retrieval_by_arm,
             "arms": arm_rows,
@@ -342,7 +350,7 @@ def main() -> None:
             f"case {index}: agents={len(agent_ids)} "
             + " ".join(
                 f"{v.replace('graph_', '')}={arm_rows[v]['verdict'][:3]}"
-                for v in VARIANTS
+                for v in selected
             ),
             flush=True,
         )
@@ -351,7 +359,7 @@ def main() -> None:
         "run_id": datetime.now(timezone.utc).strftime("%Y-%m-%d-shared-%H%M%S"),
         "dataset": "longmemeval",
         "shared_agents": True,
-        "variants": VARIANTS,
+        "variants": selected,
         "model": args.model,
         "judge_model": args.judge_model,
         "reuse_root": str(args.reuse_root),
@@ -371,7 +379,7 @@ def main() -> None:
     checksums.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
     print("\nshared-agent replay done:")
-    for variant in VARIANTS:
+    for variant in selected:
         verdicts = [row["arms"][variant]["verdict"] for row in rows]
         strict = sum(1 for v in verdicts if v == "correct") / len(verdicts)
         print(f"  {variant:<24} strict={strict:.3f}")

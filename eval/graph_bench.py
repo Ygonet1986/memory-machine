@@ -383,7 +383,11 @@ def main() -> None:
         else:
             tasks_list = load_longmemeval(DATA / "longmemeval_s_cleaned.json", args.limit, args.seed)
             gold = {i: by_q.get(t["question"], "") for i, t in enumerate(tasks_list)}
-            indices = [i for i in range(len(tasks_list)) if gold.get(i)]
+            if args.indices:
+                chosen = [int(x) for x in args.indices.split(",") if x.strip()]
+                indices = [i for i in chosen if 0 <= i < len(tasks_list) and gold.get(i)]
+            else:
+                indices = [i for i in range(len(tasks_list)) if gold.get(i)]
             tasks = {i: tasks_list[i] for i in indices}
         if args.tag:
             unique: dict[str, dict[str, Any]] = {}

@@ -121,6 +121,51 @@ questions, then re-measure on a larger slice.
 - Retrieval/admission stay frozen (`graph-v3`); composition (case 71) and
   overload are answerer-side limits, not memory failures.
 
+## U3 — 30-case validation of the delivery policies (pre-registered)
+
+Slice: indices 12–41 of the frozen seed-7 sample (untouched by earlier runs),
+15+15 in two blocks; arms `off`, `precise`, `i5`, `i5_single` (window only for
+single-fact question patterns) and `i5_mixed` (25% head + 75% window for
+composition questions). Decision rule (pre-registered): zero overload
+regressions, then max repairs−regressions, then fewest windowed items.
+
+| arm | strict | lenient | windowed items | flips vs precise |
+|---|---|---|---|---|
+| graph_off | 20/30 | 23/30 | — | — |
+| graph_augment_precise | 21/30 | 22/30 | 0 | baseline |
+| i5 | 21/30 | 23/30 | all truncated | +3 / −3 |
+| i5_single | **22/30** | 23/30 | 52 | +3 / −2 |
+| i5_mixed | 21/30 | 22/30 | 99 | +3 / −3 |
+
+**Variance audit (the decisive step).** Flips whose payload *and* context are
+identical to `precise` cannot be policy effects. Case 20 under `i5_single` (not
+windowed, context identical) flipped incorrect → correct: **answer variance**.
+Case 39 under `i5_single` (not windowed, identical) stayed correct while
+`i5`/`i5_mixed` (windowed) fell to incorrect. After removing the identical-
+context flip, the real ledger is:
+
+- **Repairs:** case 22 (single-fact, window applied).
+- **Regressions:** case 26 and 41 (`i5_single` and `i5`/`mixed`), case 39
+  (`i5`/`mixed` only; `i5_single`'s gating avoided it).
+- **Net real effect: negative (−1 to −2)** despite the nominal strict advantage
+  of `i5_single` (22/30 vs 21/30).
+
+**Conclusion (negative/neutral, honestly reported).** The fact-window *mechanism*
+repairs real truncation cases (9/88 in the 24-case round, 22 here), but
+**deciding the truncation style from the question text with these simple
+patterns does not generalize**: the single-fact detector avoided one regression
+(39) and did not prevent the others (26, 41). `i5_mixed` windows almost
+everything (99 items) with no additional benefit, and the joint strict
+differences (±1 case) are inside answer/judge variance unless the context is
+identical.
+
+**Decision:** no promotion. `evidence_payload_window` stays opt-in, default
+off; the detector arms stay harness-only. If this line is pursued, the next
+step must (a) measure deterministic fact-presence in the delivered text
+(not only verdicts), (b) repeat answers per arm to bound judge variance, and
+(c) make composition questions keep their anchors rather than window them.
+Graph, admission and all frozen artifacts are untouched.
+
 ## Reproduce
 
 ```bash

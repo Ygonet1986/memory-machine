@@ -166,6 +166,41 @@ step must (a) measure deterministic fact-presence in the delivered text
 (c) make composition questions keep their anchors rather than window them.
 Graph, admission and all frozen artifacts are untouched.
 
+## U4.1 — deterministic fact presence (instrument calibration)
+
+`eval/fact_presence.py` reads the frozen snapshots (no LLM) and checks, per
+case/arm/required memory, whether atoms survive in the delivered span. The
+pre-registered calibration produced two instrument generations and one
+substantive result:
+
+1. **Global item-fact rate (generation 1, rejected as a predictor).** Counting
+   every number/entity/date of a memory: payload arms deliver only **24–27%**
+   of them (easy slice) and **~10%** (lexmiss) versus **99.9%** under the
+   untruncated gold condition (i4). The i4 arm validates the extractor (span
+   format bug fixed): truncation is quantified, but the rate does **not**
+   predict verdicts (regressed cases even show *higher* rates).
+2. **Question-conditioned atoms (generation 2).** Atoms restricted to the
+   question/reference-matched sentence of each memory. Class split:
+   - composition questions, hard slice: payload **0.33**, window **0.49**,
+     gold-full **1.00**;
+   - composition, easy slice: 0.88–0.94; other classes 0.56–0.89.
+   The metric is sensitive and correctly flags the pure-variance flips:
+   cases 20 and 38 show **presence delta 0.000** (identical context → no
+   policy effect).
+3. **The U3 flips are not fact-presence-driven.** Case 22 was "repaired" with
+   presence saturated at 1.00 in both arms; cases 26 and 41 regressed while
+   presence *rose* (+0.25, +0.08). Delivery-policy flips therefore trace to
+   answerer variance / context arrangement, not to more facts arriving.
+
+**Conclusion of U4.1.** The deterministic metric is valid for measuring
+**delivery loss** (and shows multi-session composition questions lose two
+thirds of their relevant facts under the budget), but it is **not** an outcome
+predictor. Before any delivery-policy claim, the **replication instrument
+(U4.2)** is mandatory: only effects that exceed the identical-context flip
+floor can be attributed to a policy. FP/FN calibration lists are stored in
+`eval/graph_out/fact_presence_*.jsonl` (metric-present-but-wrong = 0–5 per arm;
+metric-absent-but-correct tracked separately), as pre-registered.
+
 ## Reproduce
 
 ```bash

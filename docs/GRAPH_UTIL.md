@@ -69,43 +69,53 @@ and the delivered-text accounting are the ground truth.
 
 `i5_fact_window`: same admission and same 4,000-char budget as `precise`, but a
 truncated memory delivers the **question-matched window** of the session (the
-best-scoring segment expanded left/right until the allocation fills) instead of
-its head. Deterministic; no graph, admission, budget or core change.
+best-scoring segment expanded by score until the allocation fills) instead of
+its head. The window is now implemented once in the core (`payload.fact_window`)
+and imported by the harness; the earlier harness-local version truncated the
+window tail and is superseded.
 
 | arm | easy slice | hard slice | both |
 |---|---|---|---|
 | graph_augment_precise | 10/12 | 6/12 | 16/24 |
 | i1_fact_floor | 9/12 | 6/12 | 15/24 |
 | i4_gold_full | 10/12 | 8/12 | 18/24 |
-| **i5_fact_window** | **11/12** | 6/12 | **17/24** |
+| **i5_fact_window** | 10/12 | **7/12** | **17/24** |
 
-- **Case 9 repaired without regression** on the easy slice (10 → 11): the
-  "2 hours" statement now survives inside M0032's window. The five i4 overload
-  regressions (7, 8 on the easy slice; 86, 119, 126 on the hard one) **do not
-  occur** under i5 — the budget protection is preserved.
-- On the hard slice i5 repairs case 88 (partial → correct) but regresses case
-  86 (correct → partial): net 0. Cases 89 and 131 stay unrepaired — they need
-  multi-session composition, not a better window (i4 fixes them, i5 does not).
-- Windows were applied to 37 (easy) and 60 (hard) payload items; payloads
-  stayed within the 4,000-char budget (e.g., case 0: 3,985 chars).
+Paired vs precise: **2 repaired (9, 88), 1 regressed (0)**; windows applied to
+37 (easy) and 60 (hard) items; payloads stay within 4,000 chars.
+
+- **Repair, case 9 (easy)**: the "2 hours" statement now survives inside
+  M0032's window (the flagship truncation case).
+- **Repair, case 88 (hard)**: partial → correct.
+- **Regression, case 0 (easy)**: the question asks for an *increase*, which
+  needs an arithmetic anchor (the starting figure) that is **not** the
+  question-matched sentence. The window kept the later "≈350 total" span and
+  dropped the baseline, so the answer went from ~100 (correct) to ~350
+  (incorrect). When the task composes several spans, "keep only the matched
+  span" is risky.
+- **Not repaired, 89/131**: multi-session counting/composition; only the
+  intrusive i4 ceiling fixes them.
 
 **Reading:** fact-window truncation is the first delivery change that repairs
-truncation damage **while avoiding the overload regressions** — but it is net
-+1 over 24 cases with one counter-case, so it is a *candidate*, not a validated
-default. The next step, if pursued: expose it as an opt-in delivery flag with
-tests and re-measure on a larger slice before any default change.
+truncation damage **without the i4 overload regressions** and within budget —
+net +1 over 24 cases, with one counter-case and one non-repair class. It stays
+an **opt-in flag, default off** (`evidence_payload_window=false`), with the
+head cut unchanged when off. If pursued: apply windowing only when the record
+is single-fact-like, or keep a fraction of the original span for arithmetic
+questions, then re-measure on a larger slice.
 
 ## Decision
 
 - **No core/delivery change from this round.** I1 (600-char floor) is neutral at
   best (0.750/0.500) because a blunt floor does not localize the fact; it is
   rejected as a default.
-- **U2b ran: fact-window truncation repairs case 9 (easy) and case 88 (hard)
-  without the i4 overload regressions, netting +1 over 24 cases with one
-  counter-case (86).** It is promoted to *delivery candidate*: implement as an
-  opt-in flag with tests, keep the default (`head` truncation) until a larger
-  slice confirms. Cases 89/131 confirm that composition (not truncation) is the
-  remaining hard-slice failure mode.
+- **U2b ran: fact-window truncation repairs cases 9 and 88 without the i4
+  overload regressions, netting +1 over 24 cases with one counter-case (0,
+  arithmetic anchor dropped).** It is implemented as an opt-in flag
+  (`evidence_payload_window`, default false; flag-off is byte-equivalent to the
+  previous payload) with tests; the default stays head truncation. Cases 89/131
+  (and the case-0 regression) confirm that composition still dominates the
+  remaining hard-slice failures.
 - **I4 stays a diagnostic instrument** (gold-only untruncated), not a product
   mode: it violates the budget discipline and regresses 5 cases.
 - Retrieval/admission stay frozen (`graph-v3`); composition (case 71) and

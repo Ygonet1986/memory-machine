@@ -152,3 +152,65 @@ def test_memory_aware_prompt_labels_and_system(tmp_path):
     )
     assert "Recalled memory evidence" in seen["sys"]
     assert "persistent memory" in seen["sys"]
+
+
+def test_fact_window_selects_mid_text():
+    from memory_machine.payload import fact_window
+
+    sentences = [f"Weather filler sentence number {i} about nothing." for i in range(40)]
+    sentences.insert(30, "The trip to Porto took exactly 2 hours by train.")
+    text = " ".join(sentences)
+
+    window = fact_window(text, "How long did the trip to Porto take?", 240)
+
+    assert "2 hours" in window
+    assert len(window) <= 240
+
+
+def _long_record(memory_id="M0001"):
+    from memory_machine.tape import MemoryRecord
+
+    sentences = [f"Weather filler sentence number {i} about nothing." for i in range(120)]
+    sentences.insert(90, "The trip to Porto took exactly 2 hours by train.")
+    return MemoryRecord(
+        type="memory", summary="short summary", why=" ".join(sentences), id=memory_id
+    )
+
+
+def test_payload_window_off_is_unchanged():
+    record = _long_record()
+    annotation = Annotation(memory_id="M0001", note="n", relevance=1.0)
+    records = {"M0001": record}
+
+    base = build_evidence_payload(records, [annotation], budget=400)
+    flagged_off = build_evidence_payload(
+        records, [annotation], budget=400, question="How long did the trip take?", window=False
+    )
+
+    assert base == flagged_off
+    assert "2 hours" not in base[0]["evidence"]
+
+
+def test_payload_window_reveals_mid_fact_within_budget():
+    record = _long_record()
+    annotation = Annotation(memory_id="M0001", note="n", relevance=1.0)
+    records = {"M0001": record}
+
+    payload = build_evidence_payload(
+        records,
+        [annotation],
+        budget=400,
+        question="How long did the trip to Porto take?",
+        window=True,
+    )
+
+    assert "2 hours" in payload[0]["evidence"]
+    assert payload[0]["used_chars"] <= 400
+    assert payload[0]["truncated"] is True
+
+
+def test_config_payload_window_defaults_off():
+    from memory_machine.config import Config
+
+    assert Config().evidence_payload_window is False
+    assert Config(evidence_payload_window=1).evidence_payload_window is True

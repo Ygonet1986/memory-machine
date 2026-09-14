@@ -20,6 +20,67 @@ DEFAULT_BUDGET = 4000
 DEFAULT_MIN_ITEM = 200
 
 
+def _segments(text: str) -> list[str]:
+    import re
+
+    parts = re.split(r"(?<=[.!?])\s+|\n+", text)
+    return [part.strip() for part in parts if part.strip()]
+
+
+def fact_window(text: str, question: str, allocation: int) -> str:
+    """Question-matched window of a long text under a character allocation.
+
+    Deterministic: segments are scored by question-token coverage; the best
+    segment expands left/right until the allocation fills. Falls back to the
+    head when nothing matches or the allocation is too small.
+    """
+    if allocation <= 0 or not text:
+        return text[: max(0, allocation)]
+    segments = _segments(text)
+    if not segments or sum(len(s) + 1 for s in segments) <= allocation:
+        return text[:allocation]
+    q_tokens = {t for t in _tokens(question) if len(t) > 2}
+    scores = [
+        len(q_tokens & {t for t in _tokens(segment) if len(t) > 2}) for segment in segments
+    ]
+    best = max(range(len(scores)), key=lambda i: (scores[i], -i))
+    chosen = [best]
+    used = len(segments[best])
+    left, right = best - 1, best + 1
+    while True:
+        candidates = []
+        if left >= 0:
+            candidates.append((scores[left], 0, left))
+        if right < len(segments):
+            candidates.append((scores[right], 1, right))
+        if not candidates:
+            break
+        candidates.sort(key=lambda item: (-item[0], item[1]))
+        advanced = False
+        for _score, side, index in candidates:
+            cost = len(segments[index]) + 3  # " … "
+            if used + cost <= allocation:
+                if side == 0:
+                    chosen.insert(0, index)
+                    left -= 1
+                else:
+                    chosen.append(index)
+                    right += 1
+                used += cost
+                advanced = True
+                break
+        if not advanced:
+            break
+    window = " … ".join(segments[i] for i in chosen)
+    return window
+
+
+def _tokens(text: str) -> list[str]:
+    from .retrieval import tokenize
+
+    return tokenize(text or "")
+
+
 def _allocations(sizes: list[int], weights: list[float], budget: int, min_item_chars: int) -> list[int]:
     """Reserve a floor per item, then water-fill the rest by weight up to size.
 
@@ -115,6 +176,8 @@ def build_evidence_payload(
     *,
     budget: int = DEFAULT_BUDGET,
     min_item_chars: int = DEFAULT_MIN_ITEM,
+    question: str = "",
+    window: bool = False,
 ) -> list[dict[str, Any]]:
     """Build the budgeted evidence payload for the annotated memories.
 
@@ -144,6 +207,19 @@ def build_evidence_payload(
     payload: list[dict[str, Any]] = []
     for (annotation, record), (full, source), allocation in zip(items, rendered, allocations):
         text, truncated = _truncate(record, full, allocation)
+        if window and truncated and question and allocation > 0:
+            header = _header(record)
+            room = allocation - len(header) - 1
+            if record.derived_from:
+                body = full[len(header) + 1 :] if full.startswith(header) else full
+                if room >= 120:
+                    text = header + "\n" + fact_window(body, question, room)
+            else:
+                summary = record.summary or ""
+                room -= len(summary) + 1
+                if room >= 120:
+                    body = fact_window(record.why or "", question, room)
+                    text = header + "\n" + summary + "\n" + body if body else text
         payload.append(
             {
                 "memory_id": record.id,

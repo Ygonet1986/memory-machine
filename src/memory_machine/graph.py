@@ -973,10 +973,15 @@ def _resolve_with_resolver(
     extractor_name: str,
     extractor_version: str,
     resolver_version: str = "",
+    resolution: Any = None,
 ) -> str:
-    """Resolve/create one entity, honouring the resolver's confidence bands."""
-    resolution = None
-    if resolver is not None:
+    """Resolve/create one entity, honouring the resolver's confidence bands.
+
+    ``resolution`` may carry a precomputed (batched) decision; the exact-name
+    check still runs first so entities created earlier in the same extraction
+    are reused.
+    """
+    if resolution is None and resolver is not None:
         try:
             resolution = resolver.resolve({"name": name, "type": entity_type})
         except Exception:
@@ -1056,12 +1061,22 @@ def project_extraction(
     created: list[str] = []
     relation_count = 0
 
-    for item in extraction.entities:
+    precomputed: list[Any] | None = None
+    if resolver is not None and extraction.entities and hasattr(resolver, "resolve_batch"):
+        try:
+            precomputed = resolver.resolve_batch(
+                [{"name": item.name, "type": item.type} for item in extraction.entities]
+            )
+        except Exception:
+            precomputed = None
+
+    for position, item in enumerate(extraction.entities):
         entity_id = _resolve_with_resolver(
             store, index, resolver, item.name, item.type, record,
             created=created, extractor_name=extractor_name,
             extractor_version=extractor_version,
             resolver_version=resolver_version,
+            resolution=precomputed[position] if precomputed is not None else None,
         )
         local[normalize_name(item.name)] = entity_id
         refs.setdefault(item.ref, entity_id)

@@ -152,3 +152,42 @@ def test_vector_cache_removes_recomputation_without_changing_resolutions(tmp_pat
     assert texts_after_first == 1 + 3
     assert cached.embedder.texts - texts_after_first == 1
     assert second.method in {"exact", "alias", "embedding", "hypothesis", "new"}
+
+
+def test_resolve_batch_equals_single_and_uses_one_call(tmp_path):
+    table = {
+        "criatura": [0.95, 0.31],
+        "criatura2": [0.9, 0.4],
+        "criatura3": [0.2, 0.98],
+        "petronante creature": [1.0, 0.0],
+        "rochedo place": [0.0, 1.0],
+        "kalak person": [0.7, 0.7],
+    }
+    index = _cache_index(tmp_path)
+    specs = [
+        {"name": "criatura"},
+        {"name": "criatura2"},
+        {"name": "criatura3"},
+        {"name": "rochedo"},  # exact match: never reaches the embedder
+    ]
+
+    single = GraphResolver(embedder=CountingEmbedder(table))
+    single.bind(index)
+    singles = [single.resolve(spec) for spec in specs]
+
+    batch = GraphResolver(embedder=CountingEmbedder(table))
+    batch.bind(index)
+    batched = batch.resolve_batch(specs)
+
+    def fingerprint(resolution):
+        return (
+            resolution.entity_id,
+            resolution.method,
+            resolution.hypothesis,
+            resolution.other_id,
+            round(resolution.confidence, 6),
+        )
+
+    assert [fingerprint(r) for r in batched] == [fingerprint(r) for r in singles]
+    assert batch.embedder.calls == 1  # every unknown name in one request
+    assert single.embedder.calls == 3

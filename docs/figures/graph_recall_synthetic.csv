@@ -1,0 +1,8 @@
+stratum,value,n,agent_recall,graph_recall,union_recall,strict_off,strict_augment,aug_better,aug_worse,aug_equal,graph_only_gold,agent_only_gold
+category,adversarial,5,1.0,0.5,1.0,1.0,1.0,0,0,5,0,3
+category,ambiguous,1,1.0,0.5,1.0,1.0,1.0,0,0,1,0,1
+category,cross_view,6,0.9167,0.25,0.9167,0.8333,0.8333,0,0,6,0,8
+category,same_view,6,1.0,0.4167,1.0,1.0,1.0,0,0,6,0,9
+category,single,7,1.0,0.8571,1.0,1.0,1.0,0,0,7,0,1
+category,structural,2,1.0,0.25,1.0,1.0,1.0,0,0,2,0,4
+category,temporal,5,1.0,0.2,1.0,0.8,0.8,1,0,4,0,11

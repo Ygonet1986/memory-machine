@@ -1,0 +1,8 @@
+stratum,value,n,agent_recall,graph_recall,union_recall,strict_off,strict_augment,aug_better,aug_worse,aug_equal,graph_only_gold,agent_only_gold
+category,knowledge-update,1,1.0,1.0,1.0,0.0,1.0,1,0,0,0,0
+category,multi-session,4,1.0,1.0,1.0,1.0,1.0,0,0,4,0,0
+category,single-session-assistant,1,1.0,1.0,1.0,1.0,0.0,0,1,0,0,0
+category,single-session-user,3,0.3333,1.0,1.0,0.3333,0.3333,0,0,3,2,0
+category,temporal-reasoning,3,0.8333,0.1667,0.8333,0.6667,1.0,1,0,2,1,4
+lexical overlap,top1,11,0.7727,0.8636,1.0,0.6364,0.7273,2,1,8,3,2
+lexical overlap,top5,1,1.0,0.0,0.5,1.0,1.0,0,0,1,0,2

@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from memory_machine.attachments import ingest_attachment
+from memory_machine.attachments import ingest_attachment, remove_attachments
 from memory_machine.config import Config
 from memory_machine.coordinator import Machine
 from memory_machine.groups import Manifest
@@ -81,3 +81,33 @@ def test_recall_returns_attached_content(tmp_path):
     res = m.recall("what does the spec say?")
     assert res["attached_content"]
     assert "PostgreSQL" in res["attached_content"][0]["text"]
+
+
+def test_remove_attachments_keeps_regular_memories(tmp_path):
+    tape = Tape(tmp_path / "tape.jsonl")
+    manifest = Manifest(capacity=50)
+    src = tmp_path / "spec.txt"
+    src.write_text("A" * 1500)
+    ingest_attachment(tape, manifest, src, chunk_size=600)
+    tape.append(MemoryRecord(type="decision", summary="keep me"))
+
+    removed = remove_attachments(tape)
+
+    assert removed == 3
+    assert [r.type for r in tape.read()] == ["decision"]
+
+
+def test_remove_attachments_by_source(tmp_path):
+    tape = Tape(tmp_path / "tape.jsonl")
+    manifest = Manifest(capacity=50)
+    a = tmp_path / "a.txt"
+    a.write_text("alpha text")
+    b = tmp_path / "b.txt"
+    b.write_text("beta text")
+    ra = ingest_attachment(tape, manifest, a)
+    ingest_attachment(tape, manifest, b)
+
+    removed = remove_attachments(tape, source=ra["source"])
+
+    assert removed == 1
+    assert len(tape) == 1

@@ -3,6 +3,8 @@ from memory_machine.tape import MemoryRecord
 
 from app import backend as backend_mod
 from app import settings as settings_mod
+from app import topics as topics_mod
+from memory_machine.tape import Tape
 
 
 def _setup(tmp_path, monkeypatch, multi_topic):
@@ -166,3 +168,29 @@ def test_full_app_cycle_integration(tmp_path, monkeypatch):
     assert st["agents_checklists"][0]["checklist"] == "- remember postgres"
     assert st["documents"] == 1
     assert st["tape_records"] >= 2  # seeded decision + chatbot memory + turn record
+
+
+def test_remove_all_documents(tmp_path, monkeypatch):
+    b = _setup(tmp_path, monkeypatch, multi_topic=False)
+    src = tmp_path / "guide.txt"
+    src.write_text("Postgres is the primary database.\n\nAuth uses OAuth flows.")
+
+    assert b.add_document(src)["ok"] is True
+    first = b.current_topic()["id"]
+    assert len(b.list_documents()) == 1
+    assert any(m["type"] == "attachment" for m in b.list_memories())
+
+    b.new_topic("second")
+    assert b.add_document(src)["ok"] is True
+    assert any(m["type"] == "attachment" for m in b.list_memories())
+
+    out = b.remove_all_documents()
+
+    assert out["documents"] == 2
+    assert out["chunks"] >= 2
+    assert b.list_documents() == []
+    base = tmp_path / "data"
+    for topic in topics_mod.list_topics(base):
+        tape = Tape(topics_mod.topic_root(base, topic["id"]) / "tape.jsonl")
+        assert not any(r.type == "attachment" for r in tape.read())
+    assert first  # the first topic's tape was cleaned too

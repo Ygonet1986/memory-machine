@@ -181,12 +181,18 @@ class MainWindow(QMainWindow):
         self.settings_btn.clicked.connect(self._open_settings)
         self.add_files_btn = QPushButton("Add files")
         self.add_files_btn.clicked.connect(self._add_files)
+        self.clear_docs_btn = QPushButton("Clear docs")
+        self.clear_docs_btn.setToolTip(
+            "Delete all attached documents (reference store and tape chunks)"
+        )
+        self.clear_docs_btn.clicked.connect(self._clear_docs)
         self.memory_btn = QPushButton("Memory")
         self.memory_btn.clicked.connect(self._open_tape)
         self.web_check = QCheckBox("Web search")
         self.web_check.setToolTip("Search the web for this message (does not touch memory)")
         row.addWidget(self.settings_btn)
         row.addWidget(self.add_files_btn)
+        row.addWidget(self.clear_docs_btn)
         row.addWidget(self.memory_btn)
         row.addWidget(self.web_check)
         row.addStretch(1)
@@ -361,6 +367,31 @@ class MainWindow(QMainWindow):
             self._append_system(msg + ".")
         self._refresh_status()
 
+    def _clear_docs(self) -> None:
+        docs = self._backend.list_documents()
+        chunks = sum(
+            1 for m in self._backend.list_memories() if m.get("type") == "attachment"
+        )
+        if not docs and not chunks:
+            self._append_system("No attached documents to delete.")
+            return
+        answer = QMessageBox.question(
+            self,
+            "Delete attached documents",
+            f"Delete {len(docs)} document(s) and {chunks} memory chunk(s)?\n"
+            "Regular memories are not affected.",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No,
+        )
+        if answer != QMessageBox.StandardButton.Yes:
+            return
+        res = self._backend.remove_all_documents()
+        self._append_system(
+            f"Deleted {res.get('documents', 0)} document(s) and "
+            f"{res.get('chunks', 0)} memory chunk(s)."
+        )
+        self._refresh_status()
+
     def _open_tape(self) -> None:
         TapeDialog(self._backend, self).exec()
         self._refresh_status()
@@ -374,6 +405,7 @@ class MainWindow(QMainWindow):
         self.topic_combo.setEnabled(not busy and not self._backend.multi_topic())
         self.settings_btn.setEnabled(not busy)
         self.add_files_btn.setEnabled(not busy)
+        self.clear_docs_btn.setEnabled(not busy)
         self.web_check.setEnabled(not busy)
         self.input.setEnabled(not busy)
         if busy:

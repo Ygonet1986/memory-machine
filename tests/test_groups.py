@@ -89,3 +89,24 @@ def test_manifest_roundtrip(tmp_path):
     assert len(loaded.groups) == 1
     assert loaded.groups[0].id == "G1"
     assert loaded.agents[0].id == "A1"
+
+
+def test_default_capacity_is_500():
+    assert Manifest().capacity == 500
+
+
+def test_group_of_500_then_next_group():
+    m = Manifest()
+    m, g1, a1, created = ensure_group(m, 1)
+    assert created is True
+    assert (g1.start, g1.end) == (1, 500)
+    assert a1.id == "A1"
+
+    m, same, _agent, created = ensure_group(m, 500)
+    assert created is False
+    assert same.id == "G1"
+
+    m, g2, a2, created = ensure_group(m, 501)
+    assert created is True
+    assert (g2.start, g2.end) == (501, 1000)
+    assert a2.id == "A2" and g2.agent_id == "A2"

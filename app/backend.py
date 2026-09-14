@@ -15,9 +15,11 @@ from pathlib import Path
 from typing import Any
 
 from memory_machine import documents as documents_mod
+from memory_machine.attachments import remove_attachments
 from memory_machine.config import Config
 from memory_machine.coordinator import Machine
 from memory_machine.llm import LLMClient
+from memory_machine.tape import Tape
 
 from . import router, topics as topics_mod
 from . import websearch
@@ -181,6 +183,28 @@ class Backend:
 
     def remove_document(self, name: str) -> bool:
         return documents_mod.remove_document(self._base(), name)
+
+    def remove_all_documents(self) -> dict[str, Any]:
+        """Delete every attached document: the reference store and all tape chunks.
+
+        The RAG store is shared across topics, so its files are removed once;
+        attachment chunks are removed from the active tape and from every other
+        topic's tape. Regular memories are never touched.
+        """
+        with self._lock:
+            assert self._machine is not None
+            files = documents_mod.remove_all_documents(self._base())
+            chunks = remove_attachments(self._machine.tape)
+            for topic in topics_mod.list_topics(self._base()):
+                if topic["id"] == self._topic_id:
+                    continue
+                tape = Tape(
+                    topics_mod.topic_root(self._base(), topic["id"]) / "tape.jsonl"
+                )
+                if tape.path.exists():
+                    chunks += remove_attachments(tape)
+            self._machine._invalidate_recall_cache()
+            return {"documents": files, "chunks": chunks}
 
     def search_web(self, message: str) -> str:
         return websearch.format_results(websearch.search(message))

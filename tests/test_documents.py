@@ -1,6 +1,12 @@
 from pathlib import Path
 
-from memory_machine.documents import add_document, list_documents, remove_document, retrieve
+from memory_machine.documents import (
+    add_document,
+    list_documents,
+    remove_all_documents,
+    remove_document,
+    retrieve,
+)
 
 
 def test_add_and_retrieve(tmp_path):
@@ -55,3 +61,14 @@ def test_remove(tmp_path):
     add_document(base, src)
     assert remove_document(base, "a.txt") is True
     assert remove_document(base, "a.txt") is False
+
+
+def test_remove_all(tmp_path):
+    base = Path(tmp_path)
+    for name in ("a.txt", "b.txt"):
+        src = tmp_path / name
+        src.write_text("hello world test")
+        add_document(base, src)
+    assert remove_all_documents(base) == 2
+    assert list_documents(base) == []
+    assert remove_all_documents(base) == 0

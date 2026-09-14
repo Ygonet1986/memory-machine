@@ -1,5 +1,5 @@
 {
-  "capacity": 50,
+  "capacity": 500,
   "whiteboard_budget": 4000,
   "consolidate_threshold": 6000,
   "context_consolidate_threshold": 6000,

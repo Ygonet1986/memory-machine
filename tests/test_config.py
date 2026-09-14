@@ -1,4 +1,4 @@
-from memory_machine.config import Config
+from memory_machine.config import Config, DEFAULT_CAPACITY
 
 
 def test_defaults_are_valid():
@@ -15,7 +15,7 @@ def test_clamps_capacity_and_budgets():
 
 def test_non_int_values_fall_back():
     cfg = Config(capacity="abc", whiteboard_budget="x")
-    assert cfg.capacity == 50  # DEFAULT_CAPACITY
+    assert cfg.capacity == DEFAULT_CAPACITY
     assert cfg.whiteboard_budget == 4000  # DEFAULT_WHITEBOARD_BUDGET
 
 

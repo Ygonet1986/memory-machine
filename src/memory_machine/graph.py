@@ -291,6 +291,7 @@ class DocumentRecord:
     name: str
     hash: str
     path: str
+    original: str = ""
     chunks: int = 0
     spans: list[tuple[int, int]] = field(default_factory=list)
     extractor: str = ""
@@ -298,7 +299,7 @@ class DocumentRecord:
     created_at: str = ""
 
     def to_dict(self) -> dict[str, Any]:
-        return {
+        d: dict[str, Any] = {
             "id": self.id,
             "source": self.source,
             "name": self.name,
@@ -310,6 +311,9 @@ class DocumentRecord:
             "status": self.status,
             "created_at": self.created_at,
         }
+        if self.original:
+            d["original"] = self.original
+        return d
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "DocumentRecord":
@@ -319,6 +323,7 @@ class DocumentRecord:
             name=str(data.get("name") or ""),
             hash=str(data.get("hash") or ""),
             path=str(data.get("path") or ""),
+            original=str(data.get("original") or ""),
             chunks=int(data.get("chunks") or 0),
             spans=_parse_spans(data.get("spans")),
             extractor=str(data.get("extractor") or ""),
@@ -483,6 +488,32 @@ def noop_extractor(record: Any) -> dict[str, Any]:
 class ExtractorSpec:
     fn: Extractor
     version: str = GRAPH_EXTRACTOR_VERSION
+
+
+class _SpecDocumentExtractor:
+    """Adapter so a plain :class:`ExtractorSpec` can drive the D5 document
+    passes (chunk scope from ``fn``; window scope skipped when the caller did
+    not supply a real window extractor)."""
+
+    def __init__(self, fn: Extractor, batch_fn: Callable[[list[Any]], dict[str, Any]] | None,
+                 name: str, version: str, tag: str) -> None:
+        self.fn = fn
+        self.batch_fn = batch_fn
+        self.name = name
+        self.version = version
+        self.tag = tag
+
+    def extract(self, record: Any) -> Any:
+        return self.fn(record)
+
+    def extract_batch(self, records: list[Any]) -> dict[str, Any]:
+        if self.batch_fn is not None:
+            return self.batch_fn(records)
+        return {record.id: self.extract(record) for record in records}
+
+    @property
+    def extract_window(self) -> None:
+        return None
 
 
 EXTRACTORS: dict[str, ExtractorSpec] = {"noop": ExtractorSpec(noop_extractor)}
@@ -1181,6 +1212,7 @@ class GraphStore:
         name: str,
         hash: str,
         path: str,
+        original: str = "",
         spans: Iterable[tuple[int, int]] = (),
         extractor: str = "",
         status: str = "registered",
@@ -1190,7 +1222,9 @@ class GraphStore:
 
         The identity is stable per ``source`` (the ``name#hash`` content key):
         registering an already-known source returns the existing record
-        (``created=False``) instead of duplicating it.
+        (``created=False``) instead of duplicating it. ``original`` is the
+        path of the preserved copy in ``<root>/documents/`` (hash-validated on
+        rebuild).
         """
         source = str(source or "").strip()
         name = str(name or "").strip()
@@ -1208,6 +1242,7 @@ class GraphStore:
             name=name,
             hash=str(hash).strip(),
             path=str(path).strip(),
+            original=str(original or "").strip(),
             chunks=int(chunks) if chunks else len(span_list),
             spans=[(s, e) for s, e in span_list],
             extractor=extractor,
@@ -2100,6 +2135,10 @@ def build_graph(
     batch_max_chars: int = 0,
     batch_fn: Callable[[list[Any]], dict[str, Any]] | None = None,
     atomic: bool = True,
+    documents_root: Path | None = None,
+    document_structure_level: str | None = None,
+    window_chars: int = 12000,
+    document_extractor: Any = None,
 ) -> dict[str, Any]:
     """Extract durable tape records into the graph store.
 
@@ -2109,7 +2148,18 @@ def build_graph(
     a complete, validated run, so an interrupted rebuild never destroys the
     previous projection. ``batch_fn`` (e.g. ``GraphExtractor.extract_batch``)
     is a transport optimization: each record keeps its own idempotency unit.
+
+    D5: when ``document_structure_level`` is given (``chunk``/``document``/
+    ``both``), the document layer is (re)projected from the tape + the
+    ``D####`` registry + the preserved originals under ``documents_root`` —
+    original files are hash-validated first and a missing/adulterated file
+    aborts the rebuild explicitly (never approximate). ``document_extractor``
+    must expose ``extract``/``extract_batch``/``extract_window`` for the
+    document passes; without it only chunk-scope rows are reproduced. The
+    default (``None``) keeps the graph-v3 projection byte-for-byte untouched.
     """
+    from .ingest_document import DocumentRebuildError, rebuild_document_projection, validate_originals
+
     spec = extractor if isinstance(extractor, ExtractorSpec) else ExtractorSpec(extractor)
     name = extractor_name or ("noop" if spec.fn is noop_extractor else "custom")
     tag = f"{name}/{spec.version}"
@@ -2123,6 +2173,18 @@ def build_graph(
             "built_tag": recorded_tag,
             "requested_tag": tag,
         }
+
+    if document_structure_level is not None and store.documents():
+        try:
+            validate_originals(
+                store, documents_root or store.directory.parent / "documents"
+            )
+        except DocumentRebuildError as exc:
+            return {
+                "ok": False,
+                "error": f"{exc}",
+                "documents_validated": False,
+            }
 
     target = store
     building: GraphStore | None = None
@@ -2138,13 +2200,7 @@ def build_graph(
         for row in documents_backup:
             store._append("documents.jsonl", row)
 
-    try:
-        result = _build_into(
-            tape, target, spec, name=name, tag=tag, types=types, resolver=resolver,
-            resolver_version=resolver_version, max_attempts=max_attempts,
-            batch_size=batch_size, batch_max_chars=batch_max_chars, batch_fn=batch_fn,
-        )
-    except Exception as exc:
+    def report_failure(exc: BaseException) -> dict[str, Any]:
         if building is not None:
             return {
                 "ok": False,
@@ -2152,6 +2208,38 @@ def build_graph(
                 "building_dir": str(building.directory),
             }
         return {"ok": False, "error": str(exc)}
+
+    try:
+        result = _build_into(
+            tape, target, spec, name=name, tag=tag, types=types, resolver=resolver,
+            resolver_version=resolver_version, max_attempts=max_attempts,
+            batch_size=batch_size, batch_max_chars=batch_max_chars, batch_fn=batch_fn,
+        )
+        if document_structure_level is not None and target.documents():
+            doc_result = rebuild_document_projection(
+                target, tape,
+                documents_root or target.directory.parent / "documents",
+                document_extractor
+                or _SpecDocumentExtractor(spec.fn, batch_fn, name, spec.version, tag),
+                resolver,
+                structure_level=document_structure_level,
+                window_chars=window_chars,
+                batch_size=batch_size,
+                batch_max_chars=batch_max_chars,
+                max_attempts=max_attempts,
+                extractor_name=name,
+                extractor_version=spec.version,
+            )
+            result["document"] = doc_result
+    except DocumentRebuildError as exc:
+        return {
+            "ok": False,
+            "error": f"{exc}",
+            "documents_validated": False,
+            **report_failure(exc),
+        }
+    except Exception as exc:
+        return report_failure(exc)
 
     if building is not None:
         _swap_directories(store.directory, building.directory)
@@ -2226,16 +2314,195 @@ def document_context(store: GraphStore, doc_key: str) -> dict[str, Any]:
     }
 
 
-def explain_relation(store: GraphStore, tape: Any, relation_id: str) -> dict[str, Any]:
-    """Walk a relation back to its source memory (provenance)."""
+def _resolve_document(store: GraphStore, doc_key: str) -> DocumentRecord | None:
+    return (
+        store.document_by_id(str(doc_key))
+        or store.document_by_source(str(doc_key))
+        or next((d for d in store.documents() if d.name == str(doc_key)), None)
+    )
+
+
+def _original_status(doc: DocumentRecord, documents_root: Path | None) -> dict[str, Any]:
+    """Present + hash-validated state of the preserved original (D5)."""
+    root = documents_root or (Path(doc.original).parent if doc.original else None)
+    if root is None:
+        return {"present": False, "hash_ok": False, "path": "",
+                "error": "no original recorded"}
+    original = Path(doc.original) if doc.original else root / doc.name
+    if not original.exists():
+        return {
+            "present": False, "hash_ok": False, "path": str(original),
+            "error": "original missing", "expected_hash": doc.hash,
+        }
+    from .attachments import _file_hash
+
+    actual = _file_hash(original.read_text(encoding="utf-8", errors="replace").strip())
+    if actual != doc.hash:
+        return {
+            "present": True, "hash_ok": False, "path": str(original),
+            "expected_hash": doc.hash, "actual_hash": actual,
+            "error": "hash mismatch (document was altered)",
+        }
+    return {"present": True, "hash_ok": True, "path": str(original),
+            "expected_hash": doc.hash}
+
+
+def document_view(
+    store: GraphStore,
+    tape: Any,
+    doc_key: str,
+    *,
+    documents_root: Path | None = None,
+    memory_id: str = "",
+    span: str = "",
+) -> dict[str, Any]:
+    """Query the document subgraph: ``D####`` / ``name#hash`` / file name.
+
+    Filters: ``memory_id`` keeps only rows produced by one chunk memory;
+    ``span`` (``"a:b"``) keeps rows whose ``source_span`` overlaps ``[a, b]``.
+    Includes a window map (``D####|wNN`` idempotency units), the document's
+    chunk memories and the hash-validated original status. Deterministic and
+    read-only — recall/plasticity are untouched.
+    """
+    doc = _resolve_document(store, doc_key)
+    if doc is None:
+        return {"ok": False, "error": f"unknown document: {doc_key}"}
+    if span.strip():
+        try:
+            a, b = (int(x) for x in span.strip().split(":", 1))
+        except ValueError:
+            return {"ok": False, "error": f"span must be 'a:b', got {span!r}"}
+    else:
+        a = b = None
+
+    def in_range(row_span: tuple[int, int] | Any) -> bool:
+        if a is None or not row_span or len(row_span) != 2:
+            return True
+        return not (int(row_span[1]) < a or int(row_span[0]) > b)
+
+    mentions = [
+        m for m in store.mentions() if m.source_document == doc.source
+    ]
+    if memory_id:
+        mentions = [m for m in mentions if m.memory_id == memory_id]
+    memory_ids = sorted({m.memory_id for m in mentions if m.memory_id})
+    entity_ids = sorted(
+        {m.entity_id for m in mentions if m.entity_id}
+        | {e.id for e in store.entities() if e.source_document == doc.source}
+    )
+    entities = [e for e in store.entities() if e.id in entity_ids]
+    relations = [
+        r for r in store.relations()
+        if r.source_document == doc.source or r.memory_id in memory_ids
+    ]
+    relations = [r for r in relations if in_range(r.source_span)]
+    entities = [e for e in entities if in_range(e.source_span)]
+    mentions = [m for m in mentions if in_range(m.span)]
+
+    prefix = f"{doc.id}|w"
+    window_rows: dict[str, list[dict[str, Any]]] = {}
+    window_ids: list[str] = []
+    for r in relations:
+        if r.memory_id.startswith(prefix):
+            window_ids.append(r.memory_id)
+    for wid in sorted(set(window_ids)):
+        window_rows[wid] = [r.to_dict() for r in relations if r.memory_id == wid]
+
+    chunk_memories: list[dict[str, Any]] = []
+    if tape is not None:
+        chunk_memories = [
+            r.to_dict() for r in sorted(
+                (rec for rec in tape.read()
+                 if rec.source == doc.source and rec.type == "attachment"),
+                key=lambda rec: (rec.source_span[0] if rec.source_span else 0),
+            )
+        ]
+
+    return {
+        "ok": True,
+        "document": doc.to_dict(),
+        "original": _original_status(doc, documents_root),
+        "memories": memory_ids,
+        "chunk_memories": chunk_memories,
+        "windows": window_rows,
+        "entities": [e.to_dict() for e in entities],
+        "relations": [r.to_dict() for r in relations],
+        "mentions": [m.to_dict() for m in mentions],
+    }
+
+
+def explain_relation(
+    store: GraphStore,
+    tape: Any,
+    relation_id: str,
+    *,
+    documents_root: Path | None = None,
+) -> dict[str, Any]:
+    """Walk a relation back to its full provenance chain (D5).
+
+    Shows **every** evidence span — not just the first — with the exact text
+    re-hydrated from the preserved original (``documents_root``) or, failing
+    that, from the tape memory; then the document, the source/target entities
+    and the window unit when the row is document-scoped.
+    """
     relation = next((r for r in store.relations() if r.id == relation_id), None)
     if relation is None:
         return {"ok": False, "error": f"unknown relation: {relation_id}"}
     entities = {e.id: e for e in store.entities()}
-    record = next((r for r in tape.read() if r.id == relation.memory_id), None)
+    records = {r.id: r for r in tape.read()} if tape is not None else {}
+
+    doc = store.document_by_source(relation.source_document) if relation.source_document else None
+    original_text: str | None = None
+    if doc is not None:
+        status = _original_status(doc, documents_root)
+        if status.get("present") and status.get("hash_ok"):
+            try:
+                original_text = Path(status["path"]).read_text(
+                    encoding="utf-8", errors="replace"
+                )
+            except OSError:
+                original_text = None
+        doc_payload = {"record": doc.to_dict(), "original": status}
+    else:
+        doc_payload = None
+
+    def slice_text(memory_id: str, span: tuple[int, int] | list[int] | Any) -> tuple[str, str]:
+        start, end = (span[0], span[1]) if len(tuple(span)) == 2 else (None, None)
+        if original_text is not None and start is not None:
+            lo = max(0, int(start))
+            hi = min(len(original_text), int(end) or lo)
+            if hi > lo:
+                return original_text[lo:hi], "original"
+        record = records.get(memory_id)
+        if record is not None and start is not None and span:
+            text = str(record.why or "")
+            lo = max(0, int(start) - (record.source_span[0] if len(record.source_span) == 2 else 0))
+            hi = min(len(text), int(end) - (record.source_span[0] if len(record.source_span) == 2 else 0))
+            if hi > lo >= 0:
+                return text[lo:hi], "tape"
+        return (str(record.why or "") if record else ""), "record"
+
+    evidence = []
+    for ev in relation.evidence:
+        memory_id = str(ev.get("memory_id") or "")
+        span = tuple(ev.get("span") or ()) if ev.get("span") else (relation.source_span,)
+        if len(span) == 1:  # no explicit span -> the relation's own span
+            span = span[0]
+        text, source = slice_text(memory_id, span)
+        record = records.get(memory_id)
+        evidence.append({
+            "memory_id": memory_id,
+            "span": list(span) if len(tuple(span)) == 2 else None,
+            "source": source,
+            "text": text,
+            "memory_summary": record.summary if record else "",
+        })
+
+    memory = records.get(relation.memory_id)
     return {
         "ok": True,
         "relation": relation.to_dict(),
+        "scope": relation.extraction_scope,
         "source": entities[relation.source].to_dict() if relation.source in entities else None,
         "target": entities[relation.target].to_dict() if relation.target in entities else None,
         "aliases": [
@@ -2243,5 +2510,8 @@ def explain_relation(store: GraphStore, tape: Any, relation_id: str) -> dict[str
             for a in store.aliases()
             if a.entity_id in {relation.source, relation.target}
         ],
-        "memory": record.to_dict() if record is not None else None,
+        "document": doc_payload,
+        "window": relation.memory_id if relation.memory_id.startswith("D") else None,
+        "memory": memory.to_dict() if memory is not None else None,
+        "evidence": evidence,
     }

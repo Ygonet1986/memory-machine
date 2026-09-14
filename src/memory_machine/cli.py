@@ -10,7 +10,14 @@ from typing import Any
 
 from .config import Config, resolve_path
 from .coordinator import Machine
-from .graph import EXTRACTORS, GraphStore, build_graph, explain_relation, graph_status
+from .graph import (
+    EXTRACTORS,
+    ExtractorSpec,
+    GraphStore,
+    build_graph,
+    explain_relation,
+    graph_status,
+)
 from .llm import LLMError
 from .secrets import SecretError
 from .sessions import list_sessions, sessions_dir_for
@@ -80,7 +87,13 @@ def _build_parser() -> argparse.ArgumentParser:
     graph.add_argument("action", choices=["build", "status", "explain"])
     graph.add_argument("target", nargs="?", default="", help="relation id for explain")
     graph.add_argument("--rebuild", action="store_true", help="discard and rebuild from the tape")
-    graph.add_argument("--extractor", default="noop", choices=sorted(EXTRACTORS))
+    graph.add_argument(
+        "--extractor",
+        default="",
+        choices=["", *sorted({*EXTRACTORS, "llm"})],
+        help="extractor: llm (default on build) or noop (diagnostic); "
+        "status defaults to the extractor recorded in meta.json",
+    )
 
     roll = sub.add_parser("rollup", help="consolidate older tape records (JSON)")
     roll.add_argument("--keep-recent", type=int, default=20)
@@ -267,16 +280,43 @@ def cmd_views(args: argparse.Namespace) -> int:
 def cmd_graph(args: argparse.Namespace) -> int:
     m = _machine(args)
     store = GraphStore(resolve_path(m.root, m.config.graph_path))
-    spec = EXTRACTORS.get(args.extractor)
-    if spec is None:
-        return _j({"ok": False, "error": f"unknown extractor: {args.extractor}"})
+    name = args.extractor
+    if not name:
+        recorded = str(store.meta().get("tag") or "").split("/")[0]
+        name = recorded or ("llm" if args.action == "build" else "noop")
+    resolver = None
+    if name == "llm":
+        from .graph_extract import GraphExtractor
+
+        extractor_name = "llm"
+        if args.action == "build":
+            from .graph_resolve import GraphResolver
+
+            try:
+                extractor = GraphExtractor(m._ensure_client())
+            except LLMError as exc:
+                return _j({"ok": False, "error": str(exc)})
+            spec = ExtractorSpec(extractor.extract, extractor.version)
+            resolver = GraphResolver(
+                embedder=m._embedder(),
+                auto=m.config.graph_confidence_auto,
+                hypothesis=m.config.graph_confidence_hypothesis,
+            )
+        else:  # status/explain only need the tag, never a client
+            spec = ExtractorSpec(lambda record: {}, GraphExtractor.VERSION)
+    else:
+        spec = EXTRACTORS.get(name)
+        if spec is None:
+            return _j({"ok": False, "error": f"unknown extractor: {name}"})
+        extractor_name = name
+    tag = f"{extractor_name}/{spec.version}"
     if args.action == "status":
         return _j(
             graph_status(
                 store,
                 m.tape,
                 extract_types=m.config.graph_extract_types,
-                extractor_tag=f"{args.extractor}/{spec.version}",
+                extractor_tag=tag,
             )
         )
     if args.action == "explain":
@@ -290,7 +330,9 @@ def cmd_graph(args: argparse.Namespace) -> int:
             spec,
             extract_types=m.config.graph_extract_types,
             rebuild=args.rebuild,
-            extractor_name=args.extractor,
+            extractor_name=extractor_name,
+            resolver=resolver,
+            max_attempts=m.config.graph_max_attempts,
         )
     )
 

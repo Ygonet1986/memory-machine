@@ -42,6 +42,15 @@ DURABLE_TYPES = ("decision", "lesson", "preference", "bugfix", "build")
 MAX_ENTITIES = 20
 MAX_RELATIONS = 30
 MAX_ALIASES = 8
+MAX_ATTEMPTS = 3
+
+
+class ExtractionError(Exception):
+    """Extraction failed schema validation (retried up to the policy)."""
+
+
+class TransientExtractionError(ExtractionError):
+    """LLM/API failure (timeout, empty completion); retried up to the policy."""
 
 
 def _now() -> str:
@@ -94,6 +103,8 @@ class GraphRelation:
     memory_id: str = ""
     confidence: float = 0.8
     kind: str = ""
+    extractor: str = ""
+    extractor_version: str = ""
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -112,6 +123,8 @@ class GraphRelation:
             memory_id=str(data.get("memory_id") or ""),
             confidence=max(0.0, min(1.0, confidence)),
             kind=str(data.get("kind") or ""),
+            extractor=str(data.get("extractor") or ""),
+            extractor_version=str(data.get("extractor_version") or ""),
         )
 
 
@@ -122,6 +135,8 @@ class GraphAlias:
     memory_id: str = ""
     confidence: float = 0.8
     method: str = ""
+    extractor: str = ""
+    extractor_version: str = ""
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -137,37 +152,103 @@ class GraphMention:
         return asdict(self)
 
 
-@dataclass
-class Extraction:
-    """Validated extractor output (names, not ids)."""
+@dataclass(frozen=True)
+class ExtractedEntity:
+    ref: str
+    name: str
+    type: str = "unknown"
+    confidence: float = 0.8
+    aliases: tuple[str, ...] = ()
 
-    entities: list[dict[str, Any]] = field(default_factory=list)
-    relations: list[dict[str, Any]] = field(default_factory=list)
+
+@dataclass(frozen=True)
+class ExtractedEvent:
+    ref: str
+    action: str
+    agent: str = ""
+    object: str = ""
+    confidence: float = 0.8
+    kind: str = "event"
+
+
+@dataclass(frozen=True)
+class ExtractedRelation:
+    source: str
+    relation: str
+    target: str
+    confidence: float = 0.8
+    kind: str = ""
+
+
+@dataclass(frozen=True)
+class Extraction:
+    """Validated, immutable extractor output (semantic refs, never E/R ids).
+
+    Parsing happens entirely before any graph mutation: the resolver turns
+    ``e1``/``ev1`` refs into ``E####`` and only then does the store change.
+    """
+
+    entities: tuple[ExtractedEntity, ...] = ()
+    events: tuple[ExtractedEvent, ...] = ()
+    relations: tuple[ExtractedRelation, ...] = ()
+    mentions: tuple[str, ...] = ()
+    confidence: float = 0.8
+    kind: str = ""
+    memory_id: str = ""
+    extractor: str = ""
+    extractor_version: str = ""
 
     @classmethod
-    def from_obj(cls, obj: Any) -> "Extraction":
-        entities: list[dict[str, Any]] = []
-        relations: list[dict[str, Any]] = []
+    def from_obj(
+        cls,
+        obj: Any,
+        *,
+        memory_id: str = "",
+        extractor: str = "",
+        extractor_version: str = "",
+    ) -> "Extraction":
+        """Lenient validation of an extractor payload (invalid items dropped)."""
         if not isinstance(obj, dict):
-            return cls()
-        for raw in (obj.get("entities") or [])[:MAX_ENTITIES]:
+            return cls(memory_id=memory_id, extractor=extractor, extractor_version=extractor_version)
+        entities: list[ExtractedEntity] = []
+        for i, raw in enumerate((obj.get("entities") or [])[:MAX_ENTITIES], start=1):
             if not isinstance(raw, dict):
                 continue
             name = str(raw.get("name") or "").strip()
             if not name:
                 continue
-            aliases = [
+            aliases = tuple(
                 str(a).strip()
                 for a in (raw.get("aliases") or [])[:MAX_ALIASES]
                 if str(a).strip()
-            ]
-            entities.append(
-                {
-                    "name": name[:120],
-                    "type": str(raw.get("type") or "unknown").strip().lower()[:40] or "unknown",
-                    "aliases": aliases,
-                }
             )
+            entities.append(
+                ExtractedEntity(
+                    ref=str(raw.get("ref") or f"e{i}").strip() or f"e{i}",
+                    name=name[:120],
+                    type=str(raw.get("type") or "unknown").strip().lower()[:40] or "unknown",
+                    confidence=_clamp(raw.get("confidence"), 0.8),
+                    aliases=aliases,
+                )
+            )
+        events: list[ExtractedEvent] = []
+        for i, raw in enumerate((obj.get("events") or [])[:MAX_RELATIONS], start=1):
+            if not isinstance(raw, dict):
+                continue
+            action = str(raw.get("action") or "").strip()
+            if not action:
+                continue
+            events.append(
+                ExtractedEvent(
+                    ref=str(raw.get("ref") or f"ev{i}").strip() or f"ev{i}",
+                    action=action[:60],
+                    agent=str(raw.get("agent") or "").strip()[:120],
+                    object=str(raw.get("object") or "").strip()[:120],
+                    confidence=_clamp(raw.get("confidence"), 0.8),
+                    kind=str(raw.get("kind") or "event").strip().lower()[:40] or "event",
+                )
+            )
+        relations: list[ExtractedRelation] = []
         for raw in (obj.get("relations") or [])[:MAX_RELATIONS]:
             if not isinstance(raw, dict):
                 continue
@@ -176,20 +257,38 @@ class Extraction:
             target = str(raw.get("target") or "").strip()
             if not (source and relation and target):
                 continue
-            try:
-                confidence = float(raw.get("confidence") or 0.8)
-            except (TypeError, ValueError):
-                confidence = 0.8
             relations.append(
-                {
-                    "source": source[:120],
-                    "relation": relation[:60],
-                    "target": target[:120],
-                    "confidence": max(0.0, min(1.0, confidence)),
-                    "kind": str(raw.get("kind") or "").strip().lower()[:40],
-                }
+                ExtractedRelation(
+                    source=source[:120],
+                    relation=relation[:60],
+                    target=target[:120],
+                    confidence=_clamp(raw.get("confidence"), 0.8),
+                    kind=str(raw.get("kind") or "").strip().lower()[:40],
+                )
             )
-        return cls(entities=entities, relations=relations)
+        mentions = tuple(
+            str(m).strip()
+            for m in (obj.get("mentions") or [])[:MAX_ENTITIES]
+            if str(m).strip()
+        )
+        return cls(
+            entities=tuple(entities),
+            events=tuple(events),
+            relations=tuple(relations),
+            mentions=mentions,
+            confidence=_clamp(obj.get("confidence"), 0.8),
+            kind=str(obj.get("kind") or "").strip().lower()[:40],
+            memory_id=memory_id,
+            extractor=extractor,
+            extractor_version=extractor_version,
+        )
+
+
+def _clamp(value: Any, default: float) -> float:
+    try:
+        return max(0.0, min(1.0, float(value)))
+    except (TypeError, ValueError):
+        return default
 
 
 Extractor = Callable[[Any], dict[str, Any]]
@@ -374,6 +473,7 @@ class GraphStore:
         "mentions.jsonl",
         "extracted.jsonl",
         "failed.jsonl",
+        "pending.jsonl",
     )
 
     def __init__(self, directory: Path | str) -> None:
@@ -435,6 +535,8 @@ class GraphStore:
         *,
         kind: str = "",
         relation_id: str = "",
+        extractor: str = "",
+        extractor_version: str = "",
     ) -> GraphRelation:
         if not relation_id:
             relation_id = f"R{self.index().max_relation_num + 1:04d}"
@@ -446,6 +548,8 @@ class GraphStore:
             memory_id=memory_id,
             confidence=max(0.0, min(1.0, float(confidence))),
             kind=kind,
+            extractor=extractor,
+            extractor_version=extractor_version,
         )
         self._append("relations.jsonl", item.to_dict())
         return item
@@ -457,6 +561,9 @@ class GraphStore:
         memory_id: str,
         confidence: float = 0.8,
         method: str = "extractor",
+        *,
+        extractor: str = "",
+        extractor_version: str = "",
     ) -> GraphAlias:
         item = GraphAlias(
             entity_id=entity_id,
@@ -464,6 +571,8 @@ class GraphStore:
             memory_id=memory_id,
             confidence=max(0.0, min(1.0, float(confidence))),
             method=method,
+            extractor=extractor,
+            extractor_version=extractor_version,
         )
         self._append("aliases.jsonl", item.to_dict())
         return item
@@ -498,6 +607,53 @@ class GraphStore:
             "failed.jsonl",
             {"memory_id": memory_id, "error": str(error)[:400], "extractor": extractor, "at": _now()},
         )
+
+    def mark_pending(
+        self, memory_id: str, error: str, *, extractor: str = "", attempts: int = 1
+    ) -> None:
+        self._append(
+            "pending.jsonl",
+            {
+                "memory_id": memory_id,
+                "error": str(error)[:400],
+                "extractor": extractor,
+                "attempts": max(1, int(attempts)),
+                "at": _now(),
+            },
+        )
+
+    def pending_rows(self, extractor: str = "") -> list[dict[str, Any]]:
+        """Latest pending row per memory id (the queue, not the history)."""
+        latest: dict[str, dict[str, Any]] = {}
+        for row in self._load("pending.jsonl"):
+            memory_id = str(row.get("memory_id") or "")
+            if not memory_id:
+                continue
+            if extractor and row.get("extractor") != extractor:
+                continue
+            latest[memory_id] = row
+        return list(latest.values())
+
+    def pending_attempts(self, memory_id: str, *, extractor: str = "") -> int:
+        for row in self.pending_rows(extractor):
+            if row.get("memory_id") == memory_id:
+                try:
+                    return int(row.get("attempts") or 0)
+                except (TypeError, ValueError):
+                    return 0
+        return 0
+
+    def drop_pending(self, memory_id: str) -> None:
+        """Remove a memory from the pending queue (operational, not history)."""
+        path = self._path("pending.jsonl")
+        if not path.exists():
+            return
+        keep = [
+            json.dumps(row, ensure_ascii=False)
+            for row in self._load("pending.jsonl")
+            if str(row.get("memory_id") or "") != memory_id
+        ]
+        path.write_text("\n".join(keep) + ("\n" if keep else ""), encoding="utf-8")
 
     # --------------------------------------------------------------- load
 
@@ -546,6 +702,7 @@ class GraphStore:
             "mentions": len(self.mentions()),
             "extracted": len(self.extracted_ids()),
             "failed": len(self.failed_rows()),
+            "pending": len(self.pending_rows()),
         }
 
     def exists(self) -> bool:
@@ -582,6 +739,294 @@ def _ensure_entity(
     return entity_id
 
 
+def _resolve_with_resolver(
+    store: GraphStore,
+    index: GraphIndex,
+    resolver: Any,
+    name: str,
+    entity_type: str,
+    record: Any,
+    *,
+    created: list[str],
+    extractor_name: str,
+    extractor_version: str,
+) -> str:
+    """Resolve/create one entity, honouring the resolver's confidence bands."""
+    resolution = None
+    if resolver is not None:
+        try:
+            resolution = resolver.resolve({"name": name, "type": entity_type})
+        except Exception:
+            resolution = None
+    if isinstance(resolution, str) and resolution:
+        return resolution
+    entity_id = str(getattr(resolution, "entity_id", "") or "") if resolution is not None else ""
+    if entity_id:
+        method = str(getattr(resolution, "method", "") or "")
+        confidence = float(getattr(resolution, "confidence", 0.8) or 0.8)
+        if method in {"alias", "embedding", "llm"}:
+            store.add_alias(
+                entity_id, name, record.id, confidence, method,
+                extractor=extractor_name, extractor_version=extractor_version,
+            )
+            index.alias_map.setdefault(normalize_name(name), entity_id)
+        return entity_id
+
+    entity_id = _ensure_entity(
+        store, index, name, entity_type, record.id, created=created
+    )
+    if resolution is not None and getattr(resolution, "hypothesis", False):
+        other_id = str(getattr(resolution, "other_id", "") or "")
+        if other_id:
+            relation = store.add_relation(
+                entity_id,
+                "possibly_same_as",
+                other_id,
+                record.id,
+                float(getattr(resolution, "confidence", 0.6) or 0.6),
+                kind="hypothesis",
+                extractor=extractor_name,
+                extractor_version=extractor_version,
+            )
+            index.add_relation(relation)
+    return entity_id
+
+
+def project_extraction(
+    store: GraphStore,
+    index: GraphIndex,
+    record: Any,
+    extraction: Extraction,
+    *,
+    tag: str,
+    resolver: Any = None,
+    extractor_name: str = "",
+    extractor_version: str = "",
+) -> dict[str, int]:
+    """Mutate the projection from a fully validated ``Extraction``.
+
+    The resolver maps semantic refs (``e1``/``ev1``) to ``E####``; the LLM
+    never chooses graph ids. Events become ``type=event`` entities with
+    ``agent``/``action``/``object`` edges, each relation carrying provenance.
+    """
+    if resolver is not None and hasattr(resolver, "bind"):
+        resolver.bind(index)
+
+    local: dict[str, str] = {}
+    refs: dict[str, str] = {}
+    mentioned: set[str] = set()
+    created: list[str] = []
+    relation_count = 0
+
+    for item in extraction.entities:
+        entity_id = _resolve_with_resolver(
+            store, index, resolver, item.name, item.type, record,
+            created=created, extractor_name=extractor_name,
+            extractor_version=extractor_version,
+        )
+        local[normalize_name(item.name)] = entity_id
+        refs.setdefault(item.ref, entity_id)
+        mentioned.add(entity_id)
+        for alias in item.aliases:
+            store.add_alias(
+                entity_id, alias, record.id, item.confidence, "extractor",
+                extractor=extractor_name, extractor_version=extractor_version,
+            )
+            index.alias_map.setdefault(normalize_name(alias), entity_id)
+
+    action_entities: dict[str, str] = {}
+
+    def resolve_endpoint(raw: str) -> str:
+        return refs.get(raw) or local.get(normalize_name(raw)) or index.resolve(raw)
+
+    for event in extraction.events:
+        event_entity = store.add_entity(
+            f"{event.action} ({record.id})", "event", record.id
+        )
+        index.add_entity(event_entity)
+        created.append(event_entity.id)
+        refs.setdefault(event.ref, event_entity.id)
+        mentioned.add(event_entity.id)
+
+        action_entity = action_entities.get(event.action)
+        if not action_entity:
+            action_entity = _ensure_entity(
+                store, index, event.action, "action", record.id, created=created
+            )
+            action_entities[event.action] = action_entity
+        mentioned.add(action_entity)
+
+        edges: list[tuple[str, str]] = [("action", action_entity)]
+        for role, ref in (("agent", event.agent), ("object", event.object)):
+            if not ref:
+                continue
+            target = resolve_endpoint(ref)
+            if not target:
+                target = _ensure_entity(
+                    store, index, ref, "unknown", record.id, created=created
+                )
+            edges.append((role, target))
+        for role, target in edges:
+            relation = store.add_relation(
+                event_entity.id, role, target, record.id, event.confidence,
+                kind="event", extractor=extractor_name,
+                extractor_version=extractor_version,
+            )
+            index.add_relation(relation)
+            mentioned.add(target)
+            relation_count += 1
+
+    for item in extraction.relations:
+        source = resolve_endpoint(item.source)
+        if not source:
+            source = _ensure_entity(
+                store, index, item.source, "unknown", record.id, created=created
+            )
+        target = resolve_endpoint(item.target)
+        if not target:
+            target = _ensure_entity(
+                store, index, item.target, "unknown", record.id, created=created
+            )
+        relation = store.add_relation(
+            source, item.relation, target, record.id, item.confidence,
+            kind=item.kind, extractor=extractor_name,
+            extractor_version=extractor_version,
+        )
+        index.add_relation(relation)
+        mentioned.add(source)
+        mentioned.add(target)
+        relation_count += 1
+
+    for raw in extraction.mentions:
+        entity_id = resolve_endpoint(raw)
+        if not entity_id:
+            entity_id = _ensure_entity(
+                store, index, raw, "unknown", record.id, created=created
+            )
+        mentioned.add(entity_id)
+
+    for entity_id in sorted(mentioned):
+        store.add_mention(record.id, entity_id)
+
+    return {
+        "entities": len(mentioned),
+        "relations": relation_count,
+        "created_entities": len(created),
+        "empty": int(not extraction.entities and not extraction.events and not extraction.relations),
+    }
+
+
+def _retry_or_fail(
+    store: GraphStore,
+    memory_id: str,
+    error: str,
+    *,
+    tag: str,
+    attempts: int,
+    max_attempts: int,
+) -> str:
+    """Apply the retry policy: transient stays pending, then becomes failed."""
+    next_attempts = attempts + 1
+    if next_attempts >= max(1, max_attempts):
+        store.mark_failed(memory_id, f"{error} (after {next_attempts} attempts)", extractor=tag)
+        store.drop_pending(memory_id)
+        return "failed"
+    store.mark_pending(memory_id, error, extractor=tag, attempts=next_attempts)
+    return "pending"
+
+
+def _write_meta(
+    store: GraphStore,
+    *,
+    tag: str,
+    extractor_name: str,
+    extractor_version: str,
+    extract_types: Iterable[str] | None = None,
+    last_memory_id: str = "",
+) -> dict[str, Any]:
+    counts = store.counts()
+    meta = {
+        "version": GRAPH_EXTRACTOR_VERSION,
+        "extractor": extractor_name,
+        "extractor_version": extractor_version,
+        "tag": tag,
+        "built_at": _now(),
+        "extract_types": sorted(extract_types) if extract_types else sorted(DURABLE_TYPES),
+        "counts": counts,
+        "last_memory_id": last_memory_id,
+    }
+    store.write_meta(meta)
+    return meta
+
+
+def apply_record_extraction(
+    store: GraphStore,
+    record: Any,
+    fn: Extractor,
+    *,
+    tag: str,
+    extractor_name: str = "",
+    extractor_version: str = "",
+    resolver: Any = None,
+    index: GraphIndex | None = None,
+    max_attempts: int = MAX_ATTEMPTS,
+) -> dict[str, Any]:
+    """Extract and project a single record with retry policy.
+
+    Expected failures (``ExtractionError``: schema, empty completion, API
+    timeout) follow the pending/failed policy; unexpected exceptions fail
+    immediately. The tape is never touched here.
+    """
+    if record.id in store.extracted_ids(tag):
+        return {
+            "ok": True,
+            "status": "skipped",
+            "entities": 0,
+            "relations": 0,
+            "created_entities": 0,
+            "empty": 0,
+        }
+    attempts = store.pending_attempts(record.id, extractor=tag)
+    try:
+        raw = fn(record)
+        extraction = (
+            raw
+            if isinstance(raw, Extraction)
+            else Extraction.from_obj(
+                raw,
+                memory_id=record.id,
+                extractor=extractor_name,
+                extractor_version=extractor_version,
+            )
+        )
+    except ExtractionError as exc:
+        status = _retry_or_fail(
+            store, record.id, str(exc), tag=tag, attempts=attempts,
+            max_attempts=max_attempts,
+        )
+        return {"ok": False, "status": status, "error": str(exc)}
+    except Exception as exc:  # unexpected: definitive
+        store.mark_failed(record.id, str(exc), extractor=tag)
+        store.drop_pending(record.id)
+        return {"ok": False, "status": "failed", "error": str(exc)}
+
+    idx = index if index is not None else store.index()
+    result = project_extraction(
+        store, idx, record, extraction, tag=tag, resolver=resolver,
+        extractor_name=extractor_name, extractor_version=extractor_version,
+    )
+    store.mark_extracted(record.id, result["entities"], result["relations"], extractor=tag)
+    store.drop_pending(record.id)
+    _write_meta(
+        store,
+        tag=tag,
+        extractor_name=extractor_name or "custom",
+        extractor_version=extractor_version,
+        last_memory_id=record.id,
+    )
+    return {"ok": True, "status": "extracted", **result}
+
+
 def build_graph(
     tape: Any,
     store: GraphStore,
@@ -591,13 +1036,14 @@ def build_graph(
     rebuild: bool = False,
     extractor_name: str = "",
     resolver: Any = None,
+    max_attempts: int = MAX_ATTEMPTS,
 ) -> dict[str, Any]:
     """Extract durable tape records into the graph store.
 
     ``tape`` is only read. ``rebuild`` clears the projection first. Records
     already extracted by the same extractor tag are skipped (idempotence);
-    extractor failures are recorded and retried on the next build. ``resolver``
-    is the F2 hook (``.resolve(spec) -> entity_id``); F1 resolves exact names.
+    extractor failures follow the pending/failed policy and are retried on the
+    next build. ``resolver`` maps semantic names to entity ids (F2).
     """
     spec = extractor if isinstance(extractor, ExtractorSpec) else ExtractorSpec(extractor)
     name = extractor_name or ("noop" if spec.fn is noop_extractor else "custom")
@@ -608,16 +1054,19 @@ def build_graph(
         store.clear()
     index = store.index()
     done = store.extracted_ids(tag)
+    if resolver is not None and hasattr(resolver, "bind"):
+        resolver.bind(index)
 
     stats: dict[str, Any] = {
         "considered": 0,
         "extracted": 0,
         "skipped": 0,
         "failed": 0,
+        "pending": 0,
         "empty": 0,
         "new_mentions": 0,
     }
-    created_entities: list[str] = []
+    created_entities = 0
 
     for record in tape.read():
         if record.type not in types or record.derived_from:
@@ -626,77 +1075,41 @@ def build_graph(
             stats["skipped"] += 1
             continue
         stats["considered"] += 1
-        try:
-            extraction = Extraction.from_obj(spec.fn(record))
-        except Exception as exc:  # extractor failures never stop the build
-            store.mark_failed(record.id, str(exc), extractor=tag)
-            stats["failed"] += 1
-            continue
-
-        local: dict[str, str] = {}
-        mentioned: set[str] = set()
-        for item in extraction.entities:
-            entity_id = index.resolve(item["name"])
-            if not entity_id and resolver is not None:
-                entity_id = str(resolver.resolve(item) or "")
-            if not entity_id:
-                entity_id = _ensure_entity(
-                    store, index, item["name"], item["type"], record.id,
-                    created=created_entities,
-                )
-                for alias in item["aliases"]:
-                    store.add_alias(entity_id, alias, record.id)
-                    index.alias_map.setdefault(normalize_name(alias), entity_id)
-            local[normalize_name(item["name"])] = entity_id
-            mentioned.add(entity_id)
-
-        for item in extraction.relations:
-            source = local.get(normalize_name(item["source"])) or index.resolve(item["source"])
-            if not source:
-                source = _ensure_entity(
-                    store, index, item["source"], "unknown", record.id,
-                    created=created_entities,
-                )
-            target = local.get(normalize_name(item["target"])) or index.resolve(item["target"])
-            if not target:
-                target = _ensure_entity(
-                    store, index, item["target"], "unknown", record.id,
-                    created=created_entities,
-                )
-            relation = store.add_relation(
-                source, item["relation"], target, record.id, item["confidence"],
-                kind=item["kind"],
-            )
-            index.add_relation(relation)
-            mentioned.add(source)
-            mentioned.add(target)
-
-        for entity_id in sorted(mentioned):
-            store.add_mention(record.id, entity_id)
-            stats["new_mentions"] += 1
-        if not extraction.entities and not extraction.relations:
-            stats["empty"] += 1
-        store.mark_extracted(
-            record.id, len(mentioned), len(extraction.relations), extractor=tag
+        outcome = apply_record_extraction(
+            store,
+            record,
+            spec.fn,
+            tag=tag,
+            extractor_name=name,
+            extractor_version=spec.version,
+            resolver=resolver,
+            index=index,
+            max_attempts=max_attempts,
         )
-        stats["extracted"] += 1
+        if outcome["status"] == "extracted":
+            stats["extracted"] += 1
+            created_entities += int(outcome.get("created_entities") or 0)
+            stats["new_mentions"] += int(outcome.get("entities") or 0)
+            if outcome.get("empty"):
+                stats["empty"] += 1
+        elif outcome["status"] == "pending":
+            stats["pending"] += 1
+        else:
+            stats["failed"] += 1
 
     counts = store.counts()
-    meta = {
-        "version": GRAPH_EXTRACTOR_VERSION,
-        "extractor": name,
-        "extractor_version": spec.version,
-        "tag": tag,
-        "built_at": _now(),
-        "extract_types": sorted(types),
-        "counts": counts,
-        "last_memory_id": str(getattr(tape.last(), "id", "") or ""),
-    }
-    store.write_meta(meta)
+    _write_meta(
+        store,
+        tag=tag,
+        extractor_name=name,
+        extractor_version=spec.version,
+        extract_types=types,
+        last_memory_id=str(getattr(tape.last(), "id", "") or ""),
+    )
     return {
         "ok": True,
         "extractor": tag,
-        "created_entities": len(created_entities),
+        "created_entities": created_entities,
         **stats,
         "counts": counts,
     }
@@ -723,9 +1136,12 @@ def graph_status(
         durable = [r.id for r in tape.read() if r.type in types and not r.derived_from]
         done = store.extracted_ids(extractor_tag) if extractor_tag else set()
         result["durable_records"] = len(durable)
-        result["pending"] = len([mid for mid in durable if mid not in done]) if extractor_tag else len(durable)
+        result["pending_records"] = (
+            len([mid for mid in durable if mid not in done]) if extractor_tag else len(durable)
+        )
         result["extractor_tag"] = extractor_tag
     result["failed"] = store.failed_rows()[-20:]
+    result["pending"] = store.pending_rows()[-20:]
     return result
 
 

@@ -723,6 +723,7 @@ class Machine:
         record, group, agent, created = add_memory(
             self.tape, self.manifest, record, model=self.config.model
         )
+        self._graph_after_append(record)
         if save:
             self.save()
             self._update_session_meta()
@@ -733,6 +734,50 @@ class Machine:
             "agent": agent.id,
             "new_agent": created,
         }
+
+    def _graph_after_append(self, record: MemoryRecord) -> None:
+        """Project a freshly appended durable memory into the graph (F2).
+
+        Runs strictly after the tape append: failures follow the pending/failed
+        policy and never propagate, so the tape is never rolled back. With
+        ``graph_enabled=false`` this is a no-op and the old path is untouched.
+        """
+        if not self.config.graph_enabled:
+            return
+        from .graph import GraphStore, apply_record_extraction, parse_types
+
+        if record.derived_from or record.type not in parse_types(
+            self.config.graph_extract_types
+        ):
+            return
+        try:
+            from .graph_extract import GraphExtractor
+            from .graph_resolve import GraphResolver
+
+            store = GraphStore(resolve_path(self.root, self.config.graph_path))
+            extractor = GraphExtractor(self._ensure_client())
+            resolver = GraphResolver(
+                embedder=self._embedder(),
+                auto=self.config.graph_confidence_auto,
+                hypothesis=self.config.graph_confidence_hypothesis,
+            )
+            apply_record_extraction(
+                store,
+                record,
+                extractor.extract,
+                tag=extractor.tag,
+                extractor_name=extractor.name,
+                extractor_version=extractor.version,
+                resolver=resolver,
+                max_attempts=self.config.graph_max_attempts,
+            )
+        except Exception as exc:
+            # The tape is already committed; surface the projection failure if
+            # possible and never propagate it to the caller.
+            try:
+                store.mark_failed(record.id, f"projection error: {exc}", extractor="graph")
+            except Exception:
+                pass
 
     def set_subject(self, subject: str, objective: str = "", *, save: bool = True) -> dict[str, Any]:
         self.whiteboard.subject = subject
@@ -859,6 +904,7 @@ class Machine:
             saved.append(rec.to_dict())
             if created:
                 new_agents += 1
+            self._graph_after_append(rec)
 
         # Memorize almost everything: record the turn itself on the tape (last).
         turn_record = MemoryRecord(
@@ -1191,6 +1237,7 @@ class Machine:
                 saved.append(rec.to_dict())
                 if created:
                     new_agents += 1
+                self._graph_after_append(rec)
             except SecretError:
                 skipped_secrets += 1
 

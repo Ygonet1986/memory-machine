@@ -59,6 +59,14 @@ class Config:
     evidence_payload: str = "off"
     evidence_payload_budget: int = 4000
     evidence_payload_min_item: int = 200
+    graph_enabled: bool = False
+    graph_path: str = "graph"
+    graph_extract_types: str = "decision,lesson,preference,bugfix,build"
+    graph_recall_mode: str = "off"
+    graph_depth: int = 2
+    graph_top_k: int = 8
+    graph_confidence_auto: float = 0.90
+    graph_confidence_hypothesis: float = 0.60
     coverage_mode: str = "off"
     cascade_min_score: float = 0.0
     cascade_expand_top_k: int = 5
@@ -140,6 +148,31 @@ class Config:
         )
         self.evidence_payload_budget = max(0, _int(self.evidence_payload_budget, 4000))
         self.evidence_payload_min_item = max(0, _int(self.evidence_payload_min_item, 200))
+        self.graph_enabled = bool(self.graph_enabled)
+        self.graph_path = (self.graph_path or "graph").strip() or "graph"
+        self.graph_extract_types = ",".join(
+            t.strip().lower()
+            for t in (self.graph_extract_types or "").split(",")
+            if t.strip()
+        )
+        self.graph_recall_mode = (
+            self.graph_recall_mode
+            if self.graph_recall_mode in {"off", "augment", "only"}
+            else "off"
+        )
+        self.graph_depth = max(1, min(4, _int(self.graph_depth, 2)))
+        self.graph_top_k = max(1, _int(self.graph_top_k, 8))
+        for name, default in (
+            ("graph_confidence_auto", 0.90),
+            ("graph_confidence_hypothesis", 0.60),
+        ):
+            try:
+                value = float(getattr(self, name))
+            except (TypeError, ValueError):
+                value = default
+            setattr(self, name, max(0.0, min(1.0, value)))
+        if self.graph_confidence_hypothesis > self.graph_confidence_auto:
+            self.graph_confidence_hypothesis = self.graph_confidence_auto
         self.coverage_mode = (
             self.coverage_mode if self.coverage_mode in {"off", "agents", "structural", "both", "judge", "judge_views", "views"} else "off"
         )

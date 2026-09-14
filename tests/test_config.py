@@ -32,3 +32,28 @@ def test_validate_flags_bad_base_url():
 def test_from_dict_ignores_unknown_keys():
     cfg = Config.from_dict({"capacity": 7, "bogus": 1})
     assert cfg.capacity == 7
+
+
+def test_graph_defaults_are_off_and_consistent():
+    cfg = Config()
+    assert cfg.graph_enabled is False
+    assert cfg.graph_recall_mode == "off"
+    assert cfg.graph_depth == 2
+    assert cfg.graph_confidence_hypothesis <= cfg.graph_confidence_auto
+
+
+def test_graph_config_clamps_and_normalizes():
+    cfg = Config(
+        graph_recall_mode="nope",
+        graph_depth=99,
+        graph_top_k=0,
+        graph_confidence_auto=0.5,
+        graph_confidence_hypothesis=0.9,
+        graph_extract_types=" Decision , ,Lesson ",
+    )
+    assert cfg.graph_recall_mode == "off"
+    assert cfg.graph_depth == 4
+    assert cfg.graph_top_k == 1
+    assert cfg.graph_confidence_auto == 0.5
+    assert cfg.graph_confidence_hypothesis == 0.5
+    assert cfg.graph_extract_types == "decision,lesson"

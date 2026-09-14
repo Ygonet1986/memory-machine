@@ -8,8 +8,9 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from .config import Config
+from .config import Config, resolve_path
 from .coordinator import Machine
+from .graph import EXTRACTORS, GraphStore, build_graph, explain_relation, graph_status
 from .llm import LLMError
 from .secrets import SecretError
 from .sessions import list_sessions, sessions_dir_for
@@ -74,6 +75,12 @@ def _build_parser() -> argparse.ArgumentParser:
 
     sub.add_parser("sessions", help="list sessions (JSON)")
     sub.add_parser("views", help="list memory views / projections (JSON)")
+
+    graph = sub.add_parser("graph", help="graph projection: build/status/explain (JSON)")
+    graph.add_argument("action", choices=["build", "status", "explain"])
+    graph.add_argument("target", nargs="?", default="", help="relation id for explain")
+    graph.add_argument("--rebuild", action="store_true", help="discard and rebuild from the tape")
+    graph.add_argument("--extractor", default="noop", choices=sorted(EXTRACTORS))
 
     roll = sub.add_parser("rollup", help="consolidate older tape records (JSON)")
     roll.add_argument("--keep-recent", type=int, default=20)
@@ -257,6 +264,37 @@ def cmd_views(args: argparse.Namespace) -> int:
     return _j({"ok": True, "views": list_views(m.tape)})
 
 
+def cmd_graph(args: argparse.Namespace) -> int:
+    m = _machine(args)
+    store = GraphStore(resolve_path(m.root, m.config.graph_path))
+    spec = EXTRACTORS.get(args.extractor)
+    if spec is None:
+        return _j({"ok": False, "error": f"unknown extractor: {args.extractor}"})
+    if args.action == "status":
+        return _j(
+            graph_status(
+                store,
+                m.tape,
+                extract_types=m.config.graph_extract_types,
+                extractor_tag=f"{args.extractor}/{spec.version}",
+            )
+        )
+    if args.action == "explain":
+        if not args.target:
+            return _j({"ok": False, "error": "explain needs a relation id"})
+        return _j(explain_relation(store, m.tape, args.target))
+    return _j(
+        build_graph(
+            m.tape,
+            store,
+            spec,
+            extract_types=m.config.graph_extract_types,
+            rebuild=args.rebuild,
+            extractor_name=args.extractor,
+        )
+    )
+
+
 def cmd_sessions(args: argparse.Namespace) -> int:
     root = Path(args.root).expanduser().resolve()
     sdir = sessions_dir_for(root)
@@ -348,6 +386,7 @@ def main(argv: list[str] | None = None) -> int:
         "delete": cmd_delete,
         "sessions": cmd_sessions,
         "views": cmd_views,
+        "graph": cmd_graph,
         "rollup": cmd_rollup,
         "rehydrate": cmd_rehydrate,
     }

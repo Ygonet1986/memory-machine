@@ -75,6 +75,36 @@ relation/target/confidence), "mentions" (refs), per-item confidence 0..1.
 fix, add, remove, change, before, after, belongs_to, part_of).
 - Entity types: person|object|place|organization|concept|event|action|unknown."""
 
+GRAPH_WINDOW_PROMPT = """You extract the DOCUMENT-LEVEL structure of a window: \
+several contiguous chunks of one document, shown in order with their memory ids \
+and character offsets. This is the unit where structure that only emerges from \
+seeing many pieces together becomes visible (long-range relations, topics, \
+internal references). The window text is the ONLY source: never invent facts, \
+entities or relations it does not support.
+
+Return ONLY a JSON object, nothing else:
+
+{{"entities":[{{"ref":"e1","name":"Evidence Delivery","type":"topic","confidence":0.9}},{{"ref":"e2","name":"chapter 4","type":"reference","confidence":0.7}}],"relations":[{{"source":"e1","relation":"influences","target":"e2","confidence":0.8,"evidence":[{{"memory_id":"M0042","span":[1800,2300]}},{{"memory_id":"M0171","span":[28400,29100]}}]}}]}}
+
+Rules:
+- refs are LOCAL to this answer (e1, e2, ev1, ...). NEVER use graph ids such \
+as E0001 or R0001.
+- "entities": reuse entity types for things already visible in the window; \
+add type "topic" for the global subjects a topic spans; add type "reference" \
+for internal chapter/section/header ids and clearly identifiable \
+citations/bibliography. Do not build richer ontologies.
+- "relations": edges that emerge ACROSS the window between entities/topics \
+(chapter/entity discusses topic, topic related_to topic, entity central_to \
+topic, entity interacts entity, ...). Use short canonical verbs when obvious.
+- "evidence": list the EXACT memory_ids (from the "### [M####]" headers) that \
+support THIS relation, with their character span when you have it. Never use a \
+memory_id that is not in the window. Omit "evidence" only when no specific \
+member supports it alone.
+- confidence is per item, 0.0-1.0; prefer lower values when the window is vague.
+- If the window adds nothing beyond the local view, return \
+{{"entities":[],"relations":[]}}."""
+
+
 _CANONICAL_RELATIONS = {
     "crossed": "cross",
     "crossing": "cross",
@@ -129,6 +159,7 @@ def parse_extraction(
     memory_id: str,
     extractor: str = EXTRACTOR_NAME,
     extractor_version: str = GRAPH_EXTRACTOR_VERSION,
+    scope: str = "",
 ) -> Extraction:
     """Strictly validate a raw extractor payload into a frozen ``Extraction``.
 
@@ -165,6 +196,7 @@ def parse_extraction(
             target=relation.target,
             confidence=relation.confidence,
             kind=relation.kind,
+            evidence=relation.evidence,
         )
         for relation in base.relations
     )
@@ -175,6 +207,7 @@ def parse_extraction(
         mentions=base.mentions,
         confidence=base.confidence,
         kind=base.kind,
+        scope=scope or base.scope,
         memory_id=memory_id,
         extractor=extractor,
         extractor_version=extractor_version,
@@ -284,3 +317,40 @@ class GraphExtractor:
             except ExtractionError:
                 continue  # per-record failure -> retried by the caller
         return out
+
+    # ----------------------------------------------------- window scope (D4)
+
+    def window_text(self, window: Any) -> str:
+        blocks = []
+        for member in window.members:
+            span = tuple(getattr(member, "source_span", ()) or ())
+            offsets = f" char {span[0]}-{span[1]}" if len(span) == 2 else ""
+            blocks.append(f"### [{getattr(member, 'id', '')}]{offsets}\n{self.memory_text(member)}")
+        return "\n\n".join(blocks)
+
+    def extract_window(self, window: Any) -> Extraction:
+        """One transport call over a window of chunk memories.
+
+        Uses ``complete_with_reasoning`` so reasoning models cannot silently
+        drop the JSON payload (see M0006): if ``content`` is empty the window
+        is transient-failed and retried by the caller.
+        """
+        messages = [
+            {"role": "system", "content": GRAPH_WINDOW_PROMPT},
+            {"role": "user", "content": self.window_text(window)},
+        ]
+        try:
+            content, _reasoning = self.client.complete_with_reasoning(
+                messages, temperature=self.temperature
+            )
+        except Exception as exc:  # API, transport, timeout
+            raise TransientExtractionError(f"llm error: {exc}") from exc
+        if not str(content or "").strip():
+            raise TransientExtractionError("empty completion")
+        return parse_extraction(
+            extract_json_object(content),
+            memory_id=str(getattr(window, "id", "") or ""),
+            extractor=self.name,
+            extractor_version=self.version,
+            scope="document",
+        )

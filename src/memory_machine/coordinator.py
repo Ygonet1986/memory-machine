@@ -1489,11 +1489,12 @@ class Machine:
         chunk_size: int | None = None,
         enable_graph: bool | None = None,
     ) -> dict[str, Any]:
-        """Ingest a .txt as tape memories + document registry + graph (D3).
+        """Ingest a .txt as tape memories + document registry + graph (D3/D4).
 
-        Commit order is strictly tape -> registry -> graph; the graph flag is
-        consulted only here (``--no-document-graph`` passes ``enable_graph=False``).
-        ``add_memory`` and ``ingest_attachment`` are untouched.
+        Commit order is strictly tape -> registry -> graph; the graph flags are
+        consulted only here (``document_graph_enabled``/``document_structure_level``,
+        ``--no-document-graph`` passes ``enable_graph=False``). ``add_memory``
+        and ``ingest_attachment`` are untouched.
         """
         from .graph import GraphStore
         from .graph_extract import GraphExtractor
@@ -1527,6 +1528,8 @@ class Machine:
             batch_size=self.config.graph_batch_size,
             batch_max_chars=self.config.graph_batch_max_chars,
             max_attempts=self.config.graph_max_attempts,
+            structure_level=self.config.document_structure_level,
+            window_chars=self.config.document_window_chars,
         )
         if result.get("ok") or result.get("skipped"):
             self.save()

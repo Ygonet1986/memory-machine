@@ -108,6 +108,7 @@ class GraphRecall:
         top_k: int = 8,
         max_paths: int = 400,
         max_paths_per_evidence: int = 3,
+        hub_degree: int = 0,
     ) -> None:
         self.index = index
         self.embedder = embedder
@@ -115,6 +116,23 @@ class GraphRecall:
         self.top_k = max(1, int(top_k))
         self.max_paths = max(1, int(max_paths))
         self.max_paths_per_evidence = max(1, int(max_paths_per_evidence))
+        self.hub_degree = max(0, int(hub_degree))
+        self._degrees: dict[str, int] | None = None
+
+    def _degree(self, entity_id: str) -> int:
+        """Non-resolution relation degree, computed once per recall."""
+        if self._degrees is None:
+            degrees: dict[str, int] = {}
+            for relation in self.index.relations.values():
+                if relation.kind in {"resolution", "hypothesis"}:
+                    continue
+                degrees[relation.source] = degrees.get(relation.source, 0) + 1
+                degrees[relation.target] = degrees.get(relation.target, 0) + 1
+            self._degrees = degrees
+        return self._degrees.get(entity_id, 0)
+
+    def _is_hub(self, entity_id: str) -> bool:
+        return self.hub_degree > 0 and self._degree(entity_id) > self.hub_degree
 
     # ------------------------------------------------------------ query side
 
@@ -194,6 +212,8 @@ class GraphRecall:
         paths: list[GraphPath] = []
         seen_paths: set[tuple[tuple[str, ...], tuple[str, ...]]] = set()
         for seed in seeds:
+            if self._is_hub(seed):
+                continue  # never expand from a stop-entity hub
             visited = {seed}
             queue: deque[tuple[str, list[str], list[str], float, int]] = deque(
                 [(seed, [seed], [], 1.0, 0)]
@@ -219,6 +239,8 @@ class GraphRecall:
                     paths.append(path)
                     if nxt in visited:
                         continue  # parallel edge: record it, do not re-expand
+                    if self._is_hub(nxt):
+                        continue  # record the edge into a hub, never expand from it
                     visited.add(nxt)
                     queue.append((nxt, next_nodes, next_relations, chain_confidence, semantic + 1))
                     if len(paths) >= self.max_paths:
@@ -308,6 +330,22 @@ class GraphRecall:
             result.paths_selected = sum(len(item.paths) for item in result.evidence)
         result.elapsed_ms = (time.perf_counter() - started) * 1000.0
         return result
+
+
+def guard_evidence(
+    evidence: list[GraphEvidence],
+    *,
+    min_score: float = 0.0,
+    max_items: int = 0,
+) -> list[GraphEvidence]:
+    """Admission control for augmented recall: score floor plus a small cap.
+
+    `max_items=0` disables the cap. Evidence arrives score-sorted, so the cap
+    keeps the strongest structural paths and the global budget then decides
+    how much room they actually get.
+    """
+    items = [item for item in evidence if item.score >= min_score]
+    return items[:max_items] if max_items > 0 else items
 
 
 def describe_evidence(

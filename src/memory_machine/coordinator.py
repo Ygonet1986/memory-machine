@@ -755,6 +755,7 @@ class Machine:
             embedder=self._embedder(),
             auto=self.config.graph_confidence_auto,
             hypothesis=self.config.graph_confidence_hypothesis,
+            max_candidates=self.config.graph_resolver_candidates,
         )
         return store, extractor, resolver
 
@@ -1097,9 +1098,13 @@ class Machine:
                 question, client, views=views, temperature=temperature, max_workers=max_workers
             )
             raw_annotations = run.annotations
-            if graph_mode == "augment":
-                graph_result = self._graph_recall(question)
-                graph_annotations = self._graph_annotations(graph_result)
+            if graph_mode in {"augment", "augment_guarded"}:
+                guarded = graph_mode == "augment_guarded"
+                graph_result = self._graph_recall(question, guard=guarded)
+                graph_annotations = self._graph_annotations(
+                    graph_result,
+                    weight=self.config.graph_augment_weight if guarded else 1.0,
+                )
                 raw_annotations = self._union_with_graph(
                     raw_annotations, graph_annotations
                 )
@@ -1199,13 +1204,17 @@ class Machine:
         if not self.config.graph_enabled:
             return "off"
         mode = self.config.graph_recall_mode
-        return mode if mode in {"augment", "only"} else "off"
+        return mode if mode in {"augment", "augment_guarded", "only"} else "off"
 
-    def _graph_recall(self, question: str) -> Any:
-        """Run graph-side recall; never raises, returns None when unavailable."""
+    def _graph_recall(self, question: str, *, guard: bool = False) -> Any:
+        """Run graph-side recall; never raises, returns None when unavailable.
+
+        With ``guard`` the evidence passes admission control (score floor and
+        a small cap) before it can compete for the single global budget.
+        """
         try:
             from .graph import GraphStore
-            from .graph_recall import GraphRecall
+            from .graph_recall import GraphRecall, guard_evidence
 
             store = GraphStore(resolve_path(self.root, self.config.graph_path))
             if not store.exists():
@@ -1215,16 +1224,29 @@ class Machine:
                 embedder=self._embedder(),
                 depth=self.config.graph_depth,
                 top_k=self.config.graph_top_k,
+                hub_degree=self.config.graph_hub_degree,
             )
-            return recall.recall(question)
+            result = recall.recall(question)
+            if guard:
+                result.evidence = guard_evidence(
+                    result.evidence,
+                    min_score=self.config.graph_augment_min_score,
+                    max_items=self.config.graph_augment_max_items,
+                )
+                result.paths_selected = sum(len(item.paths) for item in result.evidence)
+            return result
         except Exception:
             return None
 
-    def _graph_annotations(self, graph_result: Any) -> list[Annotation]:
+    def _graph_annotations(
+        self, graph_result: Any, *, weight: float = 1.0
+    ) -> list[Annotation]:
         """Turn graph evidence into annotations, rehydratable from the tape.
 
         Memories that are not active on the tape (orphan relations, archived
         records) are dropped: the graph selects, the tape supplies the facts.
+        ``weight`` ranks graph evidence below strong agent evidence when the
+        guarded mode asks for it (1.0 = neutral).
         """
         if graph_result is None:
             return []
@@ -1237,7 +1259,7 @@ class Machine:
                 Annotation(
                     memory_id=item.memory_id,
                     note=item.label or "graph evidence",
-                    relevance=max(0.05, float(item.score)),
+                    relevance=max(0.05, float(item.score) * max(0.0, weight)),
                     agent_id="graph",
                 )
             )

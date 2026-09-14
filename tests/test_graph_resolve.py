@@ -105,3 +105,50 @@ def test_embedding_failure_falls_back_to_new(tmp_path):
     resolver.bind(store.index())
     result = resolver.resolve({"name": "criatura"})
     assert result.entity_id == "" and result.method == "new"
+
+
+class CountingEmbedder:
+    def __init__(self, table):
+        self.table = table
+        self.calls = 0
+        self.texts = 0
+
+    def embed(self, texts):
+        self.calls += 1
+        self.texts += len(texts)
+        return [self.table.get(text, [0.0, 0.0]) for text in texts]
+
+
+def _cache_index(tmp_path):
+    store = GraphStore(tmp_path / "graph")
+    store.add_entity("petronante", "creature", "M0001", entity_id="E0001")
+    store.add_entity("rochedo", "place", "M0002", entity_id="E0002")
+    store.add_entity("kalak", "person", "M0003", entity_id="E0003")
+    return store.index()
+
+
+def test_vector_cache_removes_recomputation_without_changing_resolutions(tmp_path):
+    table = {
+        "criatura": [0.95, 0.31],
+        "criatura2": [0.9, 0.4],
+        "petronante creature": [1.0, 0.0],
+        "rochedo place": [0.0, 1.0],
+        "kalak person": [0.7, 0.7],
+    }
+    index = _cache_index(tmp_path)
+    cached = GraphResolver(embedder=CountingEmbedder(table))
+    cached.bind(index)
+    first = cached.resolve({"name": "criatura"})
+    texts_after_first = cached.embedder.texts
+    second = cached.resolve({"name": "criatura2"})
+
+    fresh = GraphResolver(embedder=CountingEmbedder(table))
+    fresh.bind(index)
+    first_fresh = fresh.resolve({"name": "criatura"})
+
+    assert (first.entity_id, first.method) == (first_fresh.entity_id, first_fresh.method)
+    # first resolution embeds the query + all candidate docs; the second only
+    # needs the query because the docs are cached
+    assert texts_after_first == 1 + 3
+    assert cached.embedder.texts - texts_after_first == 1
+    assert second.method in {"exact", "alias", "embedding", "hypothesis", "new"}

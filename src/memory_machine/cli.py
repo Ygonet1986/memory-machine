@@ -307,39 +307,8 @@ def cmd_views(args: argparse.Namespace) -> int:
     return _j({"ok": True, "views": list_views(m.tape)})
 
 
-def _resolve_entity(index: Any, raw: str) -> str:
-    text = str(raw or "").strip()
-    if not text:
-        return ""
-    upper = text.upper()
-    if upper in index.entities:
-        return upper
-    return index.resolve(text)
-
-
-def _relation_detail(index: Any, relation_id: str) -> dict[str, Any] | None:
-    relation = index.relations.get(relation_id)
-    if relation is None:
-        return None
-    source = index.entities.get(relation.source)
-    target = index.entities.get(relation.target)
-    return {
-        "id": relation.id,
-        "relation": relation.relation,
-        "source": relation.source,
-        "source_name": source.name if source else relation.source,
-        "target": relation.target,
-        "target_name": target.name if target else relation.target,
-        "memory_id": relation.memory_id,
-        "confidence": relation.confidence,
-        "kind": relation.kind,
-        "extractor": relation.extractor,
-        "extractor_version": relation.extractor_version,
-    }
-
-
 def _graph_read(store: GraphStore, machine: Machine, args: argparse.Namespace) -> dict[str, Any]:
-    from .graph_recall import GraphRecall
+    from .graph_recall import graph_path_payload, graph_query_payload
 
     try:
         index = store.index()
@@ -349,57 +318,13 @@ def _graph_read(store: GraphStore, machine: Machine, args: argparse.Namespace) -
         return {"ok": False, "error": "graph is empty (run graph build first)"}
     depth = args.depth or machine.config.graph_depth
     top_k = args.top_k or machine.config.graph_top_k
-    recall = GraphRecall(index, embedder=machine._embedder(), depth=depth, top_k=top_k)
-
     if args.action == "query":
         if not args.target:
             return {"ok": False, "error": "query needs a question or entity name"}
-        result = recall.recall(args.target)
-        payload = result.to_dict()
-        payload["ok"] = True
-        payload["entities"] = [
-            {"id": eid, "name": index.entities[eid].name, "type": index.entities[eid].type}
-            for eid in result.seeds
-            if eid in index.entities
-        ]
-        for item in payload["evidence"]:
-            item["path_details"] = [
-                detail
-                for path in item.get("paths", [])
-                for detail in [_relation_detail(index, rid) for rid in path.get("relations", [])]
-                if detail
-            ]
-        return payload
-
-    source = _resolve_entity(index, args.target)
-    target = _resolve_entity(index, args.target_b)
-    if not source or not target:
-        return {
-            "ok": False,
-            "error": f"unknown entity: {args.target!r} / {args.target_b!r}",
-        }
-    trails = index.paths(source, target, max_depth=depth, limit=top_k)
-    paths: list[dict[str, Any]] = []
-    memories: list[str] = []
-    for trail in trails:
-        details = [d for d in (_relation_detail(index, r.id) for r in trail) if d]
-        for detail in details:
-            if detail["memory_id"] and detail["memory_id"] not in memories:
-                memories.append(detail["memory_id"])
-        paths.append(
-            {
-                "nodes": [source] + [relation.target for relation in trail],
-                "relations": [relation.id for relation in trail],
-                "detail": details,
-            }
+        return graph_query_payload(
+            index, args.target, depth=depth, top_k=top_k, embedder=machine._embedder()
         )
-    return {
-        "ok": True,
-        "source": {"id": source, "name": index.entities[source].name},
-        "target": {"id": target, "name": index.entities[target].name},
-        "paths": paths,
-        "evidence": memories,
-    }
+    return graph_path_payload(index, args.target, args.target_b, depth=depth, top_k=top_k)
 
 
 def cmd_graph(args: argparse.Namespace) -> int:

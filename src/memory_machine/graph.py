@@ -36,7 +36,7 @@ from pathlib import Path
 from typing import Any, Callable, Iterable
 
 GRAPH_EXTRACTOR_VERSION = "v1"
-GRAPH_SCHEMA_VERSION = 2
+GRAPH_SCHEMA_VERSION = 3
 GRAPH_RESOLVER_VERSION = "1.0"
 
 # Epistemological/resolution edges are metadata, not domain knowledge: recall
@@ -134,6 +134,7 @@ class GraphEntity:
     created_at: str = ""
     source_document: str = ""
     source_span: tuple[int, int] = ()
+    extraction_scope: str = ""
 
     def to_dict(self) -> dict[str, Any]:
         d: dict[str, Any] = {
@@ -147,6 +148,8 @@ class GraphEntity:
             d["source_document"] = self.source_document
         if self.source_span:
             d["source_span"] = [self.source_span[0], self.source_span[1]]
+        if self.extraction_scope:
+            d["extraction_scope"] = self.extraction_scope
         return d
 
     @classmethod
@@ -159,6 +162,7 @@ class GraphEntity:
             created_at=str(data.get("created_at") or ""),
             source_document=str(data.get("source_document") or ""),
             source_span=_parse_span(data.get("source_span")),
+            extraction_scope=str(data.get("extraction_scope") or ""),
         )
 
 
@@ -176,6 +180,7 @@ class GraphRelation:
     source_document: str = ""
     source_span: tuple[int, int] = ()
     evidence: tuple[dict[str, Any], ...] = ()
+    extraction_scope: str = ""
 
     def to_dict(self) -> dict[str, Any]:
         d: dict[str, Any] = {
@@ -195,6 +200,8 @@ class GraphRelation:
             d["source_span"] = [self.source_span[0], self.source_span[1]]
         if self.evidence:
             d["evidence"] = [dict(ev) for ev in self.evidence]
+        if self.extraction_scope:
+            d["extraction_scope"] = self.extraction_scope
         return d
 
     @classmethod
@@ -216,6 +223,7 @@ class GraphRelation:
             source_document=str(data.get("source_document") or ""),
             source_span=_parse_span(data.get("source_span")),
             evidence=_parse_evidence(data.get("evidence")),
+            extraction_scope=str(data.get("extraction_scope") or ""),
         )
 
 
@@ -240,6 +248,7 @@ class GraphMention:
     confidence: float = 0.8
     source_document: str = ""
     span: tuple[int, int] = ()
+    extraction_scope: str = ""
 
     def to_dict(self) -> dict[str, Any]:
         d: dict[str, Any] = {
@@ -251,6 +260,8 @@ class GraphMention:
             d["source_document"] = self.source_document
         if self.span:
             d["span"] = [self.span[0], self.span[1]]
+        if self.extraction_scope:
+            d["extraction_scope"] = self.extraction_scope
         return d
 
     @classmethod
@@ -261,6 +272,7 @@ class GraphMention:
             confidence=_clamp(data.get("confidence"), 0.8),
             source_document=str(data.get("source_document") or ""),
             span=_parse_span(data.get("span")),
+            extraction_scope=str(data.get("extraction_scope") or ""),
         )
 
 
@@ -341,6 +353,7 @@ class ExtractedRelation:
     target: str
     confidence: float = 0.8
     kind: str = ""
+    evidence: tuple[dict[str, Any], ...] = ()
 
 
 @dataclass(frozen=True)
@@ -357,6 +370,7 @@ class Extraction:
     mentions: tuple[str, ...] = ()
     confidence: float = 0.8
     kind: str = ""
+    scope: str = ""
     memory_id: str = ""
     extractor: str = ""
     extractor_version: str = ""
@@ -369,6 +383,7 @@ class Extraction:
         memory_id: str = "",
         extractor: str = "",
         extractor_version: str = "",
+        scope: str = "",
     ) -> "Extraction":
         """Lenient validation of an extractor payload (invalid items dropped)."""
         if not isinstance(obj, dict):
@@ -427,6 +442,7 @@ class Extraction:
                     target=target[:120],
                     confidence=_clamp(raw.get("confidence"), 0.8),
                     kind=str(raw.get("kind") or "").strip().lower()[:40],
+                    evidence=_parse_evidence(raw.get("evidence")),
                 )
             )
         mentions = tuple(
@@ -441,6 +457,7 @@ class Extraction:
             mentions=mentions,
             confidence=_clamp(obj.get("confidence"), 0.8),
             kind=str(obj.get("kind") or "").strip().lower()[:40],
+            scope=str(obj.get("scope") or scope or "").strip().lower()[:20],
             memory_id=memory_id,
             extractor=extractor,
             extractor_version=extractor_version,
@@ -758,6 +775,7 @@ class GraphStore:
         entity_id: str = "",
         source_document: str = "",
         source_span: tuple[int, int] = (),
+        extraction_scope: str = "",
     ) -> GraphEntity:
         if not entity_id:
             entity_id = f"E{self.index().max_entity_num + 1:04d}"
@@ -769,6 +787,7 @@ class GraphStore:
             created_at=_now(),
             source_document=source_document or "",
             source_span=(int(source_span[0]), int(source_span[1])) if source_span else (),
+            extraction_scope=extraction_scope or "",
         )
         self._append("entities.jsonl", entity.to_dict())
         return entity
@@ -788,6 +807,7 @@ class GraphStore:
         source_document: str = "",
         source_span: tuple[int, int] = (),
         evidence: Iterable[dict[str, Any]] = (),
+        extraction_scope: str = "",
     ) -> GraphRelation:
         if not relation_id:
             relation_id = f"R{self.index().max_relation_num + 1:04d}"
@@ -806,6 +826,7 @@ class GraphStore:
             evidence=tuple(
                 ev for ev in (_parse_evidence(list(evidence)) if evidence else ())
             ),
+            extraction_scope=extraction_scope or "",
         )
         self._append("relations.jsonl", item.to_dict())
         return item
@@ -841,6 +862,7 @@ class GraphStore:
         *,
         source_document: str = "",
         span: tuple[int, int] = (),
+        extraction_scope: str = "",
     ) -> GraphMention:
         mention = GraphMention(
             memory_id=memory_id,
@@ -848,6 +870,7 @@ class GraphStore:
             confidence=max(0.0, min(1.0, float(confidence))),
             source_document=source_document or "",
             span=(int(span[0]), int(span[1])) if span else (),
+            extraction_scope=extraction_scope or "",
         )
         self._append("mentions.jsonl", mention.to_dict())
         return mention
@@ -1240,6 +1263,7 @@ def _ensure_entity(
     created: list[str],
     source_document: str = "",
     source_span: tuple[int, int] = (),
+    extraction_scope: str = "",
 ) -> str:
     entity_id = index.resolve(name)
     if entity_id:
@@ -1249,6 +1273,7 @@ def _ensure_entity(
         name, entity_type, memory_id, entity_id=entity_id,
         source_document=source_document or "",
         source_span=source_span or (),
+        extraction_scope=extraction_scope,
     )
     index.add_entity(entity)
     created.append(entity_id)
@@ -1268,6 +1293,7 @@ def _resolve_with_resolver(
     extractor_version: str,
     resolver_version: str = "",
     resolution: Any = None,
+    extraction_scope: str = "",
 ) -> str:
     """Resolve/create one entity, honouring the resolver's confidence bands.
 
@@ -1298,6 +1324,7 @@ def _resolve_with_resolver(
         store, index, name, entity_type, record.id, created=created,
         source_document=str(getattr(record, "source_document", "") or ""),
         source_span=tuple(getattr(record, "source_span", ()) or ()),
+        extraction_scope=extraction_scope,
     )
     if resolution is not None and getattr(resolution, "hypothesis", False):
         other_id = str(getattr(resolution, "other_id", "") or "")
@@ -1341,12 +1368,22 @@ def project_extraction(
     extractor_name: str = "",
     extractor_version: str = "",
     resolver_version: str = "",
+    scope: str = "",
+    emit_mentions: bool = True,
 ) -> dict[str, int]:
     """Mutate the projection from a fully validated ``Extraction``.
 
     The resolver maps semantic refs (``e1``/``ev1``) to ``E####``; the LLM
     never chooses graph ids. Events become ``type=event`` entities with
     ``agent``/``action``/``object`` edges, each relation carrying provenance.
+
+    ``scope``/``emit_mentions`` are window-scope knobs: ``scope`` is an *audit*
+    marker (``chunk``/``document``) that never affects resolution or confidence;
+    ``emit_mentions=False`` skips the member-mention loop for window passes
+    (mentions stay a chunk-level, memory-keyed provenance). Relation evidence is
+    taken from ``ExtractedRelation.evidence`` when present (long-range window
+    relations reference every supporting member); otherwise it falls back to
+    the record's own ``source_document``/``source_span``.
     """
     if resolver is not None and hasattr(resolver, "bind"):
         resolver.bind(index)
@@ -1363,10 +1400,10 @@ def project_extraction(
     # byte-identical.
     doc = str(getattr(record, "source_document", "") or "")
     span = tuple(getattr(record, "source_span", ()) or ())
-    relation_evidence: tuple[dict[str, Any], ...] = ()
+    record_evidence: tuple[dict[str, Any], ...] = ()
     if doc:
         memory_id = str(getattr(record, "id", "") or "")
-        relation_evidence = (
+        record_evidence = (
             ({"memory_id": memory_id, "span": [span[0], span[1]]},) if len(span) == 2
             else ({"memory_id": memory_id},)
         )
@@ -1387,6 +1424,7 @@ def project_extraction(
             extractor_version=extractor_version,
             resolver_version=resolver_version,
             resolution=precomputed[position] if precomputed is not None else None,
+            extraction_scope=scope,
         )
         local[normalize_name(item.name)] = entity_id
         refs.setdefault(item.ref, entity_id)
@@ -1407,6 +1445,7 @@ def project_extraction(
         event_entity = store.add_entity(
             f"{event.action} ({record.id})", "event", record.id,
             source_document=doc, source_span=span,
+            extraction_scope=scope,
         )
         index.add_entity(event_entity)
         created.append(event_entity.id)
@@ -1418,6 +1457,7 @@ def project_extraction(
             action_entity = _ensure_entity(
                 store, index, event.action, "action", record.id, created=created,
                 source_document=doc, source_span=span,
+                extraction_scope=scope,
             )
             action_entities[event.action] = action_entity
         mentioned.add(action_entity)
@@ -1431,6 +1471,7 @@ def project_extraction(
                 target = _ensure_entity(
                     store, index, ref, "unknown", record.id, created=created,
                     source_document=doc, source_span=span,
+                    extraction_scope=scope,
                 )
             edges.append((role, target))
         for role, target in edges:
@@ -1439,7 +1480,8 @@ def project_extraction(
                 kind="event", extractor=extractor_name,
                 extractor_version=extractor_version,
                 source_document=doc, source_span=span,
-                evidence=relation_evidence,
+                evidence=record_evidence,
+                extraction_scope=scope,
             )
             index.add_relation(relation)
             mentioned.add(target)
@@ -1451,19 +1493,22 @@ def project_extraction(
             source = _ensure_entity(
                 store, index, item.source, "unknown", record.id, created=created,
                 source_document=doc, source_span=span,
+                extraction_scope=scope,
             )
         target = resolve_endpoint(item.target)
         if not target:
             target = _ensure_entity(
                 store, index, item.target, "unknown", record.id, created=created,
                 source_document=doc, source_span=span,
+                extraction_scope=scope,
             )
         relation = store.add_relation(
             source, item.relation, target, record.id, item.confidence,
             kind=item.kind, extractor=extractor_name,
             extractor_version=extractor_version,
             source_document=doc, source_span=span,
-            evidence=relation_evidence,
+            evidence=tuple(item.evidence) if item.evidence else record_evidence,
+            extraction_scope=scope,
         )
         index.add_relation(relation)
         mentioned.add(source)
@@ -1476,11 +1521,16 @@ def project_extraction(
             entity_id = _ensure_entity(
                 store, index, raw, "unknown", record.id, created=created,
                 source_document=doc, source_span=span,
+                extraction_scope=scope,
             )
         mentioned.add(entity_id)
 
-    for entity_id in sorted(mentioned):
-        store.add_mention(record.id, entity_id, source_document=doc, span=span)
+    if emit_mentions:
+        for entity_id in sorted(mentioned):
+            store.add_mention(
+                record.id, entity_id, source_document=doc, span=span,
+                extraction_scope=scope,
+            )
 
     return {
         "entities": len(mentioned),
@@ -1549,12 +1599,13 @@ def _apply_validated(
     extractor_version: str,
     resolver: Any,
     resolver_version: str,
+    scope: str = "",
 ) -> dict[str, Any]:
     """Project one validated extraction, mark it and refresh meta."""
     result = project_extraction(
         store, index, record, extraction, tag=tag, resolver=resolver,
         extractor_name=extractor_name, extractor_version=extractor_version,
-        resolver_version=resolver_version,
+        resolver_version=resolver_version, scope=scope,
     )
     store.mark_extracted(
         record.id, result["entities"], result["relations"], extractor=tag
@@ -1583,6 +1634,7 @@ def apply_record_extraction(
     resolver_version: str = GRAPH_RESOLVER_VERSION,
     index: GraphIndex | None = None,
     max_attempts: int = MAX_ATTEMPTS,
+    scope: str = "",
 ) -> dict[str, Any]:
     """Extract and project a single record with retry policy.
 
@@ -1627,7 +1679,7 @@ def apply_record_extraction(
     return _apply_validated(
         store, idx, record, extraction, tag=tag, extractor_name=extractor_name,
         extractor_version=extractor_version, resolver=resolver,
-        resolver_version=resolver_version,
+        resolver_version=resolver_version, scope=scope,
     )
 
 
@@ -1643,6 +1695,7 @@ def apply_batch_extraction(
     resolver_version: str = GRAPH_RESOLVER_VERSION,
     index: GraphIndex | None = None,
     max_attempts: int = MAX_ATTEMPTS,
+    scope: str = "",
 ) -> dict[str, Any]:
     """One transport call for many records; one idempotency unit each.
 
@@ -1718,7 +1771,7 @@ def apply_batch_extraction(
         outcome = _apply_validated(
             store, idx, record, extraction, tag=tag, extractor_name=extractor_name,
             extractor_version=extractor_version, resolver=resolver,
-            resolver_version=resolver_version,
+            resolver_version=resolver_version, scope=scope,
         )
         applied += 1
         created_entities += int(outcome.get("created_entities") or 0)
@@ -1729,6 +1782,178 @@ def apply_batch_extraction(
         "pending": pending, "failed": failed,
         "created_entities": created_entities, "empty": empty,
         "new_mentions": mentions,
+    }
+
+
+# ----------------------------------------------------------- window scope (D4)
+
+
+@dataclass(frozen=True)
+class WindowRecord:
+    """One document-level extraction unit: the window and its member chunks.
+
+    ``id`` is the stable idempotency key (``D####|wNN``) used for the
+    pending/failed/retry and ``extracted.jsonl`` bookkeeping; ``members`` are
+    the chunk ``MemoryRecord``s that compose the window, in source order.
+    """
+
+    id: str
+    members: tuple[Any, ...] = ()
+    source_document: str = ""
+    source_span: tuple[int, int] = ()
+
+
+def _resolve_window_evidence(
+    extraction: Extraction, window: WindowRecord
+) -> Extraction:
+    """Normalize relation evidence to the window's REAL memory members.
+
+    Guard (D4): the model must never carry evidence outside the window — even
+    if it cites something plausible. Any ``memory_id`` not in ``window.members``
+    is dropped. A relation left without any valid evidence (or the extractor
+    omitting evidence) conservatively carries ALL members ``{memory_id, span}``,
+    so a long-range relation always lists every supporting span.
+    """
+    member_spans: dict[str, tuple[int, int]] = {}
+    for member in window.members:
+        mid = str(getattr(member, "id", "") or "")
+        span = tuple(getattr(member, "source_span", ()) or ())
+        if mid and len(span) == 2:
+            member_spans[mid] = (int(span[0]), int(span[1]))
+    default_evidence = tuple(
+        {"memory_id": mid, "span": [span[0], span[1]]}
+        for mid, span in member_spans.items()
+    )
+
+    relations: list[ExtractedRelation] = []
+    for relation in extraction.relations:
+        evidence: list[dict[str, Any]] = []
+        for ev in relation.evidence:
+            mid = str(ev.get("memory_id") or "")
+            if mid not in member_spans:
+                continue  # never project evidence outside the window
+            span = ev.get("span")
+            if not (isinstance(span, (list, tuple)) and len(span) == 2):
+                span = member_spans[mid]
+            evidence.append(
+                {"memory_id": mid, "span": [int(span[0]), int(span[1])]}
+            )
+        relations.append(
+            ExtractedRelation(
+                relation.source,
+                relation.relation,
+                relation.target,
+                relation.confidence,
+                relation.kind,
+                tuple(evidence) if evidence else default_evidence,
+            )
+        )
+    return Extraction(
+        entities=extraction.entities,
+        events=extraction.events,
+        relations=tuple(relations),
+        mentions=extraction.mentions,
+        confidence=extraction.confidence,
+        kind=extraction.kind,
+        scope=extraction.scope,
+        memory_id=extraction.memory_id,
+        extractor=extraction.extractor,
+        extractor_version=extraction.extractor_version,
+    )
+
+
+def apply_window_extraction(
+    store: GraphStore,
+    window: WindowRecord,
+    fn: Callable[[WindowRecord], Any],
+    *,
+    tag: str,
+    extractor_name: str = "",
+    extractor_version: str = "",
+    resolver: Any = None,
+    resolver_version: str = GRAPH_RESOLVER_VERSION,
+    index: GraphIndex | None = None,
+    max_attempts: int = MAX_ATTEMPTS,
+    scope: str = "document",
+) -> dict[str, Any]:
+    """Project one document-level window with the pending/failed/retry policy.
+
+    The window is a single idempotency unit (``extracted.jsonl`` keyed by
+    ``window.id``). Validation happens before any mutation; evidence is
+    re-anchored to the window's real members; the projection is strictly
+    additive (``scope="document"``, no mentions) and never touches chunk rows
+    or the tape.
+    """
+    def skipped() -> dict[str, Any]:
+        return {
+            "ok": True, "status": "skipped", "applied": 0,
+            "pending": 0, "failed": 0, "created_entities": 0,
+            "empty": 0, "new_mentions": 0,
+        }
+
+    if window.id in store.extracted_ids(tag):
+        return skipped()
+    attempts = store.pending_attempts(window.id, extractor=tag)
+
+    def failed_outcome(status: str, error: str) -> dict[str, Any]:
+        return {
+            "ok": False, "status": status, "error": error,
+            "applied": 0, "pending": int(status == "pending"),
+            "failed": int(status == "failed"), "created_entities": 0,
+            "empty": 0, "new_mentions": 0,
+        }
+
+    try:
+        raw = fn(window)
+    except ExtractionError as exc:
+        status = _retry_or_fail(
+            store, window.id, str(exc), tag=tag, attempts=attempts,
+            max_attempts=max_attempts,
+        )
+        return failed_outcome(status, str(exc))
+    except Exception as exc:  # unexpected: definitive
+        store.mark_failed(window.id, str(exc), extractor=tag)
+        store.drop_pending(window.id)
+        return failed_outcome("failed", str(exc))
+
+    try:
+        extraction = (
+            raw
+            if isinstance(raw, Extraction)
+            else Extraction.from_obj(
+                raw,
+                memory_id=window.id,
+                extractor=extractor_name,
+                extractor_version=extractor_version,
+                scope=scope,
+            )
+        )
+        extraction = _resolve_window_evidence(extraction, window)
+    except Exception as exc:  # malformed payload: definitive
+        store.mark_failed(window.id, str(exc), extractor=tag)
+        store.drop_pending(window.id)
+        return failed_outcome("failed", str(exc))
+
+    idx = index if index is not None else store.index()
+    result = project_extraction(
+        store, idx, window, extraction, tag=tag, resolver=resolver,
+        extractor_name=extractor_name, extractor_version=extractor_version,
+        resolver_version=resolver_version, scope=scope, emit_mentions=False,
+    )
+    store.mark_extracted(window.id, result["entities"], result["relations"], extractor=tag)
+    store.drop_pending(window.id)
+    _write_meta(
+        store,
+        tag=tag,
+        extractor_name=extractor_name or "custom",
+        extractor_version=extractor_version,
+        resolver_version=resolver_version,
+        last_memory_id=window.id,
+    )
+    return {
+        "ok": True, "status": "extracted", "applied": 1, "pending": 0,
+        "failed": 0, "created_entities": result["created_entities"],
+        "empty": result["empty"], "new_mentions": 0,
     }
 
 

@@ -80,6 +80,8 @@ class Config:
     graph_augment_question_min_cov: float = 0.30
     graph_resolver_candidates: int = 10
     document_graph_enabled: bool = True
+    document_structure_level: str = "chunk"
+    document_window_chars: int = 12000
     coverage_mode: str = "off"
     cascade_min_score: float = 0.0
     cascade_expand_top_k: int = 5
@@ -195,6 +197,13 @@ class Config:
         self.graph_augment_max_items = max(0, _int(self.graph_augment_max_items, 3))
         self.graph_augment_question_gate = bool(self.graph_augment_question_gate)
         self.graph_resolver_candidates = max(1, _int(self.graph_resolver_candidates, 10))
+        self.document_graph_enabled = bool(self.document_graph_enabled)
+        self.document_structure_level = (
+            self.document_structure_level
+            if self.document_structure_level in {"chunk", "document", "both"}
+            else "chunk"
+        )
+        self.document_window_chars = max(1, _int(self.document_window_chars, 12000))
         for name, default in (
             ("graph_augment_min_score", 0.80),
             ("graph_augment_weight", 1.0),

@@ -251,8 +251,8 @@ def test_meta_declares_schema_extractor_resolver_and_source(tmp_path):
     build_graph(tape, store, spec, extractor_name="llm")
 
     meta = store.meta()
-    assert meta["schema_version"] == 2
-    assert meta["version"] == 2
+    assert meta["schema_version"] == 3
+    assert meta["version"] == 3
     assert meta["extractor"] == "llm"
     assert meta["extractor_version"] == "v1"
     assert meta["resolver_version"] == "1.0"

@@ -1,4 +1,4 @@
-"""Document ingestion: tape -> registry -> graph (Graph Memory Machine, D3).
+"""Document ingestion: tape -> registry -> graph (Graph Memory Machine, D3/D4).
 
 Commit order is strict and never reversed::
 
@@ -8,15 +8,21 @@ Commit order is strict and never reversed::
      ↓
     Document registry confirmed (``D####`` in ``documents.jsonl``)
      ↓
-    Graph extraction (chunk-level, provenance on every generated row)
+    Graph extraction, governed by ``document_structure_level``:
+        chunk     - local view (one extraction per chunk memory)
+        document  - window view (structure only visible across many chunks)
+        both      - chunk then document
 
 The extractor runs last and its failures never undo or block the tape: it
-reuses the pending/failed/retry policy of ``graph.apply_record_extraction`` /
-``apply_batch_extraction``. When ``enable_graph`` is false (``--no-document-graph``)
-the document is ingested into the tape only: no registry, no extraction.
+reuses the pending/failed/retry policy of the ``graph`` module. Document-level
+projections are strictly additive: they never overwrite chunk rows and every
+relation carries its supporting window evidence. When ``enable_graph`` is false
+(``--no-document-graph``) the document is ingested into the tape only: no
+registry, no extraction of any scope.
 
 ``Machine.add_memory`` and ``ingest_attachment`` are intentionally untouched;
-this path is the only place ``document_graph_enabled`` is consulted.
+this path is the only place ``document_graph_enabled``/``document_structure_level``
+are consulted.
 """
 
 from __future__ import annotations
@@ -27,9 +33,11 @@ from typing import Any
 from .attachments import _file_hash
 from .graph import (
     GraphStore,
+    WindowRecord,
     _chunk_records,
     apply_batch_extraction,
     apply_record_extraction,
+    apply_window_extraction,
 )
 from .groups import Manifest, add_memory
 from .retrieval import chunk_spans
@@ -38,6 +46,7 @@ from .tape import MemoryRecord, Tape
 
 DEFAULT_CHUNK_SIZE = 600
 DEFAULT_CHUNK_OVERLAP = 100
+WINDOW_SCOPE_TAG = "document"
 
 
 def _file_spans(path: Path, chunk_size: int, overlap: int) -> tuple[str, list[tuple[int, int]]]:
@@ -86,15 +95,12 @@ def _run_extraction(
     *,
     extractor_name: str,
     extractor_version: str,
+    scope: str = "chunk",
     batch_size: int,
     batch_max_chars: int,
     max_attempts: int,
 ) -> dict[str, Any]:
-    """Project chunk records with the pending/failed/retry policy.
-
-    Never raises for the caller: a projection failure only marks the affected
-    records in the store and is reported in the result.
-    """
+    """Project chunk records (one idempotency unit each) with retry policy."""
     name = extractor_name or getattr(extractor, "name", "chunk")
     version = extractor_version or getattr(extractor, "version", "v1")
     tag = getattr(extractor, "tag", None) or f"{name}/{version}"
@@ -108,12 +114,14 @@ def _run_extraction(
                     store, batch[0], extractor.extract, tag=tag,
                     extractor_name=name, extractor_version=version,
                     resolver=resolver, max_attempts=max(1, int(max_attempts)),
+                    scope=scope,
                 )
             else:
                 outcome = apply_batch_extraction(
                     store, batch, extractor.extract_batch, tag=tag,
                     extractor_name=name, extractor_version=version,
                     resolver=resolver, max_attempts=max(1, int(max_attempts)),
+                    scope=scope,
                 )
             status = str(outcome.get("status") or "")
             applied += int(outcome.get("applied") or 0) or int(status == "extracted")
@@ -128,14 +136,98 @@ def _run_extraction(
                 store.mark_failed(record.id, f"document projection error: {exc}", extractor=tag)
             except Exception:
                 pass
-    status = (
-        "pending" if pending and not applied else
-        "partial" if applied and (pending or failed) else
-        "extracted" if applied else
-        "failed" if failed else "registered"
-    )
+    return _summary(status=None, tag=tag, applied=applied, pending=pending,
+                    failed=failed, created_entities=created_entities, mentions=mentions)
+
+
+def _run_window_extraction(
+    store: GraphStore,
+    records: list[MemoryRecord],
+    extractor: Any,
+    resolver: Any,
+    *,
+    doc_id: str,
+    window_chars: int,
+    extractor_name: str,
+    extractor_version: str,
+    max_attempts: int,
+) -> dict[str, Any] | None:
+    """Project document-level windows (one idempotency unit each).
+
+    Windows are source-ordered chunk groups of at most ``window_chars``
+    characters. Each window becomes a ``WindowRecord`` with stable id
+    ``f"{doc_id}|w{i:02d}"``; a window's relations carry evidence anchored to
+    its real members (never outside them, see ``_resolve_window_evidence``).
+    """
+    extract_window = getattr(extractor, "extract_window", None)
+    if extract_window is None:
+        return None
+    name = extractor_name or getattr(extractor, "name", "chunk")
+    version = extractor_version or getattr(extractor, "version", "v1")
+    tag = f"{getattr(extractor, 'tag', None) or f'{name}/{version}'}/{WINDOW_SCOPE_TAG}"
+
+    applied = pending = failed = created_entities = mentions = 0
+    window_groups: list[list[MemoryRecord]] = []
+    current: list[MemoryRecord] = []
+    used = 0
+    for record in records:
+        cost = len(record.why or "") or len(record.text())
+        if current and used + cost > max(1, int(window_chars)):
+            window_groups.append(current)
+            current = []
+            used = 0
+        current.append(record)
+        used += cost
+    if current:
+        window_groups.append(current)
+
+    for i, window_members in enumerate(window_groups, start=1):
+        members = tuple(window_members)
+        first_span = tuple(getattr(members[0], "source_span", ()) or ())
+        last_span = tuple(getattr(members[-1], "source_span", ()) or ())
+        span = ()
+        if len(first_span) == 2 and len(last_span) == 2:
+            span = (int(first_span[0]), int(last_span[1]))
+        window = WindowRecord(
+            id=f"{doc_id}|w{i:02d}",
+            members=members,
+            source_document=str(getattr(members[0], "source_document", "") or ""),
+            source_span=span,
+        )
+        outcome = apply_window_extraction(
+            store, window, extract_window, tag=tag,
+            extractor_name=name, extractor_version=version,
+            resolver=resolver, max_attempts=max(1, int(max_attempts)),
+            scope=WINDOW_SCOPE_TAG,
+        )
+        status = str(outcome.get("status") or "")
+        applied += int(outcome.get("applied") or 0) or int(status == "extracted")
+        pending += int(outcome.get("pending") or 0) or int(status == "pending")
+        failed += int(outcome.get("failed") or 0) or int(status == "failed")
+        created_entities += int(outcome.get("created_entities") or 0)
+        mentions += int(outcome.get("new_mentions") or 0)
+    return _summary(status=None, tag=tag, applied=applied, pending=pending,
+                    failed=failed, created_entities=created_entities, mentions=mentions)
+
+
+def _summary(
+    *,
+    status: str | None,
+    tag: str,
+    applied: int,
+    pending: int,
+    failed: int,
+    created_entities: int,
+    mentions: int,
+) -> dict[str, Any]:
+    if status is None:
+        status = (
+            "pending" if pending and not applied else
+            "partial" if applied and (pending or failed) else
+            "extracted" if applied else
+            "failed" if failed else "registered"
+        )
     return {
-        "enabled": True,
         "status": status,
         "tag": tag,
         "applied": applied,
@@ -163,12 +255,15 @@ def ingest_document(
     batch_size: int = 8,
     batch_max_chars: int = 12000,
     max_attempts: int = 3,
+    structure_level: str = "chunk",
+    window_chars: int = 12000,
 ) -> dict[str, Any]:
     """Ingest one .txt file through the tape -> registry -> graph pipeline.
 
+    ``structure_level`` selects the extraction scopes for this call:
+    ``chunk`` (base, D3 behavior), ``document`` (window pass only) or ``both``.
     The tape is always committed first; the registry second; graph extraction
-    is last and never propagates failures. Records use the same shape as
-    ``ingest_attachment`` plus the optional D1 provenance fields.
+    is last and never propagates failures.
     """
     p = Path(path).expanduser()
     if not p.exists() or p.suffix.lower() != ".txt":
@@ -209,22 +304,67 @@ def ingest_document(
             store, path=p, source=source, hash=_file_hash(text),
             spans=spans, extractor=extractor_name or "chunk",
         )
-        if extractor is None:
-            graph["status"] = "registered"  # tape+registry done, no transport
 
     # --------------------------------------------------------------- graph
-    graph: dict[str, Any] = {"enabled": bool(enable_graph and store is not None)}
-    if enable_graph and store is not None and extractor is not None:
+    graph_active = bool(enable_graph and store is not None and extractor is not None)
+    chunk_summary = None
+    document_summary = None
+    if graph_active:
         records = preexisting or saved
-        if records:
-            graph = _run_extraction(
+        if structure_level in {"chunk", "both"} and records:
+            chunk_summary = _run_extraction(
                 store, records, extractor, resolver,
                 extractor_name=extractor_name, extractor_version=extractor_version,
+                scope="chunk",
                 batch_size=batch_size, batch_max_chars=batch_max_chars,
                 max_attempts=max_attempts,
             )
+        if structure_level in {"document", "both"} and records:
+            document_summary = _run_window_extraction(
+                store, records, extractor, resolver,
+                doc_id=doc_ref["id"] if doc_ref else source,
+                window_chars=window_chars,
+                extractor_name=extractor_name, extractor_version=extractor_version,
+                max_attempts=max_attempts,
+            )
+
+    summaries = [s for s in (chunk_summary, document_summary) if s]
+    graph: dict[str, Any] = {
+        "enabled": bool(enable_graph and store is not None),
+        "structure_level": structure_level,
+    }
+    if summaries:
+        applied = sum(s["applied"] for s in summaries)
+        pending = sum(s["pending"] for s in summaries)
+        failed = sum(s["failed"] for s in summaries)
+        created_entities = sum(s["created_entities"] for s in summaries)
+        mentions = sum(s["new_mentions"] for s in summaries)
+        tags = [s["tag"] for s in summaries]
+        graph["status"] = (
+            "pending" if pending and not applied else
+            "partial" if applied and (pending or failed) else
+            "extracted" if applied else
+            "failed" if failed else "registered"
+        )
+        graph["tag"] = "+".join(tags)
+        graph["applied"] = applied
+        graph["pending"] = pending
+        graph["failed"] = failed
+        graph["created_entities"] = created_entities
+        graph["new_mentions"] = mentions
+        graph["chunk"] = chunk_summary
+        graph["document"] = document_summary
         if doc_ref is not None:
-            store.update_document(doc_ref["id"], status=graph["status"], extractor=graph["tag"])
+            store.update_document(
+                doc_ref["id"], status=graph["status"], extractor=graph["tag"]
+            )
+    elif enable_graph and store is not None and extractor is None:
+        graph["status"] = "registered"
+        graph["tag"] = extractor_name or "chunk"
+        graph["applied"] = graph["pending"] = graph["failed"] = 0
+        graph["created_entities"] = graph["new_mentions"] = 0
+        graph["chunk"] = None
+        graph["document"] = None
 
     return {
         "ok": True,

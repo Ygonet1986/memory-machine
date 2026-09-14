@@ -27,6 +27,9 @@ eval/data/
 # E2E benchmark outputs (snapshots; keep locally)
 eval/out/
 
+# Graph measurement outputs (M-phase snapshots; keep locally)
+eval/graph_out/
+
 # Graph projection (derived, local)
 /graph/
 /graph.building/

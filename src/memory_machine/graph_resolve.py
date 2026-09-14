@@ -46,7 +46,7 @@ class GraphResolver:
         auto: float = 0.90,
         hypothesis: float = 0.60,
         llm: Any = None,
-        max_candidates: int = 50,
+        max_candidates: int = 10,
     ) -> None:
         self.embedder = embedder
         self.auto = max(0.0, min(1.0, float(auto)))
@@ -54,6 +54,10 @@ class GraphResolver:
         self.llm = llm
         self.max_candidates = max(1, int(max_candidates))
         self.index: GraphIndex | None = None
+        # In-memory doc-vector cache: the same entity document is embedded once,
+        # so caching never changes the vectors (and therefore never changes a
+        # resolution); it only removes recomputation.
+        self._doc_vectors: dict[str, list[float]] = {}
 
     def bind(self, index: GraphIndex) -> None:
         self.index = index
@@ -80,16 +84,28 @@ class GraphResolver:
         candidates = self._shortlist(name, index)
         if not candidates:
             return Resolution()
+
+        missing = [
+            (entity_id, doc)
+            for entity_id, doc in candidates
+            if entity_id not in self._doc_vectors
+        ]
         try:
-            vectors = self.embedder.embed([name] + [doc for _eid, doc in candidates])
+            vectors = self.embedder.embed([name] + [doc for _eid, doc in missing])
         except Exception:
             return Resolution()
-        if len(vectors) != len(candidates) + 1:
+        if len(vectors) != len(missing) + 1:
             return Resolution()
 
         query = vectors[0]
+        for (entity_id, _doc), vector in zip(missing, vectors[1:]):
+            self._doc_vectors[entity_id] = vector
+
         scored: list[tuple[float, str]] = []
-        for (entity_id, _doc), vector in zip(candidates, vectors[1:]):
+        for entity_id, _doc in candidates:
+            vector = self._doc_vectors.get(entity_id)
+            if vector is None:
+                continue
             scored.append((cosine(query, vector), entity_id))
         best_score, best_id = max(scored)
         if best_score >= self.auto:

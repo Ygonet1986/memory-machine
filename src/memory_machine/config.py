@@ -70,6 +70,11 @@ class Config:
     graph_max_attempts: int = 3
     graph_batch_size: int = 8
     graph_batch_max_chars: int = 12000
+    graph_hub_degree: int = 0
+    graph_augment_min_score: float = 0.80
+    graph_augment_max_items: int = 5
+    graph_augment_weight: float = 1.0
+    graph_resolver_candidates: int = 10
     coverage_mode: str = "off"
     cascade_min_score: float = 0.0
     cascade_expand_top_k: int = 5
@@ -160,7 +165,7 @@ class Config:
         )
         self.graph_recall_mode = (
             self.graph_recall_mode
-            if self.graph_recall_mode in {"off", "augment", "only"}
+            if self.graph_recall_mode in {"off", "augment", "augment_guarded", "only"}
             else "off"
         )
         self.graph_depth = max(1, min(4, _int(self.graph_depth, 2)))
@@ -179,6 +184,18 @@ class Config:
         self.graph_max_attempts = max(1, min(10, _int(self.graph_max_attempts, 3)))
         self.graph_batch_size = max(1, min(32, _int(self.graph_batch_size, 8)))
         self.graph_batch_max_chars = max(0, _int(self.graph_batch_max_chars, 12000))
+        self.graph_hub_degree = max(0, _int(self.graph_hub_degree, 0))
+        self.graph_augment_max_items = max(0, _int(self.graph_augment_max_items, 5))
+        self.graph_resolver_candidates = max(1, _int(self.graph_resolver_candidates, 10))
+        for name, default in (
+            ("graph_augment_min_score", 0.80),
+            ("graph_augment_weight", 1.0),
+        ):
+            try:
+                value = float(getattr(self, name))
+            except (TypeError, ValueError):
+                value = default
+            setattr(self, name, max(0.0, min(1.0, value)))
         self.coverage_mode = (
             self.coverage_mode if self.coverage_mode in {"off", "agents", "structural", "both", "judge", "judge_views", "views"} else "off"
         )

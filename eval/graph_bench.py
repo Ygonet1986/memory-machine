@@ -40,6 +40,7 @@ sys.path.insert(0, str(HERE.parent / "src"))
 
 from memory_machine.config import Config  # noqa: E402
 from memory_machine.coordinator import Machine  # noqa: E402
+from memory_machine.groups import load_manifest  # noqa: E402
 from memory_machine.graph import ExtractorSpec, GraphStore, build_graph  # noqa: E402
 from memory_machine.graph_extract import GraphExtractor  # noqa: E402
 from memory_machine.graph_resolve import GraphResolver  # noqa: E402
@@ -97,6 +98,27 @@ class EmbedMeter:
         self.calls += 1
         self.texts += len(texts)
         return self.embedder.embed(texts)
+
+
+ARM_MODES = {
+    "graph_off": "off",
+    "graph_augment": "augment",
+    "graph_augment_guarded": "augment_guarded",
+    "graph_augment_precise": "augment_guarded",
+    "graph_only": "only",
+}
+
+# V2-0 calibration (LME-12 replay):
+#   guarded = literal rule  -> keeps 3/3 graph-only gold, -30% non-gold
+#   precise = precision     -> keeps 2/3 gold (case 6, no answer effect), -83% non-gold
+ARM_FLAGS = {
+    "graph_augment_guarded": dict(
+        graph_hub_degree=0, graph_augment_min_score=0.80, graph_augment_max_items=5
+    ),
+    "graph_augment_precise": dict(
+        graph_hub_degree=20, graph_augment_min_score=0.80, graph_augment_max_items=3
+    ),
+}
 
 
 def make_config(
@@ -197,11 +219,7 @@ def run_arm(
     question_date: str,
 ) -> dict[str, Any]:
     machine.config.graph_enabled = True
-    machine.config.graph_recall_mode = {
-        "graph_off": "off",
-        "graph_augment": "augment",
-        "graph_only": "only",
-    }[arm]
+    machine.config.graph_recall_mode = ARM_MODES[arm]
     machine._invalidate_recall_cache()
     before_calls = agent_client.calls
     started = time.perf_counter()
@@ -281,7 +299,19 @@ def main() -> None:
     parser.add_argument("--tag", action="store_true", help="tag external sessions at write time")
     parser.add_argument("--seed", type=int, default=7)
     parser.add_argument("--api-key", default="")
+    parser.add_argument(
+        "--reuse-root",
+        type=Path,
+        default=None,
+        help="copy tape+graph from a previous run's root instead of re-extracting",
+    )
+    parser.add_argument(
+        "--arms",
+        default=",".join(ARM_MODES),
+        help="comma-separated arms to run",
+    )
     args = parser.parse_args()
+    selected_arms = [a.strip() for a in args.arms.split(",") if a.strip()]
 
     api_key = args.api_key or os.environ.get("DEEPSEEK_API_KEY", "")
     if not api_key:
@@ -339,7 +369,7 @@ def main() -> None:
     ingest_cfg = make_config(
         "ingest", embedding_model=args.embedding_model, embedding_base_url=args.embedding_base_url
     )
-    arms = ["graph_off", "graph_augment", "graph_only"]
+    arms = ["graph_off", "graph_augment", "graph_augment_guarded", "graph_augment_precise", "graph_only"]
 
     # Synthetic fixture: identical tape for every case -> build the graph once.
     fixture_machine: Machine | None = None
@@ -421,6 +451,21 @@ def main() -> None:
             sessions = len(task["sessions"])
             question_date = task.get("question_date", "") if not args.no_dates else ""
 
+        if args.reuse_root is not None:
+            reuse = args.reuse_root / f"case_{index:02d}" / "graph_augment"
+            if not (reuse / "tape.jsonl").exists():
+                raise RuntimeError(f"reuse root missing case {index}: {reuse}")
+            for name in ("tape.jsonl", "manifest.json"):
+                if (reuse / name).exists():
+                    shutil.copy2(reuse / name, Path(base_machine.root) / name)
+            reused_graph = reuse / "graph"
+            if (Path(base_machine.root) / "graph").exists():
+                shutil.rmtree(Path(base_machine.root) / "graph")
+            if reused_graph.exists():
+                shutil.copytree(reused_graph, Path(base_machine.root) / "graph")
+            base_machine.manifest = load_manifest(
+                Path(base_machine.root) / "manifest.json", capacity=base_machine.config.capacity
+            )
         tape_hash = sha256(Path(base_machine.root) / "tape.jsonl")
         if args.dataset == "synthetic" and fixture_graph is not None:
             if tape_hash != fixture_tape_hash:
@@ -450,7 +495,7 @@ def main() -> None:
         shutil.copytree(graph_dir, audit_dir)
 
         arm_rows: dict[str, Any] = {}
-        for arm in arms:
+        for arm in selected_arms:
             arm_dir = case_dir / arm
             if arm_dir.exists():
                 shutil.rmtree(arm_dir)
@@ -462,13 +507,16 @@ def main() -> None:
             shutil.copytree(graph_dir, arm_dir / "graph")
             if sha256(arm_dir / "tape.jsonl") != tape_hash:
                 raise RuntimeError(f"tape drift in {arm_dir}")
+            arm_config = make_config(
+                "augment",
+                embedding_model=args.embedding_model,
+                embedding_base_url=args.embedding_base_url,
+            )
+            for flag, value in ARM_FLAGS.get(arm, {}).items():
+                setattr(arm_config, flag, value)
             arm_machine = Machine(
                 arm_dir,
-                config=make_config(
-                    "augment",
-                    embedding_model=args.embedding_model,
-                    embedding_base_url=args.embedding_base_url,
-                ),
+                config=arm_config,
                 client=agent_client,
             )
             arm_rows[arm] = run_arm(
@@ -488,6 +536,15 @@ def main() -> None:
         retrieval = retrieval_metrics(
             required, off["annotations"], augment["annotations"], only["graph_ids"]
         )
+        retrieval_by_arm = {
+            arm: retrieval_metrics(
+                required,
+                off["annotations"],
+                arm_rows[arm]["annotations"],
+                arm_rows[arm]["graph_ids"],
+            )
+            for arm in selected_arms
+        }
         row = {
             "case": index,
             "cat": task.get("cat") or task.get("type", ""),
@@ -507,6 +564,7 @@ def main() -> None:
             },
             "graph": graph_result,
             "retrieval": retrieval,
+            "retrieval_by_arm": retrieval_by_arm,
             "arms": arm_rows,
             "cost": {
                 "extract_calls_case": graph_result.get("extract_calls", 0),
@@ -536,7 +594,7 @@ def main() -> None:
     checksums.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
     print("\naggregate:")
-    for arm in arms:
+    for arm in selected_arms:
         rows_arm = [row["arms"][arm] for row in rows]
         judged = [row for row in rows_arm if row["verdict"]]
         strict = (

@@ -65,16 +65,47 @@ ignored/partial between two runs of the same case) and in case 9 it said "used"
 for an answer that explicitly denied the data. Use it as a hint; the verdicts
 and the delivered-text accounting are the ground truth.
 
+## U2b — fact-window truncation (the delivery candidate)
+
+`i5_fact_window`: same admission and same 4,000-char budget as `precise`, but a
+truncated memory delivers the **question-matched window** of the session (the
+best-scoring segment expanded left/right until the allocation fills) instead of
+its head. Deterministic; no graph, admission, budget or core change.
+
+| arm | easy slice | hard slice | both |
+|---|---|---|---|
+| graph_augment_precise | 10/12 | 6/12 | 16/24 |
+| i1_fact_floor | 9/12 | 6/12 | 15/24 |
+| i4_gold_full | 10/12 | 8/12 | 18/24 |
+| **i5_fact_window** | **11/12** | 6/12 | **17/24** |
+
+- **Case 9 repaired without regression** on the easy slice (10 → 11): the
+  "2 hours" statement now survives inside M0032's window. The five i4 overload
+  regressions (7, 8 on the easy slice; 86, 119, 126 on the hard one) **do not
+  occur** under i5 — the budget protection is preserved.
+- On the hard slice i5 repairs case 88 (partial → correct) but regresses case
+  86 (correct → partial): net 0. Cases 89 and 131 stay unrepaired — they need
+  multi-session composition, not a better window (i4 fixes them, i5 does not).
+- Windows were applied to 37 (easy) and 60 (hard) payload items; payloads
+  stayed within the 4,000-char budget (e.g., case 0: 3,985 chars).
+
+**Reading:** fact-window truncation is the first delivery change that repairs
+truncation damage **while avoiding the overload regressions** — but it is net
++1 over 24 cases with one counter-case, so it is a *candidate*, not a validated
+default. The next step, if pursued: expose it as an opt-in delivery flag with
+tests and re-measure on a larger slice before any default change.
+
 ## Decision
 
 - **No core/delivery change from this round.** I1 (600-char floor) is neutral at
   best (0.750/0.500) because a blunt floor does not localize the fact; it is
   rejected as a default.
-- **Concrete next micro-test (U2b): fact-window truncation.** Instead of a
-  larger floor, keep the sentence window inside each session that matches the
-  question (the facts are mid-session), capped by the existing 4,000-char
-  budget. Evaluate exactly on the truncation-repair cases (9, 88, 89, 131) and
-  control against the overload regressions (7, 8, 86, 119, 126).
+- **U2b ran: fact-window truncation repairs case 9 (easy) and case 88 (hard)
+  without the i4 overload regressions, netting +1 over 24 cases with one
+  counter-case (86).** It is promoted to *delivery candidate*: implement as an
+  opt-in flag with tests, keep the default (`head` truncation) until a larger
+  slice confirms. Cases 89/131 confirm that composition (not truncation) is the
+  remaining hard-slice failure mode.
 - **I4 stays a diagnostic instrument** (gold-only untruncated), not a product
   mode: it violates the budget discipline and regresses 5 cases.
 - Retrieval/admission stay frozen (`graph-v3`); composition (case 71) and

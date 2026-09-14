@@ -136,6 +136,46 @@ def probe_usage(
     return {"usage": usage, "why": str(obj.get("why") or "")[:200]}
 
 
+def _segments(text: str) -> list[str]:
+    parts = re.split(r"(?<=[.!?])\s+|\n+", text)
+    return [part.strip() for part in parts if part.strip()]
+
+
+def fact_window(text: str, question: str, allocation: int) -> str:
+    """Keep the question-matching window of a long memory instead of its head.
+
+    Deterministic: segments of the session are scored by question-token
+    coverage; the best segment is expanded left/right until the allocation is
+    filled. Falls back to the head when nothing matches.
+    """
+    if allocation <= 0 or not text:
+        return text[: max(0, allocation)]
+    segments = _segments(text)
+    if not segments or sum(len(s) + 1 for s in segments) <= allocation:
+        return text[:allocation]
+    qtokens = answer_tokens(question)
+    scores = [len(qtokens & answer_tokens(segment)) for segment in segments]
+    best = max(range(len(scores)), key=lambda i: (scores[i], -i))
+    chosen = [best]
+    used = len(segments[best])
+    left, right = best - 1, best + 1
+    while len(" ".join(segments[i] for i in chosen)) < allocation:
+        take_left = left >= 0 and (right >= len(segments) or scores[left] >= scores[right])
+        if take_left:
+            chosen.insert(0, left)
+            left -= 1
+        elif right < len(segments):
+            chosen.append(right)
+            right += 1
+        else:
+            break
+    window = " … ".join(segments[i] for i in chosen)
+    if len(window) <= allocation:
+        return window
+    cut = window[:allocation]
+    return cut.rsplit(" ", 1)[0] if " " in cut else cut
+
+
 def full_gold_text(records: dict[str, Any], ids: list[str]) -> str:
     blocks = []
     for memory_id in ids:
@@ -276,7 +316,12 @@ def analyze_arm(
     return result
 
 
-def run_u2(case: dict[str, Any], judge_client: CountingClient, agent_client: CountingClient) -> dict[str, Any]:
+def run_u2(
+    case: dict[str, Any],
+    judge_client: CountingClient,
+    agent_client: CountingClient,
+    interventions: set[str],
+) -> dict[str, Any]:
     """Answerer/delivery-only interventions, judged with the same answerer."""
     records = case["records"]
     required = list(case["row"]["required_ids"])
@@ -284,6 +329,62 @@ def run_u2(case: dict[str, Any], judge_client: CountingClient, agent_client: Cou
     question_date = case.get("question_date", "")
     provenance = f"\n\n(Question asked on {question_date}.)" if question_date else ""
     out: dict[str, Any] = {}
+    if "i1" not in interventions and "i4" not in interventions and "i5" not in interventions:
+        return out
+    if "i5" in interventions:
+        cfg = variant_config("graph_augment_precise")
+        work_dir = case["work_root"] / "i5_fact_window"
+        copy_case(case["root"] / f"case_{case['case']:02d}", work_dir)
+        machine = Machine(work_dir, config=cfg, client=agent_client)
+        evidence = variant_evidence(case["root"] / f"case_{case['case']:02d}", cfg, question)
+        graph_annotations = [
+            Annotation(
+                memory_id=item.memory_id,
+                note=item.label or "graph evidence",
+                relevance=max(0.05, float(item.score)),
+                agent_id="graph",
+            )
+            for item in evidence
+            if item.memory_id in {r.id for r in records.values() if r.status == "active"}
+        ]
+        agent_annotations = frozen_agent_annotations(case)
+        union = {a.memory_id: a for a in agent_annotations}
+        for item in graph_annotations:
+            current = union.get(item.memory_id)
+            if current is None or item.relevance > current.relevance:
+                union[item.memory_id] = item
+        machine.whiteboard.annotations = []
+        machine.whiteboard.subject = question
+        kept = merge_annotations(machine.whiteboard, list(union.values()), budget=cfg.whiteboard_budget)
+        payload = build_evidence_payload(
+            records, kept, budget=cfg.evidence_payload_budget,
+            min_item_chars=cfg.evidence_payload_min_item,
+        )
+        windowed = []
+        for item in payload:
+            record = records.get(item["memory_id"])
+            entry = dict(item)
+            if record is not None and item["truncated"]:
+                header = item["evidence"].split("\n", 1)[0]
+                allocation = max(0, item["used_chars"] - len(header) - 1)
+                body = fact_window(record.why or record.summary, question, allocation)
+                entry["evidence"] = f"{header}\n{body}"
+                entry["windowed"] = True
+            windowed.append(entry)
+        context = payload_as_context(windowed)
+        answer = answer_with(agent_client, machine, question + provenance, extra_context=context)
+        verdict, reason = judge(judge_client, question, case["row"]["gold"], answer)
+        out["i5_fact_window"] = {
+            "answer": answer,
+            "verdict": verdict,
+            "reason": reason,
+            "payload_ids": [item["memory_id"] for item in windowed],
+            "payload_chars": sum(len(item["evidence"]) for item in windowed),
+            "windowed_items": sum(1 for item in windowed if item.get("windowed")),
+            "context": context,
+        }
+    if "i1" not in interventions and "i4" not in interventions:
+        return out
 
     # i1: same precise admission, fact-floor delivery
     cfg = variant_config("graph_augment_precise")
@@ -350,6 +451,10 @@ def main() -> None:
     parser.add_argument("--slice", default="", choices=["", *SLICES])
     parser.add_argument("--limit", type=int, default=0)
     parser.add_argument("--stage", default="all", choices=["u1", "u2", "all"])
+    parser.add_argument(
+        "--interventions", default="i1,i4",
+        help="comma-separated: i1,i4,i5",
+    )
     parser.add_argument("--model", default="deepseek-v4-flash")
     parser.add_argument("--judge-model", default="deepseek-v4-flash")
     parser.add_argument("--timeout", type=int, default=300)
@@ -404,7 +509,12 @@ def main() -> None:
                     probe_client=probe_client, stage=args.stage,
                 )
             if args.stage in {"u2", "all"}:
-                arm_rows.update(run_u2(case, judge_client, agent_client))
+                arm_rows.update(
+                    run_u2(
+                        case, judge_client, agent_client,
+                        {x.strip() for x in args.interventions.split(",") if x.strip()},
+                    )
+                )
             out_rows.append(
                 {
                     "case": row["case"],
@@ -417,8 +527,23 @@ def main() -> None:
                 }
             )
             path = OUT_DIR / f"u_diag_{name}.jsonl"
+            merged_rows: dict[int, dict[str, Any]] = {}
+            if path.exists():
+                for line in path.read_text(encoding="utf-8").splitlines():
+                    if line.strip():
+                        old_row = json.loads(line)
+                        merged_rows[old_row["case"]] = old_row
+            for item in out_rows:
+                old = merged_rows.get(item["case"])
+                if old is not None:
+                    arms = dict(old.get("arms") or {})
+                    arms.update(item.get("arms") or {})
+                    old["arms"] = arms
+                    merged_rows[item["case"]] = old
+                else:
+                    merged_rows[item["case"]] = item
             with path.open("w", encoding="utf-8") as handle:
-                for item in out_rows:
+                for item in merged_rows.values():
                     handle.write(json.dumps(item, ensure_ascii=False) + "\n")
             delivered = sum(
                 1 for g in arm_rows["graph_augment_precise"]["gold"] if g.get("delivered")

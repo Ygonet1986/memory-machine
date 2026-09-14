@@ -36,7 +36,7 @@ from pathlib import Path
 from typing import Any, Callable, Iterable
 
 GRAPH_EXTRACTOR_VERSION = "v1"
-GRAPH_SCHEMA_VERSION = 1
+GRAPH_SCHEMA_VERSION = 2
 GRAPH_RESOLVER_VERSION = "1.0"
 
 # Epistemological/resolution edges are metadata, not domain knowledge: recall
@@ -63,6 +63,53 @@ def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
+def format_document_id(num: int) -> str:
+    return f"D{num:04d}"
+
+
+def parse_document_id(doc_id: str) -> int:
+    m = re.match(r"^D(\d+)$", str(doc_id or "").strip())
+    if not m:
+        raise ValueError(f"invalid document id: {doc_id!r}")
+    return int(m.group(1))
+
+
+def _parse_span(raw: Any) -> tuple[int, int]:
+    if isinstance(raw, (list, tuple)) and len(raw) == 2:
+        try:
+            return (int(raw[0]), int(raw[1]))
+        except (TypeError, ValueError):
+            pass
+    return ()
+
+
+def _parse_spans(raw: Any) -> list[tuple[int, int]]:
+    if not isinstance(raw, (list, tuple)):
+        return []
+    return [span for raw_span in raw if (span := _parse_span(raw_span))]
+
+
+def _parse_evidence(raw: Any) -> tuple[dict[str, Any], ...]:
+    """Multi-span provenance: ``[{"memory_id": ..., "span": [s, e]}, ...]``."""
+    if not isinstance(raw, (list, tuple)):
+        return ()
+    out: list[dict[str, Any]] = []
+    for item in raw:
+        if not isinstance(item, dict):
+            continue
+        memory_id = str(item.get("memory_id") or "")
+        span = _parse_span(item.get("span"))
+        if not memory_id and not span:
+            continue
+        ev: dict[str, Any] = {}
+        if memory_id:
+            ev["memory_id"] = memory_id
+        if span:
+            ev["span"] = [span[0], span[1]]
+        out.append(ev)
+    return tuple(out)
+
+
 def normalize_name(name: str) -> str:
     """Case/accents/punctuation-insensitive key used for entity resolution."""
     text = unicodedata.normalize("NFKD", str(name or "").strip().lower())
@@ -85,9 +132,22 @@ class GraphEntity:
     type: str = "unknown"
     memory_id: str = ""
     created_at: str = ""
+    source_document: str = ""
+    source_span: tuple[int, int] = ()
 
     def to_dict(self) -> dict[str, Any]:
-        return asdict(self)
+        d: dict[str, Any] = {
+            "id": self.id,
+            "name": self.name,
+            "type": self.type,
+            "memory_id": self.memory_id,
+            "created_at": self.created_at,
+        }
+        if self.source_document:
+            d["source_document"] = self.source_document
+        if self.source_span:
+            d["source_span"] = [self.source_span[0], self.source_span[1]]
+        return d
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "GraphEntity":
@@ -97,6 +157,8 @@ class GraphEntity:
             type=str(data.get("type") or "unknown"),
             memory_id=str(data.get("memory_id") or ""),
             created_at=str(data.get("created_at") or ""),
+            source_document=str(data.get("source_document") or ""),
+            source_span=_parse_span(data.get("source_span")),
         )
 
 
@@ -111,9 +173,29 @@ class GraphRelation:
     kind: str = ""
     extractor: str = ""
     extractor_version: str = ""
+    source_document: str = ""
+    source_span: tuple[int, int] = ()
+    evidence: tuple[dict[str, Any], ...] = ()
 
     def to_dict(self) -> dict[str, Any]:
-        return asdict(self)
+        d: dict[str, Any] = {
+            "id": self.id,
+            "source": self.source,
+            "relation": self.relation,
+            "target": self.target,
+            "memory_id": self.memory_id,
+            "confidence": self.confidence,
+            "kind": self.kind,
+            "extractor": self.extractor,
+            "extractor_version": self.extractor_version,
+        }
+        if self.source_document:
+            d["source_document"] = self.source_document
+        if self.source_span:
+            d["source_span"] = [self.source_span[0], self.source_span[1]]
+        if self.evidence:
+            d["evidence"] = [dict(ev) for ev in self.evidence]
+        return d
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "GraphRelation":
@@ -131,6 +213,9 @@ class GraphRelation:
             kind=str(data.get("kind") or ""),
             extractor=str(data.get("extractor") or ""),
             extractor_version=str(data.get("extractor_version") or ""),
+            source_document=str(data.get("source_document") or ""),
+            source_span=_parse_span(data.get("source_span")),
+            evidence=_parse_evidence(data.get("evidence")),
         )
 
 
@@ -153,9 +238,81 @@ class GraphMention:
     memory_id: str
     entity_id: str
     confidence: float = 0.8
+    source_document: str = ""
+    span: tuple[int, int] = ()
 
     def to_dict(self) -> dict[str, Any]:
-        return asdict(self)
+        d: dict[str, Any] = {
+            "memory_id": self.memory_id,
+            "entity_id": self.entity_id,
+            "confidence": self.confidence,
+        }
+        if self.source_document:
+            d["source_document"] = self.source_document
+        if self.span:
+            d["span"] = [self.span[0], self.span[1]]
+        return d
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "GraphMention":
+        return cls(
+            memory_id=str(data.get("memory_id") or ""),
+            entity_id=str(data.get("entity_id") or ""),
+            confidence=_clamp(data.get("confidence"), 0.8),
+            source_document=str(data.get("source_document") or ""),
+            span=_parse_span(data.get("span")),
+        )
+
+
+@dataclass
+class DocumentRecord:
+    """Registered document (identity + provenance of an ingested .txt).
+
+    ``source`` is the stable content key ``name#hash`` (same key used by the
+    ``attachment`` records on the tape), so a subgraph can be rebuilt by
+    filtering graph rows by document provenance. ``spans`` are the chunk
+    offsets ``(start, end)`` produced by :func:`chunk_spans`, listed in order.
+    """
+
+    id: str
+    source: str
+    name: str
+    hash: str
+    path: str
+    chunks: int = 0
+    spans: list[tuple[int, int]] = field(default_factory=list)
+    extractor: str = ""
+    status: str = "registered"
+    created_at: str = ""
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "id": self.id,
+            "source": self.source,
+            "name": self.name,
+            "hash": self.hash,
+            "path": self.path,
+            "chunks": int(self.chunks),
+            "spans": [[s, e] for s, e in self.spans],
+            "extractor": self.extractor,
+            "status": self.status,
+            "created_at": self.created_at,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "DocumentRecord":
+        return cls(
+            id=str(data.get("id") or ""),
+            source=str(data.get("source") or ""),
+            name=str(data.get("name") or ""),
+            hash=str(data.get("hash") or ""),
+            path=str(data.get("path") or ""),
+            chunks=int(data.get("chunks") or 0),
+            spans=_parse_spans(data.get("spans")),
+            extractor=str(data.get("extractor") or ""),
+            status=str(data.get("status") or "registered"),
+            created_at=str(data.get("created_at") or ""),
+        )
 
 
 @dataclass(frozen=True)
@@ -559,6 +716,7 @@ class GraphStore:
         "failed.jsonl",
         "pending.jsonl",
         "hypotheses.jsonl",
+        "documents.jsonl",
     )
     REVIEW_FILE = "reviews.jsonl"  # human decisions: preserved across rebuilds
 
@@ -598,6 +756,8 @@ class GraphStore:
         memory_id: str,
         *,
         entity_id: str = "",
+        source_document: str = "",
+        source_span: tuple[int, int] = (),
     ) -> GraphEntity:
         if not entity_id:
             entity_id = f"E{self.index().max_entity_num + 1:04d}"
@@ -607,6 +767,8 @@ class GraphStore:
             type=str(entity_type or "unknown").strip() or "unknown",
             memory_id=memory_id,
             created_at=_now(),
+            source_document=source_document or "",
+            source_span=(int(source_span[0]), int(source_span[1])) if source_span else (),
         )
         self._append("entities.jsonl", entity.to_dict())
         return entity
@@ -623,6 +785,9 @@ class GraphStore:
         relation_id: str = "",
         extractor: str = "",
         extractor_version: str = "",
+        source_document: str = "",
+        source_span: tuple[int, int] = (),
+        evidence: Iterable[dict[str, Any]] = (),
     ) -> GraphRelation:
         if not relation_id:
             relation_id = f"R{self.index().max_relation_num + 1:04d}"
@@ -636,6 +801,11 @@ class GraphStore:
             kind=kind,
             extractor=extractor,
             extractor_version=extractor_version,
+            source_document=source_document or "",
+            source_span=(int(source_span[0]), int(source_span[1])) if source_span else (),
+            evidence=tuple(
+                ev for ev in (_parse_evidence(list(evidence)) if evidence else ())
+            ),
         )
         self._append("relations.jsonl", item.to_dict())
         return item
@@ -663,11 +833,24 @@ class GraphStore:
         self._append("aliases.jsonl", item.to_dict())
         return item
 
-    def add_mention(self, memory_id: str, entity_id: str, confidence: float = 0.8) -> None:
-        self._append(
-            "mentions.jsonl",
-            {"memory_id": memory_id, "entity_id": entity_id, "confidence": confidence},
+    def add_mention(
+        self,
+        memory_id: str,
+        entity_id: str,
+        confidence: float = 0.8,
+        *,
+        source_document: str = "",
+        span: tuple[int, int] = (),
+    ) -> GraphMention:
+        mention = GraphMention(
+            memory_id=memory_id,
+            entity_id=entity_id,
+            confidence=max(0.0, min(1.0, float(confidence))),
+            source_document=source_document or "",
+            span=(int(span[0]), int(span[1])) if span else (),
         )
+        self._append("mentions.jsonl", mention.to_dict())
+        return mention
 
     def mark_extracted(
         self,
@@ -878,7 +1061,7 @@ class GraphStore:
         return [GraphAlias(**d) for d in self._load("aliases.jsonl")]
 
     def mentions(self) -> list[GraphMention]:
-        return [GraphMention(**d) for d in self._load("mentions.jsonl")]
+        return [GraphMention.from_dict(d) for d in self._load("mentions.jsonl")]
 
     def extracted_ids(self, extractor: str = "") -> set[str]:
         rows = self._load("extracted.jsonl")
@@ -914,6 +1097,7 @@ class GraphStore:
             "extracted": len(self.extracted_ids()),
             "failed": len(self.failed_rows()),
             "pending": len(self.pending_rows()),
+            "documents": len(self.documents()),
         }
 
     def exists(self) -> bool:
@@ -937,8 +1121,112 @@ class GraphStore:
         source = other._path(self.REVIEW_FILE)
         if not source.exists():
             return 0
+
         self.directory.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source, self._path(self.REVIEW_FILE))
+        return 1
+
+    # --------------------------------------------------- documents (D2)
+
+    def documents(self) -> list[DocumentRecord]:
+        """Latest registered state per document id (append-only history)."""
+        latest: dict[str, DocumentRecord] = {}
+        for row in self._load("documents.jsonl"):
+            record = DocumentRecord.from_dict(row)
+            if record.id:
+                latest[record.id] = record
+        return list(latest.values())
+
+    def next_document_num(self) -> int:
+        numbers = []
+        for row in self._load("documents.jsonl"):
+            match = re.match(r"^D(\d+)$", str(row.get("id") or ""))
+            if match:
+                numbers.append(int(match.group(1)))
+        return max(numbers, default=0) + 1
+
+    def document_by_id(self, doc_id: str) -> DocumentRecord | None:
+        return next((d for d in self.documents() if d.id == doc_id), None)
+
+    def document_by_source(self, source: str) -> DocumentRecord | None:
+        return next((d for d in self.documents() if d.source == source), None)
+
+    def add_document(
+        self,
+        *,
+        source: str,
+        name: str,
+        hash: str,
+        path: str,
+        spans: Iterable[tuple[int, int]] = (),
+        extractor: str = "",
+        status: str = "registered",
+        chunks: int = 0,
+    ) -> tuple[DocumentRecord, bool]:
+        """Register a document, giving it a stable ``D####`` identity.
+
+        The identity is stable per ``source`` (the ``name#hash`` content key):
+        registering an already-known source returns the existing record
+        (``created=False``) instead of duplicating it.
+        """
+        source = str(source or "").strip()
+        name = str(name or "").strip()
+        if not (source and name and (hash or "").strip() and str(path or "").strip()):
+            raise ValueError(
+                "add_document requires source, name, hash and path"
+            )
+        existing = self.document_by_source(source)
+        if existing is not None:
+            return existing, False
+        span_list = [[int(s), int(e)] for s, e in spans if e >= s]
+        record = DocumentRecord(
+            id=format_document_id(self.next_document_num()),
+            source=source,
+            name=name,
+            hash=str(hash).strip(),
+            path=str(path).strip(),
+            chunks=int(chunks) if chunks else len(span_list),
+            spans=[(s, e) for s, e in span_list],
+            extractor=extractor,
+            status=status,
+            created_at=_now(),
+        )
+        self._append("documents.jsonl", record.to_dict())
+        return record, True
+
+    def update_document(
+        self,
+        doc_id: str,
+        *,
+        status: str | None = None,
+        extractor: str | None = None,
+        chunks: int | None = None,
+    ) -> DocumentRecord | None:
+        """Append a new state row for a registered document (latest wins)."""
+        current = self.document_by_id(doc_id)
+        if current is None:
+            return None
+        row = dict(current.to_dict())
+        if status is not None:
+            row["status"] = status
+        if extractor is not None:
+            row["extractor"] = extractor
+        if chunks is not None:
+            row["chunks"] = int(chunks)
+        row["created_at"] = _now()
+        self._append("documents.jsonl", row)
+        return DocumentRecord.from_dict(row)
+
+    def copy_documents_from(self, other: "GraphStore") -> int:
+        """Carry the document registry into a fresh projection dir."""
+        import shutil
+
+        source = other._path("documents.jsonl")
+        if not source.exists():
+            return 0
+
+        self.directory.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, self._path("documents.jsonl"))
         return 1
 
 
@@ -1585,9 +1873,13 @@ def build_graph(
         building = GraphStore(Path(str(store.directory) + ".building"))
         building.clear()
         building.copy_reviews_from(store)
+        building.copy_documents_from(store)
         target = building
     elif rebuild:
+        documents_backup = store._load("documents.jsonl")
         store.clear()
+        for row in documents_backup:
+            store._append("documents.jsonl", row)
 
     try:
         result = _build_into(
@@ -1638,6 +1930,43 @@ def graph_status(
     result["failed"] = store.failed_rows()[-20:]
     result["pending"] = store.pending_rows()[-20:]
     return result
+
+
+def document_context(store: GraphStore, doc_key: str) -> dict[str, Any]:
+    """Provenance-filtered view of the graph for one document.
+
+    ``doc_key`` may be a ``D####`` id or a ``name#hash`` source key. The view
+    is deterministic and reconstructable: entities are globally resolved (no
+    per-document duplicates) and are selected through the document's mentions
+    (the plural provenance point); relations are selected from the document's
+    memories or by explicit ``source_document``. This is the data the future
+    document subgraph will render — no recall and no new defaults.
+    """
+    doc = store.document_by_id(str(doc_key)) or store.document_by_source(str(doc_key))
+    if doc is None:
+        return {"ok": False, "error": f"unknown document: {doc_key}"}
+    mentions = [
+        m for m in store.mentions() if m.source_document == doc.source
+    ]
+    memory_ids = sorted({m.memory_id for m in mentions if m.memory_id})
+    entity_ids = sorted(
+        {m.entity_id for m in mentions if m.entity_id}
+        | {e.id for e in store.entities() if e.source_document == doc.source}
+    )
+    entities = [e for e in store.entities() if e.id in entity_ids]
+    relations = [
+        r
+        for r in store.relations()
+        if r.source_document == doc.source or r.memory_id in memory_ids
+    ]
+    return {
+        "ok": True,
+        "document": doc.to_dict(),
+        "memories": memory_ids,
+        "entities": [e.to_dict() for e in entities],
+        "relations": [r.to_dict() for r in relations],
+        "mentions": [m.to_dict() for m in mentions],
+    }
 
 
 def explain_relation(store: GraphStore, tape: Any, relation_id: str) -> dict[str, Any]:

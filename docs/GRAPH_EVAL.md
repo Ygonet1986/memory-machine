@@ -113,6 +113,10 @@ dominated by the resolver's embedding shortlist (**8,284 embedding calls**,
    no-resolver-embeddings variant and a budget-aware augment arm. Those three
    would test the structural hypothesis instead of the current ceiling.
 
+## V2 follow-up
+
+Admission control and resolver-cost results: `docs/GRAPH_V2.md`.
+
 ## Reproduce
 
 ```bash

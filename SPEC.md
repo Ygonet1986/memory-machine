@@ -1039,3 +1039,144 @@ The central architectural statement:
 > A good memory for an LLM is not the one that puts the most history into the
 > context; it is the one that preserves, finds and delivers the right amount of
 > evidence, with its provenance, at the right moment.
+
+## 20. Graph Memory Projection (Graph Memory Machine v1)
+
+The graph is a **rebuildable projection over the canonical tape**, exactly like
+the views (§4.3): it is derived, disposable and never a source of facts.
+
+> **Normative invariant.** No entity, relation or path of the graph is factual
+> evidence without a provenance chain to a memory on the tape. The graph
+> selects; the tape supplies the content.
+
+### 20.1 Scope and files
+
+Eligible records are the durable types (`decision`, `lesson`, `preference`,
+`bugfix`, `build`) written by `run()`, `checkpoint()` and `add_memory()`.
+Turn records (`type=memory` without `derived_from`), attachments and rollups
+are never extracted. All files are append-only JSONL under `<root>/graph`:
+
+| File | Content |
+|------|---------|
+| `entities.jsonl` | `E####` entities: name, type, first memory |
+| `relations.jsonl` | `R####` edges: source/relation/target + `memory_id`, `confidence`, `kind`, `extractor`, `extractor_version` |
+| `aliases.jsonl` | names that resolve to an entity (`method`: extractor/alias/embedding/llm/merge) |
+| `mentions.jsonl` | memory → entity links (memories are things too) |
+| `extracted.jsonl` | idempotence markers per `memory_id + extractor tag` |
+| `pending.jsonl` | transient failures (API/timeout/schema), retried |
+| `failed.jsonl` | definitive failures (after `graph_max_attempts`); audit history |
+| `hypotheses.jsonl` | open identity hypotheses (`H####`) produced by the resolver |
+| `reviews.jsonl` | **human** review decisions, keyed by name pair; preserved across rebuilds |
+| `meta.json` | schema/extractor/resolver versions, source stats, counts |
+
+### 20.2 Extractor contract
+
+The LLM never chooses graph ids. It returns semantic refs local to the answer:
+
+```json
+{"entities":[{"ref":"e1","name":"Kalak","type":"person","confidence":0.99,
+              "aliases":["the king"]}],
+ "events":[{"ref":"ev1","action":"contornar","agent":"e1","object":"e2",
+            "confidence":0.97}],
+ "relations":[{"source":"e1","relation":"crossed","target":"e2",
+               "confidence":0.9,"kind":""}],
+ "mentions":["e1","e2"],"confidence":0.95}
+```
+
+Validation is completed before any mutation (`Extraction` is frozen); verbs are
+normalized to canonical forms when evident. Batch mode sends several records
+in one call (`{"records":[{"memory_id":"M0010", ...}, ...]}`): **batching is
+transport only** — each record keeps its own idempotency unit, a malformed
+item is dropped without losing the others, and a `memory_id` outside the batch
+is ignored.
+
+### 20.3 Resolver and identity
+
+Resolution order: normalized exact name → alias → optional embedding
+(top-k shortlist) → new entity. Confidence bands:
+
+| Band | Action |
+|------|--------|
+| `>= graph_confidence_auto` (0.90) | merge via append-only alias |
+| `hypothesis` (0.60) … `auto` | `possibly_same_as` hypothesis (`H####`, `kind=resolution`), never a merge |
+| `< hypothesis` | new entity |
+
+Resolution edges are **epistemological metadata**: recall traversal never
+follows them. Accepted reviews create a merge redirect keyed by name, which
+survives rebuilds; rejected pairs are never proposed again.
+
+### 20.4 Events
+
+An event is an entity (`type=event`) with `agent`/`action`/`object` edges
+(`kind=event`). For recall it counts as **one semantic hop** even though the
+path carries two physical edges (`semantic_depth`), so `depth=1` already finds
+event-mediated relations.
+
+### 20.5 Write-time pipeline
+
+```text
+tape.append(memory)        # always first; the tape is never rolled back
+        ↓
+graph_extract(memory)      # batched when several memories are emitted
+        ↓
+validated Extraction → resolver → GraphStore (append-only)
+        ↓
+extracted.jsonl marker (+ pending/failed on error)
+```
+
+`graph_enabled=false` makes the hook a literal no-op.
+
+### 20.6 Rebuild
+
+Changing the extractor version requires an explicit rebuild (`graph build
+--rebuild`); the same version stays idempotent. A rebuild builds into
+`graph.building/` and swaps directories only after a complete run: an
+interrupted rebuild never destroys the previous projection. `reviews.jsonl` is
+carried over. The philosophy is *never migrate a projection semantically*;
+rebuild it from the tape.
+
+### 20.7 Recall
+
+`graph_recall_mode`: `off` (default; byte-for-byte the old path, graph modules
+untouched) · `augment` (union with agent annotations, deduped by memory id,
+single global budget applied **after** the union) · `only` (graph selects, the
+tape still supplies the text). Query seeds are deterministic (n-gram match on
+names/aliases; embeddings only as fallback, no LLM call per recall). Score =
+bottleneck edge confidence × `0.85^(depth-1)`.
+
+`graph_evidence` is returned separately from `annotations`, with paths,
+relation ids and per-edge provenance; metrics record seeds, paths considered/
+selected, unique memories, graph-only and overlap memories, and recall time.
+Orphan relations, archived memories and missing/corrupt graph files degrade
+gracefully (empty evidence), never blocking the traditional recall.
+
+### 20.8 Failure semantics and maintenance
+
+Transient errors (`pending`) are retried up to `graph_max_attempts`, then move
+to `failed` (audit history, append-only). Secrets are never extracted: the
+scanner gates the tape first. `graph pending`, `graph failed`, `graph retry
+[--id M####]` operate the queues; `graph review` lists open hypotheses and
+records `accept`/`reject`/`skip` decisions (append-only; the tape is never
+touched).
+
+### 20.9 Versioning
+
+`meta.json` declares `schema_version`, `extractor` name/version,
+`resolver_version` and source stats, so the projection on disk is always
+self-describing.
+
+### 20.10 F4 operational benchmark
+
+20 real memories (durable), same extractor, measured per batch size:
+
+| batch | calls | s | ms/mem | prompt tok/mem | extracted | pending | failed |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 1 | 20 | 224.9 | 11,245 | 411 | 20 | 0 | 0 |
+| 4 | 5 | 161.9 | 8,093 | 101 | 20 | 0 | 0 |
+| 8 | 3 | 123.0 | 6,149 | 70 | 20 | 0 | 0 |
+| 16 | 2 | 86.4 | 4,320 | 55 | 20 | 0 | 0 |
+
+Default `graph_batch_size=8` (knee with margin under the response-size risk);
+logical equivalence of batch vs single is guaranteed by the pipeline and
+covered by deterministic tests (real-model output varies run to run, as any
+LLM extraction does).

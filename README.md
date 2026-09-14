@@ -197,6 +197,10 @@ delivering ~11k context characters — context size is not evidence. See
 | Key | Default | Meaning |
 |-----|---------|---------|
 | `capacity` | 500 | memories per group (per agent) |
+| `graph_enabled` | `false` | write-time graph extraction (opt-in) |
+| `graph_batch_size` / `graph_batch_max_chars` | 8 / 12000 | extraction batching limits |
+| `graph_recall_mode` | `off` | graph recall: `off` / `augment` / `only` |
+| `graph_depth` / `graph_top_k` | 2 / 8 | traversal depth (semantic hops) and evidence cap |
 | `whiteboard_budget` | 4000 | char budget for reminders on the whiteboard |
 | `consolidate_threshold` | 6000 | whiteboard size that triggers consolidation |
 | `context_consolidate_threshold` | 6000 | chatbot context size that triggers its own consolidation |
@@ -221,6 +225,35 @@ delivering ~11k context characters — context size is not evidence. See
 | `api_key_env` | `DEEPSEEK_API_KEY` | env var that holds the API key |
 
 The API key is read from the environment only; it is never written to disk.
+
+## Graph projection (Graph Memory Machine v1)
+
+The tape stays the single source of truth; the graph is a rebuildable
+projection over it (like views), never a factual source by itself:
+
+```text
+Memory:  "Kalak crossed the rock."        (M0001)
+             │
+Graph:  Kalak --cross--> rock ── M0001        (every edge keeps its memory)
+```
+
+```bash
+python3 -m memory_machine -C <root> graph build --rebuild   # project the tape
+python3 -m memory_machine -C <root> graph status            # versions + counts
+python3 -m memory_machine -C <root> graph query "Kalak"     # entities→paths→memories
+python3 -m memory_machine -C <root> graph path Kalak rochedo
+python3 -m memory_machine -C <root> graph explain R0001     # edge → memory → text
+python3 -m memory_machine -C <root> graph review            # identity hypotheses
+python3 -m memory_machine -C <root> graph pending / failed / retry
+```
+
+Write-time extraction is opt-in (`graph_enabled=true`), batched
+(`graph_batch_size=8`; 20 real memories: 11.2s → 4.3s per memory, 411 → 55
+prompt tokens per memory from batch 1 → 16, zero failures). Recall adds the
+graph as a second, deterministic selection arm: `graph_recall_mode=off`
+(default) / `augment` / `only` — in every mode the evidence is rehydrated from
+the tape. Rebuilds are atomic (`graph.building/` + swap) and human review
+decisions survive them. See SPEC §20.
 
 ## Tests
 

@@ -113,7 +113,18 @@ def test_build_is_idempotent_per_extractor_tag(tmp_path):
     assert second["skipped"] == 2
     assert len(store.entities()) == first["counts"]["entities"]
 
-    third = build_graph(tape, store, ExtractorSpec(fake_extractor, "v2"), extractor_name="fake")
+    blocked = build_graph(
+        tape, store, ExtractorSpec(fake_extractor, "v2"), extractor_name="fake"
+    )
+    assert blocked["ok"] is False and "rebuild" in blocked["error"]
+
+    third = build_graph(
+        tape,
+        store,
+        ExtractorSpec(fake_extractor, "v2"),
+        extractor_name="fake",
+        rebuild=True,
+    )
     assert third["extracted"] == 2  # a new extractor version re-extracts
 
 
@@ -143,7 +154,7 @@ def test_failed_extractor_is_recorded_and_retried(tmp_path):
     assert len(store.failed_rows()) == 2
     assert store.extracted_ids("broken/v1") == set()
 
-    retried = build_graph(tape, store, fake_extractor, extractor_name="fake")
+    retried = build_graph(tape, store, fake_extractor, extractor_name="broken")
     assert retried["extracted"] == 2
 
 

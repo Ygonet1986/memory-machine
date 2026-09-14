@@ -83,9 +83,23 @@ def _build_parser() -> argparse.ArgumentParser:
     sub.add_parser("sessions", help="list sessions (JSON)")
     sub.add_parser("views", help="list memory views / projections (JSON)")
 
-    graph = sub.add_parser("graph", help="graph projection: build/status/explain/query/path (JSON)")
+    graph = sub.add_parser(
+        "graph",
+        help="graph projection: build/status/explain/query/path/pending/failed/retry/review (JSON)",
+    )
     graph.add_argument(
-        "action", choices=["build", "status", "explain", "query", "path"]
+        "action",
+        choices=[
+            "build",
+            "status",
+            "explain",
+            "query",
+            "path",
+            "pending",
+            "failed",
+            "retry",
+            "review",
+        ],
     )
     graph.add_argument("target", nargs="?", default="", help="relation id, query, or path source")
     graph.add_argument("target_b", nargs="?", default="", help="path target (graph path A B)")
@@ -97,8 +111,19 @@ def _build_parser() -> argparse.ArgumentParser:
         help="extractor: llm (default on build) or noop (diagnostic); "
         "status defaults to the extractor recorded in meta.json",
     )
+    graph.add_argument(
+        "--extractor-version", default="", help="override the extractor version (requires rebuild)"
+    )
     graph.add_argument("--depth", type=int, default=0, help="max semantic depth (0 = config)")
     graph.add_argument("--top-k", type=int, default=0, help="max paths/evidence (0 = config)")
+    graph.add_argument("--batch-size", type=int, default=0, help="extraction batch size (0 = config)")
+    graph.add_argument(
+        "--batch-max-chars", type=int, default=0, help="batch char limit (0 = config)"
+    )
+    graph.add_argument("--id", default="", help="memory id (retry) or hypothesis id (review)")
+    graph.add_argument("--accept", action="store_true", help="review: accept the hypothesis")
+    graph.add_argument("--reject", action="store_true", help="review: reject the hypothesis")
+    graph.add_argument("--skip", action="store_true", help="review: keep the hypothesis open")
 
     roll = sub.add_parser("rollup", help="consolidate older tape records (JSON)")
     roll.add_argument("--keep-recent", type=int, default=20)
@@ -383,26 +408,30 @@ def cmd_graph(args: argparse.Namespace) -> int:
     name = args.extractor
     if not name:
         recorded = str(store.meta().get("tag") or "").split("/")[0]
-        name = recorded or ("llm" if args.action == "build" else "noop")
+        name = recorded or ("llm" if args.action in {"build", "retry"} else "noop")
     resolver = None
+    batch_fn = None
     if name == "llm":
         from .graph_extract import GraphExtractor
 
         extractor_name = "llm"
-        if args.action == "build":
+        if args.action in {"build", "retry"}:
             from .graph_resolve import GraphResolver
 
             try:
-                extractor = GraphExtractor(m._ensure_client())
+                extractor = GraphExtractor(
+                    m._ensure_client(), version=args.extractor_version or None
+                )
             except LLMError as exc:
                 return _j({"ok": False, "error": str(exc)})
             spec = ExtractorSpec(extractor.extract, extractor.version)
+            batch_fn = extractor.extract_batch
             resolver = GraphResolver(
                 embedder=m._embedder(),
                 auto=m.config.graph_confidence_auto,
                 hypothesis=m.config.graph_confidence_hypothesis,
             )
-        else:  # status/explain only need the tag, never a client
+        else:  # status/explain/query/path/review only need the tag
             spec = ExtractorSpec(lambda record: {}, GraphExtractor.VERSION)
     else:
         spec = EXTRACTORS.get(name)
@@ -410,6 +439,7 @@ def cmd_graph(args: argparse.Namespace) -> int:
             return _j({"ok": False, "error": f"unknown extractor: {name}"})
         extractor_name = name
     tag = f"{extractor_name}/{spec.version}"
+
     if args.action == "status":
         return _j(
             graph_status(
@@ -425,6 +455,16 @@ def cmd_graph(args: argparse.Namespace) -> int:
         return _j(explain_relation(store, m.tape, args.target))
     if args.action in {"query", "path"}:
         return _j(_graph_read(store, m, args))
+    if args.action == "pending":
+        rows = store.pending_rows()
+        return _j({"ok": True, "pending": rows, "count": len(rows)})
+    if args.action == "failed":
+        rows = store.failed_rows()
+        return _j({"ok": True, "failed": rows, "count": len(rows)})
+    if args.action == "retry":
+        return _j(_graph_retry(store, m, spec, extractor_name, tag, args, resolver))
+    if args.action == "review":
+        return _j(_graph_review(store, args))
     return _j(
         build_graph(
             m.tape,
@@ -435,8 +475,84 @@ def cmd_graph(args: argparse.Namespace) -> int:
             extractor_name=extractor_name,
             resolver=resolver,
             max_attempts=m.config.graph_max_attempts,
+            batch_size=args.batch_size or m.config.graph_batch_size,
+            batch_max_chars=args.batch_max_chars or m.config.graph_batch_max_chars,
+            batch_fn=batch_fn,
         )
     )
+
+
+def _graph_retry(
+    store: GraphStore,
+    machine: Machine,
+    spec: ExtractorSpec,
+    extractor_name: str,
+    tag: str,
+    args: argparse.Namespace,
+    resolver: Any,
+) -> dict[str, Any]:
+    from .graph import apply_record_extraction
+
+    records = {record.id: record for record in machine.tape.read()}
+    ids = [args.id] if args.id else [row["memory_id"] for row in store.pending_rows(tag)]
+    outcomes: list[dict[str, Any]] = []
+    for memory_id in ids:
+        record = records.get(memory_id)
+        if record is None:
+            outcomes.append({"memory_id": memory_id, "status": "missing"})
+            continue
+        outcome = apply_record_extraction(
+            store,
+            record,
+            spec.fn,
+            tag=tag,
+            extractor_name=extractor_name,
+            extractor_version=spec.version,
+            resolver=resolver,
+            max_attempts=machine.config.graph_max_attempts,
+        )
+        outcomes.append({"memory_id": memory_id, **outcome})
+    return {"ok": True, "tag": tag, "retried": len(outcomes), "outcomes": outcomes}
+
+
+def _graph_review(store: GraphStore, args: argparse.Namespace) -> dict[str, Any]:
+    entities = {entity.id: entity for entity in store.entities()}
+    if args.id and (args.accept or args.reject or args.skip):
+        hypothesis = next(
+            (row for row in store.hypotheses() if row.get("id") == args.id), None
+        )
+        if hypothesis is None:
+            return {"ok": False, "error": f"unknown hypothesis: {args.id}"}
+        decision = "accept" if args.accept else "reject" if args.reject else "skip"
+        store.decide_hypothesis(args.id, decision)
+        if decision == "accept":
+            store.add_alias(
+                hypothesis["target_entity"],
+                hypothesis["source_entity"],
+                str(hypothesis.get("memory_id") or ""),
+                float(hypothesis.get("confidence") or 0.8),
+                "merge",
+            )
+        status = {"accept": "accepted", "reject": "rejected", "skip": "open"}[decision]
+        return {"ok": True, "id": args.id, "decision": decision, "status": status}
+
+    rows: list[dict[str, Any]] = []
+    for hypothesis in store.open_hypotheses():
+        source = entities.get(str(hypothesis.get("source_entity") or ""))
+        target = entities.get(str(hypothesis.get("target_entity") or ""))
+        rows.append(
+            {
+                **hypothesis,
+                "source_name": source.name if source else "",
+                "target_name": target.name if target else "",
+            }
+        )
+    return {
+        "ok": True,
+        "open": rows,
+        "count": len(rows),
+        "decided": len(store.reviewed_pairs()),
+    }
 
 
 def cmd_sessions(args: argparse.Namespace) -> int:

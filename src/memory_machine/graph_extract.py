@@ -54,6 +54,27 @@ vague.
 - If the record has nothing worth extracting, return \
 {{"entities":[],"events":[],"relations":[]}}."""
 
+GRAPH_BATCH_PROMPT = """You extract a small knowledge graph from SEVERAL \
+memory records of a persistent project tape. The records are the only source: \
+never invent facts, entities or relations they do not state.
+
+Return ONLY a JSON object, nothing else:
+
+{{"records":[{{"memory_id":"M0010","entities":[{{"ref":"e1","name":"Kalak","type":"person","confidence":0.99}}],"events":[],"relations":[]}},{{"memory_id":"M0011","entities":[],"events":[],"relations":[]}}]}}
+
+Rules:
+- One entry per record, keyed by the record's exact "memory_id" (as given in \
+the "### [M####]" header). Never emit a memory_id that is not in the input; \
+never omit a record - use empty lists when it has nothing to extract.
+- refs are LOCAL to each record's entry (e1, e2, ev1, ...). NEVER use graph \
+ids such as E0001 or R0001.
+- Same extraction contract as single-record mode: "entities" (name/type/\
+aliases/confidence), "events" (action/agent/object), "relations" (source/\
+relation/target/confidence), "mentions" (refs), per-item confidence 0..1.
+- Use short canonical verbs when obvious (cross, find, decide, create, use, \
+fix, add, remove, change, before, after, belongs_to, part_of).
+- Entity types: person|object|place|organization|concept|event|action|unknown."""
+
 _CANONICAL_RELATIONS = {
     "crossed": "cross",
     "crossing": "cross",
@@ -210,3 +231,56 @@ class GraphExtractor:
             extractor=self.name,
             extractor_version=self.version,
         )
+
+    def batch_text(self, records: list[Any]) -> str:
+        blocks = [
+            f"### [{record.id}]\n{self.memory_text(record)}" for record in records
+        ]
+        return "\n\n".join(blocks)
+
+    def extract_batch(self, records: list[Any]) -> dict[str, Extraction]:
+        """Extract several records in one transport call.
+
+        Returns ``{memory_id: Extraction}`` for the records it could parse;
+        a memory missing from the result is retried by the caller's
+        pending/failed policy. Memory ids outside the batch are ignored and
+        duplicated ids keep the first occurrence.
+        """
+        if not records:
+            return {}
+        if len(records) == 1:
+            record = records[0]
+            return {record.id: self.extract(record)}
+        messages = [
+            {"role": "system", "content": GRAPH_BATCH_PROMPT},
+            {"role": "user", "content": self.batch_text(records)},
+        ]
+        try:
+            content = self.client.complete(messages, temperature=self.temperature)
+        except Exception as exc:  # API, transport, timeout
+            raise TransientExtractionError(f"llm error: {exc}") from exc
+        if not str(content or "").strip():
+            raise TransientExtractionError("empty completion")
+        obj = extract_json_object(content)
+        raw_records = obj.get("records") if isinstance(obj, dict) else None
+        if not isinstance(raw_records, list):
+            raise ExtractionError("batch output has no records list")
+
+        allowed = {record.id for record in records}
+        out: dict[str, Extraction] = {}
+        for item in raw_records:
+            if not isinstance(item, dict):
+                continue
+            memory_id = str(item.get("memory_id") or "").strip()
+            if memory_id not in allowed or memory_id in out:
+                continue  # never process a memory that was not in the batch
+            try:
+                out[memory_id] = parse_extraction(
+                    item,
+                    memory_id=memory_id,
+                    extractor=self.name,
+                    extractor_version=self.version,
+                )
+            except ExtractionError:
+                continue  # per-record failure -> retried by the caller
+        return out

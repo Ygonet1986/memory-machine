@@ -736,36 +736,68 @@ class Machine:
             "new_agent": created,
         }
 
+    def _graph_eligible(self, record: MemoryRecord) -> bool:
+        if not self.config.graph_enabled or record.derived_from:
+            return False
+        from .graph import parse_types
+
+        return record.type in parse_types(self.config.graph_extract_types)
+
+    def _graph_pipeline(self) -> tuple[Any, Any, Any]:
+        """Build (store, extractor, resolver) for the current project."""
+        from .graph import GraphStore
+        from .graph_extract import GraphExtractor
+        from .graph_resolve import GraphResolver
+
+        store = GraphStore(resolve_path(self.root, self.config.graph_path))
+        extractor = GraphExtractor(self._ensure_client())
+        resolver = GraphResolver(
+            embedder=self._embedder(),
+            auto=self.config.graph_confidence_auto,
+            hypothesis=self.config.graph_confidence_hypothesis,
+        )
+        return store, extractor, resolver
+
     def _graph_after_append(self, record: MemoryRecord) -> None:
-        """Project a freshly appended durable memory into the graph (F2).
+        """Project a freshly appended durable memory into the graph (F2/F4).
 
         Runs strictly after the tape append: failures follow the pending/failed
         policy and never propagate, so the tape is never rolled back. With
         ``graph_enabled=false`` this is a no-op and the old path is untouched.
         """
-        if not self.config.graph_enabled:
-            return
-        from .graph import GraphStore, apply_record_extraction, parse_types
+        self._graph_after_appends([record])
 
-        if record.derived_from or record.type not in parse_types(
-            self.config.graph_extract_types
-        ):
+    def _graph_after_appends(self, records: list[MemoryRecord]) -> None:
+        """Project one or more freshly appended records (batched transport).
+
+        Each record keeps its own idempotency unit; batching only groups the
+        LLM calls. Any failure is recorded in the projection and never
+        propagates to the caller.
+        """
+        eligible = [record for record in records if self._graph_eligible(record)]
+        if not eligible:
             return
+        from .graph import apply_batch_extraction, apply_record_extraction
+
+        store = None
         try:
-            from .graph_extract import GraphExtractor
-            from .graph_resolve import GraphResolver
-
-            store = GraphStore(resolve_path(self.root, self.config.graph_path))
-            extractor = GraphExtractor(self._ensure_client())
-            resolver = GraphResolver(
-                embedder=self._embedder(),
-                auto=self.config.graph_confidence_auto,
-                hypothesis=self.config.graph_confidence_hypothesis,
-            )
-            apply_record_extraction(
+            store, extractor, resolver = self._graph_pipeline()
+            if len(eligible) == 1:
+                apply_record_extraction(
+                    store,
+                    eligible[0],
+                    extractor.extract,
+                    tag=extractor.tag,
+                    extractor_name=extractor.name,
+                    extractor_version=extractor.version,
+                    resolver=resolver,
+                    max_attempts=self.config.graph_max_attempts,
+                )
+                return
+            apply_batch_extraction(
                 store,
-                record,
-                extractor.extract,
+                eligible,
+                extractor.extract_batch,
                 tag=extractor.tag,
                 extractor_name=extractor.name,
                 extractor_version=extractor.version,
@@ -776,7 +808,11 @@ class Machine:
             # The tape is already committed; surface the projection failure if
             # possible and never propagate it to the caller.
             try:
-                store.mark_failed(record.id, f"projection error: {exc}", extractor="graph")
+                if store is not None:
+                    for record in eligible:
+                        store.mark_failed(
+                            record.id, f"projection error: {exc}", extractor="graph"
+                        )
             except Exception:
                 pass
 
@@ -893,6 +929,7 @@ class Machine:
         saved: list[dict[str, Any]] = []
         new_agents = 0
         skipped_secrets = 0
+        projected: list[MemoryRecord] = []
 
         for rec in memories:
             try:
@@ -905,7 +942,8 @@ class Machine:
             saved.append(rec.to_dict())
             if created:
                 new_agents += 1
-            self._graph_after_append(rec)
+            projected.append(rec)
+        self._graph_after_appends(projected)
 
         # Memorize almost everything: record the turn itself on the tape (last).
         turn_record = MemoryRecord(
@@ -1332,6 +1370,7 @@ class Machine:
         saved: list[dict[str, Any]] = []
         new_agents = 0
         skipped_secrets = 0
+        projected: list[MemoryRecord] = []
 
         def _append(rec: MemoryRecord) -> None:
             nonlocal new_agents, skipped_secrets
@@ -1342,7 +1381,7 @@ class Machine:
                 saved.append(rec.to_dict())
                 if created:
                     new_agents += 1
-                self._graph_after_append(rec)
+                projected.append(rec)
             except SecretError:
                 skipped_secrets += 1
 
@@ -1350,6 +1389,7 @@ class Machine:
             rec = memory_from_spec(spec)
             if rec is not None:
                 _append(rec)
+        self._graph_after_appends(projected)
 
         turn_record = MemoryRecord(
             type="memory",

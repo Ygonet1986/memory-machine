@@ -137,3 +137,72 @@ def test_config_accepts_guarded_mode_and_flags():
     assert cfg.graph_augment_min_score == 1.0
     assert cfg.graph_augment_max_items == 0
     assert cfg.graph_resolver_candidates == 1
+
+
+def test_guarded_defaults_follow_the_r3_recipe():
+    cfg = Config()
+    assert cfg.graph_augment_hub_degree == 20
+    assert cfg.graph_augment_max_items == 3
+    assert cfg.graph_augment_min_score == 0.80
+    assert cfg.graph_augment_question_gate is False
+    assert cfg.graph_hub_degree == 0  # generic traversal knob untouched
+
+
+def test_guarded_mode_uses_the_augment_hub_degree(tmp_path):
+    machine = _machine(
+        tmp_path,
+        "augment_guarded",
+        graph_augment_hub_degree=2,
+        graph_augment_min_score=0.0,
+        graph_augment_max_items=0,
+    )
+    _hub_graph(tmp_path)
+
+    result = machine._graph_recall("Kalak", guard=True)
+
+    ids = {item.memory_id for item in result.evidence}
+    assert "M0003" not in ids  # expansion from the hub is blocked
+
+
+def test_plain_augment_ignores_the_guarded_hub_default(tmp_path):
+    machine = _machine(tmp_path, "augment")
+    _hub_graph(tmp_path)
+
+    result = machine._graph_recall("Kalak", guard=False)
+
+    ids = {item.memory_id for item in result.evidence}
+    assert "M0003" in ids  # v1 augment stays uncapped
+
+
+def test_question_gate_blocks_low_coverage_but_keeps_high_coverage(tmp_path):
+    machine = _machine(
+        tmp_path,
+        "augment_guarded",
+        graph_augment_hub_degree=0,
+        graph_augment_min_score=0.0,
+        graph_augment_max_items=0,
+        graph_augment_question_gate=True,
+        graph_augment_question_min_cov=0.5,
+    )
+    _seed_store(machine)
+
+    result = machine.recall("Kalak crossed the rock")
+
+    # M0001's text covers the question; M0002 (Kalak knows the user) does not
+    assert {item["memory_id"] for item in result["graph_evidence"]} == {"M0001"}
+    assert {item["memory_id"] for item in result["annotations"]} == {"M0001"}
+
+
+def test_question_gate_is_off_by_default(tmp_path):
+    machine = _machine(
+        tmp_path,
+        "augment_guarded",
+        graph_augment_hub_degree=0,
+        graph_augment_min_score=0.0,
+        graph_augment_max_items=0,
+    )
+    _seed_store(machine)
+
+    result = machine.recall("Kalak crossed the rock")
+
+    assert {item["memory_id"] for item in result["graph_evidence"]} == {"M0001", "M0002"}

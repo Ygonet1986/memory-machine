@@ -113,10 +113,10 @@ ARM_MODES = {
 #   precise = precision     -> keeps 2/3 gold (case 6, no answer effect), -83% non-gold
 ARM_FLAGS = {
     "graph_augment_guarded": dict(
-        graph_hub_degree=0, graph_augment_min_score=0.80, graph_augment_max_items=5
+        graph_augment_hub_degree=0, graph_augment_min_score=0.80, graph_augment_max_items=5
     ),
     "graph_augment_precise": dict(
-        graph_hub_degree=20, graph_augment_min_score=0.80, graph_augment_max_items=3
+        graph_augment_hub_degree=20, graph_augment_min_score=0.80, graph_augment_max_items=3
     ),
 }
 

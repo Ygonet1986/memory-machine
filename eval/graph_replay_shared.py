@@ -55,6 +55,21 @@ OUT_DIR = HERE / "graph_out"
 VARIANTS = ["graph_off", "graph_augment", "graph_augment_guarded", "graph_augment_precise"]
 
 
+def copy_case(source: Path, dest: Path) -> None:
+    """Copy only the frozen inputs: tape, manifest and the graph projection.
+
+    Copying the whole arm directory would carry a stale whiteboard.json and
+    inflate the agent recall with annotations from a previous run.
+    """
+    dest.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(source / "tape.jsonl", dest / "tape.jsonl")
+    if (source / "manifest.json").exists():
+        shutil.copy2(source / "manifest.json", dest / "manifest.json")
+    if (dest / "graph").exists():
+        shutil.rmtree(dest / "graph")
+    shutil.copytree(source / "graph", dest / "graph")
+
+
 def variant_config(variant: str) -> Config:
     mode = {
         "graph_off": "off",
@@ -141,12 +156,12 @@ def main() -> None:
 
         base = root / f"case_{index:02d}"
         source = args.reuse_root / f"case_{index:02d}" / "graph_augment"
-        shutil.copytree(source, base)
+        copy_case(source, base)
 
         # ---- one agent recall per case, frozen for every variant
         off_cfg = variant_config("graph_off")
         agent_dir = root / f"case_{index:02d}_agent"
-        shutil.copytree(source, agent_dir)
+        copy_case(source, agent_dir)
         agent_machine = Machine(agent_dir, config=off_cfg, client=agent_client)
         agent_machine._invalidate_recall_cache()
         agent_result = agent_machine.recall(case["question"], debug=True)
@@ -166,8 +181,9 @@ def main() -> None:
 
         arm_rows: dict[str, Any] = {}
         graph_only_by_arm: dict[str, list[str]] = {}
-        agent_calls_before_variants = agent_client.calls
+        agent_recall_calls = agent_client.calls
         for variant in VARIANTS:
+            calls_before_variant = agent_client.calls
             cfg = variant_config(variant)
             evidence = (
                 variant_evidence(base, cfg, case["question"])
@@ -203,7 +219,7 @@ def main() -> None:
             union = list(by_id.values())
 
             answer_dir = root / f"case_{index:02d}_{variant}"
-            shutil.copytree(source, answer_dir)
+            copy_case(source, answer_dir)
             machine = Machine(answer_dir, config=cfg, client=agent_client)
             machine.whiteboard.annotations = []
             machine.whiteboard.subject = case["question"]
@@ -217,6 +233,12 @@ def main() -> None:
                 min_item_chars=cfg.evidence_payload_min_item,
             )
             context = payload_as_context(payload)
+            # Shared-agent gate: building the graph evidence, the union and
+            # the payload is pure local work, so the client must not have been
+            # called since this variant started (the answerer call comes next).
+            assert agent_client.calls == calls_before_variant, (
+                f"case {index} {variant}: union/payload called the LLM"
+            )
             answer = answer_with(
                 agent_client, machine, case["question"] + provenance, extra_context=context
             )
@@ -245,11 +267,9 @@ def main() -> None:
                 "evidence_complete": int(set(required) <= annotated),
             }
 
-        # Shared-agent gate: variants must not have consulted the agents at
-        # all, and the off arm must be a subset of the frozen agent set.
-        assert agent_client.calls == agent_calls_before_variants, (
-            f"case {index}: variants called the agents"
-        )
+        # Shared-agent gate: the agent recall ran once, the off arm is a
+        # subset of the frozen agent set, and the answerer calls are the only
+        # LLM calls made by the variants.
         assert set(arm_rows["graph_off"]["annotations"]) <= agent_ids, (
             f"case {index}: off arm contains non-agent annotations"
         )
@@ -274,6 +294,7 @@ def main() -> None:
             "graph": case["graph"],
             "shared_agents": True,
             "agent_ids": sorted(agent_ids),
+            "agent_recall_calls": agent_recall_calls,
             "retrieval": retrieval_metrics(
                 required,
                 sorted(agent_ids),

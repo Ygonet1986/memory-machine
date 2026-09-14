@@ -1214,17 +1214,20 @@ class Machine:
         """
         try:
             from .graph import GraphStore
-            from .graph_recall import GraphRecall, guard_evidence
+            from .graph_recall import GraphRecall, guard_evidence, question_gate
 
             store = GraphStore(resolve_path(self.root, self.config.graph_path))
             if not store.exists():
                 return None
+            hub_degree = self.config.graph_hub_degree
+            if guard and not hub_degree:
+                hub_degree = self.config.graph_augment_hub_degree
             recall = GraphRecall(
                 store.index(),
                 embedder=self._embedder(),
                 depth=self.config.graph_depth,
                 top_k=self.config.graph_top_k,
-                hub_degree=self.config.graph_hub_degree,
+                hub_degree=hub_degree,
             )
             result = recall.recall(question)
             if guard:
@@ -1233,6 +1236,14 @@ class Machine:
                     min_score=self.config.graph_augment_min_score,
                     max_items=self.config.graph_augment_max_items,
                 )
+                if self.config.graph_augment_question_gate:
+                    records = {record.id: record for record in self.tape.read()}
+                    result.evidence = question_gate(
+                        result.evidence,
+                        records,
+                        question,
+                        min_cov=self.config.graph_augment_question_min_cov,
+                    )
                 result.paths_selected = sum(len(item.paths) for item in result.evidence)
             return result
         except Exception:

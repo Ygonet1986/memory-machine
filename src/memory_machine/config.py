@@ -71,9 +71,12 @@ class Config:
     graph_batch_size: int = 8
     graph_batch_max_chars: int = 12000
     graph_hub_degree: int = 0
+    graph_augment_hub_degree: int = 20
     graph_augment_min_score: float = 0.80
-    graph_augment_max_items: int = 5
+    graph_augment_max_items: int = 3
     graph_augment_weight: float = 1.0
+    graph_augment_question_gate: bool = False
+    graph_augment_question_min_cov: float = 0.30
     graph_resolver_candidates: int = 10
     coverage_mode: str = "off"
     cascade_min_score: float = 0.0
@@ -185,11 +188,14 @@ class Config:
         self.graph_batch_size = max(1, min(32, _int(self.graph_batch_size, 8)))
         self.graph_batch_max_chars = max(0, _int(self.graph_batch_max_chars, 12000))
         self.graph_hub_degree = max(0, _int(self.graph_hub_degree, 0))
-        self.graph_augment_max_items = max(0, _int(self.graph_augment_max_items, 5))
+        self.graph_augment_hub_degree = max(0, _int(self.graph_augment_hub_degree, 20))
+        self.graph_augment_max_items = max(0, _int(self.graph_augment_max_items, 3))
+        self.graph_augment_question_gate = bool(self.graph_augment_question_gate)
         self.graph_resolver_candidates = max(1, _int(self.graph_resolver_candidates, 10))
         for name, default in (
             ("graph_augment_min_score", 0.80),
             ("graph_augment_weight", 1.0),
+            ("graph_augment_question_min_cov", 0.30),
         ):
             try:
                 value = float(getattr(self, name))

@@ -201,6 +201,42 @@ floor can be attributed to a policy. FP/FN calibration lists are stored in
 `eval/graph_out/fact_presence_*.jsonl` (metric-present-but-wrong = 0–5 per arm;
 metric-absent-but-correct tracked separately), as pre-registered.
 
+## U4.2 — replication: identical-context oscillation floor
+
+`eval/u4_replication.py` re-answers and re-judges the **frozen U3 contexts**
+(assembly verified byte-identical on all 60 case-arm rebuilds before running:
+`rebuild_delivery` asserts equality with the snapshot context or aborts). Arms
+`graph_augment_precise` and `i5_single` over the 30 U3 cases; N=3, and N=5 on
+the U3 flip cases (20, 22, 26, 38, 41). The U2b round (0, 9, 86, 88) is
+excluded: its contexts predate the payload-window code change (8db0885) and are
+not byte-reproducible — replicating them on current code would measure a new
+arm, violating the pre-registered fidelity rule.
+
+Results (`eval/graph_out/u4_replication_summary.md`, ledger jsonl):
+
+1. **Identical-context oscillation floor.** Within-arm pair flip rate
+   **0.082** (precise, 4/30) and **0.073** (i5_single, 5/30): 6/30 cases flip
+   verdict when the exact same context is answered again. First-replicate vs
+   modal agree in 56/60 arm-cases. This is the natural noise the U3 nominal
+   comparison was swimming in.
+2. **The modal-corrected causal ledger is essentially empty.** Only two cases
+   keep a modal delta: case 20 (+2, "repair") and case 26 (−1, "regression").
+   Both are high-oscillation cases: case 20's arms are 1/5-vs-4/5 correct and
+   case 26's precise arm itself flips (partial modal from 2/2/1). The U3
+   nominal flips (22 repaired, 41 regressed) **collapse to delta 0** under the
+   modal reading: both sides are all/mostly correct or all/mostly incorrect.
+3. **Strict totals under modal verdict** are 21 (precise, +2 partial) vs
+   22 (i5_single, +1 partial): a +1 that lives entirely in unstable cases.
+
+**Conclusion of U4.2.** With byte-identical contexts, verdicts oscillate at a
+7–8% floor, and every U3 window flip either vanishes or sits in the noise.
+The nominal "+1 repair / −2 regression" ledger (which triggered U4.1→U4.2) is
+therefore **within the answerer/judge oscillation floor** — no delivery-policy
+effect survives replication. This confirms, with a measured floor, the U3
+decision to keep `evidence_payload_window` opt-in default off, and it is the
+empirical gate U4.3 must clear: a context-composition policy only counts as
+evidence if its effect exceeds the 0.07–0.08 flip rate.
+
 ## Reproduce
 
 ```bash

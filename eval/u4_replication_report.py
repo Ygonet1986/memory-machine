@@ -96,8 +96,10 @@ def main() -> None:
             f"{', '.join(v[0] for v in b['verdicts'])} | {b_modal} | {delta:+d} |"
         )
 
-    a_sum = sum(RANK[md["precise_modal"]] for md in ledger)
-    b_sum = sum(RANK[md["i5_single_modal"]] for md in ledger)
+    a_corr = sum(1 for md in ledger if md["precise_modal"] == "correct")
+    b_corr = sum(1 for md in ledger if md["i5_single_modal"] == "correct")
+    a_par = sum(1 for md in ledger if md["precise_modal"] == "partial")
+    b_par = sum(1 for md in ledger if md["i5_single_modal"] == "partial")
     bins = {"u3a": [], "u3b": []}
     for md in ledger:
         bins[md["slice"].replace("longmemeval_", "")].append(md["modal_delta"])
@@ -106,7 +108,10 @@ def main() -> None:
         "## Aggregate",
         "",
         f"- cases: {len(ledger)} (u3a: {len(bins['u3a'])}, u3b: {len(bins['u3b'])})",
-        f"- strict by **modal** verdict: precise {a_sum}/{len(ledger)}, i5_single {b_sum}/{len(ledger)}",
+        f"- strict (correct) by **modal** verdict: precise {a_corr} (+{a_par} partial), "
+        f"i5_single {b_corr} (+{b_par} partial)",
+        "- nominal (first-replicate) strict for reference: see per-case table (first verdict "
+        "in each cell); the modal reading above is the replication's result.",
         f"- cases where the first replicate differs from the modal verdict: {nominal_vs_modal} "
         f"(of {len(rows)} arm-cases)",
         f"- cases with any within-arm flip (identical context): {flips_any}/{len(ledger)}",

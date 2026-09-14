@@ -288,7 +288,7 @@ def test_resolver_hypothesis_and_alias_merge_at_projection_level(tmp_path):
             )
         ),
     )
-    edges = [r for r in store.relations() if r.kind == "hypothesis"]
+    edges = [r for r in store.relations() if r.kind == "resolution"]
     criatura = next(e for e in store.entities() if e.name == "criatura")
     assert len(edges) == 1
     assert edges[0].relation == "possibly_same_as"

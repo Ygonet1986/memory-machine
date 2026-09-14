@@ -26,3 +26,8 @@ eval/data/
 
 # E2E benchmark outputs (snapshots; keep locally)
 eval/out/
+
+# Graph projection (derived, local)
+/graph/
+/graph.building/
+/graph.previous/

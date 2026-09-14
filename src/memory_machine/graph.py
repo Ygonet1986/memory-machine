@@ -36,6 +36,12 @@ from pathlib import Path
 from typing import Any, Callable, Iterable
 
 GRAPH_EXTRACTOR_VERSION = "v1"
+GRAPH_SCHEMA_VERSION = 1
+GRAPH_RESOLVER_VERSION = "1.0"
+
+# Epistemological/resolution edges are metadata, not domain knowledge: recall
+# traversal never follows them unless explicitly asked.
+RESOLUTION_KINDS = {"resolution", "hypothesis"}
 
 DURABLE_TYPES = ("decision", "lesson", "preference", "bugfix", "build")
 
@@ -321,6 +327,7 @@ class GraphIndex:
         self.memory_entities: dict[str, set[str]] = {}
         self.entity_memories: dict[str, set[str]] = {}
         self.mention_confidence: dict[tuple[str, str], float] = {}
+        self.merged: dict[str, str] = {}  # accepted review merges (source -> target)
 
     @classmethod
     def load(cls, store: "GraphStore") -> "GraphIndex":
@@ -329,6 +336,15 @@ class GraphIndex:
             index.add_entity(entity)
         for alias in store.aliases():
             index.alias_map.setdefault(normalize_name(alias.alias), alias.entity_id)
+            if alias.method == "merge" and alias.alias in index.entities:
+                index.merged.setdefault(alias.alias, alias.entity_id)
+        for pair, decision in store.reviewed_pairs().items():
+            if decision != "accept":
+                continue
+            source = index.by_norm.get(pair[0]) or index.alias_map.get(pair[0])
+            target = index.by_norm.get(pair[1]) or index.alias_map.get(pair[1])
+            if source and target and source != target:
+                index.merged.setdefault(source, target)
         for relation in store.relations():
             index.add_relation(relation)
         for mention in store.mentions():
@@ -361,7 +377,16 @@ class GraphIndex:
 
     def resolve(self, name: str) -> str:
         key = normalize_name(name)
-        return self.by_norm.get(key) or self.alias_map.get(key) or ""
+        entity_id = self.by_norm.get(key) or self.alias_map.get(key) or ""
+        return self.canonical(entity_id) if entity_id else ""
+
+    def canonical(self, entity_id: str) -> str:
+        """Follow accepted review merges (append-only redirects)."""
+        seen: set[str] = set()
+        while entity_id in self.merged and entity_id not in seen:
+            seen.add(entity_id)
+            entity_id = self.merged[entity_id]
+        return entity_id
 
     def edges_of(
         self,
@@ -369,6 +394,7 @@ class GraphIndex:
         *,
         direction: str = "both",
         kinds: Iterable[str] | None = None,
+        include_resolution: bool = False,
     ) -> list[GraphRelation]:
         want = {str(k).strip().lower() for k in kinds} if kinds else None
         edges = []
@@ -378,6 +404,8 @@ class GraphIndex:
             edges.extend(self.in_edges.get(entity_id, []))
         if want:
             edges = [r for r in edges if r.kind in want or r.relation in want]
+        elif not include_resolution:
+            edges = [r for r in edges if r.kind not in RESOLUTION_KINDS]
         return edges
 
     def neighbors(
@@ -388,11 +416,13 @@ class GraphIndex:
         min_confidence: float = 0.0,
         direction: str = "both",
         kinds: Iterable[str] | None = None,
+        include_resolution: bool = False,
     ) -> list[tuple[GraphRelation, str, float]]:
         """BFS over edges; returns ``(relation, other_entity, path_confidence)``.
 
         The path confidence is the bottleneck (minimum edge confidence) along
-        the path that reached the entity.
+        the path that reached the entity. Resolution edges are skipped unless
+        ``include_resolution`` is set.
         """
         frontier = [(entity_id, 1.0)]
         seen = {entity_id: 1.0}
@@ -400,7 +430,12 @@ class GraphIndex:
         for _ in range(max(1, depth)):
             nxt: list[tuple[str, float]] = []
             for current, path_conf in frontier:
-                for relation in self.edges_of(current, direction=direction, kinds=kinds):
+                for relation in self.edges_of(
+                    current,
+                    direction=direction,
+                    kinds=kinds,
+                    include_resolution=include_resolution,
+                ):
                     if relation.confidence < min_confidence:
                         continue
                     other = relation.target if relation.source == current else relation.source
@@ -523,7 +558,9 @@ class GraphStore:
         "extracted.jsonl",
         "failed.jsonl",
         "pending.jsonl",
+        "hypotheses.jsonl",
     )
+    REVIEW_FILE = "reviews.jsonl"  # human decisions: preserved across rebuilds
 
     def __init__(self, directory: Path | str) -> None:
         self.directory = Path(directory)
@@ -704,6 +741,131 @@ class GraphStore:
         ]
         path.write_text("\n".join(keep) + ("\n" if keep else ""), encoding="utf-8")
 
+    # ----------------------------------------------------------- hypotheses
+
+    def add_hypothesis(
+        self,
+        *,
+        kind: str,
+        source_entity: str,
+        target_entity: str,
+        confidence: float,
+        memory_id: str,
+        source_name: str = "",
+        target_name: str = "",
+        resolver_version: str = GRAPH_RESOLVER_VERSION,
+        relation_id: str = "",
+        hypothesis_id: str = "",
+    ) -> dict[str, Any]:
+        if not hypothesis_id:
+            hypothesis_id = f"H{self.next_hypothesis_num():04d}"
+        row = {
+            "id": hypothesis_id,
+            "kind": kind,
+            "source_entity": source_entity,
+            "target_entity": target_entity,
+            "source_name": source_name,
+            "target_name": target_name,
+            "confidence": max(0.0, min(1.0, float(confidence))),
+            "memory_id": memory_id,
+            "relation_id": relation_id,
+            "resolver_version": resolver_version,
+            "status": "open",
+            "created_at": _now(),
+        }
+        self._append("hypotheses.jsonl", row)
+        return row
+
+    def next_hypothesis_num(self) -> int:
+        numbers = []
+        for row in self._load("hypotheses.jsonl"):
+            match = re.match(r"^H(\d+)$", str(row.get("id") or ""))
+            if match:
+                numbers.append(int(match.group(1)))
+        return max(numbers, default=0) + 1
+
+    def hypotheses(self) -> list[dict[str, Any]]:
+        """Latest state per hypothesis id (append-only decision rows)."""
+        latest: dict[str, dict[str, Any]] = {}
+        for row in self._load("hypotheses.jsonl"):
+            hypothesis_id = str(row.get("id") or "")
+            if not hypothesis_id:
+                continue
+            current = latest.get(hypothesis_id)
+            if current is None:
+                latest[hypothesis_id] = dict(row)
+            else:
+                merged = dict(current)
+                merged.update(row)
+                latest[hypothesis_id] = merged
+        return list(latest.values())
+
+    def reviewed_pairs(self) -> dict[tuple[str, str], str]:
+        """Latest human decision per name pair (accept/reject/skip)."""
+        decisions: dict[tuple[str, str], str] = {}
+        for row in self._load(self.REVIEW_FILE):
+            source = normalize_name(str(row.get("source_name") or ""))
+            target = normalize_name(str(row.get("target_name") or ""))
+            if not source or not target:
+                continue
+            decision = str(row.get("decision") or "skip")
+            decisions[(source, target)] = decision
+        return decisions
+
+    def open_hypotheses(self) -> list[dict[str, Any]]:
+        reviewed = self.reviewed_pairs()
+        out = []
+        for row in self.hypotheses():
+            pair = (
+                normalize_name(str(row.get("source_name") or "")),
+                normalize_name(str(row.get("target_name") or "")),
+            )
+            if reviewed.get(pair) in {"accept", "reject"}:
+                continue
+            out.append(row)
+        return out
+
+    def add_review(
+        self,
+        source_name: str,
+        target_name: str,
+        decision: str,
+        *,
+        hypothesis_id: str = "",
+        confidence: float = 0.0,
+    ) -> dict[str, Any]:
+        decision = decision if decision in {"accept", "reject", "skip"} else "skip"
+        row = {
+            "kind": "possibly_same_as",
+            "source_name": source_name,
+            "target_name": target_name,
+            "decision": decision,
+            "hypothesis_id": hypothesis_id,
+            "confidence": max(0.0, min(1.0, float(confidence))),
+            "reviewed_at": _now(),
+        }
+        self._append(self.REVIEW_FILE, row)
+        return row
+
+    def decide_hypothesis(self, hypothesis_id: str, decision: str) -> dict[str, Any]:
+        """Append a human review decision; never rewrites the hypothesis rows."""
+        row = next(
+            (item for item in self.hypotheses() if item.get("id") == hypothesis_id), None
+        ) or {}
+        return self.add_review(
+            str(row.get("source_name") or row.get("source_entity") or ""),
+            str(row.get("target_name") or row.get("target_entity") or ""),
+            decision,
+            hypothesis_id=hypothesis_id,
+            confidence=float(row.get("confidence") or 0.0),
+        )
+
+    def rejected_pairs(self) -> set[tuple[str, str]]:
+        """Rejected identity pairs keyed by normalized names (stable across rebuilds)."""
+        return {
+            pair for pair, decision in self.reviewed_pairs().items() if decision == "reject"
+        }
+
     # --------------------------------------------------------------- load
 
     def entities(self) -> list[GraphEntity]:
@@ -761,12 +923,23 @@ class GraphStore:
         return GraphIndex.load(self)
 
     def clear(self) -> None:
-        """Remove every graph file (used by ``--rebuild``). Never the tape."""
+        """Remove the projection files. Human reviews are preserved."""
         for name in (*self.FILES, "meta.json"):
             try:
                 self._path(name).unlink(missing_ok=True)
             except OSError:
                 continue
+
+    def copy_reviews_from(self, other: "GraphStore") -> int:
+        """Carry human review decisions into a fresh projection."""
+        import shutil
+
+        source = other._path(self.REVIEW_FILE)
+        if not source.exists():
+            return 0
+        self.directory.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, self._path(self.REVIEW_FILE))
+        return 1
 
 
 def _ensure_entity(
@@ -799,6 +972,7 @@ def _resolve_with_resolver(
     created: list[str],
     extractor_name: str,
     extractor_version: str,
+    resolver_version: str = "",
 ) -> str:
     """Resolve/create one entity, honouring the resolver's confidence bands."""
     resolution = None
@@ -826,18 +1000,32 @@ def _resolve_with_resolver(
     )
     if resolution is not None and getattr(resolution, "hypothesis", False):
         other_id = str(getattr(resolution, "other_id", "") or "")
-        if other_id:
+        other = index.entities.get(other_id)
+        pair = (normalize_name(name), normalize_name(other.name if other else other_id))
+        if other_id and pair not in store.rejected_pairs():
+            confidence = float(getattr(resolution, "confidence", 0.6) or 0.6)
             relation = store.add_relation(
                 entity_id,
                 "possibly_same_as",
                 other_id,
                 record.id,
-                float(getattr(resolution, "confidence", 0.6) or 0.6),
-                kind="hypothesis",
+                confidence,
+                kind="resolution",
                 extractor=extractor_name,
                 extractor_version=extractor_version,
             )
             index.add_relation(relation)
+            store.add_hypothesis(
+                kind="possibly_same_as",
+                source_entity=entity_id,
+                target_entity=other_id,
+                source_name=name,
+                target_name=other.name if other else "",
+                confidence=confidence,
+                memory_id=record.id,
+                resolver_version=resolver_version or GRAPH_RESOLVER_VERSION,
+                relation_id=relation.id,
+            )
     return entity_id
 
 
@@ -851,6 +1039,7 @@ def project_extraction(
     resolver: Any = None,
     extractor_name: str = "",
     extractor_version: str = "",
+    resolver_version: str = "",
 ) -> dict[str, int]:
     """Mutate the projection from a fully validated ``Extraction``.
 
@@ -872,6 +1061,7 @@ def project_extraction(
             store, index, resolver, item.name, item.type, record,
             created=created, extractor_name=extractor_name,
             extractor_version=extractor_version,
+            resolver_version=resolver_version,
         )
         local[normalize_name(item.name)] = entity_id
         refs.setdefault(item.ref, entity_id)
@@ -992,20 +1182,58 @@ def _write_meta(
     extractor_version: str,
     extract_types: Iterable[str] | None = None,
     last_memory_id: str = "",
+    resolver_version: str = GRAPH_RESOLVER_VERSION,
+    source: dict[str, int] | None = None,
 ) -> dict[str, Any]:
     counts = store.counts()
     meta = {
-        "version": GRAPH_EXTRACTOR_VERSION,
+        "version": GRAPH_SCHEMA_VERSION,
+        "schema_version": GRAPH_SCHEMA_VERSION,
         "extractor": extractor_name,
         "extractor_version": extractor_version,
+        "resolver_version": resolver_version,
         "tag": tag,
         "built_at": _now(),
         "extract_types": sorted(extract_types) if extract_types else sorted(DURABLE_TYPES),
+        "source": source or {},
         "counts": counts,
         "last_memory_id": last_memory_id,
     }
     store.write_meta(meta)
     return meta
+
+
+def _apply_validated(
+    store: GraphStore,
+    index: GraphIndex,
+    record: Any,
+    extraction: Extraction,
+    *,
+    tag: str,
+    extractor_name: str,
+    extractor_version: str,
+    resolver: Any,
+    resolver_version: str,
+) -> dict[str, Any]:
+    """Project one validated extraction, mark it and refresh meta."""
+    result = project_extraction(
+        store, index, record, extraction, tag=tag, resolver=resolver,
+        extractor_name=extractor_name, extractor_version=extractor_version,
+        resolver_version=resolver_version,
+    )
+    store.mark_extracted(
+        record.id, result["entities"], result["relations"], extractor=tag
+    )
+    store.drop_pending(record.id)
+    _write_meta(
+        store,
+        tag=tag,
+        extractor_name=extractor_name or "custom",
+        extractor_version=extractor_version,
+        resolver_version=resolver_version,
+        last_memory_id=record.id,
+    )
+    return {"ok": True, "status": "extracted", **result}
 
 
 def apply_record_extraction(
@@ -1017,6 +1245,7 @@ def apply_record_extraction(
     extractor_name: str = "",
     extractor_version: str = "",
     resolver: Any = None,
+    resolver_version: str = GRAPH_RESOLVER_VERSION,
     index: GraphIndex | None = None,
     max_attempts: int = MAX_ATTEMPTS,
 ) -> dict[str, Any]:
@@ -1060,20 +1289,240 @@ def apply_record_extraction(
         return {"ok": False, "status": "failed", "error": str(exc)}
 
     idx = index if index is not None else store.index()
-    result = project_extraction(
-        store, idx, record, extraction, tag=tag, resolver=resolver,
-        extractor_name=extractor_name, extractor_version=extractor_version,
+    return _apply_validated(
+        store, idx, record, extraction, tag=tag, extractor_name=extractor_name,
+        extractor_version=extractor_version, resolver=resolver,
+        resolver_version=resolver_version,
     )
-    store.mark_extracted(record.id, result["entities"], result["relations"], extractor=tag)
-    store.drop_pending(record.id)
+
+
+def apply_batch_extraction(
+    store: GraphStore,
+    records: list[Any],
+    batch_fn: Callable[[list[Any]], dict[str, Any]],
+    *,
+    tag: str,
+    extractor_name: str = "",
+    extractor_version: str = "",
+    resolver: Any = None,
+    resolver_version: str = GRAPH_RESOLVER_VERSION,
+    index: GraphIndex | None = None,
+    max_attempts: int = MAX_ATTEMPTS,
+) -> dict[str, Any]:
+    """One transport call for many records; one idempotency unit each.
+
+    Batching is only a transport optimization: each record is still validated,
+    projected and marked independently. A record missing from the response is
+    retried per the pending/failed policy, and the extractor can never touch a
+    memory that was not in this batch.
+    """
+    records = [r for r in records if r.id not in store.extracted_ids(tag)]
+    if not records:
+        return {
+            "ok": True, "status": "skipped", "applied": 0,
+            "pending": 0, "failed": 0, "created_entities": 0, "empty": 0,
+            "new_mentions": 0,
+        }
+    idx = index if index is not None else store.index()
+
+    def retry_all(error: str) -> dict[str, Any]:
+        pending = 0
+        for record in records:
+            status = _retry_or_fail(
+                store, record.id, error, tag=tag,
+                attempts=store.pending_attempts(record.id, extractor=tag),
+                max_attempts=max_attempts,
+            )
+            pending += int(status == "pending")
+        return {
+            "ok": False, "status": "pending" if pending else "failed",
+            "applied": 0, "pending": pending, "failed": len(records) - pending,
+            "created_entities": 0, "empty": 0, "new_mentions": 0,
+        }
+
+    try:
+        results = batch_fn(records)
+    except ExtractionError as exc:
+        return retry_all(str(exc))
+    except Exception as exc:  # unexpected: definitive
+        for record in records:
+            store.mark_failed(record.id, str(exc), extractor=tag)
+            store.drop_pending(record.id)
+        return {
+            "ok": False, "status": "failed", "applied": 0,
+            "pending": 0, "failed": len(records), "created_entities": 0,
+            "empty": 0, "new_mentions": 0,
+        }
+
+    if not isinstance(results, dict):
+        results = {}
+
+    applied = pending = failed = 0
+    created_entities = empty = mentions = 0
+    for record in records:
+        extraction = results.get(record.id)
+        if extraction is not None and not isinstance(extraction, Extraction):
+            try:
+                extraction = Extraction.from_obj(
+                    extraction,
+                    memory_id=record.id,
+                    extractor=extractor_name,
+                    extractor_version=extractor_version,
+                )
+            except Exception:
+                extraction = None
+        if extraction is None:
+            status = _retry_or_fail(
+                store, record.id, "missing from batch response", tag=tag,
+                attempts=store.pending_attempts(record.id, extractor=tag),
+                max_attempts=max_attempts,
+            )
+            pending += int(status == "pending")
+            failed += int(status == "failed")
+            continue
+        outcome = _apply_validated(
+            store, idx, record, extraction, tag=tag, extractor_name=extractor_name,
+            extractor_version=extractor_version, resolver=resolver,
+            resolver_version=resolver_version,
+        )
+        applied += 1
+        created_entities += int(outcome.get("created_entities") or 0)
+        mentions += int(outcome.get("entities") or 0)
+        empty += int(outcome.get("empty") or 0)
+    return {
+        "ok": True, "status": "extracted", "applied": applied,
+        "pending": pending, "failed": failed,
+        "created_entities": created_entities, "empty": empty,
+        "new_mentions": mentions,
+    }
+
+
+def _chunk_records(
+    records: list[Any], batch_size: int, batch_max_chars: int
+) -> list[list[Any]]:
+    """Split records into batches honoring both the count and char limits."""
+    batches: list[list[Any]] = []
+    current: list[Any] = []
+    used = 0
+    for record in records:
+        cost = len(record.text()) if hasattr(record, "text") else len(str(record))
+        overflow = batch_max_chars and current and used + cost > batch_max_chars
+        if current and (len(current) >= max(1, batch_size) or overflow):
+            batches.append(current)
+            current = []
+            used = 0
+        current.append(record)
+        used += cost
+    if current:
+        batches.append(current)
+    return batches
+
+
+def _swap_directories(target: Path, building: Path) -> None:
+    """Atomically replace ``target`` with a fully built ``building`` dir."""
+    import shutil
+
+    backup = target.with_name(target.name + ".previous")
+    shutil.rmtree(backup, ignore_errors=True)
+    if target.exists():
+        target.rename(backup)
+    building.rename(target)
+    shutil.rmtree(backup, ignore_errors=True)
+
+
+def _build_into(
+    tape: Any,
+    store: GraphStore,
+    spec: ExtractorSpec,
+    *,
+    name: str,
+    tag: str,
+    types: set[str],
+    resolver: Any,
+    resolver_version: str,
+    max_attempts: int,
+    batch_size: int,
+    batch_max_chars: int,
+    batch_fn: Callable[[list[Any]], dict[str, Any]] | None,
+) -> dict[str, Any]:
+    records = tape.read()
+    index = store.index()
+    done = store.extracted_ids(tag)
+    if resolver is not None and hasattr(resolver, "bind"):
+        resolver.bind(index)
+
+    eligible = [r for r in records if r.type in types and not r.derived_from]
+    pending_records = [r for r in eligible if r.id not in done]
+    stats: dict[str, int] = {
+        "considered": len(pending_records),
+        "extracted": 0,
+        "skipped": len(eligible) - len(pending_records),
+        "failed": 0,
+        "pending": 0,
+        "empty": 0,
+        "new_mentions": 0,
+    }
+    created_entities = 0
+
+    use_batches = batch_fn is not None and batch_size > 1 and len(pending_records) > 1
+    if use_batches:
+        for batch in _chunk_records(pending_records, batch_size, batch_max_chars):
+            outcome = apply_batch_extraction(
+                store, batch, batch_fn, tag=tag, extractor_name=name,
+                extractor_version=spec.version, resolver=resolver,
+                resolver_version=resolver_version, index=index,
+                max_attempts=max_attempts,
+            )
+            stats["extracted"] += int(outcome.get("applied") or 0)
+            stats["pending"] += int(outcome.get("pending") or 0)
+            stats["failed"] += int(outcome.get("failed") or 0)
+            stats["empty"] += int(outcome.get("empty") or 0)
+            stats["new_mentions"] += int(outcome.get("new_mentions") or 0)
+            created_entities += int(outcome.get("created_entities") or 0)
+            if outcome.get("status") == "skipped":
+                stats["skipped"] += len(batch)
+    else:
+        for record in pending_records:
+            outcome = apply_record_extraction(
+                store, record, spec.fn, tag=tag, extractor_name=name,
+                extractor_version=spec.version, resolver=resolver,
+                resolver_version=resolver_version, index=index,
+                max_attempts=max_attempts,
+            )
+            if outcome["status"] == "extracted":
+                stats["extracted"] += 1
+                created_entities += int(outcome.get("created_entities") or 0)
+                stats["new_mentions"] += int(outcome.get("entities") or 0)
+                stats["empty"] += int(outcome.get("empty") or 0)
+            elif outcome["status"] == "pending":
+                stats["pending"] += 1
+            elif outcome["status"] == "failed":
+                stats["failed"] += 1
+            else:
+                stats["skipped"] += 1
+
+    source = {
+        "tape_records_seen": len(records),
+        "eligible_records": len(eligible),
+        "extracted_records": stats["extracted"],
+    }
     _write_meta(
         store,
         tag=tag,
-        extractor_name=extractor_name or "custom",
-        extractor_version=extractor_version,
-        last_memory_id=record.id,
+        extractor_name=name,
+        extractor_version=spec.version,
+        extract_types=types,
+        resolver_version=resolver_version,
+        source=source,
+        last_memory_id=str(getattr(tape.last(), "id", "") or ""),
     )
-    return {"ok": True, "status": "extracted", **result}
+    return {
+        "ok": True,
+        "extractor": tag,
+        "created_entities": created_entities,
+        **stats,
+        "counts": store.counts(),
+    }
 
 
 def build_graph(
@@ -1085,83 +1534,65 @@ def build_graph(
     rebuild: bool = False,
     extractor_name: str = "",
     resolver: Any = None,
+    resolver_version: str = GRAPH_RESOLVER_VERSION,
     max_attempts: int = MAX_ATTEMPTS,
+    batch_size: int = 1,
+    batch_max_chars: int = 0,
+    batch_fn: Callable[[list[Any]], dict[str, Any]] | None = None,
+    atomic: bool = True,
 ) -> dict[str, Any]:
     """Extract durable tape records into the graph store.
 
-    ``tape`` is only read. ``rebuild`` clears the projection first. Records
-    already extracted by the same extractor tag are skipped (idempotence);
-    extractor failures follow the pending/failed policy and are retried on the
-    next build. ``resolver`` maps semantic names to entity ids (F2).
+    ``tape`` is only read. A rebuild with a different extractor tag is
+    required when the recorded projection was built by another extractor
+    version. ``atomic`` rebuilds into ``graph.building/`` and swaps only after
+    a complete, validated run, so an interrupted rebuild never destroys the
+    previous projection. ``batch_fn`` (e.g. ``GraphExtractor.extract_batch``)
+    is a transport optimization: each record keeps its own idempotency unit.
     """
     spec = extractor if isinstance(extractor, ExtractorSpec) else ExtractorSpec(extractor)
     name = extractor_name or ("noop" if spec.fn is noop_extractor else "custom")
     tag = f"{name}/{spec.version}"
     types = parse_types(extract_types) if extract_types else set(DURABLE_TYPES)
 
-    if rebuild:
+    recorded_tag = str(store.meta().get("tag") or "")
+    if recorded_tag and recorded_tag != tag and not rebuild:
+        return {
+            "ok": False,
+            "error": f"graph was built with {recorded_tag}; rebuild required for {tag}",
+            "built_tag": recorded_tag,
+            "requested_tag": tag,
+        }
+
+    target = store
+    building: GraphStore | None = None
+    if rebuild and atomic:
+        building = GraphStore(Path(str(store.directory) + ".building"))
+        building.clear()
+        building.copy_reviews_from(store)
+        target = building
+    elif rebuild:
         store.clear()
-    index = store.index()
-    done = store.extracted_ids(tag)
-    if resolver is not None and hasattr(resolver, "bind"):
-        resolver.bind(index)
 
-    stats: dict[str, Any] = {
-        "considered": 0,
-        "extracted": 0,
-        "skipped": 0,
-        "failed": 0,
-        "pending": 0,
-        "empty": 0,
-        "new_mentions": 0,
-    }
-    created_entities = 0
-
-    for record in tape.read():
-        if record.type not in types or record.derived_from:
-            continue
-        if record.id in done:
-            stats["skipped"] += 1
-            continue
-        stats["considered"] += 1
-        outcome = apply_record_extraction(
-            store,
-            record,
-            spec.fn,
-            tag=tag,
-            extractor_name=name,
-            extractor_version=spec.version,
-            resolver=resolver,
-            index=index,
-            max_attempts=max_attempts,
+    try:
+        result = _build_into(
+            tape, target, spec, name=name, tag=tag, types=types, resolver=resolver,
+            resolver_version=resolver_version, max_attempts=max_attempts,
+            batch_size=batch_size, batch_max_chars=batch_max_chars, batch_fn=batch_fn,
         )
-        if outcome["status"] == "extracted":
-            stats["extracted"] += 1
-            created_entities += int(outcome.get("created_entities") or 0)
-            stats["new_mentions"] += int(outcome.get("entities") or 0)
-            if outcome.get("empty"):
-                stats["empty"] += 1
-        elif outcome["status"] == "pending":
-            stats["pending"] += 1
-        else:
-            stats["failed"] += 1
+    except Exception as exc:
+        if building is not None:
+            return {
+                "ok": False,
+                "error": f"rebuild failed; previous graph kept: {exc}",
+                "building_dir": str(building.directory),
+            }
+        return {"ok": False, "error": str(exc)}
 
-    counts = store.counts()
-    _write_meta(
-        store,
-        tag=tag,
-        extractor_name=name,
-        extractor_version=spec.version,
-        extract_types=types,
-        last_memory_id=str(getattr(tape.last(), "id", "") or ""),
-    )
-    return {
-        "ok": True,
-        "extractor": tag,
-        "created_entities": created_entities,
-        **stats,
-        "counts": counts,
-    }
+    if building is not None:
+        _swap_directories(store.directory, building.directory)
+        result["rebuilt"] = True
+    return result
 
 
 def graph_status(

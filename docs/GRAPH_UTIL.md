@@ -237,6 +237,45 @@ decision to keep `evidence_payload_window` opt-in default off, and it is the
 empirical gate U4.3 must clear: a context-composition policy only counts as
 evidence if its effect exceeds the 0.07–0.08 flip rate.
 
+## U4.3 — multi-anchor composition: delivery mechanics (closed negative)
+
+`eval/u4_composition.py` recomputes the frozen U3 precise payload from the
+frozen roots (asserting byte-identity with the `graph_augment_precise`
+snapshot context on all cases) and applies two pre-registered composition
+variants, both bounded by each item's existing allocation so the 4000-char
+budget and the locked payload contract are untouched:
+
+- `multi_window` — question-window the two highest-relevance truncated items;
+- `anchor_keep` — window only the second-best truncated item (top-1 keeps its head).
+
+No LLM calls: the primary evaluation is U4.1's deterministic item-fact
+presence. The U2b ``i5_fact_window`` numbers are the reference: windowing
+**all** truncated items. Results by question class:
+
+| class / slice | precise | multi_window | anchor_keep | i5 (all, ref) |
+|---|---|---|---|---|
+| composition · u3a | 0.76 | 0.76 | 0.76 | **0.88** |
+| composition · u3b | 0.69 | 0.69 | 0.69 | 0.69 |
+| composition · lexmiss | 0.33 | 0.43 | 0.41 | **0.49** |
+| all · lexmiss | 0.37 | 0.42 | 0.41 | — |
+
+**Conclusion.** (1) The top-2 variants are strictly dominated by windowing
+**all** truncated items (i5): restricting the window to the top-2 loses the
+facts that later items still carry. (2) On the hard multi-session composition
+slice they raise presence to ~0.41–0.43 vs 0.33 but still reach **0/5**
+all-present cases — the multi-anchor loss is structural under the 4000 budget
+(the full-gold condition reached 1.00 in U4.1). (3) On the mild U3 slice the
+variants change nothing on composition. So no composition policy is promoted,
+defaults stay as frozen, and the whole U4 line (U4.1 → U4.2 → U4.3) closes
+without a delivery-policy change. Any future composition policy must clear
+the U4.2 oscillation floor (0.07–0.08) with U4.1 fact presence as its primary
+instrument — and the multi-anchor gap is a structural budget property, not a
+code defect.
+
+The D-phase (document structure projection) inherits this: relation
+provenance will need multi-evidence spans (`evidence = [{memory_id, span}]`),
+which is exactly where long-range composition suffers today.
+
 ## Reproduce
 
 ```bash

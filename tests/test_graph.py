@@ -207,9 +207,9 @@ def test_status_reports_pending_for_tag(tmp_path):
 
     status = graph_status(store, tape, extractor_tag="fake/v1")
     assert status["built"] is True
-    assert status["pending"] == 0
+    assert status["pending_records"] == 0
     status_v2 = graph_status(store, tape, extractor_tag="fake/v2")
-    assert status_v2["pending"] == 2
+    assert status_v2["pending_records"] == 2
 
 
 def test_build_never_writes_to_the_tape(tmp_path):
@@ -230,3 +230,22 @@ def test_store_files_are_append_only_jsonl(tmp_path):
     meta = json.loads((store.directory / "meta.json").read_text(encoding="utf-8"))
     assert meta["counts"]["entities"] >= 3
     assert sorted(meta["extract_types"]) == sorted(DURABLE_TYPES)
+
+
+def test_cli_graph_status_defaults_to_recorded_extractor(tmp_path, capsys):
+    import argparse
+    import json as json_mod
+
+    from memory_machine import cli
+
+    tape = _tape(tmp_path)
+    store = _store(tmp_path)
+    build_graph(tape, store, fake_extractor, extractor_name="llm")
+
+    args = argparse.Namespace(
+        root=str(tmp_path), action="status", target="", extractor="", rebuild=False
+    )
+    assert cli.cmd_graph(args) == 0
+    out = json_mod.loads(capsys.readouterr().out)
+    assert out["extractor_tag"] == "llm/v1"
+    assert out["pending_records"] == 0

@@ -67,6 +67,7 @@ class Config:
     graph_top_k: int = 8
     graph_confidence_auto: float = 0.90
     graph_confidence_hypothesis: float = 0.60
+    graph_max_attempts: int = 3
     coverage_mode: str = "off"
     cascade_min_score: float = 0.0
     cascade_expand_top_k: int = 5
@@ -173,6 +174,7 @@ class Config:
             setattr(self, name, max(0.0, min(1.0, value)))
         if self.graph_confidence_hypothesis > self.graph_confidence_auto:
             self.graph_confidence_hypothesis = self.graph_confidence_auto
+        self.graph_max_attempts = max(1, min(10, _int(self.graph_max_attempts, 3)))
         self.coverage_mode = (
             self.coverage_mode if self.coverage_mode in {"off", "agents", "structural", "both", "judge", "judge_views", "views"} else "off"
         )

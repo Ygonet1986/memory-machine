@@ -200,7 +200,9 @@ delivering ~11k context characters — context size is not evidence. See
 | `graph_enabled` | `false` | write-time graph extraction (opt-in) |
 | `graph_batch_size` / `graph_batch_max_chars` | 8 / 12000 | extraction batching limits |
 | `graph_recall_mode` | `off` | graph recall: `off` / `augment` / `augment_guarded` / `only` |
-| `graph_augment_min_score` / `graph_augment_max_items` | 0.80 / 5 | guarded augmentation: score floor and cap |
+| `graph_augment_min_score` / `graph_augment_max_items` | 0.80 / 3 | guarded augmentation: score floor and cap |
+| `graph_augment_hub_degree` | 20 | guarded traversal: stop-expanding degree (generic `graph_hub_degree` overrides) |
+| `graph_augment_question_gate` / `min_cov` | `false` / 0.30 | optional question veto over graph-only evidence (calibrated, pending the miss slice) |
 | `graph_hub_degree` | 0 | guarded traversal: stop-expanding degree (0 = off) |
 | `graph_resolver_candidates` | 10 | resolver shortlist size (doc-vector cache is always on) |
 | `graph_depth` / `graph_top_k` | 2 / 8 | traversal depth (semantic hops) and evidence cap |

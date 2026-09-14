@@ -1194,11 +1194,21 @@ it can compete for the single global budget:
 | `graph_augment_max_items` | cap on graph-only additions (0 = unlimited) |
 | `graph_augment_weight` | optional ranking factor applied when merging with agent annotations (1.0 = neutral) |
 
-Defaults follow the V2-0 replay rule (preserve 100% of the recovered gold,
-minimize non-gold, least aggressive on ties): hub cap off, score 0.80, up to 5
-items, weight 1.0. The precision recipe (hub 20, score 0.80, 3 items) is
-available through the same flags and documented with its explicit trade-off in
-`docs/GRAPH_V2.md`. The resolver keeps an in-memory doc-vector cache and a
+Defaults (promoted after the shared-agent judged replay, `docs/GRAPH_V2.md`):
+`graph_augment_hub_degree=20` (guarded-only; the generic `graph_hub_degree`
+stays 0 for v1-compatible traversal), score 0.80, up to 3 items, weight 1.0.
+With the agents frozen per case, this recipe preserved the recovered gold,
+removed both dilution flips and netted +1 strict over the un-augmented system,
+while plain `augment` lost 1 (1 better / 2 worse).
+
+The optional question gate (`graph_augment_question_gate`, default false;
+`graph_augment_question_min_cov=0.30`) vetoes graph-only evidence whose memory
+text does not cover question content tokens. P2 calibration on the shared
+snapshot: every deterministic rule kept 2/2 graph-only gold, with lexical
+coverage >= 0.30 blocking 45/46 non-gold — but that slice is 11/12 lexically
+top-1, so the gate stays opt-in and must be validated on the enriched
+miss/top-5 slice before any default change. The gate is a veto, never a
+ranking: it must not turn the graph into another BM25. The resolver keeps an in-memory doc-vector cache and a
 shortlist of `graph_resolver_candidates` (default 10): same vectors, same
 resolutions, fewer recomputations.
 

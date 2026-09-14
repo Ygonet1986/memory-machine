@@ -107,11 +107,86 @@ class GraphResolver:
             if vector is None:
                 continue
             scored.append((cosine(query, vector), entity_id))
+        return self._resolution_from_scores(scored, name, index)
+
+    def resolve_batch(self, specs: list[dict[str, Any]]) -> list[Resolution]:
+        """Resolve many names with a single embedding request.
+
+        Same vectors, same cache, same bands as ``resolve``: the only change is
+        transport. Names that hit exact/alias resolution never reach the
+        embedder, and candidate documents already cached are not re-embedded.
+        """
+        index = self.index
+        results: list[Resolution | None] = [None] * len(specs)
+        pending: list[tuple[int, str, dict[str, Any], list[tuple[str, str]]]] = []
+        for position, spec in enumerate(specs):
+            name = str(spec.get("name") or "").strip()
+            if not name or index is None:
+                results[position] = Resolution()
+                continue
+            key = normalize_name(name)
+            exact = index.by_norm.get(key)
+            if exact:
+                results[position] = Resolution(entity_id=exact, confidence=1.0, method="exact")
+                continue
+            alias = index.alias_map.get(key)
+            if alias:
+                results[position] = Resolution(entity_id=alias, confidence=1.0, method="alias")
+                continue
+            pending.append((position, name, spec, self._shortlist(name, index)))
+
+        if self.embedder is not None and index is not None and pending:
+            wanted: list[str] = []
+            seen: set[str] = set()
+            for _position, name, _spec, candidates in pending:
+                if name not in seen:
+                    seen.add(name)
+                    wanted.append(name)
+                for entity_id, doc in candidates:
+                    if entity_id in self._doc_vectors or doc in seen:
+                        continue
+                    seen.add(doc)
+                    wanted.append(doc)
+            vectors = []
+            if wanted:
+                try:
+                    vectors = self.embedder.embed(wanted)
+                except Exception:
+                    vectors = []
+            if len(vectors) == len(wanted):
+                lookup = dict(zip(wanted, vectors))
+                for _position, name, _spec, candidates in pending:
+                    for entity_id, doc in candidates:
+                        if entity_id not in self._doc_vectors and doc in lookup:
+                            self._doc_vectors[entity_id] = lookup[doc]
+                for position, name, _spec, candidates in pending:
+                    query = lookup.get(name)
+                    if query is None:
+                        results[position] = Resolution()
+                        continue
+                    results[position] = self._resolution_from_scores(
+                        [(cosine(query, self._doc_vectors[entity_id]), entity_id)
+                         for entity_id, _doc in candidates if entity_id in self._doc_vectors],
+                        name,
+                        index,
+                    )
+            else:
+                for position, _name, _spec, _candidates in pending:
+                    results[position] = Resolution()
+        else:
+            for position, name, _spec, candidates in pending:
+                results[position] = self._resolution_from_scores([], name, index)
+
+        return [result or Resolution() for result in results]
+
+    def _resolution_from_scores(
+        self, scored: list[tuple[float, str]], name: str, index: GraphIndex
+    ) -> Resolution:
+        if not scored:
+            return Resolution()
         best_score, best_id = max(scored)
         if best_score >= self.auto:
-            return Resolution(
-                entity_id=best_id, confidence=best_score, method="embedding"
-            )
+            return Resolution(entity_id=best_id, confidence=best_score, method="embedding")
         if best_score >= self.hypothesis:
             if self.llm is not None:
                 promoted = self._llm_decide(name, best_id, index)

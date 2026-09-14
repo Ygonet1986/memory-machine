@@ -67,6 +67,50 @@ ARMS = ["graph_off", "graph_augment", "graph_augment_precise"]
 PROBE_ARMS = {"graph_augment", "graph_augment_precise"}
 I1_FLOOR = 600
 
+SINGLE_RE = re.compile(
+    r"\b(how long|how many|how much time|what time|when|where|which|who|name|duration)\b",
+    re.I,
+)
+COMPOSITION_RE = re.compile(
+    r"\b(increase|decrease|difference|change|between|total|combined|altogether|times)\b",
+    re.I,
+)
+
+
+def single_like(question: str) -> bool:
+    return bool(SINGLE_RE.search(question))
+
+
+def composition_like(question: str) -> bool:
+    return bool(COMPOSITION_RE.search(question))
+
+
+def mixed_window(text: str, question: str, allocation: int, head_ratio: float = 0.25) -> str:
+    """25% of the allocation as the record head (arithmetic anchor) + window."""
+    head_chars = max(0, int(allocation * head_ratio))
+    tail_room = max(0, allocation - head_chars - 3)
+    head = text[:head_chars].rstrip()
+    window = fact_window(text, question, tail_room)
+    if head and window:
+        return f"{head} … {window}"
+    return window or head
+
+
+def windowed_body(record: Any, question: str, allocation: int, mode: str) -> str | None:
+    why = record.why or record.summary
+    if mode == "i5":
+        return fact_window(why, question, allocation)
+    if mode == "i5_single":
+        if single_like(question) and not composition_like(question):
+            return fact_window(why, question, allocation)
+        return None
+    if mode == "i5_mixed":
+        if composition_like(question):
+            return mixed_window(why, question, allocation)
+        return fact_window(why, question, allocation)
+    return None
+
+
 PROBE_SYSTEM = """You check whether a CANDIDATE ANSWER uses the fact stated in ONE memory.
 Return ONLY a JSON object: {"usage":"used|partial|ignored|contradicted","why":"<short>"}
 - used: the answer states the memory's fact (paraphrase counts).
@@ -295,9 +339,9 @@ def run_u2(
     out: dict[str, Any] = {}
     if "i1" not in interventions and "i4" not in interventions and "i5" not in interventions:
         return out
-    if "i5" in interventions:
+    for mode in [m for m in ("i5", "i5_single", "i5_mixed") if m in interventions]:
         cfg = variant_config("graph_augment_precise")
-        work_dir = case["work_root"] / "i5_fact_window"
+        work_dir = case["work_root"] / mode
         copy_case(case["root"] / f"case_{case['case']:02d}", work_dir)
         machine = Machine(work_dir, config=cfg, client=agent_client)
         evidence = variant_evidence(case["root"] / f"case_{case['case']:02d}", cfg, question)
@@ -320,31 +364,48 @@ def run_u2(
         machine.whiteboard.annotations = []
         machine.whiteboard.subject = question
         kept = merge_annotations(machine.whiteboard, list(union.values()), budget=cfg.whiteboard_budget)
-        payload = build_evidence_payload(
-            records, kept, budget=cfg.evidence_payload_budget,
-            min_item_chars=cfg.evidence_payload_min_item,
-        )
-        windowed = []
-        for item in payload:
-            record = records.get(item["memory_id"])
-            entry = dict(item)
-            if record is not None and item["truncated"]:
-                header = item["evidence"].split("\n", 1)[0]
-                allocation = max(0, item["used_chars"] - len(header) - 1)
-                body = fact_window(record.why or record.summary, question, allocation)
-                entry["evidence"] = f"{header}\n{body}"
-                entry["windowed"] = True
-            windowed.append(entry)
-        context = payload_as_context(windowed)
+        if mode == "i5":
+            payload = build_evidence_payload(
+                records, kept, budget=cfg.evidence_payload_budget,
+                min_item_chars=cfg.evidence_payload_min_item,
+                question=question, window=True,
+            )
+        else:
+            base_payload = build_evidence_payload(
+                records, kept, budget=cfg.evidence_payload_budget,
+                min_item_chars=cfg.evidence_payload_min_item,
+            )
+            payload = []
+            for item in base_payload:
+                record = records.get(item["memory_id"])
+                entry = dict(item)
+                if record is not None and item["truncated"]:
+                    header = item["evidence"].split("\n", 1)[0]
+                    summary = record.summary or ""
+                    room = item["used_chars"] - len(header) - 1
+                    if summary:
+                        room -= len(summary) + 1
+                    body = windowed_body(record, question, max(0, room), mode)
+                    if body:
+                        entry["evidence"] = (
+                            f"{header}\n{summary}\n{body}" if summary else f"{header}\n{body}"
+                        )
+                        entry["windowed"] = True
+                payload.append(entry)
+        context = payload_as_context(payload)
         answer = answer_with(agent_client, machine, question + provenance, extra_context=context)
         verdict, reason = judge(judge_client, question, case["row"]["gold"], answer)
-        out["i5_fact_window"] = {
+        out[mode] = {
             "answer": answer,
             "verdict": verdict,
             "reason": reason,
-            "payload_ids": [item["memory_id"] for item in windowed],
-            "payload_chars": sum(len(item["evidence"]) for item in windowed),
-            "windowed_items": sum(1 for item in windowed if item.get("windowed")),
+            "payload_ids": [item["memory_id"] for item in payload],
+            "payload_chars": sum(len(item["evidence"]) for item in payload),
+            "windowed_items": sum(1 for item in payload if item.get("windowed")),
+            "policy": {
+                "single_like": single_like(question),
+                "composition_like": composition_like(question),
+            },
             "context": context,
         }
     if "i1" not in interventions and "i4" not in interventions:
@@ -412,12 +473,15 @@ def run_u2(
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--slice", default="", choices=["", *SLICES])
+    parser.add_argument("--slice", default="")
+    parser.add_argument("--name", default="", help="ad-hoc slice name")
+    parser.add_argument("--snapshot-path", default="", help="ad-hoc snapshot file name")
+    parser.add_argument("--root-path", default="", help="ad-hoc replay root")
     parser.add_argument("--limit", type=int, default=0)
     parser.add_argument("--stage", default="all", choices=["u1", "u2", "all"])
     parser.add_argument(
         "--interventions", default="i1,i4",
-        help="comma-separated: i1,i4,i5",
+        help="comma-separated: i1,i4,i5,i5_single,i5_mixed",
     )
     parser.add_argument("--model", default="deepseek-v4-flash")
     parser.add_argument("--judge-model", default="deepseek-v4-flash")
@@ -428,6 +492,10 @@ def main() -> None:
     if not api_key:
         raise SystemExit("set DEEPSEEK_API_KEY (or --api-key)")
 
+    if args.name and args.snapshot_path and args.root_path:
+        SLICES[args.name] = {"snapshot": args.snapshot_path, "root": Path(args.root_path)}
+    if args.slice and args.slice not in SLICES:
+        raise SystemExit(f"unknown slice: {args.slice}")
     agent_client = CountingClient(
         LLMClient("https://api.deepseek.com", api_key, args.model, timeout=args.timeout, retries=1, backoff=0.5)
     )
@@ -467,7 +535,7 @@ def main() -> None:
                 "question_date": task.get("question_date", ""),
             }
             arm_rows = {}
-            for arm in ARMS:
+            for arm in [a for a in ARMS if a in row["arms"]]:
                 arm_rows[arm] = analyze_arm(
                     case, arm, records, judge_client=judge_client,
                     probe_client=probe_client, stage=args.stage,

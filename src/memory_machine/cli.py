@@ -85,7 +85,7 @@ def _build_parser() -> argparse.ArgumentParser:
 
     graph = sub.add_parser(
         "graph",
-        help="graph projection: build/status/explain/query/path/pending/failed/retry/review (JSON)",
+        help="graph projection: build/status/explain/document/query/path/pending/failed/retry/review (JSON)",
     )
     graph.add_argument(
         "action",
@@ -93,6 +93,7 @@ def _build_parser() -> argparse.ArgumentParser:
             "build",
             "status",
             "explain",
+            "document",
             "query",
             "path",
             "pending",
@@ -101,7 +102,7 @@ def _build_parser() -> argparse.ArgumentParser:
             "review",
         ],
     )
-    graph.add_argument("target", nargs="?", default="", help="relation id, query, or path source")
+    graph.add_argument("target", nargs="?", default="", help="relation id, query, path source, or document D####/source/name")
     graph.add_argument("target_b", nargs="?", default="", help="path target (graph path A B)")
     graph.add_argument("--rebuild", action="store_true", help="discard and rebuild from the tape")
     graph.add_argument(
@@ -119,6 +120,12 @@ def _build_parser() -> argparse.ArgumentParser:
     graph.add_argument("--batch-size", type=int, default=0, help="extraction batch size (0 = config)")
     graph.add_argument(
         "--batch-max-chars", type=int, default=0, help="batch char limit (0 = config)"
+    )
+    graph.add_argument(
+        "--memory", default="", help="document query: keep only rows of this chunk memory (M####)"
+    )
+    graph.add_argument(
+        "--span", default="", help="document query: keep only rows overlapping span (e.g. 100:400)"
     )
     graph.add_argument("--id", default="", help="memory id (retry) or hypothesis id (review)")
     graph.add_argument("--accept", action="store_true", help="review: accept the hypothesis")
@@ -331,6 +338,10 @@ def _graph_read(store: GraphStore, machine: Machine, args: argparse.Namespace) -
     return graph_path_payload(index, args.target, args.target_b, depth=depth, top_k=top_k)
 
 
+def _documents_root(machine: Any) -> Path:
+    return machine.root / "documents"
+
+
 def cmd_graph(args: argparse.Namespace) -> int:
     m = _machine(args)
     store = GraphStore(resolve_path(m.root, m.config.graph_path))
@@ -381,7 +392,18 @@ def cmd_graph(args: argparse.Namespace) -> int:
     if args.action == "explain":
         if not args.target:
             return _j({"ok": False, "error": "explain needs a relation id"})
-        return _j(explain_relation(store, m.tape, args.target))
+        return _j(explain_relation(store, m.tape, args.target, documents_root=_documents_root(m)))
+    if args.action == "document":
+        if not args.target:
+            return _j({"ok": False, "error": "document needs a D#### / source / name"})
+        from .graph import document_view
+
+        return _j(document_view(
+            store, m.tape, args.target,
+            documents_root=_documents_root(m),
+            memory_id=args.memory,
+            span=args.span,
+        ))
     if args.action in {"query", "path"}:
         return _j(_graph_read(store, m, args))
     if args.action == "pending":
@@ -407,6 +429,10 @@ def cmd_graph(args: argparse.Namespace) -> int:
             batch_size=args.batch_size or m.config.graph_batch_size,
             batch_max_chars=args.batch_max_chars or m.config.graph_batch_max_chars,
             batch_fn=batch_fn,
+            documents_root=_documents_root(m),
+            document_structure_level=m.config.document_structure_level,
+            window_chars=m.config.document_window_chars,
+            document_extractor=extractor if name == "llm" else None,
         )
     )
 

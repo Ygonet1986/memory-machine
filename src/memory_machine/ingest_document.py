@@ -28,9 +28,11 @@ are consulted.
 from __future__ import annotations
 
 from pathlib import Path
+import shutil
 from typing import Any
 
 from .attachments import _file_hash
+from .documents import documents_dir
 from .graph import (
     GraphStore,
     WindowRecord,
@@ -47,6 +49,36 @@ from .tape import MemoryRecord, Tape
 DEFAULT_CHUNK_SIZE = 600
 DEFAULT_CHUNK_OVERLAP = 100
 WINDOW_SCOPE_TAG = "document"
+
+
+class DocumentRebuildError(Exception):
+    """A required original document is missing or its hash no longer matches."""
+
+
+def _settle_meta(
+    store: GraphStore,
+    *,
+    tag: str,
+    document_tag: str | None = None,
+    structure_level: str | None = None,
+) -> None:
+    """Stamp meta after a document-aware pass.
+
+    The window pass overwrites ``meta.tag`` with the document-scope tag; that
+    would make the next ``build_graph`` demand a rebuild (tag mismatch). Keep
+    ``meta.tag`` at the chunk-level tag and record the window tag separately so
+    re-runs stay idempotent and ``graph status`` still reads ``meta.tag``.
+    """
+    meta = dict(store.meta())
+    meta["tag"] = tag
+    if document_tag:
+        meta["document_tag"] = document_tag
+    else:
+        meta.pop("document_tag", None)
+    if structure_level is not None:
+        meta["document_structure_level"] = structure_level
+    meta["counts"] = store.counts()
+    store.write_meta(meta)
 
 
 def _file_spans(path: Path, chunk_size: int, overlap: int) -> tuple[str, list[tuple[int, int]]]:
@@ -69,7 +101,8 @@ def _register_document(
     hash: str,
     spans: list[tuple[int, int]],
     extractor: str,
-) -> dict[str, Any] | None:
+    original: str = "",
+) -> dict[str, Any]:
     """Register/refresh the ``D####`` row. Idempotent by ``source``."""
     if store is None:
         return None
@@ -78,6 +111,7 @@ def _register_document(
         name=path.name,
         hash=hash,
         path=str(path),
+        original=original,
         spans=spans,
         extractor=extractor,
         status="registered",
@@ -85,6 +119,21 @@ def _register_document(
     if created:
         store.update_document(record.id, extractor=extractor)
     return {"id": record.id, "source": record.source, "created": created}
+
+
+def _preserve_original(base: Path, source: Path) -> str:
+    """Copy the ingested .txt into the originals dir (D5, decision #8).
+
+    ``base`` is the originals dir itself (``<root>/documents/``). Returns the
+    preserved path; copies only when the target is missing. An
+    already-preserved file is re-verified but never duplicated.
+    """
+    target = (base or documents_dir(source.parent)) / source.name
+    if target.exists():
+        return str(target)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(source, target)
+    return str(target)
 
 
 def _run_extraction(
@@ -257,13 +306,16 @@ def ingest_document(
     max_attempts: int = 3,
     structure_level: str = "chunk",
     window_chars: int = 12000,
+    documents_root: Path | None = None,
 ) -> dict[str, Any]:
     """Ingest one .txt file through the tape -> registry -> graph pipeline.
 
     ``structure_level`` selects the extraction scopes for this call:
     ``chunk`` (base, D3 behavior), ``document`` (window pass only) or ``both``.
     The tape is always committed first; the registry second; graph extraction
-    is last and never propagates failures.
+    is last and never propagates failures. ``documents_root`` is where the
+    original document is preserved (default ``<tape-dir>/documents``) for the
+    D5 rebuild/provenance chain.
     """
     p = Path(path).expanduser()
     if not p.exists() or p.suffix.lower() != ".txt":
@@ -298,11 +350,14 @@ def ingest_document(
             saved.append(rec)
 
     # ------------------------------------------------------------- registry
+    docs_root = documents_root or documents_dir(tape.path.parent)
     doc_ref = None
     if enable_graph and store is not None:
+        original = _preserve_original(docs_root, p)
         doc_ref = _register_document(
             store, path=p, source=source, hash=_file_hash(text),
             spans=spans, extractor=extractor_name or "chunk",
+            original=original,
         )
 
     # --------------------------------------------------------------- graph
@@ -340,6 +395,16 @@ def ingest_document(
         created_entities = sum(s["created_entities"] for s in summaries)
         mentions = sum(s["new_mentions"] for s in summaries)
         tags = [s["tag"] for s in summaries]
+        extractor_tag = chunk_summary["tag"] if chunk_summary else (
+            f"{extractor_name or getattr(extractor, 'name', 'chunk')}/"
+            f"{extractor_version or getattr(extractor, 'version', 'v1')}"
+        )
+        _settle_meta(
+            store,
+            tag=extractor_tag,
+            document_tag=document_summary["tag"] if document_summary else None,
+            structure_level=structure_level,
+        )
         graph["status"] = (
             "pending" if pending and not applied else
             "partial" if applied and (pending or failed) else
@@ -377,3 +442,131 @@ def ingest_document(
         "document": doc_ref,
         "document_graph": graph,
     }
+
+
+# ------------------------------------------------------- document-aware rebuild (D5)
+
+
+def validate_originals(store: GraphStore, documents_root: Path) -> list[dict[str, Any]]:
+    """Hash-validate every preserved original against the registry.
+
+    Never approximates: a missing or adulterated file is reported verbatim
+    with the expected hash. Raises ``DocumentRebuildError`` listing every
+    offending document before any extraction is started.
+    """
+    problems: list[dict[str, Any]] = []
+    root_exists = documents_root.exists()
+    for doc in store.documents():
+        original = Path(doc.original) if doc.original else documents_root / doc.name
+        if not root_exists or not original.exists():
+            problems.append({
+                "id": doc.id,
+                "source": doc.source,
+                "name": doc.name,
+                "expected_hash": doc.hash,
+                "error": "original missing",
+                "path": str(original),
+            })
+            continue
+        actual = _file_hash(original.read_text(encoding="utf-8", errors="replace").strip())
+        if actual != doc.hash:
+            problems.append({
+                "id": doc.id,
+                "source": doc.source,
+                "name": doc.name,
+                "expected_hash": doc.hash,
+                "actual_hash": actual,
+                "error": "hash mismatch (document was altered)",
+                "path": str(original),
+            })
+    if problems:
+        raise DocumentRebuildError(
+            "document originals are missing or altered; refusing to rebuild "
+            f"approximately: {problems}"
+        )
+    return problems
+
+
+def rebuild_document_projection(
+    store: GraphStore,
+    tape: Tape,
+    documents_root: Path,
+    extractor: Any,
+    resolver: Any,
+    *,
+    structure_level: str = "chunk",
+    window_chars: int = 12000,
+    batch_size: int = 8,
+    batch_max_chars: int = 0,
+    max_attempts: int = 3,
+    extractor_name: str = "",
+    extractor_version: str = "",
+) -> dict[str, Any]:
+    """Re-project the document layer (chunk + optional window scopes) from the
+    tape, the ``D####`` registry and the preserved originals.
+
+    Used by ``build_graph(rebuild=...)`` (D5). Originals are hash-validated
+    first (``validate_originals``), then each document replays exactly the same
+    chunk/window passes as :func:`ingest_document`: same tags, same retry and
+    idempotency units. Never reconstructs approximately.
+    """
+    validate_originals(store, documents_root)
+    docs = store.documents()
+    if not docs:
+        return {"ok": True, "skipped": True, "documents": 0}
+
+    name = extractor_name or getattr(extractor, "name", "chunk")
+    version = extractor_version or getattr(extractor, "version", "v1")
+    total: dict[str, int] = {"documents": len(docs), "chunks": 0, "applied": 0,
+                             "pending": 0, "failed": 0, "created_entities": 0}
+    levels: list[str] = []
+    for doc in docs:
+        records = sorted(
+            [r for r in tape.read() if r.source == doc.source and r.type == "attachment"],
+            key=lambda r: (r.source_span[0] if r.source_span else 0),
+        )
+        if not records:
+            continue
+        total["chunks"] += len(records)
+        if structure_level in {"chunk", "both"}:
+            levels.append("chunk")
+            summary = _run_extraction(
+                store, records, extractor, resolver,
+                extractor_name=name, extractor_version=version,
+                scope="chunk", batch_size=batch_size,
+                batch_max_chars=batch_max_chars, max_attempts=max_attempts,
+            )
+            total["applied"] += summary.get("applied") or 0
+            total["pending"] += summary.get("pending") or 0
+            total["failed"] += summary.get("failed") or 0
+            total["created_entities"] += summary.get("created_entities") or 0
+        if structure_level in {"document", "both"}:
+            levels.append("document")
+            summary = _run_window_extraction(
+                store, records, extractor, resolver,
+                doc_id=doc.id, window_chars=window_chars,
+                extractor_name=name, extractor_version=version,
+                max_attempts=max_attempts,
+            )
+            if summary is not None:
+                total["applied"] += summary.get("applied") or 0
+                total["pending"] += summary.get("pending") or 0
+                total["failed"] += summary.get("failed") or 0
+                total["created_entities"] += summary.get("created_entities") or 0
+    total["structure_level"] = structure_level
+    total["tag"] = f"{name}/{version}" if levels == ["chunk"] else (
+        f"{name}/{version}/document" if levels == ["document"] else
+        (f"{name}/{version}+{name}/{version}/document" if levels else "")
+    )
+    if levels:
+        extractor_tag = getattr(extractor, "tag", None) or f"{name}/{version}"
+        _settle_meta(
+            store,
+            tag=extractor_tag,
+            document_tag=(
+                f"{extractor_tag}/{WINDOW_SCOPE_TAG}" if "document" in levels else None
+            ),
+            structure_level=structure_level,
+        )
+    return total
+    return {"ok": True, **total}

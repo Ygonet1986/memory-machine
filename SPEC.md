@@ -1,8 +1,8 @@
 # Memory Machine Specification
 
-**Version:** 0.4
+**Version:** 0.5
 **Status:** Draft
-**Date:** 2026-09-11
+**Date:** 2026-09-14
 
 ## 1. Abstract
 
@@ -1135,6 +1135,11 @@ interrupted rebuild never destroys the previous projection. `reviews.jsonl` is
 carried over. The philosophy is *never migrate a projection semantically*;
 rebuild it from the tape.
 
+The document layer follows the same rule (§20.12): a rebuild replays the
+tape + registry + preserved originals, hash-gated up front; a missing or
+altered original aborts before any mutation and the previous projection stays
+in place. `documents.jsonl` is carried across rebuilds like `reviews.jsonl`.
+
 ### 20.7 Recall
 
 `graph_recall_mode`: `off` (default; byte-for-byte the old path, graph modules
@@ -1216,3 +1221,65 @@ Admission control bounds mass dilution; it cannot repair a single
 question-irrelevant neighbour (behavioural interference) or the case where the
 answerer ignores admitted gold (utilization), both documented in
 `docs/GRAPH_V2.md`.
+
+### 20.12 Operational document graph (D-phase, v0.5)
+
+The document layer turns the **RAG file store** (`.txt` attachments, §13) into a
+projection with the same normative invariant as §20: it is derived, disposable
+and reconstructible from the tape. The tape and the registry are the proof; the
+graph is a view.
+
+**Pipeline (per file).** Tape first, registry second, graph last — never the
+other way around:
+
+```text
+chunk_spans(file) → MemoryRecord per chunk (tape, append-only, with source_span)
+        ↓
+documents.jsonl row D####  {source: "name#hash12", name, hash, spans, original}
+        ↓
+chunk pass:  extract per M####            tag: name/version            scope: chunk
+window pass: extract per window D####|wNN tag: name/version/document   scope: document
+```
+
+Two coords select the pass set:
+
+| Config key | Default | Meaning |
+|------------|---------|---------|
+| `document_structure_level` | `chunk` | `chunk` · `document` · `both` |
+| `document_window_chars` | `12000` | content-cost budget per window (idempotency unit `D####|wNN`) |
+
+Window membership is deterministic (source-ordered chunk groups, cost =
+`len(why)`); evidence is confined to real members — what the window itself
+never contained cannot appear as evidence. `--no-document-graph` zeroes the
+whole projection even under `both`.
+
+**Originals.** Each ingested `.txt` is preserved under `<root>/documents/` and
+the registry row records the `original` path plus the `name#hash12` source hash
+(`sha1` of the stripped text, first 12 chars). A registry entry without a
+preserved file has no document provenance.
+
+**Rebuild (D5).** `build_graph` accepts `document_structure_level` and
+`document_extractor`; when the document layer is active it runs
+`validate_originals` **before any mutation**: every preserved original is
+hash-checked and a missing or adulterated file aborts the build explicitly —
+MUST NOT reconstruct approximately. The chunk/window passes replay exactly the
+tags, retry and idempotency units of the original ingest, so a full
+deletion-and-rebuild reproduces the projection structurally and by provenance
+(the round-trip invariant). Incremental re-runs project nothing twice: the
+window pass overwrites `meta.tag`, so `_settle_meta` restores the chunk-level
+`meta.tag` and records `meta.document_tag` + `meta.document_structure_level`
+separately. `documents.jsonl` is carried across atomic rebuilds.
+
+**Consult (D5).** `graph document <D####|source|name> [--memory M####]
+[--span a:b]` returns the document record, the hash-validated original status
+(`present`/`hash_ok`/`expected_hash`, or the mismatch), its chunk memories, the
+window map (relations per `D####|wNN`) and the filtered subgraph rows.
+`graph explain <R####>` shows **every** evidence span — not just the first —
+re-hydrating the exact text from the preserved original (falling back to the
+tape memory when the file is gone), then the document record, window and the
+source/target entities. Durable explain output is unchanged.
+
+**Scope discipline.** `document_structure_level` defaults off in `build_graph`
+(`None`), so plain `graph build` keeps the graph-v3 projection byte-for-byte.
+Recall/admission, PAPER/RESULTS figures and the historical defaults are
+untouched; document provenance is read-only — it never drives recall.

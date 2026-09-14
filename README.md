@@ -205,6 +205,9 @@ delivering ~11k context characters — context size is not evidence. See
 | `graph_augment_question_gate` / `min_cov` | `false` / 0.30 | optional question veto over graph-only evidence (calibrated, pending the miss slice) |
 | `graph_hub_degree` | 0 | guarded traversal: stop-expanding degree (0 = off) |
 | `graph_resolver_candidates` | 10 | resolver shortlist size (doc-vector cache is always on) |
+| `document_graph_enabled` | `true` | project `.txt` attachments into the document graph |
+| `document_structure_level` | `chunk` | document scope: `chunk` / `document` / `both` |
+| `document_window_chars` | 12000 | content-cost budget per document window |
 | `evidence_payload_window` | `false` | opt-in fact-window truncation (U2b; no reliable gain in the U3 30-case audit — stays off) |
 | `graph_depth` / `graph_top_k` | 2 / 8 | traversal depth (semantic hops) and evidence cap |
 | `whiteboard_budget` | 4000 | char budget for reminders on the whiteboard |
@@ -248,7 +251,9 @@ python3 -m memory_machine -C <root> graph build --rebuild   # project the tape
 python3 -m memory_machine -C <root> graph status            # versions + counts
 python3 -m memory_machine -C <root> graph query "Kalak"     # entities→paths→memories
 python3 -m memory_machine -C <root> graph path Kalak rochedo
-python3 -m memory_machine -C <root> graph explain R0001     # edge → memory → text
+python3 -m memory_machine -C <root> graph explain R0001     # edge → memories → text
+python3 -m memory_machine -C <root> graph document D0001    # document subgraph + windows
+python3 -m memory_machine -C <root> graph document novella.txt --memory M0003 --span 100:400
 python3 -m memory_machine -C <root> graph review            # identity hypotheses
 python3 -m memory_machine -C <root> graph pending / failed / retry
 ```
@@ -260,6 +265,15 @@ graph as a second, deterministic selection arm: `graph_recall_mode=off`
 (default) / `augment` / `only` — in every mode the evidence is rehydrated from
 the tape. Rebuilds are atomic (`graph.building/` + swap) and human review
 decisions survive them. See SPEC §20.
+
+`.txt` attachments project into the **document graph** (SPEC §20.12): each file
+is chunked onto the tape, registered in `graph/documents.jsonl` and its
+original preserved under `<root>/documents/`. Rebuilding replays the documented
+chunk/window scopes from the tape hash-gated against the preserved originals —
+a missing or altered original aborts the build explicitly, never approximate.
+`graph document` queries the subgraph (by `D####`, `name#hash` or file name,
+optionally filtered by `--memory` and `--span`) and `graph explain` shows every
+evidence span re-hydrated from the original file. See `docs/DOC_GRAPH.md`.
 
 ## Tests
 
@@ -280,6 +294,11 @@ recall and token economy.
 ## Docs
 
 - [SPEC.md](SPEC.md) — the formal specification.
+- [docs/DOC_GRAPH.md](docs/DOC_GRAPH.md) — the operational document graph
+  (D-phase): rebuild, `graph document`, `explain` provenance, originals.
+- [docs/GRAPH_V1.md](docs/GRAPH_V1.md), [docs/GRAPH_V2.md](docs/GRAPH_V2.md),
+  [docs/GRAPH_UTIL.md](docs/GRAPH_UTIL.md), [docs/GRAPH_EVAL.md](docs/GRAPH_EVAL.md) —
+  graph recall, admission control, utilization and the F4 evaluation.
 
 ## Desktop app (macOS)
 

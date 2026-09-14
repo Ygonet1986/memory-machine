@@ -1238,12 +1238,18 @@ def _ensure_entity(
     memory_id: str,
     *,
     created: list[str],
+    source_document: str = "",
+    source_span: tuple[int, int] = (),
 ) -> str:
     entity_id = index.resolve(name)
     if entity_id:
         return entity_id
     entity_id = f"E{index.max_entity_num + 1:04d}"
-    entity = store.add_entity(name, entity_type, memory_id, entity_id=entity_id)
+    entity = store.add_entity(
+        name, entity_type, memory_id, entity_id=entity_id,
+        source_document=source_document or "",
+        source_span=source_span or (),
+    )
     index.add_entity(entity)
     created.append(entity_id)
     return entity_id
@@ -1289,7 +1295,9 @@ def _resolve_with_resolver(
         return entity_id
 
     entity_id = _ensure_entity(
-        store, index, name, entity_type, record.id, created=created
+        store, index, name, entity_type, record.id, created=created,
+        source_document=str(getattr(record, "source_document", "") or ""),
+        source_span=tuple(getattr(record, "source_span", ()) or ()),
     )
     if resolution is not None and getattr(resolution, "hypothesis", False):
         other_id = str(getattr(resolution, "other_id", "") or "")
@@ -1349,6 +1357,20 @@ def project_extraction(
     created: list[str] = []
     relation_count = 0
 
+    # Documental provenance (D1 fields on the record): when the projection runs
+    # over document chunks, every generated row carries the document and span;
+    # durable tape records never set these, so the legacy projection stays
+    # byte-identical.
+    doc = str(getattr(record, "source_document", "") or "")
+    span = tuple(getattr(record, "source_span", ()) or ())
+    relation_evidence: tuple[dict[str, Any], ...] = ()
+    if doc:
+        memory_id = str(getattr(record, "id", "") or "")
+        relation_evidence = (
+            ({"memory_id": memory_id, "span": [span[0], span[1]]},) if len(span) == 2
+            else ({"memory_id": memory_id},)
+        )
+
     precomputed: list[Any] | None = None
     if resolver is not None and extraction.entities and hasattr(resolver, "resolve_batch"):
         try:
@@ -1383,7 +1405,8 @@ def project_extraction(
 
     for event in extraction.events:
         event_entity = store.add_entity(
-            f"{event.action} ({record.id})", "event", record.id
+            f"{event.action} ({record.id})", "event", record.id,
+            source_document=doc, source_span=span,
         )
         index.add_entity(event_entity)
         created.append(event_entity.id)
@@ -1393,7 +1416,8 @@ def project_extraction(
         action_entity = action_entities.get(event.action)
         if not action_entity:
             action_entity = _ensure_entity(
-                store, index, event.action, "action", record.id, created=created
+                store, index, event.action, "action", record.id, created=created,
+                source_document=doc, source_span=span,
             )
             action_entities[event.action] = action_entity
         mentioned.add(action_entity)
@@ -1405,7 +1429,8 @@ def project_extraction(
             target = resolve_endpoint(ref)
             if not target:
                 target = _ensure_entity(
-                    store, index, ref, "unknown", record.id, created=created
+                    store, index, ref, "unknown", record.id, created=created,
+                    source_document=doc, source_span=span,
                 )
             edges.append((role, target))
         for role, target in edges:
@@ -1413,6 +1438,8 @@ def project_extraction(
                 event_entity.id, role, target, record.id, event.confidence,
                 kind="event", extractor=extractor_name,
                 extractor_version=extractor_version,
+                source_document=doc, source_span=span,
+                evidence=relation_evidence,
             )
             index.add_relation(relation)
             mentioned.add(target)
@@ -1422,17 +1449,21 @@ def project_extraction(
         source = resolve_endpoint(item.source)
         if not source:
             source = _ensure_entity(
-                store, index, item.source, "unknown", record.id, created=created
+                store, index, item.source, "unknown", record.id, created=created,
+                source_document=doc, source_span=span,
             )
         target = resolve_endpoint(item.target)
         if not target:
             target = _ensure_entity(
-                store, index, item.target, "unknown", record.id, created=created
+                store, index, item.target, "unknown", record.id, created=created,
+                source_document=doc, source_span=span,
             )
         relation = store.add_relation(
             source, item.relation, target, record.id, item.confidence,
             kind=item.kind, extractor=extractor_name,
             extractor_version=extractor_version,
+            source_document=doc, source_span=span,
+            evidence=relation_evidence,
         )
         index.add_relation(relation)
         mentioned.add(source)
@@ -1443,12 +1474,13 @@ def project_extraction(
         entity_id = resolve_endpoint(raw)
         if not entity_id:
             entity_id = _ensure_entity(
-                store, index, raw, "unknown", record.id, created=created
+                store, index, raw, "unknown", record.id, created=created,
+                source_document=doc, source_span=span,
             )
         mentioned.add(entity_id)
 
     for entity_id in sorted(mentioned):
-        store.add_mention(record.id, entity_id)
+        store.add_mention(record.id, entity_id, source_document=doc, span=span)
 
     return {
         "entities": len(mentioned),

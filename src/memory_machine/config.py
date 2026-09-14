@@ -79,6 +79,7 @@ class Config:
     graph_augment_question_gate: bool = False
     graph_augment_question_min_cov: float = 0.30
     graph_resolver_candidates: int = 10
+    document_graph_enabled: bool = True
     coverage_mode: str = "off"
     cascade_min_score: float = 0.0
     cascade_expand_top_k: int = 5

@@ -40,6 +40,9 @@ def test_graph_defaults_are_off_and_consistent():
     assert cfg.graph_recall_mode == "off"
     assert cfg.graph_depth == 2
     assert cfg.graph_confidence_hypothesis <= cfg.graph_confidence_auto
+    assert cfg.document_graph_enabled is True
+    assert cfg.graph_batch_size == 8
+    assert cfg.graph_batch_max_chars == 12000
 
 
 def test_graph_config_clamps_and_normalizes():

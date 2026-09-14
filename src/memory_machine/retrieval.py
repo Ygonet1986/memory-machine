@@ -27,22 +27,33 @@ def tokenize(text: str) -> list[str]:
     return [t for t in toks if len(t) > 2 and t not in STOPWORDS]
 
 
-def chunk_text(text: str, size: int = 600, overlap: int = 100) -> list[str]:
-    """Split text into overlapping fixed-size chunks."""
+def chunk_spans(
+    text: str, size: int = 600, overlap: int = 100
+) -> list[tuple[int, int, str]]:
+    """Split text into overlapping fixed-size chunks.
+
+    Returns ``(start, end, chunk)`` triples whose offsets index the stripped
+    text. Guarantees ``[t for _, _, t in chunk_spans(...)] == chunk_text(...)``.
+    """
     text = (text or "").strip()
     if not text:
         return []
     if len(text) <= size:
-        return [text]
-    out: list[str] = []
+        return [(0, len(text), text)]
+    out: list[tuple[int, int, str]] = []
     start = 0
     while start < len(text):
         end = min(start + size, len(text))
-        out.append(text[start:end])
+        out.append((start, end, text[start:end]))
         if end == len(text):
             break
         start = end - overlap
     return out
+
+
+def chunk_text(text: str, size: int = 600, overlap: int = 100) -> list[str]:
+    """Split text into overlapping fixed-size chunks (delegates to chunk_spans)."""
+    return [chunk for _start, _end, chunk in chunk_spans(text, size=size, overlap=overlap)]
 
 
 def bm25(query: str, docs: list[str], *, k1: float = 1.5, b: float = 0.75) -> list[float]:

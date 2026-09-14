@@ -57,9 +57,11 @@ class MemoryRecord:
     source: str = ""
     derived_from: list[str] = field(default_factory=list)
     views: list[str] = field(default_factory=list)
+    source_span: tuple[int, int] = ()
+    source_document: str = ""
 
     def to_dict(self) -> dict[str, Any]:
-        return {
+        d: dict[str, Any] = {
             "id": self.id,
             "type": self.type,
             "summary": self.summary,
@@ -71,9 +73,19 @@ class MemoryRecord:
             "derived_from": self.derived_from,
             "views": self.views,
         }
+        if self.source_document:
+            d["source_document"] = self.source_document
+        if self.source_span:
+            d["source_span"] = [int(self.source_span[0]), int(self.source_span[1])]
+        return d
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "MemoryRecord":
+        span = data.get("source_span")
+        if isinstance(span, (list, tuple)) and len(span) == 2:
+            span = (int(span[0]), int(span[1]))
+        else:
+            span = ()
         return cls(
             id=str(data.get("id") or ""),
             type=str(data.get("type") or ""),
@@ -85,6 +97,8 @@ class MemoryRecord:
             source=str(data.get("source") or ""),
             derived_from=list(data.get("derived_from") or []),
             views=list(data.get("views") or []),
+            source_span=span,
+            source_document=str(data.get("source_document") or ""),
         )
 
     def text(self) -> str:

@@ -382,6 +382,8 @@ class Machine:
             kept,
             budget=self.config.evidence_payload_budget if budgeted else 0,
             min_item_chars=self.config.evidence_payload_min_item if budgeted else 0,
+            question=self.whiteboard.subject,
+            window=self.config.evidence_payload_window,
         )
 
     def _update_attention(self, plan: RoutingPlan, run: RecallRun) -> None:

@@ -205,6 +205,7 @@ delivering ~11k context characters — context size is not evidence. See
 | `graph_augment_question_gate` / `min_cov` | `false` / 0.30 | optional question veto over graph-only evidence (calibrated, pending the miss slice) |
 | `graph_hub_degree` | 0 | guarded traversal: stop-expanding degree (0 = off) |
 | `graph_resolver_candidates` | 10 | resolver shortlist size (doc-vector cache is always on) |
+| `evidence_payload_window` | `false` | opt-in fact-window truncation (deliver the question-matched span; U2b candidate) |
 | `graph_depth` / `graph_top_k` | 2 / 8 | traversal depth (semantic hops) and evidence cap |
 | `whiteboard_budget` | 4000 | char budget for reminders on the whiteboard |
 | `consolidate_threshold` | 6000 | whiteboard size that triggers consolidation |

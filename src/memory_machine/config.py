@@ -59,6 +59,7 @@ class Config:
     evidence_payload: str = "off"
     evidence_payload_budget: int = 4000
     evidence_payload_min_item: int = 200
+    evidence_payload_window: bool = False
     graph_enabled: bool = False
     graph_path: str = "graph"
     graph_extract_types: str = "decision,lesson,preference,bugfix,build"
@@ -159,6 +160,7 @@ class Config:
         )
         self.evidence_payload_budget = max(0, _int(self.evidence_payload_budget, 4000))
         self.evidence_payload_min_item = max(0, _int(self.evidence_payload_min_item, 200))
+        self.evidence_payload_window = bool(self.evidence_payload_window)
         self.graph_enabled = bool(self.graph_enabled)
         self.graph_path = (self.graph_path or "graph").strip() or "graph"
         self.graph_extract_types = ",".join(

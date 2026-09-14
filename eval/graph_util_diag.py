@@ -38,7 +38,11 @@ from memory_machine.coordinator import Machine  # noqa: E402
 from memory_machine.graph import GraphStore  # noqa: E402
 from memory_machine.graph_recall import GraphRecall, guard_evidence, question_gate  # noqa: E402
 from memory_machine.llm import LLMClient, extract_json_object  # noqa: E402
-from memory_machine.payload import build_evidence_payload, payload_as_context  # noqa: E402
+from memory_machine.payload import (  # noqa: E402
+    build_evidence_payload,
+    fact_window,
+    payload_as_context,
+)
 from memory_machine.retrieval import tokenize  # noqa: E402
 from memory_machine.tape import Tape  # noqa: E402
 from memory_machine.whiteboard import Annotation, merge_annotations  # noqa: E402
@@ -134,46 +138,6 @@ def probe_usage(
     if usage not in {"used", "partial", "ignored", "contradicted"}:
         usage = "unknown"
     return {"usage": usage, "why": str(obj.get("why") or "")[:200]}
-
-
-def _segments(text: str) -> list[str]:
-    parts = re.split(r"(?<=[.!?])\s+|\n+", text)
-    return [part.strip() for part in parts if part.strip()]
-
-
-def fact_window(text: str, question: str, allocation: int) -> str:
-    """Keep the question-matching window of a long memory instead of its head.
-
-    Deterministic: segments of the session are scored by question-token
-    coverage; the best segment is expanded left/right until the allocation is
-    filled. Falls back to the head when nothing matches.
-    """
-    if allocation <= 0 or not text:
-        return text[: max(0, allocation)]
-    segments = _segments(text)
-    if not segments or sum(len(s) + 1 for s in segments) <= allocation:
-        return text[:allocation]
-    qtokens = answer_tokens(question)
-    scores = [len(qtokens & answer_tokens(segment)) for segment in segments]
-    best = max(range(len(scores)), key=lambda i: (scores[i], -i))
-    chosen = [best]
-    used = len(segments[best])
-    left, right = best - 1, best + 1
-    while len(" ".join(segments[i] for i in chosen)) < allocation:
-        take_left = left >= 0 and (right >= len(segments) or scores[left] >= scores[right])
-        if take_left:
-            chosen.insert(0, left)
-            left -= 1
-        elif right < len(segments):
-            chosen.append(right)
-            right += 1
-        else:
-            break
-    window = " … ".join(segments[i] for i in chosen)
-    if len(window) <= allocation:
-        return window
-    cut = window[:allocation]
-    return cut.rsplit(" ", 1)[0] if " " in cut else cut
 
 
 def full_gold_text(records: dict[str, Any], ids: list[str]) -> str:

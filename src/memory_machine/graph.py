@@ -320,6 +320,7 @@ class GraphIndex:
         self.in_edges: dict[str, list[GraphRelation]] = {}
         self.memory_entities: dict[str, set[str]] = {}
         self.entity_memories: dict[str, set[str]] = {}
+        self.mention_confidence: dict[tuple[str, str], float] = {}
 
     @classmethod
     def load(cls, store: "GraphStore") -> "GraphIndex":
@@ -333,6 +334,7 @@ class GraphIndex:
         for mention in store.mentions():
             index.memory_entities.setdefault(mention.memory_id, set()).add(mention.entity_id)
             index.entity_memories.setdefault(mention.entity_id, set()).add(mention.memory_id)
+            index.mention_confidence[(mention.memory_id, mention.entity_id)] = mention.confidence
         return index
 
     @property
@@ -461,6 +463,53 @@ class GraphIndex:
                         scores.get(relation.memory_id, 0.0), confidence
                     )
         return scores
+
+    def memories_for_entity(self, entity_id: str) -> list[tuple[str, float]]:
+        """Memories that mention the entity, with mention confidence."""
+        return [
+            (memory_id, self.mention_confidence.get((memory_id, entity_id), 0.8))
+            for memory_id in sorted(self.entity_memories.get(entity_id, set()))
+        ]
+
+    def paths(
+        self,
+        source_id: str,
+        target_id: str,
+        *,
+        max_depth: int = 3,
+        limit: int = 5,
+        min_confidence: float = 0.0,
+        kinds: Iterable[str] | None = None,
+    ) -> list[list[GraphRelation]]:
+        """Up to ``limit`` simple paths between two entities, best first.
+
+        Paths are scored by the bottleneck edge confidence (times the depth
+        penalty); the result is stable for identical graphs.
+        """
+        if source_id == target_id:
+            return [[]]
+        found: list[tuple[float, list[GraphRelation]]] = []
+
+        def walk(current: str, trail: list[GraphRelation], seen: set[str]) -> None:
+            if len(trail) >= max(1, max_depth) or len(found) >= limit * 4:
+                return
+            for relation in self.edges_of(current, direction="both", kinds=kinds):
+                if relation.confidence < min_confidence:
+                    continue
+                other = relation.target if relation.source == current else relation.source
+                if other in seen:
+                    continue
+                new_trail = trail + [relation]
+                if other == target_id:
+                    bottleneck = min(r.confidence for r in new_trail)
+                    score = bottleneck * (0.85 ** (len(new_trail) - 1))
+                    found.append((score, new_trail))
+                    continue
+                walk(other, new_trail, seen | {other})
+
+        walk(source_id, [], {source_id})
+        found.sort(key=lambda pair: (-pair[0], [r.id for r in pair[1]]))
+        return [trail for _score, trail in found[:limit]]
 
 
 class GraphStore:

@@ -51,6 +51,7 @@ from .sessions import save_session_meta, search_sessions, sessions_dir_for
 from .tape import MemoryRecord, Tape, parse_id
 from .views import build_index, ids_in_views, rank_views, related_views, select_views_llm
 from .whiteboard import (
+    Annotation,
     load_whiteboard,
     merge_annotations,
     needs_consolidation as whiteboard_needs_consolidation,
@@ -1044,10 +1045,26 @@ class Machine:
         client = self._ensure_client()
         self.whiteboard.subject = question
 
-        run, plan = self._dispatch_agents(
-            question, client, views=views, temperature=temperature, max_workers=max_workers
-        )
-        raw_annotations = run.annotations
+        graph_mode = self._graph_recall_mode()
+        graph_result = None
+        graph_annotations: list[Annotation] = []
+        if graph_mode == "only":
+            run = RecallRun()
+            plan = RoutingPlan(mode="graph")
+            graph_result = self._graph_recall(question)
+            graph_annotations = self._graph_annotations(graph_result)
+            raw_annotations = graph_annotations
+        else:
+            run, plan = self._dispatch_agents(
+                question, client, views=views, temperature=temperature, max_workers=max_workers
+            )
+            raw_annotations = run.annotations
+            if graph_mode == "augment":
+                graph_result = self._graph_recall(question)
+                graph_annotations = self._graph_annotations(graph_result)
+                raw_annotations = self._union_with_graph(
+                    raw_annotations, graph_annotations
+                )
         if not debug:
             plan.consulted_ids = []
             plan.level1_ids = []
@@ -1119,10 +1136,98 @@ class Machine:
             ),
             "cached": False,
         }
+        if graph_mode != "off":
+            agent_ids = {a.memory_id for a in run.annotations}
+            graph_ids = {a.memory_id for a in graph_annotations}
+            metrics = graph_result.metrics() if graph_result is not None else {}
+            metrics["graph_only_memories"] = len(graph_ids - agent_ids)
+            metrics["overlap_memories"] = len(graph_ids & agent_ids)
+            result["graph_mode"] = graph_mode
+            result["graph_evidence"] = (
+                [item.to_dict() for item in graph_result.evidence]
+                if graph_result is not None
+                else []
+            )
+            result["graph_metrics"] = metrics
         self._save_recall_cache(question, result)
         if cross_session:
             result["past_hits"] = self._cross_session_hits(question)
         return result
+
+    # ------------------------------------------------------------ graph recall
+
+    def _graph_recall_mode(self) -> str:
+        """Effective graph recall mode: off unless enabled and configured."""
+        if not self.config.graph_enabled:
+            return "off"
+        mode = self.config.graph_recall_mode
+        return mode if mode in {"augment", "only"} else "off"
+
+    def _graph_recall(self, question: str) -> Any:
+        """Run graph-side recall; never raises, returns None when unavailable."""
+        try:
+            from .graph import GraphStore
+            from .graph_recall import GraphRecall
+
+            store = GraphStore(resolve_path(self.root, self.config.graph_path))
+            if not store.exists():
+                return None
+            recall = GraphRecall(
+                store.index(),
+                embedder=self._embedder(),
+                depth=self.config.graph_depth,
+                top_k=self.config.graph_top_k,
+            )
+            return recall.recall(question)
+        except Exception:
+            return None
+
+    def _graph_annotations(self, graph_result: Any) -> list[Annotation]:
+        """Turn graph evidence into annotations, rehydratable from the tape.
+
+        Memories that are not active on the tape (orphan relations, archived
+        records) are dropped: the graph selects, the tape supplies the facts.
+        """
+        if graph_result is None:
+            return []
+        active = {record.id for record in self.tape.read() if record.status == "active"}
+        out: list[Annotation] = []
+        for item in graph_result.evidence:
+            if item.memory_id not in active:
+                continue
+            out.append(
+                Annotation(
+                    memory_id=item.memory_id,
+                    note=item.label or "graph evidence",
+                    relevance=max(0.05, float(item.score)),
+                    agent_id="graph",
+                )
+            )
+        return out
+
+    @staticmethod
+    def _union_with_graph(
+        annotations: list[Annotation], graph_annotations: list[Annotation]
+    ) -> list[Annotation]:
+        """Union agent and graph annotations, deduped by memory id.
+
+        The single global budget is applied later, after the union, so the two
+        recall arms never compete with independent budgets.
+        """
+        by_id: dict[str, Annotation] = {a.memory_id: a for a in annotations}
+        for item in graph_annotations:
+            current = by_id.get(item.memory_id)
+            if current is None:
+                by_id[item.memory_id] = item
+                continue
+            if item.relevance > current.relevance:
+                by_id[item.memory_id] = Annotation(
+                    memory_id=current.memory_id,
+                    note=current.note or item.note,
+                    relevance=item.relevance,
+                    agent_id=current.agent_id or item.agent_id,
+                )
+        return list(by_id.values())
 
     # ---------------------------------------------------------- recall cache
 

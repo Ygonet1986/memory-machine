@@ -1,3 +1,5 @@
+import json
+
 import pytest
 
 from memory_machine.tape import (
@@ -81,3 +83,53 @@ def test_status_default_active(tmp_path):
     tape = Tape(tmp_path / "tape.jsonl")
     tape.append(MemoryRecord(type="decision", summary="A"))
     assert tape.read()[0].status == "active"
+
+
+def test_source_fields_absent_by_default():
+    rec = MemoryRecord(type="decision", summary="A")
+    d = rec.to_dict()
+    assert "source_document" not in d
+    assert "source_span" not in d
+
+
+def test_source_fields_round_trip():
+    rec = MemoryRecord(
+        type="attachment",
+        summary="chunk",
+        why="body",
+        source="manual.txt#abc123",
+        source_span=(1800, 2300),
+        source_document="manual.txt#abc123",
+    )
+    restored = MemoryRecord.from_dict(rec.to_dict())
+    assert restored == rec
+    assert restored.to_dict()["source_span"] == [1800, 2300]
+    assert restored.to_dict()["source_document"] == "manual.txt#abc123"
+
+
+def test_old_line_stays_byte_equivalent_invariance(tmp_path):
+    old = (
+        '{"id":"M0001","type":"decision","summary":"A","why":"","files":[],'
+        '"created_at":"2000-01-01T00:00:00+00:00","status":"active","source":"",'
+        '"derived_from":[],"views":[]}\n'
+    )
+    p = tmp_path / "tape.jsonl"
+    p.write_text(old, encoding="utf-8")
+    tape = Tape(p)
+    raw = p.read_text(encoding="utf-8")
+    record = tape.read()[0]
+    assert record.to_dict() == {
+        "id": "M0001",
+        "type": "decision",
+        "summary": "A",
+        "why": "",
+        "files": [],
+        "created_at": "2000-01-01T00:00:00+00:00",
+        "status": "active",
+        "source": "",
+        "derived_from": [],
+        "views": [],
+    }
+    assert json.dumps(record.to_dict(), sort_keys=True) == json.dumps(
+        json.loads(raw), sort_keys=True
+    )

@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 from memory_machine.attachments import ingest_attachment, remove_attachments
@@ -23,6 +24,23 @@ def test_ingest_creates_labeled_chunks(tmp_path):
     assert all(r.type == "attachment" for r in records)
     assert records[0].summary == 'Attached text "spec.txt" — chunk 1/3'
     assert records[0].source.startswith("spec.txt#")
+
+
+def test_ingest_records_byte_equivalent_without_new_fields(tmp_path):
+    tape = Tape(tmp_path / "tape.jsonl")
+    manifest = Manifest(capacity=50)
+    src = tmp_path / "spec.txt"
+    src.write_text("A" * 1500)
+    ingest_attachment(tape, manifest, src, chunk_size=600)
+
+    for record in tape.read():
+        d = record.to_dict()
+        assert "source_document" not in d
+        assert "source_span" not in d
+    raw = tmp_path / "tape.jsonl"
+    for line in raw.read_text(encoding="utf-8").splitlines():
+        assert "source_document" not in json.loads(line)
+        assert "source_span" not in json.loads(line)
 
 
 def test_ingest_dedupes_by_source(tmp_path):

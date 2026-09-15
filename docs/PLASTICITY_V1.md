@@ -1,12 +1,12 @@
 # plasticity-v1 — pre-registration (Fase P, P0)
 
 **Status: pre-registration frozen · P0 closed: `7cd3251` + `93708e1` (426
-green) · P1 observe EXECUTED: `eval/plasticity_observe.py` + run
-`eval/results/plasticity_u42_observe/run1` (determinism proven; empty ledger ⇒
-**0/30** cases would change — instrument verified) · **P2 shadow
-PRE-REGISTERED** (§12 frozen before any P2 execution): leak-guarded population
-from train cases 0–11 only, paired metric `repaired − regressed`, promotion
-iff `net ≥ +3` (0.10 > floor 0.07–0.08; +2 = 0.0667 insufficient) · precedent:
+green) · P1 observe EXECUTED (`eval/plasticity_observe.py` + run1; determinism
+proven; empty ledger ⇒ **0/30** changed) · **P2 shadow EXECUTED**
+(`eval/plasticity_shadow.py` + `plasticity_u42_shadow`; §12.5 budgeted-payload
+addendum `9594e92`; leak-guarded population train 0–11 + eval 12–41; negative
+control reproduced P1 byte-identically; A/B replication perfect) — **result:
+net +0 (0/30) ⇒ fails the 0.07–0.08 floor (§12.9), not promoted** · precedent:
 doc-graph-v1 gate (`doc-graph-v1` tag, closed), U4.2 oscillation floor, M0150
 pre-registration discipline.
 
@@ -240,6 +240,39 @@ config default depth/top_k/max_paths + `wᵤ=0.5`, `hop_cost=0`):
 
 P2 may now measure whether a populated ledger clears the 0.07–0.08 historical
 floor against this instrument.
+
+### 11.2 P2 shadow execution record
+
+**Harness:** `eval/plasticity_shadow.py` (populate → freeze → paired eval →
+negative control → two from-scratch runs A/B). Populated ledger from train
+cases **0–11** (disjoint from eval 12–41), frozen single version under the run
+(`ledger_frozen/`, deterministic ts mask — timestamps are audit-only), then
+evaluated on U4.2 **12–41**.
+
+**Run `plasticity_u42_shadow`** (`git_commit 9594e92`):
+
+- population: 12 train cases, 14 items, 42 paths, **98 edge events → 59 edge
+  keys**, 0 leaks, 6 ground-only items skipped (4:M0016, 6:M0036, 7:M0040,
+  8:M0015, 11:M0013, 11:M0012 — present in the archive ground but not in the
+  train recall evidence ⇒ not candidates, per §12.3).
+- negative control: empty ledger reproduced P1 byte-identically
+  (**matches P1 run1 sha1 `3d9df4dc…` True**).
+- determinism: negative and shadow eval both deterministic (2 identical
+  iterations); replication A/B: frozen ledger sha1 equal, eval iteration equal,
+  classification equal — **all True**.
+- per-case outcome (budgeted payload, §12.5 addendum): `stayed_correct 11`,
+  `stayed_incorrect 19`, `repaired 0`, `regressed 0` ⇒ **net = +0 (0/30 cases
+  changed)**.
+- transfer probe: **0 of the 30 eval cases share a single edge key with the
+  frozen ledger** (59 ledger keys × eval path edges 1,508) — with a disjoint
+  train pool, the learned navigation prior has no point of contact with the
+  evaluation snapshots, so `ΔE = 0` on every case by construction.
+
+**Finding (per §12.9): net +0 < +3 ⇒ the phase fails the pre-registered floor
+and is not promoted; P3/P4 do not run on this ledger version.** The null
+result is exactly the leak-guard's behavior — a populated ledger learned from
+cases 0–11 cannot change any of the 30 disjoint cases — and the instrument is
+verified (controls, determinism and replication all green).
 
 ## 12. P2 shadow — pre-registration (frozen before any P2 execution)
 

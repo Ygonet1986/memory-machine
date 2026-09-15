@@ -701,10 +701,9 @@ def main() -> int:
     ev_all = evidence_alignment(snaps, norm)
     ev = {pair.lower(): ev_all[pair]["distance"] for pair in ("OA", "OB", "AB")}
     delta["evidence"] = ev
-    evidence_meta = {pair: {k: v for k, v in ev_all[pair].items()
-                            if k != "distance"} for pair in ("OA", "OB", "AB")}
-    if any(ev_all[p]["eligible_pairs"] == 0 for p in ("OA", "OB", "AB")):
-        evidence_meta["note"] = "no evidence-bearing aligned relations"
+    evidence_meta = {pair: dict(ev_all[pair]) for pair in ("OA", "OB", "AB")}
+    if any(ev_all[p]["units"] == 0 for p in ("OA", "OB", "AB")):
+        evidence_meta["note"] = "no evidence-bearing O-anchored units"
     health = {
         label: {
             "pending": len(arms[label]["store"].pending_rows()),

@@ -1,0 +1,51 @@
+{
+  "harness": "eval/composition_e1.py",
+  "git_commit": "ece739fc194b52b469b8f013fd2f492d88e53961",
+  "fixture": "/Users/igorcoutrimlacerda/memory-machine/eval/fixtures/composition_u4",
+  "fixture_sha1": "24b390955b228bbfad5150bc7412ca67c6ae4cc5",
+  "card_rules": "evidence_cards v1 (docs/COMPOSITION_V1.md §3)",
+  "arms": [
+    "complete",
+    "precise",
+    "cards"
+  ],
+  "model": "deepseek-v4-flash",
+  "judge_model": "deepseek-v4-flash",
+  "n_sweep": 3,
+  "n_flip": 5,
+  "checksums": {
+    "atoms.jsonl": "d8d2981f9adcfb3c3ac53c22d91b7bfe70a2e2b4",
+    "cards_contexts": {
+      "12": "cd841dc6239d22bc8e47c916d3f9c340ac50241e",
+      "13": "e15a302f5c422aa236d899b5278cf2b028d686f9",
+      "14": "892d4f26e61e38f91c8b1e436984ffa98edf1fd5",
+      "15": "7cf38b288372d24a214ff56d3bf76e65503b8142",
+      "16": "d0ac6cb1bb3874e53579bb6ce9bd2478fdfe1ad4",
+      "17": "ede2719cf3a0b134b61c81ede6aba1ca4638e86b",
+      "18": "f997a56d49a9cde69e81082e2c8e833cebc970cf",
+      "19": "8c444055032fba3bd13a9b11d69e645a8009d816",
+      "20": "81ed4a56c06bbdcf05db8e11b6cedb65cf716abd",
+      "21": "c9527e8b70ea9f40ecf079261b247763426f0f93",
+      "22": "7dda4556a4978ea2be87a92cd0f37defaeb90f50",
+      "23": "38ab4978052c85bb35b65e3a93a3c34dad434f28",
+      "24": "f7b089659af088ee8e5b3b643ab23e9b96a1c370",
+      "25": "30972b466f23f7d1245d761da160b2f1cfc47a4d",
+      "26": "9cd3c5132b58e3bbbd8e292c7f374b378b012555",
+      "27": "639e757306c2fbb753a9893ea562f18a51d145aa",
+      "28": "920d59f89503c3c59e74c4bcbb76ca819cb03b48",
+      "29": "439d80320e74313a2cd97904e54a4b99dca76988",
+      "30": "63107b254a6c4b4b159497d321279977ff9d4e90",
+      "31": "92dd170dfd1a65dafefee8a7826a6d45474ec488",
+      "32": "5a6a876ad62f7751e5e2cc454c35e6895dc62506",
+      "33": "17cf12f6ec986754fab2c77e398e5d54a50b92fb",
+      "34": "e98d5f7cc1c64ac8e29617cabb5b03a96e732c2b",
+      "35": "85556dbcfb6b4664a349dfe8b30c27198730427f",
+      "36": "8b00c4e4c8a99a5866332cac533c199f42045bbc",
+      "37": "9070fe892b6405c354a3518606eebe894d6cf087",
+      "38": "a164b0f161b9ed57472655895ca727a06ea8bacb",
+      "39": "e1b3a502aec3dd9c5353b2bd1d538efa8d3fa1e8",
+      "40": "7953cefdd5fc736927e834c54baf4d759041c9e0",
+      "41": "e6e637c77d025696e76bf9f4ac381c1feb0d3c00"
+    }
+  }
+}

@@ -1283,3 +1283,33 @@ source/target entities. Durable explain output is unchanged.
 (`None`), so plain `graph build` keeps the graph-v3 projection byte-for-byte.
 Recall/admission, PAPER/RESULTS figures and the historical defaults are
 untouched; document provenance is read-only — it never drives recall.
+
+### 21 Plasticity (Fase P, P0 — learned path priority)
+
+Plasticity gives the graph a **learned navigation prior**: which paths to
+search for, never what the document said. It is a derived, disposable
+projection — the same normative invariant that governs views and the document
+graph (§20, §20.12).
+
+**Mutability.** The tape, documents, entities/relations, evidence and the
+recall contract are immutable under Fase P. The only mutable object is the
+**edge utility ledger** under `<root>/plasticity/`: append-only `events.jsonl`
+(source of truth) + append-only `utility.jsonl` materialization; `rebuild()`
+replays events deterministically; delete restores the baseline (reversible).
+The ledger never touches Tape, graph, evidence or recall.
+
+**Identity.** `EdgeKey = (source E####, canonical verb, target E####,
+extraction_scope)`; `R####`, document and memory ids are audit-only, never
+resolution criteria.
+
+**Energy.** `E(path|q) = D + H − wᵤ·U + R` with `H = hop_cost·(depth−1)` and
+shrunk utility `u_eff = u·n/(n+k)`; update `u' = clip((1−λ)u + η·s, −min, max)`
+with pre-registered constants (docs/PLASTICITY_V1.md §7). Signals are
+mechanical — from search outcomes with valid provenance only, never
+`answer_correct`.
+
+**Modes.** `plasticity_mode: off | observe | shadow | update | deliver`
+(default `off`). `off` is byte-equivalent baseline; `observe` is read-only
+(shadow rankings computed from frozen snapshots, results unchanged). Defaults,
+PAPER/RESULTS figures and the closed doc-graph-v1 / U-line gates are untouched;
+documents are never used to fire reinforcement, only as provenance.

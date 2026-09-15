@@ -208,6 +208,7 @@ delivering ~11k context characters — context size is not evidence. See
 | `document_graph_enabled` | `true` | project `.txt` attachments into the document graph |
 | `document_structure_level` | `chunk` | document scope: `chunk` / `document` / `both` |
 | `document_window_chars` | 12000 | content-cost budget per document window |
+| `plasticity_mode` | `off` | learned path priority: `off` / `observe` / `shadow` / `update` / `deliver` (P0 pre-registered; ledger in `<root>/plasticity/`) |
 | `evidence_payload_window` | `false` | opt-in fact-window truncation (U2b; no reliable gain in the U3 30-case audit — stays off) |
 | `graph_depth` / `graph_top_k` | 2 / 8 | traversal depth (semantic hops) and evidence cap |
 | `whiteboard_budget` | 4000 | char budget for reminders on the whiteboard |
@@ -299,6 +300,8 @@ recall and token economy.
 - [docs/GRAPH_V1.md](docs/GRAPH_V1.md), [docs/GRAPH_V2.md](docs/GRAPH_V2.md),
   [docs/GRAPH_UTIL.md](docs/GRAPH_UTIL.md), [docs/GRAPH_EVAL.md](docs/GRAPH_EVAL.md) —
   graph recall, admission control, utilization and the F4 evaluation.
+- [docs/PLASTICITY_V1.md](docs/PLASTICITY_V1.md) — Fase P (learned path
+  priority): pre-registered protocol (P0 ledger, energy, modes, gates).
 
 ## Desktop app (macOS)
 

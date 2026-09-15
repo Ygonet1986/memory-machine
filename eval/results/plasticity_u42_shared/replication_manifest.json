@@ -1,0 +1,34 @@
+{
+  "replication": {
+    "frozen_sha1_equal": true,
+    "eval_iter_equal": true,
+    "exposure_equal": true,
+    "classification_equal": true
+  },
+  "runs": [
+    "plasticity_u42_shared:runA",
+    "plasticity_u42_shared:runB"
+  ],
+  "exposed_nets": [
+    -2,
+    -2
+  ],
+  "total_nets": [
+    -2,
+    -2
+  ],
+  "counts": [
+    {
+      "stayed_incorrect": 64,
+      "regressed": 4,
+      "stayed_correct": 14,
+      "repaired": 2
+    },
+    {
+      "stayed_incorrect": 64,
+      "regressed": 4,
+      "stayed_correct": 14,
+      "repaired": 2
+    }
+  ]
+}

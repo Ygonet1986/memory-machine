@@ -3,9 +3,12 @@
 **Status: pre-registration frozen · P0 closed: `7cd3251` + `93708e1` (426
 green) · P1 observe EXECUTED: `eval/plasticity_observe.py` + run
 `eval/results/plasticity_u42_observe/run1` (determinism proven; empty ledger ⇒
-**0/30** cases would change — instrument verified) · precedent: doc-graph-v1
-gate (`doc-graph-v1` tag, closed), U4.2 oscillation floor, M0150 pre-registration
-discipline.
+**0/30** cases would change — instrument verified) · **P2 shadow
+PRE-REGISTERED** (§12 frozen before any P2 execution): leak-guarded population
+from train cases 0–11 only, paired metric `repaired − regressed`, promotion
+iff `net ≥ +3` (0.10 > floor 0.07–0.08; +2 = 0.0667 insufficient) · precedent:
+doc-graph-v1 gate (`doc-graph-v1` tag, closed), U4.2 oscillation floor, M0150
+pre-registration discipline.
 
 This document registers, before any plasticity experiment or delivery run,
 the exact question, layers the system may and may not touch, the `EdgeKey`
@@ -237,3 +240,139 @@ config default depth/top_k/max_paths + `wᵤ=0.5`, `hop_cost=0`):
 
 P2 may now measure whether a populated ledger clears the 0.07–0.08 historical
 floor against this instrument.
+
+## 12. P2 shadow — pre-registration (frozen before any P2 execution)
+
+This section registers, **before any P2 execution**, the population design, the
+update regime, the arms, the metric and the promotion criterion (M0150:
+parameters fixed a priori, never after seeing results).
+
+### 12.1 Question and arms
+
+> Does a ledger populated from **training cases disjoint from the U4.2
+> evaluation set** change U4.2 outcomes through the shadow arm enough to clear
+> the 0.07–0.08 floor — without breaking any invariant?
+
+- **Evaluation set** (identical to run1): U4.2 = cases **12–41 (30)**,
+  snapshots `eval/graph_out/graphs/longmemeval/case_*` +
+  `graph_bench_longmemeval_{u3a,u3b}.jsonl`, pinned by `CHECKSUMS_graph.txt`.
+- **Baseline arm**: the P1 observer with an **empty ledger** (shadow ranking,
+  read-only). **Plastic arm**: the same observer, same evaluation payload and
+  context, with the **frozen populated ledger** loaded read-only. Only the
+  energy ranking differs — `E = D − wᵤ·U`, `H = R = 0` (§6) — every edge of
+  the pipeline (seeds, paths, evidence, `guard_evidence`, `question_gate`,
+  budget) is byte-identical. **No LLM step** anywhere in P2.
+
+### 12.2 Leak guard and population source (disjoint by construction)
+
+- The ledger is populated **only** from the archived **train cases 0–11**
+  (snapshots `graph case_00..case_11`, benches `graph_bench_longmemeval.jsonl`,
+  signal ground `fact_presence_longmemeval.jsonl`) — **disjoint** from the 30
+  evaluation cases (12–41). A case cannot be both train and eval; the harness
+  iterates only the 0–11 artifacts, never the u3a/u3b benches or cases 12+, and
+  records the disjointness assertion in the run manifest.
+- Signal ground for a memory id is the frozen `graph_off` arm of
+  `fact_presence_longmemeval.jsonl` (`delivered`, `item_facts.present`,
+  `strong.present`) + `graph_bench_longmemeval.jsonl` required ids — objective
+  properties of the *search*, never `answer_correct` (M0155).
+- No edge, path or signal from any evaluation case exists in the ledger
+  (asserted at load, recorded in the manifest).
+
+### 12.3 Initial state, update count and order, signals, limits and shrinkage
+
+- **Initial state**: ledger empty (`events.jsonl` empty, `utility.jsonl` empty,
+  `sha1 "empty"`), `policy_version "p0"`.
+- **Update rule and constants** (frozen, §7): `u' = clip((1−λ)·u + η·s, −1, 1)`
+  with `λ=0.01`, `η=0.10`, bounds ±1, `k=5.0` shrinkage (`u_eff = u·n/(n+k)`),
+  `hop_cost=0.15`, `wᵤ=0.5`.
+- **Signal** (frozen composite §7.1, clipped to `[−1,1]`, attributed to every
+  edge in its path, one `apply_update` per (case, item, path, edge)):
+  `fact_presence +0.60`, `wasted_context −0.40`, `multi_evidence_complete
+  +0.30`, `budget_respected +0.10`; `cross_document_leak −0.60` ⇒ record with
+  `evidenced=false` (logged, never reinforced).
+- **Update order** (fixed, deterministic): train cases `00→11` in filename
+  order; per case, delivered memory items in `graph_off` items order; per item,
+  candidate paths from frozen recall in base-score order (as in P1), retained
+  to `max_paths_per_evidence=3`; per retained path, its edges in path order.
+- **Number of updates** = the count the rule produces over the frozen inputs
+  (not hand-picked); it is recorded in the ledger manifest and locked. Two
+  re-populations from separate empty stores must yield a byte-identical
+  `events.jsonl` (same count + sha1) — clause 12.8.
+- **Limits**: no new caps beyond the frozen search limits (depth 2, `top_k` 8,
+  `max_paths` 400, `max_paths_per_evidence` 3, budget char cap from §6.4);
+  ledger size is bounded by the training pool and reported in the manifest.
+
+### 12.4 Single frozen ledger version before evaluation
+
+- Population writes a fresh versioned ledger; after population it is
+  **frozen**: copied read-only to `eval/results/<run>/ledger_frozen/` with the
+  sha1 of `events.jsonl` and `utility.jsonl` recorded in `run_manifest.json`, and
+  the evaluation harness loads **only that copy** under the P1 mutation guard
+  (any write outside `--out` aborts, exit 2).
+- Exactly **one** frozen ledger version is evaluated. A second version = an
+  unreported policy change; it invalidates the run.
+
+### 12.5 Paired primary metric and exact tie/improve/regress rule
+
+Per evaluation case (12–41) the mechanical outcome of each arm is:
+**`correct`** ⇔ all required target ids were delivered as evidence in the
+retained paths (`targets_missing == []`); **`incorrect`** otherwise (computed
+exactly like run1's per-case table; no LLM).
+
+Per-case pairing (baseline empty-ledger outcome, plastic outcome):
+
+| Class | Rule | Net |
+|---|---|---|
+| **repaired** | baseline incorrect → plastic correct | `+1` |
+| **regressed** | baseline correct → plastic incorrect | `−1` |
+| **stayed-correct** | both correct | `0` |
+| **stayed-incorrect** | both incorrect | `0` |
+
+Anything not strictly repaired or regressed is a **tie**. Primary metric:
+**`net = repaired − regressed`** over the 30 cases. Secondary (audit-only,
+never gating): wasted-context delta, delivered-evidence stability (per-case
+Jaccard of ids), ordering stability.
+
+### 12.6 Per-case audit and traceability
+
+The run table classifies all 30 cases into the four buckets and prints per case:
+base vs plastic top-3 paths (nodes → relations → edges), energy decomposition
+(`D`, `wᵤ·U`, `H = R = 0`), target coverage, delivered/missing ids, budget.
+Traceability chain (M0124): `case → query → paths → EdgeKeys → events.jsonl →
+update records` (memory ids audit-only). Repaired and regressed cases carry an
+additional path-level diff block for manual reading.
+
+### 12.7 Negative control (must reproduce P1)
+
+An empty-ledger evaluation over the same 30 cases, part of the P2 run itself,
+must reproduce P1 run1 exactly: **changed = 0/30** with the two observer
+iterations byte-identical (re-run sha1 must equal run1's `3d9df4dc…`). Any
+divergence = snapshot or harness drift → abort before reading the plastic arm.
+
+### 12.8 Variance separation and independent executions
+
+- P2 population and evaluation are **fully mechanical — no LLM step** — so
+  run-to-run variance is 0 by construction; yet the protocol executes the whole
+  pipeline **twice from scratch** (two empty ledger stores, two run dirs), and
+  both executions must produce an identical frozen ledger (sha1) and an
+  identical 30-case classification. This satisfies the "≥2 independent runs"
+  rule deterministically (policy effect separated from variance).
+- If any later execution adds an LLM step, it **re-pre-registers** with ≥2
+  independent runs at temperature 0 and a frozen judge; not covered here.
+
+### 12.9 Promotion criterion (crossing the pre-registered floor)
+
+Pair per case = 1/30 ≈ 0.0333. A net of `+2` = 0.0667 **lies below** the
+0.07–0.08 floor; a net of `+3` = 0.10 **clears** it. Therefore:
+
+```
+promote P2  ⇔  (net = repaired − regressed) ≥ +3
+               AND all invariants hold
+               AND negative control reproduced 0/30
+               AND every regressed case audited + explained by ledger replay
+```
+
+Promotion proceeds like doc-graph-v1: joint reading of the net metric **and**
+reversibility (utility rebuild == frozen utility), then a tag. Net `< +3`
+(+2 included) rejects the phase at the floor; secondary metrics are reported
+but never gate. Empty-ledger "change" is never an effect (M0195).

@@ -1,0 +1,1604 @@
+{
+  "fixture": "eval/fixtures/composition_u4",
+  "fixture_manifest_sha1": "24b390955b228bbfad5150bc7412ca67c6ae4cc5",
+  "cases": 30,
+  "records": 122,
+  "budget": 4000,
+  "modes": {
+    "gold": {
+      "cases": 30,
+      "cards": 186,
+      "cards_avg": 6.2,
+      "chars_total": 25860,
+      "chars_avg": 862,
+      "chars_max": 2812,
+      "memories_no_cards": 0,
+      "fact_kinds": {
+        "comparison": 22,
+        "date": 25,
+        "interval": 11,
+        "negation": 7,
+        "number": 70,
+        "update": 13
+      },
+      "no_cards_cases": [],
+      "validation_failures": [],
+      "validation_ok": true,
+      "deterministic": true,
+      "per_case_sha1": {
+        "12": "cd841dc6239d22bc8e47c916d3f9c340ac50241e",
+        "13": "e15a302f5c422aa236d899b5278cf2b028d686f9",
+        "14": "892d4f26e61e38f91c8b1e436984ffa98edf1fd5",
+        "15": "7cf38b288372d24a214ff56d3bf76e65503b8142",
+        "16": "d0ac6cb1bb3874e53579bb6ce9bd2478fdfe1ad4",
+        "17": "ede2719cf3a0b134b61c81ede6aba1ca4638e86b",
+        "18": "f997a56d49a9cde69e81082e2c8e833cebc970cf",
+        "19": "8c444055032fba3bd13a9b11d69e645a8009d816",
+        "20": "81ed4a56c06bbdcf05db8e11b6cedb65cf716abd",
+        "21": "c9527e8b70ea9f40ecf079261b247763426f0f93",
+        "22": "7dda4556a4978ea2be87a92cd0f37defaeb90f50",
+        "23": "38ab4978052c85bb35b65e3a93a3c34dad434f28",
+        "24": "f7b089659af088ee8e5b3b643ab23e9b96a1c370",
+        "25": "30972b466f23f7d1245d761da160b2f1cfc47a4d",
+        "26": "9cd3c5132b58e3bbbd8e292c7f374b378b012555",
+        "27": "639e757306c2fbb753a9893ea562f18a51d145aa",
+        "28": "920d59f89503c3c59e74c4bcbb76ca819cb03b48",
+        "29": "439d80320e74313a2cd97904e54a4b99dca76988",
+        "30": "63107b254a6c4b4b159497d321279977ff9d4e90",
+        "31": "92dd170dfd1a65dafefee8a7826a6d45474ec488",
+        "32": "5a6a876ad62f7751e5e2cc454c35e6895dc62506",
+        "33": "17cf12f6ec986754fab2c77e398e5d54a50b92fb",
+        "34": "e98d5f7cc1c64ac8e29617cabb5b03a96e732c2b",
+        "35": "85556dbcfb6b4664a349dfe8b30c27198730427f",
+        "36": "8b00c4e4c8a99a5866332cac533c199f42045bbc",
+        "37": "9070fe892b6405c354a3518606eebe894d6cf087",
+        "38": "a164b0f161b9ed57472655895ca727a06ea8bacb",
+        "39": "e1b3a502aec3dd9c5353b2bd1d538efa8d3fa1e8",
+        "40": "7953cefdd5fc736927e834c54baf4d759041c9e0",
+        "41": "e6e637c77d025696e76bf9f4ac381c1feb0d3c00"
+      },
+      "per_case": [
+        {
+          "case": 12,
+          "block": "u3a",
+          "cat": "single-session-user",
+          "candidates": 1,
+          "cards": 3,
+          "chars": 447,
+          "sha1": "cd841dc6239d22bc8e47c916d3f9c340ac50241e",
+          "fact_kinds": [
+            "comparison"
+          ],
+          "card_ids": [
+            "M0040",
+            "M0040",
+            "M0040"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 13,
+          "block": "u3a",
+          "cat": "single-session-assistant",
+          "candidates": 1,
+          "cards": 3,
+          "chars": 386,
+          "sha1": "e15a302f5c422aa236d899b5278cf2b028d686f9",
+          "fact_kinds": [],
+          "card_ids": [
+            "M0037",
+            "M0037",
+            "M0037"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 14,
+          "block": "u3a",
+          "cat": "temporal-reasoning",
+          "candidates": 2,
+          "cards": 6,
+          "chars": 1041,
+          "sha1": "892d4f26e61e38f91c8b1e436984ffa98edf1fd5",
+          "fact_kinds": [],
+          "card_ids": [
+            "M0045",
+            "M0032",
+            "M0045",
+            "M0032",
+            "M0045",
+            "M0032"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 15,
+          "block": "u3a",
+          "cat": "multi-session",
+          "candidates": 5,
+          "cards": 15,
+          "chars": 2115,
+          "sha1": "7cf38b288372d24a214ff56d3bf76e65503b8142",
+          "fact_kinds": [
+            "interval",
+            "negation",
+            "number"
+          ],
+          "card_ids": [
+            "M0036",
+            "M0007",
+            "M0002",
+            "M0009",
+            "M0010",
+            "M0036",
+            "M0007",
+            "M0002",
+            "M0009",
+            "M0010",
+            "M0036",
+            "M0007",
+            "M0002",
+            "M0009",
+            "M0010"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 16,
+          "block": "u3a",
+          "cat": "single-session-user",
+          "candidates": 1,
+          "cards": 3,
+          "chars": 426,
+          "sha1": "d0ac6cb1bb3874e53579bb6ce9bd2478fdfe1ad4",
+          "fact_kinds": [
+            "update"
+          ],
+          "card_ids": [
+            "M0018",
+            "M0018",
+            "M0018"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 17,
+          "block": "u3a",
+          "cat": "single-session-user",
+          "candidates": 1,
+          "cards": 3,
+          "chars": 324,
+          "sha1": "ede2719cf3a0b134b61c81ede6aba1ca4638e86b",
+          "fact_kinds": [],
+          "card_ids": [
+            "M0043",
+            "M0043",
+            "M0043"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 18,
+          "block": "u3a",
+          "cat": "multi-session",
+          "candidates": 2,
+          "cards": 6,
+          "chars": 573,
+          "sha1": "f997a56d49a9cde69e81082e2c8e833cebc970cf",
+          "fact_kinds": [
+            "comparison",
+            "date",
+            "number"
+          ],
+          "card_ids": [
+            "M0022",
+            "M0018",
+            "M0022",
+            "M0018",
+            "M0022",
+            "M0018"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 19,
+          "block": "u3a",
+          "cat": "multi-session",
+          "candidates": 2,
+          "cards": 6,
+          "chars": 985,
+          "sha1": "8c444055032fba3bd13a9b11d69e645a8009d816",
+          "fact_kinds": [
+            "number",
+            "update"
+          ],
+          "card_ids": [
+            "M0031",
+            "M0035",
+            "M0031",
+            "M0035",
+            "M0031",
+            "M0035"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 20,
+          "block": "u3a",
+          "cat": "single-session-user",
+          "candidates": 1,
+          "cards": 3,
+          "chars": 396,
+          "sha1": "81ed4a56c06bbdcf05db8e11b6cedb65cf716abd",
+          "fact_kinds": [
+            "number"
+          ],
+          "card_ids": [
+            "M0033",
+            "M0033",
+            "M0033"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 21,
+          "block": "u3a",
+          "cat": "multi-session",
+          "candidates": 3,
+          "cards": 9,
+          "chars": 1557,
+          "sha1": "c9527e8b70ea9f40ecf079261b247763426f0f93",
+          "fact_kinds": [
+            "comparison",
+            "date",
+            "number"
+          ],
+          "card_ids": [
+            "M0006",
+            "M0039",
+            "M0026",
+            "M0006",
+            "M0039",
+            "M0026",
+            "M0006",
+            "M0039",
+            "M0026"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 22,
+          "block": "u3a",
+          "cat": "single-session-user",
+          "candidates": 1,
+          "cards": 3,
+          "chars": 345,
+          "sha1": "7dda4556a4978ea2be87a92cd0f37defaeb90f50",
+          "fact_kinds": [],
+          "card_ids": [
+            "M0038",
+            "M0038",
+            "M0038"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 23,
+          "block": "u3a",
+          "cat": "temporal-reasoning",
+          "candidates": 2,
+          "cards": 6,
+          "chars": 733,
+          "sha1": "38ab4978052c85bb35b65e3a93a3c34dad434f28",
+          "fact_kinds": [],
+          "card_ids": [
+            "M0014",
+            "M0022",
+            "M0014",
+            "M0022",
+            "M0014",
+            "M0022"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 24,
+          "block": "u3a",
+          "cat": "multi-session",
+          "candidates": 2,
+          "cards": 6,
+          "chars": 805,
+          "sha1": "f7b089659af088ee8e5b3b643ab23e9b96a1c370",
+          "fact_kinds": [
+            "comparison",
+            "number"
+          ],
+          "card_ids": [
+            "M0035",
+            "M0012",
+            "M0035",
+            "M0012",
+            "M0035",
+            "M0012"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 25,
+          "block": "u3a",
+          "cat": "single-session-user",
+          "candidates": 1,
+          "cards": 3,
+          "chars": 351,
+          "sha1": "30972b466f23f7d1245d761da160b2f1cfc47a4d",
+          "fact_kinds": [
+            "comparison",
+            "date",
+            "number"
+          ],
+          "card_ids": [
+            "M0040",
+            "M0040",
+            "M0040"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 26,
+          "block": "u3a",
+          "cat": "knowledge-update",
+          "candidates": 2,
+          "cards": 6,
+          "chars": 649,
+          "sha1": "9cd3c5132b58e3bbbd8e292c7f374b378b012555",
+          "fact_kinds": [
+            "number",
+            "update"
+          ],
+          "card_ids": [
+            "M0013",
+            "M0040",
+            "M0013",
+            "M0040",
+            "M0013",
+            "M0040"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 27,
+          "block": "u3b",
+          "cat": "temporal-reasoning",
+          "candidates": 4,
+          "cards": 12,
+          "chars": 1877,
+          "sha1": "639e757306c2fbb753a9893ea562f18a51d145aa",
+          "fact_kinds": [
+            "number",
+            "update"
+          ],
+          "card_ids": [
+            "M0023",
+            "M0002",
+            "M0029",
+            "M0011",
+            "M0023",
+            "M0002",
+            "M0029",
+            "M0011",
+            "M0023",
+            "M0002",
+            "M0029",
+            "M0011"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 28,
+          "block": "u3b",
+          "cat": "single-session-user",
+          "candidates": 1,
+          "cards": 3,
+          "chars": 346,
+          "sha1": "920d59f89503c3c59e74c4bcbb76ca819cb03b48",
+          "fact_kinds": [
+            "comparison",
+            "date",
+            "negation",
+            "number"
+          ],
+          "card_ids": [
+            "M0032",
+            "M0032",
+            "M0032"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 29,
+          "block": "u3b",
+          "cat": "multi-session",
+          "candidates": 4,
+          "cards": 12,
+          "chars": 1792,
+          "sha1": "439d80320e74313a2cd97904e54a4b99dca76988",
+          "fact_kinds": [
+            "comparison",
+            "date",
+            "negation",
+            "number"
+          ],
+          "card_ids": [
+            "M0005",
+            "M0043",
+            "M0021",
+            "M0038",
+            "M0005",
+            "M0043",
+            "M0021",
+            "M0038",
+            "M0005",
+            "M0043",
+            "M0021",
+            "M0038"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 30,
+          "block": "u3b",
+          "cat": "temporal-reasoning",
+          "candidates": 2,
+          "cards": 6,
+          "chars": 808,
+          "sha1": "63107b254a6c4b4b159497d321279977ff9d4e90",
+          "fact_kinds": [
+            "comparison",
+            "interval",
+            "negation",
+            "number",
+            "update"
+          ],
+          "card_ids": [
+            "M0024",
+            "M0001",
+            "M0024",
+            "M0001",
+            "M0024",
+            "M0001"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 31,
+          "block": "u3b",
+          "cat": "temporal-reasoning",
+          "candidates": 6,
+          "cards": 18,
+          "chars": 2812,
+          "sha1": "92dd170dfd1a65dafefee8a7826a6d45474ec488",
+          "fact_kinds": [
+            "comparison",
+            "date",
+            "number"
+          ],
+          "card_ids": [
+            "M0013",
+            "M0038",
+            "M0036",
+            "M0034",
+            "M0031",
+            "M0025",
+            "M0013",
+            "M0038",
+            "M0036",
+            "M0034",
+            "M0031",
+            "M0025",
+            "M0013",
+            "M0038",
+            "M0036",
+            "M0034",
+            "M0031",
+            "M0025"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 32,
+          "block": "u3b",
+          "cat": "single-session-user",
+          "candidates": 1,
+          "cards": 3,
+          "chars": 491,
+          "sha1": "5a6a876ad62f7751e5e2cc454c35e6895dc62506",
+          "fact_kinds": [],
+          "card_ids": [
+            "M0048",
+            "M0048",
+            "M0048"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 33,
+          "block": "u3b",
+          "cat": "temporal-reasoning",
+          "candidates": 2,
+          "cards": 6,
+          "chars": 831,
+          "sha1": "17cf12f6ec986754fab2c77e398e5d54a50b92fb",
+          "fact_kinds": [
+            "comparison"
+          ],
+          "card_ids": [
+            "M0046",
+            "M0031",
+            "M0046",
+            "M0031",
+            "M0046",
+            "M0031"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 34,
+          "block": "u3b",
+          "cat": "temporal-reasoning",
+          "candidates": 2,
+          "cards": 6,
+          "chars": 489,
+          "sha1": "e98d5f7cc1c64ac8e29617cabb5b03a96e732c2b",
+          "fact_kinds": [
+            "interval",
+            "number"
+          ],
+          "card_ids": [
+            "M0010",
+            "M0036",
+            "M0010",
+            "M0036",
+            "M0010",
+            "M0036"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 35,
+          "block": "u3b",
+          "cat": "multi-session",
+          "candidates": 2,
+          "cards": 6,
+          "chars": 816,
+          "sha1": "85556dbcfb6b4664a349dfe8b30c27198730427f",
+          "fact_kinds": [
+            "comparison",
+            "date",
+            "interval",
+            "number"
+          ],
+          "card_ids": [
+            "M0029",
+            "M0008",
+            "M0029",
+            "M0008",
+            "M0029",
+            "M0008"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 36,
+          "block": "u3b",
+          "cat": "single-session-user",
+          "candidates": 1,
+          "cards": 3,
+          "chars": 398,
+          "sha1": "8b00c4e4c8a99a5866332cac533c199f42045bbc",
+          "fact_kinds": [
+            "number"
+          ],
+          "card_ids": [
+            "M0009",
+            "M0009",
+            "M0009"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 37,
+          "block": "u3b",
+          "cat": "single-session-assistant",
+          "candidates": 1,
+          "cards": 3,
+          "chars": 295,
+          "sha1": "9070fe892b6405c354a3518606eebe894d6cf087",
+          "fact_kinds": [],
+          "card_ids": [
+            "M0048",
+            "M0048",
+            "M0048"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 38,
+          "block": "u3b",
+          "cat": "multi-session",
+          "candidates": 5,
+          "cards": 15,
+          "chars": 2161,
+          "sha1": "a164b0f161b9ed57472655895ca727a06ea8bacb",
+          "fact_kinds": [
+            "comparison",
+            "negation",
+            "update"
+          ],
+          "card_ids": [
+            "M0011",
+            "M0044",
+            "M0035",
+            "M0030",
+            "M0005",
+            "M0011",
+            "M0044",
+            "M0035",
+            "M0030",
+            "M0005",
+            "M0011",
+            "M0044",
+            "M0035",
+            "M0030",
+            "M0005"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 39,
+          "block": "u3b",
+          "cat": "single-session-user",
+          "candidates": 1,
+          "cards": 3,
+          "chars": 273,
+          "sha1": "e1b3a502aec3dd9c5353b2bd1d538efa8d3fa1e8",
+          "fact_kinds": [
+            "number"
+          ],
+          "card_ids": [
+            "M0027",
+            "M0027",
+            "M0027"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 40,
+          "block": "u3b",
+          "cat": "temporal-reasoning",
+          "candidates": 1,
+          "cards": 3,
+          "chars": 416,
+          "sha1": "7953cefdd5fc736927e834c54baf4d759041c9e0",
+          "fact_kinds": [
+            "date",
+            "number"
+          ],
+          "card_ids": [
+            "M0006",
+            "M0006",
+            "M0006"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 41,
+          "block": "u3b",
+          "cat": "knowledge-update",
+          "candidates": 2,
+          "cards": 6,
+          "chars": 922,
+          "sha1": "e6e637c77d025696e76bf9f4ac381c1feb0d3c00",
+          "fact_kinds": [
+            "interval",
+            "number",
+            "update"
+          ],
+          "card_ids": [
+            "M0010",
+            "M0033",
+            "M0010",
+            "M0033",
+            "M0010",
+            "M0033"
+          ],
+          "ids_no_cards": []
+        }
+      ]
+    },
+    "payloads": {
+      "cases": 30,
+      "cards": 331,
+      "cards_avg": 11.03,
+      "chars_total": 43157,
+      "chars_avg": 1439,
+      "chars_max": 3966,
+      "memories_no_cards": 1,
+      "fact_kinds": {
+        "comparison": 40,
+        "date": 36,
+        "interval": 16,
+        "negation": 11,
+        "number": 143,
+        "update": 15
+      },
+      "no_cards_cases": [],
+      "validation_failures": [],
+      "validation_ok": true,
+      "deterministic": true,
+      "per_case_sha1": {
+        "12": "cd841dc6239d22bc8e47c916d3f9c340ac50241e",
+        "13": "3dba4f235693e8688798826a6b37f4665ab8fc3f",
+        "14": "230b69c8f14c8feddf63c4c6474d7191182f97f9",
+        "15": "f4ed818824e6090c89535956bd82e2efe29fb8f5",
+        "16": "d0ac6cb1bb3874e53579bb6ce9bd2478fdfe1ad4",
+        "17": "e30b5b5595c075ac74adf4095f419ba9fa43910f",
+        "18": "b50ba33fcbb26d553dd9cda56579df4e568e8742",
+        "19": "10c1ac96db9de85a7a2df43b942ef4f12cddffcf",
+        "20": "c82108e1e08a86de9b69c6843f358d46a70f65d9",
+        "21": "64ca031eac30543885e599858229e420ea7078ea",
+        "22": "b2cb372f88752fa1248f5b3b5c69e7325cc9f4d4",
+        "23": "65bd163753b94a6cf2a5a96398c28ff38d20add9",
+        "24": "f7b089659af088ee8e5b3b643ab23e9b96a1c370",
+        "25": "13dd7cf5d6cbfcc7e4e3e18967ea752657beec35",
+        "26": "d8a91ba239af2d50e9055290c7ce0db21a585ef1",
+        "27": "14328b6de8d350946f3641bd33803f4f20b8c9e1",
+        "28": "606bf341f8de05403843178517b73b2a22e08bf9",
+        "29": "0bfff3e438c856cd7eb34575606b9460a6b1ada1",
+        "30": "04642e715ab69df6a550a0a947cc11c80c01ee21",
+        "31": "0b0f35148781878c19a5ab2eda082523537aad34",
+        "32": "78cc38c063a8ea62a0a3ad1620d9433fb8029ef4",
+        "33": "841fc90e0d004c4112a07e6382d34ac573f2ca80",
+        "34": "ca7e27eedaa93009c9c2d62497c7c19aa364d92d",
+        "35": "fa5e24e5c9df008d7694c1ecc7343a103f158b03",
+        "36": "0ffa851950444a937c894b18530143273666b2f2",
+        "37": "feb59f6ceec1c86d39b59081a378f6572ac42187",
+        "38": "6a4c2101fb02d22afd46a745515c0d806588d971",
+        "39": "781eefd8fdec4f7b28a3ef3a446e20e05ef4432d",
+        "40": "7953cefdd5fc736927e834c54baf4d759041c9e0",
+        "41": "f70fa4ebd82b1a8685e864138f0a260110533262"
+      },
+      "per_case": [
+        {
+          "case": 12,
+          "block": "u3a",
+          "cat": "single-session-user",
+          "candidates": 1,
+          "cards": 3,
+          "chars": 447,
+          "sha1": "cd841dc6239d22bc8e47c916d3f9c340ac50241e",
+          "fact_kinds": [
+            "comparison"
+          ],
+          "card_ids": [
+            "M0040",
+            "M0040",
+            "M0040"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 13,
+          "block": "u3a",
+          "cat": "single-session-assistant",
+          "candidates": 5,
+          "cards": 15,
+          "chars": 1914,
+          "sha1": "3dba4f235693e8688798826a6b37f4665ab8fc3f",
+          "fact_kinds": [
+            "comparison",
+            "date",
+            "number"
+          ],
+          "card_ids": [
+            "M0037",
+            "M0013",
+            "M0011",
+            "M0025",
+            "M0007",
+            "M0037",
+            "M0013",
+            "M0011",
+            "M0025",
+            "M0007",
+            "M0037",
+            "M0013",
+            "M0011",
+            "M0025",
+            "M0007"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 14,
+          "block": "u3a",
+          "cat": "temporal-reasoning",
+          "candidates": 3,
+          "cards": 9,
+          "chars": 1481,
+          "sha1": "230b69c8f14c8feddf63c4c6474d7191182f97f9",
+          "fact_kinds": [],
+          "card_ids": [
+            "M0045",
+            "M0032",
+            "M0040",
+            "M0045",
+            "M0032",
+            "M0040",
+            "M0045",
+            "M0032",
+            "M0040"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 15,
+          "block": "u3a",
+          "cat": "multi-session",
+          "candidates": 6,
+          "cards": 18,
+          "chars": 2368,
+          "sha1": "f4ed818824e6090c89535956bd82e2efe29fb8f5",
+          "fact_kinds": [
+            "interval",
+            "negation",
+            "number"
+          ],
+          "card_ids": [
+            "M0007",
+            "M0010",
+            "M0002",
+            "M0036",
+            "M0009",
+            "M0034",
+            "M0007",
+            "M0010",
+            "M0002",
+            "M0036",
+            "M0009",
+            "M0034",
+            "M0007",
+            "M0010",
+            "M0002",
+            "M0036",
+            "M0009",
+            "M0034"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 16,
+          "block": "u3a",
+          "cat": "single-session-user",
+          "candidates": 1,
+          "cards": 3,
+          "chars": 426,
+          "sha1": "d0ac6cb1bb3874e53579bb6ce9bd2478fdfe1ad4",
+          "fact_kinds": [
+            "update"
+          ],
+          "card_ids": [
+            "M0018",
+            "M0018",
+            "M0018"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 17,
+          "block": "u3a",
+          "cat": "single-session-user",
+          "candidates": 2,
+          "cards": 6,
+          "chars": 754,
+          "sha1": "e30b5b5595c075ac74adf4095f419ba9fa43910f",
+          "fact_kinds": [
+            "comparison",
+            "date",
+            "number"
+          ],
+          "card_ids": [
+            "M0018",
+            "M0022",
+            "M0018",
+            "M0022",
+            "M0018",
+            "M0022"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 18,
+          "block": "u3a",
+          "cat": "multi-session",
+          "candidates": 2,
+          "cards": 6,
+          "chars": 893,
+          "sha1": "b50ba33fcbb26d553dd9cda56579df4e568e8742",
+          "fact_kinds": [
+            "comparison",
+            "negation",
+            "number",
+            "update"
+          ],
+          "card_ids": [
+            "M0029",
+            "M0042",
+            "M0029",
+            "M0042",
+            "M0029",
+            "M0042"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 19,
+          "block": "u3a",
+          "cat": "multi-session",
+          "candidates": 3,
+          "cards": 9,
+          "chars": 1161,
+          "sha1": "10c1ac96db9de85a7a2df43b942ef4f12cddffcf",
+          "fact_kinds": [
+            "number",
+            "update"
+          ],
+          "card_ids": [
+            "M0031",
+            "M0014",
+            "M0035",
+            "M0031",
+            "M0014",
+            "M0035",
+            "M0031",
+            "M0014",
+            "M0035"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 20,
+          "block": "u3a",
+          "cat": "single-session-user",
+          "candidates": 10,
+          "cards": 30,
+          "chars": 3502,
+          "sha1": "c82108e1e08a86de9b69c6843f358d46a70f65d9",
+          "fact_kinds": [
+            "comparison",
+            "date",
+            "number"
+          ],
+          "card_ids": [
+            "M0033",
+            "M0012",
+            "M0004",
+            "M0005",
+            "M0011",
+            "M0039",
+            "M0031",
+            "M0032",
+            "M0034",
+            "M0035",
+            "M0033",
+            "M0012",
+            "M0004",
+            "M0005",
+            "M0011",
+            "M0039",
+            "M0031",
+            "M0032",
+            "M0034",
+            "M0035",
+            "M0033",
+            "M0012",
+            "M0004",
+            "M0005",
+            "M0011",
+            "M0039",
+            "M0031",
+            "M0032",
+            "M0034",
+            "M0035"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 21,
+          "block": "u3a",
+          "cat": "multi-session",
+          "candidates": 4,
+          "cards": 12,
+          "chars": 1988,
+          "sha1": "64ca031eac30543885e599858229e420ea7078ea",
+          "fact_kinds": [
+            "comparison",
+            "date",
+            "interval",
+            "number"
+          ],
+          "card_ids": [
+            "M0006",
+            "M0026",
+            "M0039",
+            "M0038",
+            "M0006",
+            "M0026",
+            "M0039",
+            "M0038",
+            "M0006",
+            "M0026",
+            "M0039",
+            "M0038"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 22,
+          "block": "u3a",
+          "cat": "single-session-user",
+          "candidates": 2,
+          "cards": 6,
+          "chars": 649,
+          "sha1": "b2cb372f88752fa1248f5b3b5c69e7325cc9f4d4",
+          "fact_kinds": [
+            "number"
+          ],
+          "card_ids": [
+            "M0038",
+            "M0034",
+            "M0038",
+            "M0034",
+            "M0038",
+            "M0034"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 23,
+          "block": "u3a",
+          "cat": "temporal-reasoning",
+          "candidates": 3,
+          "cards": 9,
+          "chars": 1153,
+          "sha1": "65bd163753b94a6cf2a5a96398c28ff38d20add9",
+          "fact_kinds": [
+            "date",
+            "number"
+          ],
+          "card_ids": [
+            "M0014",
+            "M0019",
+            "M0022",
+            "M0014",
+            "M0019",
+            "M0022",
+            "M0014",
+            "M0019",
+            "M0022"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 24,
+          "block": "u3a",
+          "cat": "multi-session",
+          "candidates": 2,
+          "cards": 6,
+          "chars": 805,
+          "sha1": "f7b089659af088ee8e5b3b643ab23e9b96a1c370",
+          "fact_kinds": [
+            "comparison",
+            "number"
+          ],
+          "card_ids": [
+            "M0035",
+            "M0012",
+            "M0035",
+            "M0012",
+            "M0035",
+            "M0012"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 25,
+          "block": "u3a",
+          "cat": "single-session-user",
+          "candidates": 12,
+          "cards": 34,
+          "chars": 3966,
+          "sha1": "13dd7cf5d6cbfcc7e4e3e18967ea752657beec35",
+          "fact_kinds": [
+            "comparison",
+            "date",
+            "negation",
+            "number"
+          ],
+          "card_ids": [
+            "M0040",
+            "M0001",
+            "M0003",
+            "M0004",
+            "M0010",
+            "M0017",
+            "M0014",
+            "M0036",
+            "M0016",
+            "M0019",
+            "M0020",
+            "M0018",
+            "M0040",
+            "M0001",
+            "M0003",
+            "M0004",
+            "M0010",
+            "M0017",
+            "M0014",
+            "M0036",
+            "M0016",
+            "M0019",
+            "M0020",
+            "M0040",
+            "M0001",
+            "M0003",
+            "M0004",
+            "M0010",
+            "M0017",
+            "M0014",
+            "M0036",
+            "M0016",
+            "M0019",
+            "M0020"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 26,
+          "block": "u3a",
+          "cat": "knowledge-update",
+          "candidates": 4,
+          "cards": 9,
+          "chars": 1086,
+          "sha1": "d8a91ba239af2d50e9055290c7ce0db21a585ef1",
+          "fact_kinds": [
+            "number",
+            "update"
+          ],
+          "card_ids": [
+            "M0013",
+            "M0040",
+            "M0011",
+            "M0013",
+            "M0040",
+            "M0011",
+            "M0013",
+            "M0040",
+            "M0011"
+          ],
+          "ids_no_cards": [
+            "M0042"
+          ]
+        },
+        {
+          "case": 27,
+          "block": "u3b",
+          "cat": "temporal-reasoning",
+          "candidates": 4,
+          "cards": 12,
+          "chars": 1877,
+          "sha1": "14328b6de8d350946f3641bd33803f4f20b8c9e1",
+          "fact_kinds": [
+            "number",
+            "update"
+          ],
+          "card_ids": [
+            "M0002",
+            "M0011",
+            "M0029",
+            "M0023",
+            "M0002",
+            "M0011",
+            "M0029",
+            "M0023",
+            "M0002",
+            "M0011",
+            "M0029",
+            "M0023"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 28,
+          "block": "u3b",
+          "cat": "single-session-user",
+          "candidates": 4,
+          "cards": 12,
+          "chars": 1351,
+          "sha1": "606bf341f8de05403843178517b73b2a22e08bf9",
+          "fact_kinds": [
+            "comparison",
+            "date",
+            "negation",
+            "number"
+          ],
+          "card_ids": [
+            "M0032",
+            "M0035",
+            "M0041",
+            "M0012",
+            "M0032",
+            "M0035",
+            "M0041",
+            "M0012",
+            "M0032",
+            "M0035",
+            "M0041",
+            "M0012"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 29,
+          "block": "u3b",
+          "cat": "multi-session",
+          "candidates": 3,
+          "cards": 9,
+          "chars": 1347,
+          "sha1": "0bfff3e438c856cd7eb34575606b9460a6b1ada1",
+          "fact_kinds": [
+            "comparison",
+            "date",
+            "number"
+          ],
+          "card_ids": [
+            "M0021",
+            "M0038",
+            "M0043",
+            "M0021",
+            "M0038",
+            "M0043",
+            "M0021",
+            "M0038",
+            "M0043"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 30,
+          "block": "u3b",
+          "cat": "temporal-reasoning",
+          "candidates": 3,
+          "cards": 9,
+          "chars": 1173,
+          "sha1": "04642e715ab69df6a550a0a947cc11c80c01ee21",
+          "fact_kinds": [
+            "comparison",
+            "interval",
+            "negation",
+            "number",
+            "update"
+          ],
+          "card_ids": [
+            "M0001",
+            "M0024",
+            "M0018",
+            "M0001",
+            "M0024",
+            "M0018",
+            "M0001",
+            "M0024",
+            "M0018"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 31,
+          "block": "u3b",
+          "cat": "temporal-reasoning",
+          "candidates": 6,
+          "cards": 18,
+          "chars": 2812,
+          "sha1": "0b0f35148781878c19a5ab2eda082523537aad34",
+          "fact_kinds": [
+            "comparison",
+            "date",
+            "number"
+          ],
+          "card_ids": [
+            "M0013",
+            "M0025",
+            "M0031",
+            "M0036",
+            "M0038",
+            "M0034",
+            "M0013",
+            "M0025",
+            "M0031",
+            "M0036",
+            "M0038",
+            "M0034",
+            "M0013",
+            "M0025",
+            "M0031",
+            "M0036",
+            "M0038",
+            "M0034"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 32,
+          "block": "u3b",
+          "cat": "single-session-user",
+          "candidates": 4,
+          "cards": 12,
+          "chars": 1438,
+          "sha1": "78cc38c063a8ea62a0a3ad1620d9433fb8029ef4",
+          "fact_kinds": [
+            "number"
+          ],
+          "card_ids": [
+            "M0052",
+            "M0018",
+            "M0048",
+            "M0044",
+            "M0052",
+            "M0018",
+            "M0048",
+            "M0044",
+            "M0052",
+            "M0018",
+            "M0048",
+            "M0044"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 33,
+          "block": "u3b",
+          "cat": "temporal-reasoning",
+          "candidates": 1,
+          "cards": 3,
+          "chars": 362,
+          "sha1": "841fc90e0d004c4112a07e6382d34ac573f2ca80",
+          "fact_kinds": [],
+          "card_ids": [
+            "M0010",
+            "M0010",
+            "M0010"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 34,
+          "block": "u3b",
+          "cat": "temporal-reasoning",
+          "candidates": 3,
+          "cards": 9,
+          "chars": 1238,
+          "sha1": "ca7e27eedaa93009c9c2d62497c7c19aa364d92d",
+          "fact_kinds": [
+            "comparison",
+            "interval",
+            "number",
+            "update"
+          ],
+          "card_ids": [
+            "M0013",
+            "M0023",
+            "M0033",
+            "M0013",
+            "M0023",
+            "M0033",
+            "M0013",
+            "M0023",
+            "M0033"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 35,
+          "block": "u3b",
+          "cat": "multi-session",
+          "candidates": 4,
+          "cards": 12,
+          "chars": 1710,
+          "sha1": "fa5e24e5c9df008d7694c1ecc7343a103f158b03",
+          "fact_kinds": [
+            "comparison",
+            "date",
+            "interval",
+            "negation",
+            "number"
+          ],
+          "card_ids": [
+            "M0008",
+            "M0029",
+            "M0019",
+            "M0030",
+            "M0008",
+            "M0029",
+            "M0019",
+            "M0030",
+            "M0008",
+            "M0029",
+            "M0019",
+            "M0030"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 36,
+          "block": "u3b",
+          "cat": "single-session-user",
+          "candidates": 3,
+          "cards": 9,
+          "chars": 1397,
+          "sha1": "0ffa851950444a937c894b18530143273666b2f2",
+          "fact_kinds": [
+            "number"
+          ],
+          "card_ids": [
+            "M0009",
+            "M0024",
+            "M0041",
+            "M0009",
+            "M0024",
+            "M0041",
+            "M0009",
+            "M0024",
+            "M0041"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 37,
+          "block": "u3b",
+          "cat": "single-session-assistant",
+          "candidates": 3,
+          "cards": 9,
+          "chars": 756,
+          "sha1": "feb59f6ceec1c86d39b59081a378f6572ac42187",
+          "fact_kinds": [
+            "number"
+          ],
+          "card_ids": [
+            "M0048",
+            "M0022",
+            "M0045",
+            "M0048",
+            "M0022",
+            "M0045",
+            "M0048",
+            "M0022",
+            "M0045"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 38,
+          "block": "u3b",
+          "cat": "multi-session",
+          "candidates": 7,
+          "cards": 21,
+          "chars": 2672,
+          "sha1": "6a4c2101fb02d22afd46a745515c0d806588d971",
+          "fact_kinds": [
+            "comparison",
+            "date",
+            "negation",
+            "number",
+            "update"
+          ],
+          "card_ids": [
+            "M0002",
+            "M0005",
+            "M0030",
+            "M0035",
+            "M0011",
+            "M0045",
+            "M0031",
+            "M0002",
+            "M0005",
+            "M0030",
+            "M0035",
+            "M0011",
+            "M0045",
+            "M0031",
+            "M0002",
+            "M0005",
+            "M0030",
+            "M0035",
+            "M0011",
+            "M0045",
+            "M0031"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 39,
+          "block": "u3b",
+          "cat": "single-session-user",
+          "candidates": 3,
+          "cards": 9,
+          "chars": 842,
+          "sha1": "781eefd8fdec4f7b28a3ef3a446e20e05ef4432d",
+          "fact_kinds": [
+            "date",
+            "interval",
+            "number"
+          ],
+          "card_ids": [
+            "M0027",
+            "M0002",
+            "M0047",
+            "M0027",
+            "M0002",
+            "M0047",
+            "M0027",
+            "M0002",
+            "M0047"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 40,
+          "block": "u3b",
+          "cat": "temporal-reasoning",
+          "candidates": 1,
+          "cards": 3,
+          "chars": 416,
+          "sha1": "7953cefdd5fc736927e834c54baf4d759041c9e0",
+          "fact_kinds": [
+            "date",
+            "number"
+          ],
+          "card_ids": [
+            "M0006",
+            "M0006",
+            "M0006"
+          ],
+          "ids_no_cards": []
+        },
+        {
+          "case": 41,
+          "block": "u3b",
+          "cat": "knowledge-update",
+          "candidates": 3,
+          "cards": 9,
+          "chars": 1173,
+          "sha1": "f70fa4ebd82b1a8685e864138f0a260110533262",
+          "fact_kinds": [
+            "comparison",
+            "date",
+            "interval",
+            "number",
+            "update"
+          ],
+          "card_ids": [
+            "M0039",
+            "M0033",
+            "M0032",
+            "M0039",
+            "M0033",
+            "M0032",
+            "M0039",
+            "M0033",
+            "M0032"
+          ],
+          "ids_no_cards": []
+        }
+      ]
+    }
+  }
+}

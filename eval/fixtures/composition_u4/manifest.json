@@ -1,0 +1,32 @@
+{
+  "blocks": {
+    "u3a": "/var/folders/3z/9n8mh2p12ld771wy19z5v7rw0000gn/T/mm-graph-shared-wnps8c6d",
+    "u3b": "/var/folders/3z/9n8mh2p12ld771wy19z5v7rw0000gn/T/mm-graph-shared-7ggare_r"
+  },
+  "builder": "eval/gen_composition_fixture.py",
+  "cases": 30,
+  "control_arm": "graph_augment_precise",
+  "files": {
+    "cases.jsonl": "ee89f39ff0264570627528020caf3d2e71d8fe2b6bfcaf2ce6ae488f16c9c454",
+    "records.jsonl": "b31fbe23149608b90e68bad467feff4796cbea763d4ce7b72df9c87a03523e09"
+  },
+  "guards": {
+    "atoms_exact_substrings": true,
+    "card_rules_frozen_before_e1": "docs/COMPOSITION_V1.md",
+    "offsets_reversible": true,
+    "selection_reads_no_gold": true
+  },
+  "records": 122,
+  "sha1": "24b390955b228bbfad5150bc7412ca67c6ae4cc5",
+  "snapshots": {
+    "u3a": {
+      "path": "/Users/igorcoutrimlacerda/memory-machine/eval/graph_out/u_diag_longmemeval_u3a.jsonl",
+      "sha256": "4a93eed93f925d4c3768526769ce0f1f3f3320bd84188e15f70e0d48e780a8b3"
+    },
+    "u3b": {
+      "path": "/Users/igorcoutrimlacerda/memory-machine/eval/graph_out/u_diag_longmemeval_u3b.jsonl",
+      "sha256": "c989de57eb63143063d09ec0f4e15fc9c06f1c90db3dafcea458a40846592a78"
+    }
+  },
+  "version": 1
+}

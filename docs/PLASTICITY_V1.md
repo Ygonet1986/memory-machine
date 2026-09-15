@@ -322,6 +322,13 @@ demotes rather than promotes the served items and the budget cut becomes more,
 not less, likely to drop the required memory. A zero **or** negative exposed
 net closes the P3/P4 aspiration per the frozen 2026-09-14 decision.
 
+**P3/P4 status (user decision, 2026-09-14): closed.** The plasticity
+experimental line ends at the P2b negative measurement; no further excavation
+without a new pre-registration (per §13.4). The instrument advances
+(the shared-graph P2b fixed the P1/P2 ordering blindness: the delivery budget
+now binds), but the populated-ledger mechanism does not raise recall quality on
+any measured substrate at the frozen floor.
+
 ## 12. P2 shadow — pre-registration (frozen before any P2 execution)
 
 This section registers, **before any P2 execution**, the population design, the

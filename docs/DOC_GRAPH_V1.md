@@ -5,6 +5,8 @@ D5 @ `a7f4ae3` (+docs `4d93fd6`) · suite: **406 green** · precedent: U4.2
 byte-identical replication and its oscillation-floor lesson.
 **Execution:** deterministic arm registered **PASS** (Δ=0 everywhere,
 provenance clean); LLM arm registered **FAIL** on F5 only — see §11.
+**Gate decision (owner):** closed on the structural proof + U4.2
+interpretation → tagged `doc-graph-v1`.
 
 This document registers, before any benchmark run, the exact question, input
 contract, arms, metrics, normalization rules and failure criteria of the
@@ -274,3 +276,12 @@ injects no detectable variance beyond the extractor. The gate decision on
 `doc-graph-v1` is the repo owner's call on this evidence — either close the
 tag on the structural proof (U4.2 interpretation) or keep it refused and
 advance to Fase P design.
+
+**Gate closed (owner decision, 2026-09-14):** tagged `doc-graph-v1`. Basis:
+deterministic arm Δ=0 (exact rebuild), D1–D8 provenance/closure/bounds clean
+across both runs, and U4.2 three-way diversity → the semantic-phase failures
+register extractor draw variance, not rebuild noise (no systematic defect
+could flip the failing metric set between runs). The semantic layer's
+stability table (OA/OB/AB) remains archived with this protocol and is the
+Fase P baseline; the live-LLM stability floor is a measured property, not a
+faithfulness gate.

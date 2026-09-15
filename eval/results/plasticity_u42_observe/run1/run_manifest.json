@@ -1,0 +1,25 @@
+{
+  "run_id": "plasticity_u42_observe:run1",
+  "git_commit": "93708e11782ff5b83c8a2908de87a3265ec8f597",
+  "identity": {
+    "snapshot_root": "eval/graph_out/graphs/longmemeval",
+    "bench_dir": "eval/graph_out",
+    "ledger": {
+      "policy_version": "p0",
+      "rows": 0,
+      "sha1": "empty"
+    },
+    "config": {
+      "depth": 2,
+      "top_k": 8,
+      "max_paths": 400,
+      "weight_utility": 0.5,
+      "hop_cost_observe": 0.0
+    }
+  },
+  "deterministic": true,
+  "iterations_sha1": [
+    "3d9df4dc6df19bc06bdd3eea2801e04f386afd13",
+    "3d9df4dc6df19bc06bdd3eea2801e04f386afd13"
+  ]
+}

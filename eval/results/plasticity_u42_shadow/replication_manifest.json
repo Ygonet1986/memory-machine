@@ -1,0 +1,26 @@
+{
+  "replication": {
+    "frozen_sha1_equal": true,
+    "eval_iter_equal": true,
+    "classification_equal": true,
+    "negative_matches_p1": true
+  },
+  "runs": [
+    "plasticity_u42_shadow:runA",
+    "plasticity_u42_shadow:runB"
+  ],
+  "nets": [
+    0,
+    0
+  ],
+  "counts": [
+    {
+      "stayed_correct": 11,
+      "stayed_incorrect": 19
+    },
+    {
+      "stayed_correct": 11,
+      "stayed_incorrect": 19
+    }
+  ]
+}

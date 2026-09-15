@@ -423,3 +423,86 @@ Promotion proceeds like doc-graph-v1: joint reading of the net metric **and**
 reversibility (utility rebuild == frozen utility), then a tag. Net `< +3`
 (+2 included) rejects the phase at the floor; secondary metrics are reported
 but never gate. Empty-ledger "change" is never an effect (M0195).
+
+## 13. P2b shared-graph — pre-registration (frozen before any P2b execution)
+
+Frozen on 2026-09-14 per session decisions — this section is the binding
+record; the code implements no behavior absent from it.
+
+### 13.1 Substrate and instruments
+
+- **One persistent shared graph** (`GraphStore`) generated deterministically by
+  `eval/gen_graph_shared.py` (seed `20260914`), committed under
+  `eval/plasticity_fixtures/u42_shared/` (`graph/`, `bench.jsonl`,
+  `ground.jsonl`, `manifest.json` with `graph.sha1`).
+- Regions: **trained** modules `{payments, auth, search, gateway, ledger}` with
+  techs `{kafka, rabbitmq, postgres, mysql, redis, cassandra, clickhouse,
+  flink}`; **unexposed** modules `{inventory, shipping, analytics}` with techs
+  `{mongodb, dynamodb, elasticsearch, couchbase, oracle, solr}` (dedicated
+  people `{dave, erin, frank}` and modules; no trained label used there).
+- Bench: 104 mechanical questions (train 20, eval trained-region 60, eval
+  unexposed 24). Train/eval questions are **textually disjoint**;
+  `disjoint_train_eval: true` is asserted. No eval answer or eval label appears
+  in any update; `required_ids` of eval rows are **shadow memory ids** that are
+  never train targets (no eval-label leak into a learned signal).
+- **Shadow targets**: for each trained-region fact, a second memory on the
+  **same EdgeKey** `(module, decided_on, tech)` with lower deterministic
+  confidence (0.22–0.38). Shadows are the repair-capable eval targets — same
+  navigation, different question. This fixes the P2 lesson that disjoint
+  different-fact queries inherit negative sibling-edge utility (repairs
+  impossible by construction).
+
+### 13.2 Instrument decisions (frozen, 2026-09-14)
+
+- Search candidate pool: `recall_top_k = 32` (`GraphRecall(depth=2, top_k=32,
+  max_paths=400)`). **Delivery budget unchanged §12.5**: top 8 items / 4000
+  chars from the pool. Rationale: with pool = delivery = 8 the delivered set is
+  always the whole pool and ordering never matters → net is structurally 0 on
+  any substrate (P1/P2 blindness: `base_chars ≤ 795`, budget never bound).
+- Evaluation pipelines exactly mirror `plasticity_observe.one_case` and
+  `plasticity_shadow` (`_path_utility`, `_item_energy`, `shrink`,
+  `energy(query_distance=1−score, weight_utility=0.5)`), but run one instance
+  against the **single shared graph** instead of per-case snapshots.
+- Signals and budget functions identical to §12.3/§12.4.
+
+### 13.3 Protocol (order is part of the commitment)
+
+1. **Populate**: replay deterministic recall per **train** qid over the shared
+   graph; per delivered item (from the mechanical ground) record the frozen
+   composite signal on every edge of its retained ≤3 candidate paths.
+2. **Freeze**: copy the ledger read-only with a deterministic ts mask
+   (audit-only; `created_at`/`ts` never enter EdgeKey, score or rank), record
+   events/utility sha1 in the run manifest.
+3. **Classify exposure** — mechanically, **before any outcome is computed**:
+   an eval qid is **exposed** ⇔ its search-space EdgeKey set intersects the
+   frozen ledger keys (≥1 learned edge); **unexposed** ⇔ empty. Written to
+   `exposure.jsonl` before evaluation; classification is auditable without any
+   outcome knowledge.
+4. **Negative control**: same evaluator with an empty ledger must reproduce the
+   base ranking byte-identically (`plastic ≡ base`, deterministic iterations);
+   every **unexposed** case must remain unchanged (`net == 0` and evidence
+   order equal) — any change aborts before the plastic arm is read.
+5. **Paired evaluation**: base arm = score ranking; plastic arm = energy ranking
+   with the frozen ledger; per-case outcome from the §12.5 budgeted payload
+   (`correct ⇔ required ⊆ delivered`; `delivered` = top 8 items / 4000 chars of
+   the 32-candidate pool).
+6. **Replicate**: runA and runB from scratch must produce byte-identical frozen
+   ledger sha1, identical exposure classification, identical eval iterations
+   and identical per-case classification.
+
+### 13.4 Metrics and promotion (frozen)
+
+```
+promote P2b  ⇔  exposed net = (repaired − regressed) ≥ +3  (floor from §12.9)
+               AND unexposed changed = 0
+               AND negative control deterministic + matches base
+               AND replication equal (runA == runB byte-for-byte)
+               AND every regressed case audited + explained by ledger replay
+```
+
+- **Primary metric**: net over **exposed** cases. **Total** net also reported.
+- **Unexposed is a frozen negative control** — its delivery order must not
+  change; it is not tuned or adapted after execution.
+- Net `< +3` (including `≤ 0`) rejects the phase at the floor. A zero or
+  negative result over the exposed cases closes the P3/P4 aspiration per the
+  2026-09-14 decision (no further excavation without a new pre-registration).

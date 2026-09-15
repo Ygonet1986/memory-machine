@@ -1,0 +1,32 @@
+{
+  "seed": 20260914,
+  "substrate": "u42_shared_shared-graph",
+  "config": {
+    "depth": 2,
+    "recall_top_k": 32,
+    "max_paths": 400,
+    "budget_items": 8,
+    "budget_chars": 4000,
+    "hub_edges": 8,
+    "scope": "chunk"
+  },
+  "graph": {
+    "entities": 30,
+    "relations": 156,
+    "memories": 186,
+    "shadows": 40,
+    "sha1": "2cc293cfd4280910aa851bc21b02664bbe0298d7"
+  },
+  "bench": {
+    "total": 104,
+    "train": 20,
+    "eval": 84,
+    "eval_exposed_region": 60,
+    "eval_unexposed_region": 24
+  },
+  "files": {
+    "bench.jsonl": "7d07591e122dcc3375dac1638c32afdca9204d64",
+    "ground.jsonl": "c20a65ad93788b8342a0382838f2846f29316186"
+  },
+  "disjoint_train_eval": true
+}

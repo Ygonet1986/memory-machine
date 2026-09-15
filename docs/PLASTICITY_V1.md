@@ -274,6 +274,54 @@ result is exactly the leak-guard's behavior — a populated ledger learned from
 cases 0–11 cannot change any of the 30 disjoint cases — and the instrument is
 verified (controls, determinism and replication all green).
 
+### 11.3 P2b shared-graph execution record
+
+**Harness:** `eval/plasticity_shared.py` (populate from train qids over the ONE
+shared graph → freeze → exposure classified before outcomes → paired
+pool-32/delivery-8 eval → empty-ledger negative control + unexposed control →
+runs A/B from scratch). Committed after §13 froze the protocol.
+
+**Fixture:** `eval/plasticity_fixtures/u42_shared/` (graph sha1
+`2cc293cfd4280910aa851bc21b02664bbe0298d7`, seed `20260914`); 104 bench qids
+(train 20, eval trained-region 60, eval unexposed 24); `disjoint_train_eval
+true`.
+
+**Run `plasticity_u42_shared`** (`git_commit 23673cc`):
+
+- population: 20 train qids, 160 items, 384 paths, **636 edge events → 47 edge
+  keys**, 0 leaks, 0 skipped. Global signal tally: **−0.40 × 573, +0.60 × 63**
+  (the +0.30 multi-evidence and +0.10 budget-respected signals never fire:
+  every ground item has total = 1 and evidence pools are 32 > 8). Every module
+  hub edge is net-negative (e.g. `payments|decided_on|kafka` +6/−26,
+  net −20): each delivered-but-not-present sibling item that traverses a shared
+  edge teaches −0.40, and the depth-2 closure across `integrates_with` makes
+  neighbouring modules' qids traverse the hub edges too, so the single +0.60 of
+  the truly-present target is swamped.
+- exposure (classified before outcomes): **exposed 60, unexposed 24** — exactly
+  the trained-region eval qids vs the dedicated unexposed modules.
+- negative control: deterministic, `plastic ≡ base` with an empty ledger
+  (matches_base True); **unexposed changed = 0** (24/24 delivered and ordering
+  identical).
+- shadow determinism: 2 identical iterations; replication A/B: frozen ledger
+  sha1 equal, eval iteration equal, exposure equal, classification equal —
+  **all True** (net identical: −2/−2).
+- per-case outcome (exposed): `stayed_incorrect 48`, `stayed_correct 6`,
+  `regressed 4`, `repaired 2` ⇒ **net = −2** (6/60 changed). Total net −2.
+- ledger replay of the 4 regressions (qids 6, 23, 40, 55): targets sit at base
+  rank 2–5 and carry their own edge's learned utility (mean shrunk utility
+  ≈ −0.32…−0.58, negative because of the 573 × −0.40), so energy demotes them
+  below the 8-item budget cut; module anchors with zero-edge paths (meanU 0)
+  and less-negative shadow siblings are promoted past them.
+
+**Finding (per §13.4): exposed net −2 < +3 ⇒ the phase fails the pre-registered
+floor and is not promoted.** The result is not a structurally-impossible zero
+(the arm discriminated: 2 repairs, 6/60 changed, unexposed byte-unchanged) —
+it is a genuine negative measurement: shared-graph population over this
+composite-signal choreography drives learned hub edges net-negative, so energy
+demotes rather than promotes the served items and the budget cut becomes more,
+not less, likely to drop the required memory. A zero **or** negative exposed
+net closes the P3/P4 aspiration per the frozen 2026-09-14 decision.
+
 ## 12. P2 shadow — pre-registration (frozen before any P2 execution)
 
 This section registers, **before any P2 execution**, the population design, the

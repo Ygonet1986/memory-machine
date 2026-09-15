@@ -34,3 +34,8 @@ eval/graph_out/
 /graph/
 /graph.building/
 /graph.previous/
+
+# doc-graph-v1 harness run artifacts (derived; reports are committed)
+eval/results/**/build/
+eval/results/**/A_root/
+eval/results/**/B_root/

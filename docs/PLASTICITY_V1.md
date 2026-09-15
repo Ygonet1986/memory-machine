@@ -1,9 +1,11 @@
 # plasticity-v1 — pre-registration (Fase P, P0)
 
-**Status: PRE-REGISTERED (frozen before any P1/P2 execution)** · P0 base:
-`7cd3251` (`P0:` utility ledger core) · suite: **426 green** · precedent:
-doc-graph-v1 gate (`doc-graph-v1` tag, closed), U4.2 oscillation floor, M0150
-pre-registration discipline.
+**Status: pre-registration frozen · P0 closed: `7cd3251` + `93708e1` (426
+green) · P1 observe EXECUTED: `eval/plasticity_observe.py` + run
+`eval/results/plasticity_u42_observe/run1` (determinism proven; empty ledger ⇒
+**0/30** cases would change — instrument verified) · precedent: doc-graph-v1
+gate (`doc-graph-v1` tag, closed), U4.2 oscillation floor, M0150 pre-registration
+discipline.
 
 This document registers, before any plasticity experiment or delivery run,
 the exact question, layers the system may and may not touch, the `EdgeKey`
@@ -204,3 +206,34 @@ deterministic self-check included); results are archived under
 `eval/results/<run>/` as `json` + `summary.md`, committed with the
 `results:` prefix like doc-graph-v1. This section is where run tables are
 appended as phases execute. Nothing below overrides §3 guards.
+
+### 11.1 Operational definition of D (P1) and P1 execution record
+
+**D (P1).** `D(path) = 1 − base_score`, where `base_score =
+bottleneck_edge_confidence · 0.85^(depth−1)` already carries the hop and
+evidence-gate penalties. In P1 `H = R = 0`: with an empty ledger
+`U_eff = 0 ⇒ E = 1 − base_score`, so the plastic ordering is provably
+byte-identical to the base ordering; any divergence a future run reports is
+purely learned-nav driven. H and R enter live ranking in later phases **only**
+by re-pre-registration.
+
+**Harness.** `eval/plasticity_observe.py` (read-only): frozen U4.2 snapshots
+(`eval/graph_out/graphs/longmemeval/case_*` + frozen `graph_bench_*` benches),
+`--fake` synthetic self-check (empty-ledger identity + ledger-loaded order
+flip), per-case base-vs-plastic paths/energy/evidence/targets/budget table,
+two identical iterations per run for determinism, and a mutation guard that
+aborts (exit 2) if anything under the snapshot or ledger dirs changed.
+
+**Run `plasticity_u42_observe/run1`** (`git_commit 93708e1`, ledger empty,
+config default depth/top_k/max_paths + `wᵤ=0.5`, `hop_cost=0`):
+
+- cases: 30 (U4.2 u3a 12–26 + u3b 27–41); 24/30 resolve a non-empty search
+  space (cases 17, 20, 33, 34, 37, 41 have no seeds — empty under both arms).
+- determinism: **True** — both iterations byte-identical
+  (sha1 `3d9df4dc…`).
+- **changed: 0/30** — order, evidence set, delivered targets, missing targets
+  and budget all equal with the empty ledger; the auditable "what would
+  change" table shows nothing would change yet, as designed.
+
+P2 may now measure whether a populated ledger clears the 0.07–0.08 historical
+floor against this instrument.

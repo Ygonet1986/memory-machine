@@ -3,6 +3,8 @@
 **Status: PRE-REGISTERED (frozen before execution)** · review target:
 D5 @ `a7f4ae3` (+docs `4d93fd6`) · suite: **406 green** · precedent: U4.2
 byte-identical replication and its oscillation-floor lesson.
+**Execution:** deterministic arm registered **PASS** (Δ=0 everywhere,
+provenance clean); LLM arm registered **FAIL** on F5 only — see §11.
 
 This document registers, before any benchmark run, the exact question, input
 contract, arms, metrics, normalization rules and failure criteria of the
@@ -180,3 +182,47 @@ The LLM arm requires a working API key and re-runs the extractor; it is the
 No changes to graph-v3, recall/admission defaults, `extraction_scope` semantics,
 the D3/D4 contract or `docs/DOC_GRAPH.md`. The review may not reopen D5. This
 protocol measures; only Fase P proposes plasticity changes afterwards.
+
+## 11. Execution record (registered verbatim, no criterion re-fit)
+
+Run 1, both arms, committed protocol `1f9a5ce` + harness `4234bc7`; full
+table in `eval/results/dg_v1_llm/doc_graph_rebuild.json` + `_summary.md`
+(commit `27da7fd`). Extractor `llm/v1` (`GraphExtractor`, temperature 0.0),
+canonical corpus params as §3.
+
+| block | O | A | B |
+|---|---:|---:|---:|
+| D1–D8 provenance/scope/bounds audit | clean | clean | clean |
+| D3 `validate_originals` | clean | clean | clean |
+| tape bytes | identical | identical | identical |
+| S5 pending/failed | 0/0 | 0/0 | 0/0 |
+
+Semantic Δ matrix (1 − Jaccard):
+
+| metric | Δ(O,A) | Δ(O,B) | Δ(A,B) | §7 ok? |
+|---|---:|---:|---:|---|
+| entities | 0.5205 | 0.6828 | 0.5923 | yes |
+| relations | 0.9762 | 0.9807 | 0.9398 | yes |
+| relations_plural | 0.9762 | 0.9807 | 0.9398 | yes |
+| windows | 0.3023 | 0.3023 | 0.0889 | yes |
+| chunks | 0.1641 | 0.1865 | 0.1368 | yes |
+| per_doc_type | 0.2304 | 0.2172 | 0.1970 | yes |
+| evidence | 0.0000 | 0.0000 | 0.0400 | **no → F5 FAIL** |
+
+**F5 finding (root cause, row-level):** the single evidence ordering violation
+is one aligned **chunk-scope** relation (`e0015 —monitors→ e0016`,
+`tech-notes.txt`, scope `chunk`) whose LLM-chosen evidence chunk citation is
+`M0002` in arm A and `M0001` in arm B — extractor citation choice, not a
+rebuild/window-layer defect (deterministic arm reproduces evidence exactly and
+`_resolve_window_evidence` sets are deterministic for identical output).
+Secondary artifact: OA/OB/AB eligible relation subsets differ (10/8/25) because
+LLM key-drift changes which relations align per pair, so the three evidence
+denominators are not the same unit set.
+
+**Verdict per §8 (no weakening):** gate NOT met → `doc-graph-v1` not tagged.
+Deterministic/provenance layers are fully clean (rebuild mechanics faithful);
+the LLM arm's F5 registers observed stability (U4.2-style sample of 1).
+Follow-up options, each requiring a fresh pre-registration before its run:
+(a) re-run the LLM arm N times and register the stability floor of the
+semantic table; (b) pre-register an amended §6 evidence metric computed over a
+fixed O-anchored unit set (so OA/OB/AB use the same relations), then re-run.

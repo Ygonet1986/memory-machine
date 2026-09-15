@@ -124,9 +124,17 @@ keep `[a-z0-9 ]` → collapse whitespace. Plural-strip (trailing `s`, len>3) is 
 |---|---|---|
 | S1 | Entity stability | per-scope set of `(norm(name), norm(type), scope, source_document)`; pairwise Jaccard + precision/recall over the O/A, O/B, A/B matrix |
 | S2 | Relation stability | set of `(norm(source), norm(verb), norm(target), scope, source_document)` (S2b: + naive plural-strip on the verb) |
-| S3 | Evidence coverage | for **aligned** relations (same canonical key): mean recall of evidence `memory_id`s (exact match; a span-overlap variant reported second) |
+| S3 | Evidence coverage | **O-anchored fixed unit set** (amended): units = the ORIGINAL projection's evidence-bearing relations, keyed on `(source_document, source_span, scope, norm(source), norm(relation), norm(target))`, fixed before any pair comparison. Every pair (OA, OB, AB) is measured over the **same** units with the **same** `|evidence_O|` denominator: `Δ(P,Q) = 1 − mean_u |ev_P(u) ∩ ev_Q(u)| / |ev_O(u)|`; a unit missing in a rebuild arm contributes recall 0 (never skipped) |
 | S4 | Structural drift | window set, chunk set, per-document entity-type histogram (per scope), mention/event counts; Jaccard + absolute deltas |
 | S5 | Extraction health | `pending`/`failed` counts per arm (bar 0; a failure makes the arm invalid, not a stability signal) |
+
+> **S3 amendment (pre-registered before Run 2):** the original S3 defined
+> "aligned" per pair, so OA/OB/AB were averaged over *different* relation
+> subsets (Run 1: 10/8/25 eligible) and were not comparable — the §7 rule could
+> misfire on a unit-set artifact. S3′ fixes the unit set on `O` and shares one
+> denominator, making the three distances directly comparable while keeping the
+> hard-miss semantics (a relation the rebuild dropped is a coverage failure).
+> The §7 ordering and §8 F5 remain unchanged.
 
 ## 7. A/B variance rule (U4.2 precedent)
 
@@ -226,3 +234,9 @@ Follow-up options, each requiring a fresh pre-registration before its run:
 (a) re-run the LLM arm N times and register the stability floor of the
 semantic table; (b) pre-register an amended §6 evidence metric computed over a
 fixed O-anchored unit set (so OA/OB/AB use the same relations), then re-run.
+
+**Run 2 (amended S3′, pre-registered):** §6 S3′ amended and committed with the
+harness before execution (protocol doc + `eval/doc_graph_rebuild.py`
+`evidence_alignment`, O-anchored fixed unit set, shared denominator; §7/F5
+unchanged). Results appended below: `doc_graph_rebuild.json` + `_summary.md`
+under `eval/results/dg_v1_llm_run2`. Verdict — see table.

@@ -451,44 +451,68 @@ def delta_table(sets: dict[str, dict[str, Any]]) -> dict[str, dict[str, float]]:
     return table
 
 
+def _o_unit_key(r: dict[str, Any], key_fn: Any) -> tuple[Any, ...]:
+    """Fixed O-anchored unit: document + span + scope + normalized relation.
+
+    The unit is defined on the ORIGINAL projection only (span and scope are
+    provenance-programmatic; the normalized triple is the semantic anchor).
+    """
+    return (str(r.get("source_document") or ""),
+            str(r.get("source_span") or ""),
+            str(r.get("extraction_scope") or ""),
+            key_fn(r["source"]), key_fn(r["relation"]), key_fn(r["target"]))
+
+
 def evidence_alignment(snaps: dict[str, dict[str, list[dict[str, Any]]]],
                        key_fn: Any) -> dict[str, dict[str, Any]]:
-    """S3 evidence coverage. Returns, per pair, the distance 1−recall (0 =
-    identical), the eligibility counts, and the raw recall for the report."""
+    """S3' evidence coverage, O-anchored fixed unit set.
+
+    Units = the original projection's evidence-bearing relations (keyed on
+    document + span + scope + normalized triple), fixed BEFORE any pair
+    comparison. Every pair (OA, OB, AB) is measured over the SAME unit set with
+    the SAME |evidence_O| denominator, so the three distances are directly
+    comparable and the §7 ordering is meaningful. A unit missing in a rebuild
+    contributes recall 0 (coverage broken), never "skipped".
+    """
+    def index(label: str) -> dict[tuple[Any, ...], list[dict[str, Any]]]:
+        idx: dict[tuple[Any, ...], list[dict[str, Any]]] = {}
+        for r in snaps[label]["relations"]:
+            idx.setdefault(_o_unit_key(r, key_fn), []).append(r)
+        return idx
+
+    oidx = index("O")
+    units = [k for k, rows in oidx.items() if _evidence_ids(rows[0]["evidence"])]
+    o_ev = {k: _evidence_ids(oidx[k][0]["evidence"]) for k in units}
+
+    def ev_of(idx: dict[tuple[Any, ...], list[dict[str, Any]]],
+              u: tuple[Any, ...]) -> set[str]:
+        rows = idx.get(u)
+        return _evidence_ids(rows[0]["evidence"]) if rows else set()
+
     result: dict[str, dict[str, Any]] = {}
-    pairs = [("O", "A"), ("O", "B"), ("A", "B")]
-    for x, y in pairs:
-        rows_x = {(key_fn(r["source"]), key_fn(r["relation"]), key_fn(r["target"]),
-                   str(r.get("extraction_scope") or ""),
-                   str(r.get("source_document") or "")): r
-                  for r in snaps[x]["relations"]}
-        rows_y = {(key_fn(r["source"]), key_fn(r["relation"]), key_fn(r["target"]),
-                   str(r.get("extraction_scope") or ""),
-                   str(r.get("source_document") or "")): r
-                  for r in snaps[y]["relations"]}
-        recalls = []
-        eligible = 0
-        for key in rows_x:
-            if key in rows_y:
-                ex = _evidence_ids(rows_x[key]["evidence"])
-                ey = _evidence_ids(rows_y[key]["evidence"])
-                if ex:
-                    eligible += 1
-                    recalls.append(len(ex & ey) / len(ex))
-        if recalls:
-            recall = round(sum(recalls) / len(recalls), 4)
+    for x, y in (("O", "A"), ("O", "B"), ("A", "B")):
+        ix, iy = index(x), index(y)
+        mean_distance = 0.0
+        missing_x = missing_y = 0
+        for u in units:
+            ex = o_ev[u] if x == "O" else ev_of(ix, u)
+            ey = ev_of(iy, u)
+            missing_x += int(x != "O" and u not in ix)
+            missing_y += int(y != "O" and u not in iy)
+            mean_distance += 1.0 - len(ex & ey) / len(o_ev[u])
+        if units:
+            mean_distance /= len(units)
             result[f"{x}{y}"] = {
-                "distance": round(1.0 - recall, 4),
-                "recall": recall,
-                "eligible_pairs": eligible,
-                "aligned_relations": sum(1 for k in rows_x if k in rows_y),
+                "distance": round(mean_distance, 4),
+                "recall": round(1.0 - mean_distance, 4),
+                "units": len(units),
+                "units_missing_in_first": missing_x,
+                "units_missing_in_second": missing_y,
             }
         else:
             result[f"{x}{y}"] = {
-                "distance": None,
-                "recall": None,
-                "eligible_pairs": 0,
-                "aligned_relations": sum(1 for k in rows_x if k in rows_y),
+                "distance": None, "recall": None, "units": 0,
+                "units_missing_in_first": 0, "units_missing_in_second": 0,
             }
     return result
 
@@ -798,14 +822,17 @@ def render_report(r: dict[str, Any]) -> str:
     if r.get("evidence"):
         ev = r["evidence"]
         if ev.get("note"):
-            lines.append(f"**Evidence coverage:** {ev['note']}")
+            lines.append(f"**Evidence coverage (S3'):** {ev['note']}")
         else:
-            lines.append("**Evidence coverage (S3, recall / aligned):**")
+            lines.append("**Evidence coverage (S3' — O-anchored units "
+                         "A↔B denominator |evidence_O|):**")
             for pair in ("OA", "OB", "AB"):
                 m = ev[pair]
-                lines.append(f"- {pair}: recall {m['recall']} "
-                             f"({m['eligible_pairs']} eligible of "
-                             f"{m['aligned_relations']} aligned)")
+                lines.append(
+                    f"- {pair}: distance {m['distance']}, recall {m['recall']} "
+                    f"over {m['units']} O-anchored units "
+                    f"(missing {m['units_missing_in_first']}/"
+                    f"{m['units_missing_in_second']})")
         lines.append("")
     lines.append("## Extraction health")
     lines.append("")

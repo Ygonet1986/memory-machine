@@ -240,3 +240,37 @@ harness before execution (protocol doc + `eval/doc_graph_rebuild.py`
 `evidence_alignment`, O-anchored fixed unit set, shared denominator; §7/F5
 unchanged). Results appended below: `doc_graph_rebuild.json` + `_summary.md`
 under `eval/results/dg_v1_llm_run2`. Verdict — see table.
+
+Run-2 semantic Δ matrix:
+
+| metric | Δ(O,A) | Δ(O,B) | Δ(A,B) | §7 ok? |
+|---|---:|---:|---:|---|
+| entities | 0.3832 | 0.5537 | 0.5763 | no |
+| relations | 0.9417 | 0.9531 | 0.9899 | no |
+| relations_plural | 0.9417 | 0.9453 | 0.9899 | no |
+| windows | 0.1429 | 0.4138 | 0.4068 | yes |
+| chunks | 0.1747 | 0.0471 | 0.2047 | no |
+| per_doc_type | 0.1596 | 0.2051 | 0.1935 | yes |
+| evidence (S3′) | 0.8960 | 0.9059 | 1.0000 | no |
+
+Run-2 relation draws under identical canonical input: O = 202, A = 179,
+B = 222 (all arms: D1–D8 clean, tape byte-identical, S5 health 0/0).
+
+**F5 investigation conclusion (two independent FAIL runs):** the failures are
+a **cross-run flip** (Run 1: evidence only; Run 2: entities/relations/plural/
+chunks/evidence) — a systematic rebuild defect cannot flip between runs, and
+the deterministic arm is Δ=0 everywhere; the semantic layer's violations match
+the U4.2 signature exactly (A/B differ from each other roughly as much as each
+differs from O = draw-to-draw extractor variance). The live LLM at temperature
+0 draws ~200 relations with 3× volume/composition drift between identical
+inputs (O 202 / A 179 / B 222), so any O-anchored semantic coverage rule is a
+stability measure, not a rebuild fidelity measure.
+
+Numeric verdict per §8 (no criterion re-fit): **gate NOT met** on either run.
+Structural faithfulness (deterministic layer + provenance, D1–D8) is
+demonstrated; semantic stability registers as: relations draw-set Jaccard
+overlap ≈ OA .059 / OB .047 / AB .010; three-way diversity per U4.2 → rebuild
+injects no detectable variance beyond the extractor. The gate decision on
+`doc-graph-v1` is the repo owner's call on this evidence — either close the
+tag on the structural proof (U4.2 interpretation) or keep it refused and
+advance to Fase P design.

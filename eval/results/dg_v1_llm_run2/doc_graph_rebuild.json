@@ -1,0 +1,158 @@
+{
+  "question": "Given the same original TXT and the same config/extractor, does the rebuilt documental graph preserve structure and provenance of the original projection?",
+  "preregistered": "docs/DOC_GRAPH_V1.md",
+  "arm_extractor": {
+    "name": "llm",
+    "version": "v1"
+  },
+  "params": {
+    "chunk_size": 400,
+    "overlap": 50,
+    "level": "both",
+    "window_chars": 12000,
+    "batch_size": 4
+  },
+  "canonical": {
+    "registry_path": "eval/results/dg_v1_llm_run2/build/o/graph/documents.jsonl",
+    "originals": "[PosixPath('eval/results/dg_v1_llm_run2/build/o/documents/decisions.txt'), PosixPath('eval/results/dg_v1_llm_run2/build/o/documents/novella.txt'), PosixPath('eval/results/dg_v1_llm_run2/build/o/documents/tech-notes.txt')]"
+  },
+  "audits": {
+    "O": {
+      "passed": true,
+      "problems": [],
+      "checks": {
+        "D1_tape_bytes": 4752,
+        "D3_validate": "clean",
+        "D2_registry_rows": 3
+      }
+    },
+    "A": {
+      "passed": true,
+      "problems": [],
+      "checks": {
+        "D1_tape_bytes": 4752,
+        "D3_validate": "clean",
+        "D2_registry_rows": 3
+      }
+    },
+    "B": {
+      "passed": true,
+      "problems": [],
+      "checks": {
+        "D1_tape_bytes": 4752,
+        "D3_validate": "clean",
+        "D2_registry_rows": 3
+      }
+    }
+  },
+  "rebuild_errors": [],
+  "determinism_gap_sets": [
+    "entities",
+    "relations",
+    "mentions"
+  ],
+  "delta": {
+    "entities": {
+      "oa": 0.383177570093458,
+      "ob": 0.5537190082644627,
+      "ab": 0.576271186440678
+    },
+    "relations": {
+      "oa": 0.9416666666666667,
+      "ob": 0.9530864197530864,
+      "ab": 0.9899244332493703
+    },
+    "relations_plural": {
+      "oa": 0.9416666666666667,
+      "ob": 0.945273631840796,
+      "ab": 0.9899244332493703
+    },
+    "windows": {
+      "oa": 0.1428571428571429,
+      "ob": 0.4137931034482759,
+      "ab": 0.4067796610169492
+    },
+    "chunks": {
+      "oa": 0.17469879518072284,
+      "ob": 0.04705882352941182,
+      "ab": 0.20467836257309946
+    },
+    "per_doc_type": {
+      "oa": 0.15957446808510634,
+      "ob": 0.20512820512820518,
+      "ab": 0.19354838709677424
+    },
+    "evidence": {
+      "oa": 0.896,
+      "ob": 0.9059,
+      "ab": 1.0
+    }
+  },
+  "evidence": {
+    "OA": {
+      "distance": 0.896,
+      "recall": 0.104,
+      "units": 202,
+      "units_missing_in_first": 0,
+      "units_missing_in_second": 181
+    },
+    "OB": {
+      "distance": 0.9059,
+      "recall": 0.0941,
+      "units": 202,
+      "units_missing_in_first": 0,
+      "units_missing_in_second": 183
+    },
+    "AB": {
+      "distance": 1.0,
+      "recall": 0.0,
+      "units": 202,
+      "units_missing_in_first": 181,
+      "units_missing_in_second": 183
+    }
+  },
+  "health": {
+    "O": {
+      "pending": 0,
+      "failed": 0
+    },
+    "A": {
+      "pending": 0,
+      "failed": 0
+    },
+    "B": {
+      "pending": 0,
+      "failed": 0
+    }
+  },
+  "ordering_failures": [
+    "entities",
+    "relations",
+    "relations_plural",
+    "chunks",
+    "evidence"
+  ],
+  "ordering_skipped": [],
+  "meta_tags": {
+    "O": [
+      "llm/v1",
+      "llm/v1/document"
+    ],
+    "A": [
+      "llm/v1",
+      "llm/v1/document"
+    ],
+    "B": [
+      "llm/v1",
+      "llm/v1/document"
+    ]
+  },
+  "decision": "FAIL",
+  "reason": {
+    "deterministic_clean": true,
+    "rebuild_ok": true,
+    "tape_unaltered": true,
+    "extraction_health": true,
+    "abor_b_ordering": false
+  }
+}

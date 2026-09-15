@@ -82,6 +82,7 @@ class Config:
     document_graph_enabled: bool = True
     document_structure_level: str = "chunk"
     document_window_chars: int = 12000
+    plasticity_mode: str = "off"
     coverage_mode: str = "off"
     cascade_min_score: float = 0.0
     cascade_expand_top_k: int = 5
@@ -204,6 +205,11 @@ class Config:
             else "chunk"
         )
         self.document_window_chars = max(1, _int(self.document_window_chars, 12000))
+        self.plasticity_mode = (
+            self.plasticity_mode
+            if self.plasticity_mode in {"off", "observe", "shadow", "update", "deliver"}
+            else "off"
+        )
         for name, default in (
             ("graph_augment_min_score", 0.80),
             ("graph_augment_weight", 1.0),

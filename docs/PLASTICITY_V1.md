@@ -333,6 +333,20 @@ Anything not strictly repaired or regressed is a **tie**. Primary metric:
 never gating): wasted-context delta, delivered-evidence stability (per-case
 Jaccard of ids), ordering stability.
 
+**Adendo P2 (pré-execução, aprovado pelo usuário).** Outcome por caso é medido
+sobre o **payload com orçamento** (o contrato de entrega real), não sobre o
+conjunto completo de itens recuperados: cada braço caminha seus itens ordenados
+(base = score desc; plástico = energia asc, empatados por score desc) e vai
+incluindo no payload até `graph_top_k` **8** itens ou **4000 chars** de label
+(`evidence_payload_budget`), o que vier primeiro; `delivered_ids` = os
+memory-ids do payload resultante. `correct` ⇔ `required_ids ⊆ delivered_ids`;
+`incorrect` caso contrário. Base e plástico usam exatamente o mesmo gatilho de
+orçamento — só a ordem muda — então "payloads e contexto idênticos" (§12.1)
+fica garantido e a métrica pareada passa a ser sensível à reordenação (sem esse
+adendo o conjunto entregue seria idêntico nos dois braços e `net` seria
+invariavelmente 0). Constantes do orçamento: `graph_top_k=8`,
+`evidence_payload_budget=4000` (config padrão, imutáveis).
+
 ### 12.6 Per-case audit and traceability
 
 The run table classifies all 30 cases into the four buckets and prints per case:

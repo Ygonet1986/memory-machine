@@ -82,6 +82,12 @@ class Config:
     document_graph_enabled: bool = True
     document_structure_level: str = "chunk"
     document_window_chars: int = 12000
+    trilepsia_enabled: bool = False
+    trilepsia_recall_mode: str = "off"
+    trilepsia_window_chars: int = 12000
+    trilepsia_batch_size: int = 8
+    trilepsia_max_attempts: int = 3
+    trilepsia_schema: str = ""
     plasticity_mode: str = "off"
     coverage_mode: str = "off"
     cascade_min_score: float = 0.0
@@ -205,6 +211,16 @@ class Config:
             else "chunk"
         )
         self.document_window_chars = max(1, _int(self.document_window_chars, 12000))
+        self.trilepsia_enabled = bool(self.trilepsia_enabled)
+        self.trilepsia_recall_mode = (
+            self.trilepsia_recall_mode
+            if self.trilepsia_recall_mode in {"off", "augment", "only"}
+            else "off"
+        )
+        self.trilepsia_window_chars = max(1, _int(self.trilepsia_window_chars, 12000))
+        self.trilepsia_batch_size = max(1, min(32, _int(self.trilepsia_batch_size, 8)))
+        self.trilepsia_max_attempts = max(1, min(10, _int(self.trilepsia_max_attempts, 3)))
+        self.trilepsia_schema = str(self.trilepsia_schema or "").strip()
         self.plasticity_mode = (
             self.plasticity_mode
             if self.plasticity_mode in {"off", "observe", "shadow", "update", "deliver"}

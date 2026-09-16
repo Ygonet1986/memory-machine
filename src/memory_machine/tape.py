@@ -59,6 +59,7 @@ class MemoryRecord:
     views: list[str] = field(default_factory=list)
     source_span: tuple[int, int] = ()
     source_document: str = ""
+    trilepsia: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         d: dict[str, Any] = {
@@ -77,6 +78,8 @@ class MemoryRecord:
             d["source_document"] = self.source_document
         if self.source_span:
             d["source_span"] = [int(self.source_span[0]), int(self.source_span[1])]
+        if self.trilepsia:
+            d["trilepsia"] = self.trilepsia
         return d
 
     @classmethod
@@ -99,6 +102,7 @@ class MemoryRecord:
             views=list(data.get("views") or []),
             source_span=span,
             source_document=str(data.get("source_document") or ""),
+            trilepsia=dict(data.get("trilepsia") or {}),
         )
 
     def text(self) -> str:

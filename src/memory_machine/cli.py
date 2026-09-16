@@ -132,6 +132,16 @@ def _build_parser() -> argparse.ArgumentParser:
     graph.add_argument("--reject", action="store_true", help="review: reject the hypothesis")
     graph.add_argument("--skip", action="store_true", help="review: keep the hypothesis open")
 
+    trip = sub.add_parser(
+        "trilepsia",
+        help="trilepsia investigation projection: ingest/status/show (JSON)",
+    )
+    trip.add_argument("action", choices=["ingest", "status", "show"])
+    trip.add_argument("target", nargs="?", default="", help="path (ingest) or unit id (show)")
+    trip.add_argument("--schema", default="", help="declared schema id (required for ingest)")
+    trip.add_argument("--scope", default="", help="registered scope (ingest; T0 V dimension)")
+    trip.add_argument("--window-chars", type=int, default=0, help="window char budget (0 = config)")
+
     roll = sub.add_parser("rollup", help="consolidate older tape records (JSON)")
     roll.add_argument("--keep-recent", type=int, default=20)
     roll.add_argument("--temperature", type=float, default=0.0)
@@ -570,6 +580,52 @@ def cmd_attach(args: argparse.Namespace) -> int:
     return _j(m.ingest_document(args.path, chunk_size=args.chunk_size))
 
 
+def cmd_trilepsia(args: argparse.Namespace) -> int:
+    from .attachments import _file_hash
+    from .trilepsia import (
+        TrilepsiaExtractor,
+        ingest_trilepsia,
+        show_unit,
+        trilepsia_status,
+    )
+
+    m = _machine(args)
+    if args.action == "status":
+        return _j(trilepsia_status(m.tape, m.root))
+    if args.action == "show":
+        if not args.target:
+            return _j({"ok": False, "error": "show needs a unit id (M####)"})
+        return _j(show_unit(m.tape, args.target))
+    if not args.target:
+        return _j({"ok": False, "error": "ingest needs a .txt path"})
+    schema = args.schema or m.config.trilepsia_schema
+    if not schema:
+        return _j({"ok": False, "error": "declare --schema (T0: X is declared at ingestion)"})
+    path = Path(args.target)
+    if not path.exists():
+        return _j({"ok": False, "error": f"file not found: {path}"})
+    ingested = m.ingest_document(path, enable_graph=False)
+    text = path.read_text(encoding="utf-8", errors="replace").strip()
+    doc_source = f"{path.name}#{_file_hash(text)}"
+    try:
+        client = m._ensure_client()
+    except LLMError as exc:
+        return _j({"ok": False, "error": str(exc)})
+    result = ingest_trilepsia(
+        tape=m.tape,
+        root=m.root,
+        doc_source=doc_source,
+        schema=schema,
+        client=client,
+        window_chars=args.window_chars or m.config.trilepsia_window_chars,
+        max_attempts=m.config.trilepsia_max_attempts,
+        extractor=TrilepsiaExtractor(client),
+        scope=args.scope or "",
+    )
+    result["ingest"] = ingested
+    return _j(result)
+
+
 def cmd_archive(args: argparse.Namespace) -> int:
     m = _machine(args)
     ok = m.tape.set_status(args.memory_id, "archived")
@@ -604,6 +660,7 @@ def main(argv: list[str] | None = None) -> int:
         "sessions": cmd_sessions,
         "views": cmd_views,
         "graph": cmd_graph,
+        "trilepsia": cmd_trilepsia,
         "rollup": cmd_rollup,
         "rehydrate": cmd_rehydrate,
     }

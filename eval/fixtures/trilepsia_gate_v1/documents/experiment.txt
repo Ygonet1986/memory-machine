@@ -1,0 +1,15 @@
+Experiment log — cache effect on latency (controlled)
+
+Setup: staging gateway, fixed load generator (600 req/s), same build, same
+dataset. One variable changed at a time.
+
+Run A (cache enabled): p95 = 350 ms over 30 minutes.
+Run B (cache disabled): p95 = 620 ms over 30 minutes.
+Order: A then B; the load generator and dataset were unchanged; the only
+difference between runs was the cache flag.
+
+Interpretation: under this controlled setup (same load, same build, cache the
+only difference), the cache reduces p95 latency by 270 ms
+relative to the disabled run. The claim "the cache reduces p95 under this
+load" is supported by this experiment; the experiment does not speak to other
+loads or to production incidents.

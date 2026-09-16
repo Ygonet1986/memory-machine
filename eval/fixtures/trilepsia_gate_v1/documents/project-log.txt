@@ -1,0 +1,18 @@
+Nimbus weekly project log (week of 2026-03-02)
+
+Monday: deployment review for the gateway. The team agreed to keep the current
+rollout plan. No blocking issues were raised.
+
+Tuesday: design review for the metering service; the team decided to defer the
+schema change to 2.4. Action item: revisit in two weeks.
+
+Wednesday: Dev mentioned that the cache hit rate is about 80%
+since the update. This number came from a team conversation, not from the
+metrics pipeline, and nobody has verified it against the dashboard yet.
+
+Thursday: incident follow-up meeting. The gateway had restarted twice in the
+week. The team took notes but did not run any controlled test; no instrumentation
+was changed and no rollback was attempted.
+
+Friday: roadmap check. The team agreed that any claim about the root cause of
+the restarts still needs evidence before it goes into the release notes.

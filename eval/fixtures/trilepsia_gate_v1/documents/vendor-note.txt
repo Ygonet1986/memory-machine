@@ -1,0 +1,9 @@
+Vendor note — missing data
+
+The vendor was asked for the February error count for the gateway. As of
+2026-03-06 the vendor has not replied; no copy of the February count exists in
+our systems (the export starts 2026-02-24 and contains no error-count column).
+
+Status: the February error count is currently unknown and cannot be determined
+from the available records. Any statement of a February error count would be a
+guess; the correct state of this datum is indeterminate, not zero.

@@ -1,0 +1,92 @@
+{
+  "builder": "eval/gen_trilepsia_gate.py",
+  "files": {
+    "cases.jsonl": {
+      "bytes": 11244,
+      "sha256": "5af1e27547569973e4c00c392e4977fff90ca0614a33beff4c008741bcb7b232"
+    },
+    "context.json": {
+      "bytes": 62,
+      "sha256": "aece953466c6046f2afa90053948be51ec4756f1c962f19ae3a30215834a910f"
+    },
+    "documents/capacity-table.txt": {
+      "bytes": 350,
+      "sha256": "530e9c002674d151f0e1e1980bf4cb1377fbe1ff187a0a247a5d577262562814"
+    },
+    "documents/changelog.txt": {
+      "bytes": 564,
+      "sha256": "b3d8402417deb4790ceb8389b877572bc8d44af910090190ba6ca2d0fe0ac07e"
+    },
+    "documents/conventions.txt": {
+      "bytes": 707,
+      "sha256": "73e715e7c21b274dfce63719042f3b1f52135128e131eab7aec1aa488e129626"
+    },
+    "documents/experiment.txt": {
+      "bytes": 721,
+      "sha256": "7c50188bc5998ea048d488917049fb15d6ea8f967e6c23764d526356ff6c54c9"
+    },
+    "documents/incident.txt": {
+      "bytes": 867,
+      "sha256": "40b043beb010f767fb7760dd150aa5e32378505499e2df16c2d782c092ffc9df"
+    },
+    "documents/measurements.txt": {
+      "bytes": 783,
+      "sha256": "495482ad51c16594af0b9982a0e802f9fb46ca7c1ac708806ad96baf14b712ee"
+    },
+    "documents/project-log.txt": {
+      "bytes": 874,
+      "sha256": "741b7a98effd4a2aae15e4dacc72730a39259d24acf594a1bf8671b02b250d04"
+    },
+    "documents/refutation.txt": {
+      "bytes": 656,
+      "sha256": "2f0a4f5f58103bed176dc99799a8b67352a9e7fd32dc2cb0085f21495c02c4b4"
+    },
+    "documents/support-thread.txt": {
+      "bytes": 654,
+      "sha256": "52e3a230fdd75703eca1ac85237e535bf73c88ed7cfd4c27b7772fe4da8a878e"
+    },
+    "documents/vendor-note.txt": {
+      "bytes": 487,
+      "sha256": "9e7d42e02278facc9159ed5c0e94fe7ae6d38709e8cd5abe5869237c4e47ff99"
+    },
+    "graph/aliases.jsonl": {
+      "bytes": 5429,
+      "sha256": "537eaf4d1d4224c3b217ac93a6c22f3ef5dad409343991e43a19e2890fed86f9"
+    },
+    "graph/documents.jsonl": {
+      "bytes": 12912,
+      "sha256": "be2dbbc2bef94ced044eed3a80e05293a3986935fd8119fd60fac1a295da9005"
+    },
+    "graph/entities.jsonl": {
+      "bytes": 50143,
+      "sha256": "90102155bd5bf3b750db5f926149bb6b15aab148c33eddf8234cd2f6b0e11b2a"
+    },
+    "graph/extracted.jsonl": {
+      "bytes": 2046,
+      "sha256": "2f8913324db194d432984370e2bcaebd9dffd198cf3025ec3a8ab3b3812590e0"
+    },
+    "graph/mentions.jsonl": {
+      "bytes": 40127,
+      "sha256": "05403d5ef1db8104f8d460cc851eb4abbf969e09451e85140a815ab38fa49b82"
+    },
+    "graph/meta.json": {
+      "bytes": 553,
+      "sha256": "2ccbdf5d848e31a099817782d558b146407795cf2f13c2ec1c26fc3ed36b75b5"
+    },
+    "graph/relations.jsonl": {
+      "bytes": 75934,
+      "sha256": "b6c984db4077615195869400bc2f427981af3324aefd219ff42f1864723afbcc"
+    },
+    "tape.jsonl": {
+      "bytes": 57030,
+      "sha256": "b5ce96dcd80a8b4e481cc7d52911f91918c27ab946460b6d3f7367da32ac0f52"
+    },
+    "whiteboard.json": {
+      "bytes": 250,
+      "sha256": "ac00ae4fe2aeae43ec55f9be44ddbdc6d47c24ea74fe579af0358a63eb395f57"
+    }
+  },
+  "schema": "gate_claims_v1",
+  "sha1": "cec309defe1acecb82adbf57e08a6e8f76cfe533",
+  "spec": "docs/TRILEPSIA_GATE_SPEC.md (538077a)"
+}

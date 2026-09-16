@@ -1,0 +1,14 @@
+Project conventions and scope (Nimbus gateway)
+
+- "severe": any p95 latency above 500 ms, measured by the metrics
+  pipeline (not by user reports).
+- "ttl" is measured in seconds.
+- "failure": a gateway restart with automatic recovery, as recorded by the
+  supervisor log; user-side errors are counted separately.
+- Scope: these conventions apply to the Nimbus gateway only. Other services
+  keep their own thresholds and are out of scope for this document.
+
+Terminology note: a user report is not a measurement. A measurement is
+produced by an instrument named in the record (dashboard, probe, supervisor
+log). When a value has both a report and a measurement, the measurement is the
+instrument of record.

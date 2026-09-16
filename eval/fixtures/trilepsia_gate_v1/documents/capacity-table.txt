@@ -1,0 +1,13 @@
+Capacity planning table — weekly units
+
+Week | units shipped
+W1   | 120
+W2   | 150
+W3   | 175
+W4   | 160
+W5   | 190
+W6   | 205
+
+Notes: counts are whole units, verified against the warehouse ledger. The
+table is the source of record for weekly units; no adjustments were applied.
+The February error count is not in this table (see the vendor note).

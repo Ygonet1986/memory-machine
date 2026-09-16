@@ -1,0 +1,17 @@
+Metrics pipeline export (gateway service)
+
+Date range: 2026-02-24 to 2026-03-06. Instrument: metrics-dashboard v1,
+aggregation window 5 minutes, service label "nimbus-gateway".
+
+p95 latency per day (cache enabled, production load):
+  2026-02-24 362 ms | 2026-02-25 355 ms | 2026-02-26 349 ms | 2026-02-27 351 ms
+  2026-02-28 344 ms | 2026-03-01 358 ms | 2026-03-02 355 ms | 2026-03-03 361 ms
+  2026-03-04 350 ms | 2026-03-05 347 ms | 2026-03-06 353 ms
+
+Cache counters (same instrument, service "nimbus-gateway"):
+  cache hit rate measured 71.4% on 2026-03-02.
+  cache hit rate measured 70.8% on 2026-03-05.
+
+Note from the on-call engineer: the 80% figure discussed in
+the project log does not match this export; the export is the instrument of
+record for latency and cache counters.

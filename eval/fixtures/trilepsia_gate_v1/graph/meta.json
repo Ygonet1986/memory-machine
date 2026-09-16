@@ -1,0 +1,29 @@
+{
+  "version": 3,
+  "schema_version": 3,
+  "extractor": "llm",
+  "extractor_version": "v1",
+  "resolver_version": "1.0",
+  "tag": "llm/v1",
+  "built_at": "2026-09-16T23:09:30.870220+00:00",
+  "extract_types": [
+    "bugfix",
+    "build",
+    "decision",
+    "lesson",
+    "preference"
+  ],
+  "source": {},
+  "counts": {
+    "entities": 212,
+    "relations": 222,
+    "aliases": 34,
+    "mentions": 247,
+    "extracted": 17,
+    "failed": 0,
+    "pending": 0,
+    "documents": 10
+  },
+  "last_memory_id": "M0026",
+  "document_structure_level": "chunk"
+}

@@ -1,0 +1,12 @@
+Release changelog — gateway
+
+2.1  cache introduced; default ttl=300 s.
+2.2  cache metrics added; ttl unchanged (ttl=300 s).
+2.3  cache eviction rework: the default ttl changed from 300 s to
+     120 s. This update supersedes 2.2; the ttl=300 s
+     setting is no longer in effect after the 2.3 rollout.
+2.4  (planned) metering schema change; no cache changes planned.
+
+Operator note: for any question about the current default, read 2.3; the
+older value belongs to a superseded release. The changelog is the source of
+record for the current configuration value.

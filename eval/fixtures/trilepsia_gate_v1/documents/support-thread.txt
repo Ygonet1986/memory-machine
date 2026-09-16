@@ -1,0 +1,15 @@
+Support thread — failure counts (exported 2026-03-04)
+
+Message 1 — customer A: "We saw 12 failures in our
+gateway calls in the first week of March. We are sure of the count because our
+retry logs are complete."
+
+Message 2 — customer B: "We only saw 4 failures in the
+same window, same region. Our logs also look complete."
+
+Message 3 — support: "The two reports disagree and neither side has shared raw
+logs. We have not been able to reproduce either count independently. Until
+those logs are provided, the number of failures in that window is contested;
+do not act on a single number."
+
+Message 4 — customer A: "We will share logs next week."

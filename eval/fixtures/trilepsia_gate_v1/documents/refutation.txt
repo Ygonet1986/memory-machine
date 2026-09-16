@@ -1,0 +1,15 @@
+Hypothesis test — ttl cause claim
+
+Claim under test: "the ttl=120 s change causes the gateway failures."
+
+Test: for one hour on 2026-03-04, the gateway ran with ttl restored to
+300 s (a controlled intervention; only the ttl changed, the 2.3
+build stayed deployed).
+
+Result: 5 failures occurred during the restore hour,
+within the same range as the preceding hours with ttl=120 s.
+
+Conclusion: under this test (restored ttl, same build), the failures
+continued, so the claim "ttl=120 s causes the failures" is refuted
+under the tested condition. The test does not identify what else causes them;
+it only removes this candidate under the stated condition.

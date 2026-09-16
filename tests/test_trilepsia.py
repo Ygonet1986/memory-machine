@@ -313,6 +313,50 @@ def test_queues_pending_and_failed(tmp_path):
     assert definitive["pending"] == 0
 
 
+def test_observation_content_requires_span():
+    payload = _valid_payload()
+    del payload["observations"][0]["evidence_span"]
+    validated, dropped = validate_trilepsia(payload, original=ORIGINAL, schema="s")
+    assert validated["observations"] == []
+    assert dropped["observations"]["invalid"] == 1
+
+
+def test_envelope_is_secret_scanned(tmp_path):
+    tape, doc_source = _make_doc(tmp_path)
+    leaky = FakeClient({"unknowns": ["sk-" + "A" * 20]})
+    result = ingest_trilepsia(
+        tape=tape, root=tmp_path, doc_source=doc_source, schema="s",
+        client=leaky, extractor=TrilepsiaExtractor(leaky), max_attempts=3,
+    )
+    assert result["applied"] == 0
+    assert result["failed"] == result["windows"]
+    assert not [r for r in tape.read() if r.type == "trilepsia_unit"]
+    rows = (tmp_path / "trilepsia" / "failed.jsonl").read_text().splitlines()
+    assert rows and "SecretError" in rows[0]
+
+
+def test_schema_change_same_version_is_skipped(tmp_path):
+    """Documents the frozen T0 key: (source, window, extractor/version).
+
+    A declared-schema change is NOT part of the idempotency key; it requires a
+    version bump (or T2's explicit rebuild), never a silent re-extraction.
+    """
+    tape, doc_source = _make_doc(tmp_path)
+    client = FakeClient(_valid_payload())
+    first = ingest_trilepsia(
+        tape=tape, root=tmp_path, doc_source=doc_source, schema="schema_a",
+        client=client, extractor=TrilepsiaExtractor(client),
+    )
+    assert first["applied"] == first["windows"]
+    second = ingest_trilepsia(
+        tape=tape, root=tmp_path, doc_source=doc_source, schema="schema_b",
+        client=client, extractor=TrilepsiaExtractor(client),
+    )
+    assert second["applied"] == 0 and second["skipped"] == second["windows"]
+    units = [r for r in tape.read() if r.type == "trilepsia_unit"]
+    assert {u.trilepsia["schema_version"] for u in units} == {"schema_a"}
+
+
 def test_status_counts(tmp_path):
     tape, doc_source = _make_doc(tmp_path)
     client = FakeClient(_valid_payload())

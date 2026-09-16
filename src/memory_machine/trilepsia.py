@@ -27,7 +27,9 @@ Invariants implemented here (each has a test in ``tests/test_trilepsia.py``):
 - **Temporal isolation**: the prompt is built from the window text and the
   declared schema ONLY — there is no question parameter anywhere in this
   module's extraction path.
-- **Idempotency**: ``(document source, window id, extractor/version)``.
+- **Idempotency**: ``(document source, window id, extractor/version)`` — the
+  declared schema is NOT part of the key (T0 §5); a schema change requires a
+  version bump or T2's explicit rebuild, never a silent re-extraction.
 
 T1 covers extraction + validation + tape units + ``ingest|status|show``; the
 ``trilepsia/`` projection, rebuild and ``explain`` are T2.
@@ -43,6 +45,7 @@ from typing import Any
 
 from .attachments import _file_hash
 from .graph_extract import extract_json_object
+from .secrets import SecretError, assert_clean
 from .tape import MemoryRecord, Tape
 
 EXTRACTOR_NAME = "trilepsia"
@@ -186,6 +189,8 @@ def _item_error(key: str, item: dict[str, Any], original: str, lo: int, hi: int)
             return f"unknown observation kind {kind!r}"
         if kind == "observed" and not str(item.get("method") or "").strip():
             return "kind=observed requires a declared method"
+        if "content" in item and "evidence_span" not in item:
+            return "observation content without evidence_span (exact-span rule)"
         if "content" in item and "evidence_span" in item:
             span = item["evidence_span"]
             start, end = int(span[0]), int(span[1])
@@ -233,7 +238,9 @@ def validate_trilepsia(
     Returns ``(validated, dropped)`` where ``dropped`` counts, per key, the
     items discarded as invalid and the items beyond the frozen cap — counters,
     never silent truncation (T0 §7). Raises ``TrilepsiaError`` when the
-    payload carries no trilepsia structure at all.
+    payload carries no trilepsia structure at all. With an empty
+    ``window_span`` the bounds fall back to the whole original; the extraction
+    path always passes the window span (``window_blocks`` guarantees it).
     """
     if not isinstance(obj, dict) or not any(key in obj for key in SCHEMA_KEYS):
         raise TrilepsiaError("extractor output has no trilepsia keys")
@@ -414,6 +421,9 @@ def unit_record(
         "validity": dict(validity or {}),
         "permissions": dict(DEFAULT_PERMISSIONS, **(permissions or {})),
     }
+    # The envelope can carry extracted text; the tape's own scan only covers
+    # record.text(), so scan the raw payload explicitly before it is written.
+    assert_clean(json.dumps(envelope, ensure_ascii=False))
     raw = envelope.get("raw") or {}
     counts = {key: len(raw.get(key) or []) for key in SCHEMA_KEYS}
     return MemoryRecord(
@@ -498,6 +508,10 @@ def ingest_trilepsia(
                 error = f"{type(exc).__name__}: {exc}"
                 continue
             except TrilepsiaError as exc:  # parse/schema: definitive
+                error = f"{type(exc).__name__}: {exc}"
+                definitive = True
+                break
+            except SecretError as exc:  # secret in the envelope: definitive
                 error = f"{type(exc).__name__}: {exc}"
                 definitive = True
                 break

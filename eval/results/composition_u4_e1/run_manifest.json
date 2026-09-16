@@ -1,6 +1,6 @@
 {
   "harness": "eval/composition_e1.py",
-  "git_commit": "ece739fc194b52b469b8f013fd2f492d88e53961",
+  "git_commit": "371037befca96212e618752c9303c2292d85d6ec",
   "fixture": "/Users/igorcoutrimlacerda/memory-machine/eval/fixtures/composition_u4",
   "fixture_sha1": "24b390955b228bbfad5150bc7412ca67c6ae4cc5",
   "card_rules": "evidence_cards v1 (docs/COMPOSITION_V1.md §3)",
@@ -47,5 +47,25 @@
       "40": "7953cefdd5fc736927e834c54baf4d759041c9e0",
       "41": "e6e637c77d025696e76bf9f4ac381c1feb0d3c00"
     }
-  }
+  },
+  "flip_cases": [
+    12,
+    13,
+    14,
+    20,
+    22,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    37,
+    40,
+    41
+  ]
 }

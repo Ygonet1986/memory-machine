@@ -1,0 +1,362 @@
+{
+  "fixture": "/Users/igorcoutrimlacerda/memory-machine/eval/fixtures/composition_u4",
+  "fixture_sha1": "24b390955b228bbfad5150bc7412ca67c6ae4cc5",
+  "e1_ledger_frozen_at": "a0edc08",
+  "arms": [
+    "cards_v1",
+    "cards_repair"
+  ],
+  "n": 5,
+  "model": "deepseek-v4-flash",
+  "judge_model": "deepseek-v4-flash",
+  "atom_metrics": {
+    "cards_v1": {
+      "item_facts_present": 176,
+      "item_facts_total": 249,
+      "item_rate": 0.7068,
+      "all_present_cases": 15,
+      "cases": 30
+    },
+    "cards_repair": {
+      "item_facts_present": 176,
+      "item_facts_total": 249,
+      "item_rate": 0.7068,
+      "all_present_cases": 15,
+      "cases": 30
+    }
+  },
+  "accuracy": {
+    "counts": {
+      "stayed_incorrect": 18,
+      "stayed_correct": 9,
+      "repaired": 2,
+      "regressed": 1
+    },
+    "net_cards_repair_vs_v1": 1,
+    "ledger": [
+      {
+        "case": 12,
+        "block": "u3a",
+        "cards_v1": "incorrect",
+        "cards_repair": "incorrect",
+        "class": "stayed_incorrect",
+        "net": 0
+      },
+      {
+        "case": 13,
+        "block": "u3a",
+        "cards_v1": "incorrect",
+        "cards_repair": "incorrect",
+        "class": "stayed_incorrect",
+        "net": 0
+      },
+      {
+        "case": 14,
+        "block": "u3a",
+        "cards_v1": "incorrect",
+        "cards_repair": "incorrect",
+        "class": "stayed_incorrect",
+        "net": 0
+      },
+      {
+        "case": 15,
+        "block": "u3a",
+        "cards_v1": "incorrect",
+        "cards_repair": "incorrect",
+        "class": "stayed_incorrect",
+        "net": 0
+      },
+      {
+        "case": 16,
+        "block": "u3a",
+        "cards_v1": "correct",
+        "cards_repair": "correct",
+        "class": "stayed_correct",
+        "net": 0
+      },
+      {
+        "case": 17,
+        "block": "u3a",
+        "cards_v1": "incorrect",
+        "cards_repair": "incorrect",
+        "class": "stayed_incorrect",
+        "net": 0
+      },
+      {
+        "case": 18,
+        "block": "u3a",
+        "cards_v1": "incorrect",
+        "cards_repair": "incorrect",
+        "class": "stayed_incorrect",
+        "net": 0
+      },
+      {
+        "case": 19,
+        "block": "u3a",
+        "cards_v1": "incorrect",
+        "cards_repair": "incorrect",
+        "class": "stayed_incorrect",
+        "net": 0
+      },
+      {
+        "case": 20,
+        "block": "u3a",
+        "cards_v1": "correct",
+        "cards_repair": "correct",
+        "class": "stayed_correct",
+        "net": 0
+      },
+      {
+        "case": 21,
+        "block": "u3a",
+        "cards_v1": "correct",
+        "cards_repair": "correct",
+        "class": "stayed_correct",
+        "net": 0
+      },
+      {
+        "case": 22,
+        "block": "u3a",
+        "cards_v1": "incorrect",
+        "cards_repair": "incorrect",
+        "class": "stayed_incorrect",
+        "net": 0
+      },
+      {
+        "case": 23,
+        "block": "u3a",
+        "cards_v1": "correct",
+        "cards_repair": "correct",
+        "class": "stayed_correct",
+        "net": 0
+      },
+      {
+        "case": 24,
+        "block": "u3a",
+        "cards_v1": "incorrect",
+        "cards_repair": "incorrect",
+        "class": "stayed_incorrect",
+        "net": 0
+      },
+      {
+        "case": 25,
+        "block": "u3a",
+        "cards_v1": "correct",
+        "cards_repair": "correct",
+        "class": "stayed_correct",
+        "net": 0
+      },
+      {
+        "case": 26,
+        "block": "u3a",
+        "cards_v1": "partial",
+        "cards_repair": "correct",
+        "class": "repaired",
+        "net": 1
+      },
+      {
+        "case": 27,
+        "block": "u3b",
+        "cards_v1": "incorrect",
+        "cards_repair": "incorrect",
+        "class": "stayed_incorrect",
+        "net": 0
+      },
+      {
+        "case": 28,
+        "block": "u3b",
+        "cards_v1": "correct",
+        "cards_repair": "correct",
+        "class": "stayed_correct",
+        "net": 0
+      },
+      {
+        "case": 29,
+        "block": "u3b",
+        "cards_v1": "incorrect",
+        "cards_repair": "incorrect",
+        "class": "stayed_incorrect",
+        "net": 0
+      },
+      {
+        "case": 30,
+        "block": "u3b",
+        "cards_v1": "correct",
+        "cards_repair": "correct",
+        "class": "stayed_correct",
+        "net": 0
+      },
+      {
+        "case": 31,
+        "block": "u3b",
+        "cards_v1": "incorrect",
+        "cards_repair": "incorrect",
+        "class": "stayed_incorrect",
+        "net": 0
+      },
+      {
+        "case": 32,
+        "block": "u3b",
+        "cards_v1": "correct",
+        "cards_repair": "correct",
+        "class": "stayed_correct",
+        "net": 0
+      },
+      {
+        "case": 33,
+        "block": "u3b",
+        "cards_v1": "incorrect",
+        "cards_repair": "correct",
+        "class": "repaired",
+        "net": 1
+      },
+      {
+        "case": 34,
+        "block": "u3b",
+        "cards_v1": "incorrect",
+        "cards_repair": "incorrect",
+        "class": "stayed_incorrect",
+        "net": 0
+      },
+      {
+        "case": 35,
+        "block": "u3b",
+        "cards_v1": "incorrect",
+        "cards_repair": "incorrect",
+        "class": "stayed_incorrect",
+        "net": 0
+      },
+      {
+        "case": 36,
+        "block": "u3b",
+        "cards_v1": "correct",
+        "cards_repair": "correct",
+        "class": "stayed_correct",
+        "net": 0
+      },
+      {
+        "case": 37,
+        "block": "u3b",
+        "cards_v1": "correct",
+        "cards_repair": "incorrect",
+        "class": "regressed",
+        "net": -1
+      },
+      {
+        "case": 38,
+        "block": "u3b",
+        "cards_v1": "incorrect",
+        "cards_repair": "incorrect",
+        "class": "stayed_incorrect",
+        "net": 0
+      },
+      {
+        "case": 39,
+        "block": "u3b",
+        "cards_v1": "incorrect",
+        "cards_repair": "incorrect",
+        "class": "stayed_incorrect",
+        "net": 0
+      },
+      {
+        "case": 40,
+        "block": "u3b",
+        "cards_v1": "incorrect",
+        "cards_repair": "incorrect",
+        "class": "stayed_incorrect",
+        "net": 0
+      },
+      {
+        "case": 41,
+        "block": "u3b",
+        "cards_v1": "incorrect",
+        "cards_repair": "incorrect",
+        "class": "stayed_incorrect",
+        "net": 0
+      }
+    ]
+  },
+  "gate": {
+    "1_case26_strict_modal_improves": true,
+    "2_global_net_strict_gt_0": true,
+    "3_no_material_drop_atoms": true,
+    "4_majority_of_runs": false,
+    "case26_replicates": {
+      "cards_v1": [
+        "partial",
+        "partial",
+        "partial",
+        "partial",
+        "partial"
+      ],
+      "cards_repair": [
+        "correct",
+        "incorrect",
+        "correct",
+        "incorrect",
+        "partial"
+      ]
+    },
+    "case26_correct_counts": {
+      "cards_v1": 0,
+      "cards_repair": 2
+    },
+    "promote": false,
+    "verdict": "localized repair only (or none): not a general mechanism"
+  },
+  "case26_M0042": {
+    "case": 26,
+    "block": "u3a",
+    "question_class": "other",
+    "arms": {
+      "cards_v1": {
+        "chars": 1086,
+        "sha1": "d8a91ba239af2d50e9055290c7ce0db21a585ef1",
+        "all_item_facts_present": true,
+        "items": {
+          "M0013": {
+            "delivered": true,
+            "item_total": 3,
+            "item_present": 3,
+            "all_total": 130,
+            "all_present": 13
+          },
+          "M0040": {
+            "delivered": true,
+            "item_total": 1,
+            "item_present": 1,
+            "all_total": 115,
+            "all_present": 7
+          }
+        },
+        "m0042_cards": false
+      },
+      "cards_repair": {
+        "chars": 1398,
+        "sha1": "9b70ec33b5571149cb95e04254100d6ad0813b55",
+        "all_item_facts_present": true,
+        "items": {
+          "M0013": {
+            "delivered": true,
+            "item_total": 3,
+            "item_present": 3,
+            "all_total": 130,
+            "all_present": 13
+          },
+          "M0040": {
+            "delivered": true,
+            "item_total": 1,
+            "item_present": 1,
+            "all_total": 115,
+            "all_present": 7
+          }
+        },
+        "m0042_cards": true
+      }
+    },
+    "integrity_failures": {
+      "cards_v1": [],
+      "cards_repair": []
+    }
+  }
+}

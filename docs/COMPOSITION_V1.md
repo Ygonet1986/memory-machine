@@ -262,3 +262,50 @@ only` (case 26 improved or majority holds but the global net is `<= 0`);
 `M0042 hypothesis not supported` (case 26 does not improve) — in which case the
 next target is the answerer/composition, since `complete = 26/30` showed the
 evidence exists.
+
+## 12. E2 execution record (registered verbatim, no criterion re-fit)
+
+Run `eval/results/composition_u4_e2` (harness + pre-registration §11 at
+`2b73aba`; fixture sha1 `24b390955b228bbfad5150bc7412ca67c6ae4cc5`; E1 ledger
+frozen at `a0edc08`; single batch, model/judge `deepseek-v4-flash`, N=5; 300/300
+case-arm-replicates). Raw answers+jurors preserved in `answers.jsonl` (sha1
+`b45daa8f…`), contexts in `contexts.jsonl`, atom audit in `atoms.jsonl`,
+paired ledger in `paired_ledger.jsonl`, summary `e2_summary.json` (sha1
+`500ca5e8…`) + `summary.md` (sha1 `72e222cb…`), manifest `a1edff9b…`.
+
+**Identity (frozen checks):** `cards_v1` rebuilds byte-identical to the E0
+payloads-mode per-case sha1 (True, no diffs); the repair changed **only case
+26** (context 1086→1398 chars; cases 33/37 have identical contexts across
+arms); 0 card integrity failures.
+
+**Atom coverage (deterministic):** identical across arms — 176/249 (0.707),
+all-present 15/30.
+
+**Strict accuracy (modal of 5):** classes `stayed_correct 9`,
+`stayed_incorrect 18`, `repaired 2`, `regressed 1` ⇒ **net +1**.
+
+Per-case changes: case 26 `partial → correct` (repaired; the only
+context-attributable change); case 33 `incorrect → correct` and case 37
+`correct → incorrect` (same context in both arms ⇒ identical-context
+oscillation, **not** treatment effects). Net attributable to the repair = the
+case-26 modal shift alone; the +1/−1 on 33/37 cancel.
+
+**Case 26 replicates:** v1 `[partial×5]` (0/5 correct) → repair
+`[correct, incorrect, correct, incorrect, partial]` (**2/5** correct).
+
+**Gate (frozen §11), all four required:**
+
+1. case 26 strict modal improves: **True**;
+2. global net strict > 0: **True** (+1);
+3. no material drop in item rate or all-present: **True**;
+4. improvement holds in the majority of the five runs: **False** (2/5, below
+   the frozen ≥3/5 bar).
+
+**Verdict (frozen classes): `localized repair only — not a general
+mechanism`.** The M0042 representation hypothesis gains partial support (the
+repaired card set moved case 26 from 0/5 to 2/5 correct and its modal from
+`partial` to `correct`), but it is not consistent enough to promote, and the
+global net must not be read as a treatment effect. No criterion or rule was
+changed after results; E2 is closed; no E2b was created. The next transition
+(B2 vs B2+ gate, or the answerer/composition line) is a user decision; T3
+remains blocked until a gate demonstrates analytical contribution.

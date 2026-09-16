@@ -219,3 +219,46 @@ far above both (26/30), so on this substrate the remaining gap is not explained
 by context organization alone. Per the frozen contract this is a **mixed
 result**: it neither kills the phase nor authorizes E2; the paired ledger above
 is the basis for the user's E2 decision.
+
+## 11. E2 — controlled M0042 repair (pre-registration, frozen before execution)
+
+Authorized 2026-09-16, after E1 (§10): cards improved atom delivery but not
+answers (net −2) and the literal kill gate was false. E2 is a **mechanistic
+repair ablation**, not a retrofit of E1.
+
+**Hypothesis**: the case-26 error stems from the representation/selection of
+M0042 (a payload candidate with zero scoring segments), and a controlled repair
+can improve the answer without degrading the rest.
+
+**Arms** (candidate set = the frozen `payload_ids`, order preserved; budget
+4000; everything else identical to E1: questions, prompts, temperature, model,
+judge, single batch):
+
+- `cards_v1` — evidence_cards v1 exactly as frozen (must rebuild byte-identical
+  to the E0 payloads-mode per-case sha1; asserted; harness aborts otherwise).
+- `cards_repair` — v1 **plus the no-score fallback**: for each candidate
+  memory that emits zero v1 cards, emit its first `<= 3` segments in source
+  order (exact spans with reversible offsets, first-fit by the remaining
+  budget, never truncating atoms). The fallback is a general rule, question-
+  agnostic (no gold), not a case-26 hack; on this corpus it materializes
+  **only for case 26 / M0042** (verified: `repair_changed_cases == [26]`).
+
+**N**: 5 per case-arm (E1 found 17/90 non-unanimous case-arms).
+
+**Primary metric**: strict modal. **Secondaries**: all-present, item rate,
+paired ledger (repairs/regressions). The E1 ledger is frozen at `a0edc08` and
+is neither re-run nor re-interpreted here.
+
+**Promotion gate (all four, frozen):**
+
+1. case 26 improves in strict modal;
+2. global net strict > 0;
+3. no material drop in item rate or all-present;
+4. the improvement holds in the majority of the five runs (case-26 correct in
+   `>= 3/5` repaired replicates and strictly more than the v1 arm).
+
+**Verdict classes (frozen)**: `repair promoted` (all 4); `localized repair
+only` (case 26 improved or majority holds but the global net is `<= 0`);
+`M0042 hypothesis not supported` (case 26 does not improve) — in which case the
+next target is the answerer/composition, since `complete = 26/30` showed the
+evidence exists.

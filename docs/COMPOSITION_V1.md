@@ -161,3 +161,61 @@ iterations.
 Fact-kind histogram (gold): number 70, date 25, comparison 22, update 13,
 interval 11, negation 7. Fixture regeneration is byte-identical; `--verify`
 cross-checks fixture→snapshot→tape with 0 failures.
+
+## 10. E1 execution record (registered verbatim, no criterion re-fit)
+
+Run `eval/results/composition_u4_e1` (harness commit `371037b`; fixture sha1
+`24b390955b228bbfad5150bc7412ca67c6ae4cc5`; single batch, model
+`deepseek-v4-flash`, judge `deepseek-v4-flash`, N=3, flips N=5 on the 18 cases
+whose precise↔cards modal diverged). Raw answers and judge reasons preserved in
+`answers.jsonl` (sha1 `4dca1c6e…`), contexts in `contexts.jsonl`, per-case atom
+audit in `atoms.jsonl`, paired ledger in `paired_ledger.jsonl`, summary in
+`e1_summary.json` (sha1 `8065e095…`) + `summary.md`; `run_manifest.json` sha1
+`e61201b9…`. Precise contexts were asserted byte-equal to the fixture
+(`context_sha1`) before any call; card lines re-validated against the source
+(0 integrity failures).
+
+**Atom coverage (deterministic, reported separately):**
+
+| arm | item facts present | rate | all-present cases | chars range |
+|---|---:|---:|---:|---|
+| complete | 247/249 | 0.992 | 29/30 | 2287–89664 |
+| precise | 138/249 | 0.554 | 7/30 | 4000–4022 |
+| cards | 200/249 | 0.803 | 15/30 | 273–2812 |
+
+**Strict accuracy (modal of replicates; `partial` ≠ correct):**
+
+| arm | correct | partial | incorrect |
+|---|---:|---:|---:|
+| complete | 26/30 | 1 | 3 |
+| precise | 13/30 | 1 | 16 |
+| cards | 11/30 | 2 | 17 |
+
+**Paired ledger, cards vs precise (the frozen comparison):**
+
+- classes: `repaired 7`, `regressed 9`, `stayed_correct 4`, `stayed_incorrect 10`
+- **net = −2** (cards 11 vs precise 13); changed cases: repairs 20, 25, 28, 29,
+  30, 32, 41; regressions 12, 13, 14, 22, 24, 27, 31, 37, 40.
+- secondary, complete vs precise: `repaired 16`, `regressed 3`, **net +13**
+  (unbudgeted ceiling arm; not a budget-comparable claim).
+- identical-context oscillation: 17 of 90 case-arms non-unanimous on this
+  substrate/batch.
+
+**Kill gate (literal §5):** cards ≤ precise on atoms → **False** (cards strictly
+beat on both atom-rate and all-present); cards beat precise on answers →
+**False** (net −2). Kill = False ⇒ per §5 the paired ledger is presented before
+any E2 decision; **no E2 was run** and no criterion was changed after results.
+
+**Case 26 / M0042 audit (no repair applied):** M0042 is a control-arm payload
+candidate, not an E1 required memory; it emitted no card in E0 payloads mode
+and the gap is carried unchanged to E2. In E1 the case-26 cards arm covers
+M0013 3/3 and M0040 1/1 in 649 chars (all-present true; precise all-present
+false at 4006 chars).
+
+**Honest reading:** cards converted more of the needed facts into the context
+(0.554 → 0.803 item rate; all-present 7 → 15) but did **not** convert that into
+better answers at equal budget (net −2); the unbudgeted `complete` arm scored
+far above both (26/30), so on this substrate the remaining gap is not explained
+by context organization alone. Per the frozen contract this is a **mixed
+result**: it neither kills the phase nor authorizes E2; the paired ledger above
+is the basis for the user's E2 decision.

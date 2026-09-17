@@ -309,3 +309,51 @@ global net must not be read as a treatment effect. No criterion or rule was
 changed after results; E2 is closed; no E2b was created. The next transition
 (B2 vs B2+ gate, or the answerer/composition line) is a user decision; T3
 remains blocked until a gate demonstrates analytical contribution.
+
+## 13. E5 — answerer/composition decomposition (pre-registration)
+
+Authorized 2026-09-17 after the B2 vs B2+ gate closed as "provenance layer
+only" (T3 blocked) and the user selected the answerer/composition line.
+
+**Motivation (frozen offline decomposition of E1, no re-fit):** among the 15
+E1 cards-arm cases with all required atoms present, strict modal was 9/15,
+and in 4 of them (cases 12, 13, 17, 22) the unbudgeted `complete` arm was
+correct while cards was not — a composition/answerer residual **conditional
+on complete delivery**; the other 15 cases (atoms incomplete) scored 2/15 —
+a delivery residual. E5 separates the two levers under identical budgets.
+
+**Substrate:** the frozen composition_u4 fixture (sha1
+`24b390955b228bbfad5150bc7412ca67c6ae4cc5`) and its candidate sets
+(`payload_ids`); E1/E2 artifacts stay frozen and are not re-interpreted.
+
+**Arms (same questions, order, prompts, temperature, model, judge, batch,
+N=5; calls/query equal in all arms; only the context or the instruction
+differs):**
+
+- `cards_v1` (control) — evidence_cards v1 contexts over `payload_ids`,
+  byte-identical to the E0 payloads-mode sha1 (asserted).
+- `scaffold` (primary experimental) — **identical context** to the control,
+  plus a frozen composition instruction appended to the question (single
+  call, no extra LLM): "First identify the facts needed, then compute, then
+  answer in one short sentence. Show the computation."
+- `atom_complete` (secondary, delivery lever) — cards built with a higher
+  per-memory cap (up to 6 scored segments + the no-score fallback), selected
+  **only from question/token scores** (no gold; guard 3), to push atom
+  delivery toward completeness inside the same 4000-char budget.
+
+**Metrics and gate (frozen):**
+
+- Primary: paired `scaffold` vs `cards_v1` strict modal, net ≥ +3 **and**
+  above the measured identical-context floor on this fixture (N=5).
+- Secondary: paired `atom_complete` vs `cards_v1` strict modal (delivery
+  lever) and the all-present conditional table; `qualification` is not in
+  scope here.
+- Guards: control contexts byte-identical to E0; determinism; provenance
+  100% on rendered atoms; budget ≤ 4000; calls/query equal.
+- Interpretation (frozen): if `scaffold` fails and `atom_complete` fails,
+  the composition/answerer hypothesis is unsupported on this substrate and
+  the honest path is consolidation (provenance layer + write-up), not a new
+  mechanism.
+
+**Non-goals:** no change to the fixture, E1/E2 artifacts, trilepsia T1,
+graph/delivery defaults; no new substrate; no tuning after results.

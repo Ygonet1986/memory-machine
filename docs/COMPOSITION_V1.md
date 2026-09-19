@@ -357,3 +357,39 @@ differs):**
 
 **Non-goals:** no change to the fixture, E1/E2 artifacts, trilepsia T1,
 graph/delivery defaults; no new substrate; no tuning after results.
+
+## 14. E5 execution record (registered verbatim, no criterion re-fit)
+
+Run `eval/results/composition_u4_e5` (harness `9d9a235`, pre-registration
+§13; fixture sha1 `24b390955b228bbfad5150bc7412ca67c6ae4cc5`; N=5;
+model/judge `deepseek-v4-flash`; 450/450). Operational incident: repeated
+urllib connection hangs (the known mode) plus one host reboot that cleared
+`/tmp`; the run was resumed from written rows each time by a supervisor
+(threshold 300 s idle) — resume-safe by design, protocol unchanged. Raw
+answers: `answers.jsonl` (sha1 `c19fb774…`); summary `e5_summary.json` (sha1
+`f6bf6204…`) + `summary.md` (sha1 `5b791ea4…`).
+
+**Results (paired vs the `cards_v1` control, modal of 5):**
+
+| arm | classes | net |
+|---|---|---:|
+| `scaffold` (same context + composition instruction) | repaired 3, regressed 0, stayed_correct 9, stayed_incorrect 18 | **+3** |
+| `atom_complete` (≤6 scored segments + fallback, question-only) | repaired 4, regressed 0, stayed_correct 9, stayed_incorrect 17 | **+4** |
+
+- atom retention: control 0.7107 → `atom_complete` 0.7758; guards green
+  (provenance 0, deterministic, budget ok).
+- measured identical-context floor: **0.20** (6/30); effective floor
+  `max(0.07, 0.20) = 0.20`.
+
+**Gate (frozen §13):** primary requires `net ≥ +3` **and** `net > 0.20 × 30 =
+6`. Both levers reach `net ≥ +3` with **zero regressions**, but neither
+exceeds the measured floor ⇒ **primary false** ⇒ frozen verdict: **both
+levers fail — consolidation (provenance layer), no new mechanism**.
+
+**Honest reading:** there is a directional signal in both levers (3 and 4
+paired repairs, no regressions, and the delivery arm raises atom retention),
+but on this substrate/model the identical-context oscillation (20% of cases)
+is larger than the effect, so under the pre-registered bar neither lever is
+distinguishable from noise. No criterion was changed after results; the full
+ledger and the direction of the effect are preserved for the record. The
+consolidation path (§13 non-goal) is the honest next state for the E-line.

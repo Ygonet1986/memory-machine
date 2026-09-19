@@ -1,0 +1,49 @@
+{
+  "fixture": "/Users/igorcoutrimlacerda/memory-machine/eval/fixtures/composition_u4",
+  "fixture_sha1": "24b390955b228bbfad5150bc7412ca67c6ae4cc5",
+  "arms": [
+    "cards_v1",
+    "scaffold",
+    "atom_complete"
+  ],
+  "n": 5,
+  "model": "deepseek-v4-flash",
+  "judge_model": "deepseek-v4-flash",
+  "scaffold_vs_control": {
+    "counts": {
+      "stayed_incorrect": 18,
+      "stayed_correct": 9,
+      "repaired": 3
+    },
+    "net": 3
+  },
+  "atom_complete_vs_control": {
+    "counts": {
+      "repaired": 4,
+      "stayed_incorrect": 17,
+      "stayed_correct": 9
+    },
+    "net": 4
+  },
+  "gate": {
+    "primary_pass": false,
+    "secondary_pair": {
+      "counts": {
+        "repaired": 4,
+        "stayed_incorrect": 17,
+        "stayed_correct": 9
+      },
+      "net": 4
+    },
+    "measured_floor": 0.2,
+    "effective_floor": 0.2,
+    "atoms": {
+      "cards_v1": 0.7107,
+      "atom_complete": 0.7758
+    },
+    "provenance_failures": 0,
+    "deterministic": true,
+    "budget_ok": true,
+    "verdict": "both levers fail -> consolidation (provenance layer), no new mechanism"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "abstain_cases": 10,
+  "cases": 80,
+  "cases_per_scenario": 10,
+  "cases_sha256": "4d00c2bfc5115cd357444218508335a870df12aa87cc476dcce003dd93ed29ff",
+  "counts_by_scenario": {
+    "contradiction": 10,
+    "current_state": 10,
+    "distractor_volume": 10,
+    "multi_memory": 10,
+    "no_answer": 10,
+    "origin": 10,
+    "related_context": 10,
+    "supersession": 10
+  },
+  "generator": "gen_admission_portfolio_v1.py",
+  "generator_version": 1,
+  "gold_occurrences": 110,
+  "records": 830,
+  "scenarios": [
+    "current_state",
+    "supersession",
+    "origin",
+    "contradiction",
+    "related_context",
+    "multi_memory",
+    "no_answer",
+    "distractor_volume"
+  ]
+}

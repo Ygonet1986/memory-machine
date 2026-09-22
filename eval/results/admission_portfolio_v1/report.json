@@ -1,0 +1,3282 @@
+{
+  "cases": 80,
+  "determinism": {
+    "identical": true,
+    "run1": "4c586d1d1dfec4f8de8c41916a231fe92461015239c55eef92de06c958d77530",
+    "run2": "4c586d1d1dfec4f8de8c41916a231fe92461015239c55eef92de06c958d77530"
+  },
+  "fixture": "/Users/igorcoutrimlacerda/memory-machine/eval/fixtures/admission_portfolio_v1",
+  "gates": {
+    "G1_availability": true,
+    "G2_precision": true,
+    "G3_beats_p3v4": false,
+    "G4_targeted_wins": false,
+    "G5_slots_are_the_cause": false,
+    "G6_cap_and_budget": true,
+    "G7_determinism": true,
+    "all_pass": false
+  },
+  "gold_occurrences": 110,
+  "per_case": [
+    {
+      "case_id": "P1-01",
+      "expectation": "deliver",
+      "gold": [
+        "P1-01-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P1-01-R06",
+            "P1-01-R05"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P1-01-R06"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P1-01-R06"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P1-01-R06",
+            "P1-01-R05"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P1-01-R06",
+            "P1-01-R05"
+          ]
+        }
+      },
+      "scenario": "current_state"
+    },
+    {
+      "case_id": "P1-02",
+      "expectation": "deliver",
+      "gold": [
+        "P1-02-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P1-02-R06",
+            "P1-02-R05"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P1-02-R06"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P1-02-R06"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P1-02-R06",
+            "P1-02-R05"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P1-02-R06",
+            "P1-02-R05"
+          ]
+        }
+      },
+      "scenario": "current_state"
+    },
+    {
+      "case_id": "P1-03",
+      "expectation": "deliver",
+      "gold": [
+        "P1-03-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P1-03-R06",
+            "P1-03-R05"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P1-03-R06"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P1-03-R06"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P1-03-R06",
+            "P1-03-R05"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P1-03-R06",
+            "P1-03-R05"
+          ]
+        }
+      },
+      "scenario": "current_state"
+    },
+    {
+      "case_id": "P1-04",
+      "expectation": "deliver",
+      "gold": [
+        "P1-04-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P1-04-R06",
+            "P1-04-R05"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P1-04-R06"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P1-04-R06"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P1-04-R06",
+            "P1-04-R05"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P1-04-R06",
+            "P1-04-R05"
+          ]
+        }
+      },
+      "scenario": "current_state"
+    },
+    {
+      "case_id": "P1-05",
+      "expectation": "deliver",
+      "gold": [
+        "P1-05-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P1-05-R06",
+            "P1-05-R05"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P1-05-R06"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P1-05-R06"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P1-05-R06",
+            "P1-05-R05"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P1-05-R06",
+            "P1-05-R05"
+          ]
+        }
+      },
+      "scenario": "current_state"
+    },
+    {
+      "case_id": "P1-06",
+      "expectation": "deliver",
+      "gold": [
+        "P1-06-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P1-06-R06",
+            "P1-06-R05"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P1-06-R06"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P1-06-R06"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P1-06-R06",
+            "P1-06-R05"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P1-06-R06",
+            "P1-06-R05"
+          ]
+        }
+      },
+      "scenario": "current_state"
+    },
+    {
+      "case_id": "P1-07",
+      "expectation": "deliver",
+      "gold": [
+        "P1-07-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P1-07-R06",
+            "P1-07-R05"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P1-07-R06"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P1-07-R06"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P1-07-R06",
+            "P1-07-R05"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P1-07-R06",
+            "P1-07-R05"
+          ]
+        }
+      },
+      "scenario": "current_state"
+    },
+    {
+      "case_id": "P1-08",
+      "expectation": "deliver",
+      "gold": [
+        "P1-08-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P1-08-R06",
+            "P1-08-R05"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P1-08-R06"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P1-08-R06"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P1-08-R06",
+            "P1-08-R05"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P1-08-R06",
+            "P1-08-R05"
+          ]
+        }
+      },
+      "scenario": "current_state"
+    },
+    {
+      "case_id": "P1-09",
+      "expectation": "deliver",
+      "gold": [
+        "P1-09-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P1-09-R06",
+            "P1-09-R05"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P1-09-R06"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P1-09-R06"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P1-09-R06",
+            "P1-09-R05"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P1-09-R06",
+            "P1-09-R05"
+          ]
+        }
+      },
+      "scenario": "current_state"
+    },
+    {
+      "case_id": "P1-10",
+      "expectation": "deliver",
+      "gold": [
+        "P1-10-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P1-10-R06",
+            "P1-10-R05"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P1-10-R06"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P1-10-R06"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P1-10-R06",
+            "P1-10-R05"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P1-10-R06",
+            "P1-10-R05"
+          ]
+        }
+      },
+      "scenario": "current_state"
+    },
+    {
+      "case_id": "P2-01",
+      "expectation": "deliver",
+      "gold": [
+        "P2-01-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P2-01-R05"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P2-01-R05"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P2-01-R06"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P2-01-R06"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P2-01-R06"
+          ]
+        }
+      },
+      "scenario": "supersession"
+    },
+    {
+      "case_id": "P2-02",
+      "expectation": "deliver",
+      "gold": [
+        "P2-02-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P2-02-R05"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P2-02-R05"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P2-02-R06"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P2-02-R06"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P2-02-R06"
+          ]
+        }
+      },
+      "scenario": "supersession"
+    },
+    {
+      "case_id": "P2-03",
+      "expectation": "deliver",
+      "gold": [
+        "P2-03-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P2-03-R05"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P2-03-R05"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P2-03-R06"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P2-03-R06"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P2-03-R06"
+          ]
+        }
+      },
+      "scenario": "supersession"
+    },
+    {
+      "case_id": "P2-04",
+      "expectation": "deliver",
+      "gold": [
+        "P2-04-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P2-04-R05"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P2-04-R05"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P2-04-R06"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P2-04-R06"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P2-04-R06"
+          ]
+        }
+      },
+      "scenario": "supersession"
+    },
+    {
+      "case_id": "P2-05",
+      "expectation": "deliver",
+      "gold": [
+        "P2-05-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P2-05-R05"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P2-05-R05"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P2-05-R06"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P2-05-R06"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P2-05-R06"
+          ]
+        }
+      },
+      "scenario": "supersession"
+    },
+    {
+      "case_id": "P2-06",
+      "expectation": "deliver",
+      "gold": [
+        "P2-06-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P2-06-R05"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P2-06-R05"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P2-06-R06"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P2-06-R06"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P2-06-R06"
+          ]
+        }
+      },
+      "scenario": "supersession"
+    },
+    {
+      "case_id": "P2-07",
+      "expectation": "deliver",
+      "gold": [
+        "P2-07-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P2-07-R05"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P2-07-R05"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P2-07-R06"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P2-07-R06"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P2-07-R06"
+          ]
+        }
+      },
+      "scenario": "supersession"
+    },
+    {
+      "case_id": "P2-08",
+      "expectation": "deliver",
+      "gold": [
+        "P2-08-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P2-08-R05"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P2-08-R05"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P2-08-R06"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P2-08-R06"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P2-08-R06"
+          ]
+        }
+      },
+      "scenario": "supersession"
+    },
+    {
+      "case_id": "P2-09",
+      "expectation": "deliver",
+      "gold": [
+        "P2-09-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P2-09-R05"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P2-09-R05"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P2-09-R06"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P2-09-R06"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P2-09-R06"
+          ]
+        }
+      },
+      "scenario": "supersession"
+    },
+    {
+      "case_id": "P2-10",
+      "expectation": "deliver",
+      "gold": [
+        "P2-10-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P2-10-R05"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P2-10-R05"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P2-10-R06"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P2-10-R06"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P2-10-R06"
+          ]
+        }
+      },
+      "scenario": "supersession"
+    },
+    {
+      "case_id": "P3-01",
+      "expectation": "deliver",
+      "gold": [
+        "P3-01-R05",
+        "P3-01-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P3-01-R06",
+            "P3-01-R05"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P3-01-R06",
+            "P3-01-R05"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P3-01-R05",
+            "P3-01-R06"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P3-01-R05",
+            "P3-01-R06"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P3-01-R06",
+            "P3-01-R05"
+          ]
+        }
+      },
+      "scenario": "origin"
+    },
+    {
+      "case_id": "P3-02",
+      "expectation": "deliver",
+      "gold": [
+        "P3-02-R05",
+        "P3-02-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P3-02-R06",
+            "P3-02-R05"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P3-02-R06"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P3-02-R05",
+            "P3-02-R06"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P3-02-R05",
+            "P3-02-R06"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P3-02-R06",
+            "P3-02-R05"
+          ]
+        }
+      },
+      "scenario": "origin"
+    },
+    {
+      "case_id": "P3-03",
+      "expectation": "deliver",
+      "gold": [
+        "P3-03-R05",
+        "P3-03-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P3-03-R06",
+            "P3-03-R05"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P3-03-R06"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P3-03-R05",
+            "P3-03-R06"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P3-03-R05",
+            "P3-03-R06"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P3-03-R06",
+            "P3-03-R05"
+          ]
+        }
+      },
+      "scenario": "origin"
+    },
+    {
+      "case_id": "P3-04",
+      "expectation": "deliver",
+      "gold": [
+        "P3-04-R05",
+        "P3-04-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P3-04-R06",
+            "P3-04-R05"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P3-04-R06"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P3-04-R05",
+            "P3-04-R06"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P3-04-R05",
+            "P3-04-R06"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P3-04-R06",
+            "P3-04-R05"
+          ]
+        }
+      },
+      "scenario": "origin"
+    },
+    {
+      "case_id": "P3-05",
+      "expectation": "deliver",
+      "gold": [
+        "P3-05-R05",
+        "P3-05-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P3-05-R06",
+            "P3-05-R05"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P3-05-R06"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P3-05-R05",
+            "P3-05-R06"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P3-05-R05",
+            "P3-05-R06"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P3-05-R06",
+            "P3-05-R05"
+          ]
+        }
+      },
+      "scenario": "origin"
+    },
+    {
+      "case_id": "P3-06",
+      "expectation": "deliver",
+      "gold": [
+        "P3-06-R05",
+        "P3-06-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P3-06-R06",
+            "P3-06-R05"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P3-06-R06",
+            "P3-06-R05"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P3-06-R05",
+            "P3-06-R06"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P3-06-R05",
+            "P3-06-R06"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P3-06-R06",
+            "P3-06-R05"
+          ]
+        }
+      },
+      "scenario": "origin"
+    },
+    {
+      "case_id": "P3-07",
+      "expectation": "deliver",
+      "gold": [
+        "P3-07-R05",
+        "P3-07-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P3-07-R06",
+            "P3-07-R05"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P3-07-R06"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P3-07-R05",
+            "P3-07-R06"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P3-07-R05",
+            "P3-07-R06"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P3-07-R06",
+            "P3-07-R05"
+          ]
+        }
+      },
+      "scenario": "origin"
+    },
+    {
+      "case_id": "P3-08",
+      "expectation": "deliver",
+      "gold": [
+        "P3-08-R05",
+        "P3-08-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P3-08-R06",
+            "P3-08-R05"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P3-08-R06"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P3-08-R05",
+            "P3-08-R06"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P3-08-R05",
+            "P3-08-R06"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P3-08-R06",
+            "P3-08-R05"
+          ]
+        }
+      },
+      "scenario": "origin"
+    },
+    {
+      "case_id": "P3-09",
+      "expectation": "deliver",
+      "gold": [
+        "P3-09-R05",
+        "P3-09-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P3-09-R06",
+            "P3-09-R05"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P3-09-R06"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P3-09-R05",
+            "P3-09-R06"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P3-09-R05",
+            "P3-09-R06"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P3-09-R06",
+            "P3-09-R05"
+          ]
+        }
+      },
+      "scenario": "origin"
+    },
+    {
+      "case_id": "P3-10",
+      "expectation": "deliver",
+      "gold": [
+        "P3-10-R05",
+        "P3-10-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P3-10-R06",
+            "P3-10-R05"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P3-10-R06"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P3-10-R05",
+            "P3-10-R06"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P3-10-R05",
+            "P3-10-R06"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P3-10-R06",
+            "P3-10-R05"
+          ]
+        }
+      },
+      "scenario": "origin"
+    },
+    {
+      "case_id": "P4-01",
+      "expectation": "deliver",
+      "gold": [
+        "P4-01-R05",
+        "P4-01-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P4-01-R05",
+            "P4-01-R06"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P4-01-R05",
+            "P4-01-R06"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P4-01-R06",
+            "P4-01-R05"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P4-01-R06",
+            "P4-01-R05"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P4-01-R05",
+            "P4-01-R06"
+          ]
+        }
+      },
+      "scenario": "contradiction"
+    },
+    {
+      "case_id": "P4-02",
+      "expectation": "deliver",
+      "gold": [
+        "P4-02-R05",
+        "P4-02-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P4-02-R05",
+            "P4-02-R06"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P4-02-R05",
+            "P4-02-R06"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P4-02-R06",
+            "P4-02-R05"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P4-02-R06",
+            "P4-02-R05"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P4-02-R05",
+            "P4-02-R06"
+          ]
+        }
+      },
+      "scenario": "contradiction"
+    },
+    {
+      "case_id": "P4-03",
+      "expectation": "deliver",
+      "gold": [
+        "P4-03-R05",
+        "P4-03-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P4-03-R05",
+            "P4-03-R06"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P4-03-R05",
+            "P4-03-R06"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P4-03-R06",
+            "P4-03-R05"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P4-03-R06",
+            "P4-03-R05"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P4-03-R05",
+            "P4-03-R06"
+          ]
+        }
+      },
+      "scenario": "contradiction"
+    },
+    {
+      "case_id": "P4-04",
+      "expectation": "deliver",
+      "gold": [
+        "P4-04-R05",
+        "P4-04-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P4-04-R05",
+            "P4-04-R06"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P4-04-R05",
+            "P4-04-R06"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P4-04-R06",
+            "P4-04-R05"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P4-04-R06",
+            "P4-04-R05"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P4-04-R05",
+            "P4-04-R06"
+          ]
+        }
+      },
+      "scenario": "contradiction"
+    },
+    {
+      "case_id": "P4-05",
+      "expectation": "deliver",
+      "gold": [
+        "P4-05-R05",
+        "P4-05-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P4-05-R05",
+            "P4-05-R06"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P4-05-R05",
+            "P4-05-R06"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P4-05-R06",
+            "P4-05-R05"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P4-05-R06",
+            "P4-05-R05"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P4-05-R05",
+            "P4-05-R06"
+          ]
+        }
+      },
+      "scenario": "contradiction"
+    },
+    {
+      "case_id": "P4-06",
+      "expectation": "deliver",
+      "gold": [
+        "P4-06-R05",
+        "P4-06-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P4-06-R05",
+            "P4-06-R06"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P4-06-R05",
+            "P4-06-R06"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P4-06-R06",
+            "P4-06-R05"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P4-06-R06",
+            "P4-06-R05"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P4-06-R05",
+            "P4-06-R06"
+          ]
+        }
+      },
+      "scenario": "contradiction"
+    },
+    {
+      "case_id": "P4-07",
+      "expectation": "deliver",
+      "gold": [
+        "P4-07-R05",
+        "P4-07-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P4-07-R05",
+            "P4-07-R06"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P4-07-R05",
+            "P4-07-R06"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P4-07-R06",
+            "P4-07-R05"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P4-07-R06",
+            "P4-07-R05"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P4-07-R05",
+            "P4-07-R06"
+          ]
+        }
+      },
+      "scenario": "contradiction"
+    },
+    {
+      "case_id": "P4-08",
+      "expectation": "deliver",
+      "gold": [
+        "P4-08-R05",
+        "P4-08-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P4-08-R05",
+            "P4-08-R06"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P4-08-R05",
+            "P4-08-R06"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P4-08-R06",
+            "P4-08-R05"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P4-08-R06",
+            "P4-08-R05"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P4-08-R05",
+            "P4-08-R06"
+          ]
+        }
+      },
+      "scenario": "contradiction"
+    },
+    {
+      "case_id": "P4-09",
+      "expectation": "deliver",
+      "gold": [
+        "P4-09-R05",
+        "P4-09-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P4-09-R05",
+            "P4-09-R06"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P4-09-R05",
+            "P4-09-R06"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P4-09-R06",
+            "P4-09-R05"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P4-09-R06",
+            "P4-09-R05"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P4-09-R05",
+            "P4-09-R06"
+          ]
+        }
+      },
+      "scenario": "contradiction"
+    },
+    {
+      "case_id": "P4-10",
+      "expectation": "deliver",
+      "gold": [
+        "P4-10-R05",
+        "P4-10-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P4-10-R05",
+            "P4-10-R06"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P4-10-R05",
+            "P4-10-R06"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P4-10-R06",
+            "P4-10-R05"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P4-10-R06",
+            "P4-10-R05"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P4-10-R05",
+            "P4-10-R06"
+          ]
+        }
+      },
+      "scenario": "contradiction"
+    },
+    {
+      "case_id": "P5-01",
+      "expectation": "deliver",
+      "gold": [
+        "P5-01-R05",
+        "P5-01-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P5-01-R05"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P5-01-R05"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P5-01-R05"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P5-01-R05"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P5-01-R05"
+          ]
+        }
+      },
+      "scenario": "related_context"
+    },
+    {
+      "case_id": "P5-02",
+      "expectation": "deliver",
+      "gold": [
+        "P5-02-R05",
+        "P5-02-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P5-02-R05"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P5-02-R05"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P5-02-R05"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P5-02-R05"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P5-02-R05"
+          ]
+        }
+      },
+      "scenario": "related_context"
+    },
+    {
+      "case_id": "P5-03",
+      "expectation": "deliver",
+      "gold": [
+        "P5-03-R05",
+        "P5-03-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P5-03-R05"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P5-03-R05"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P5-03-R05"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P5-03-R05"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P5-03-R05"
+          ]
+        }
+      },
+      "scenario": "related_context"
+    },
+    {
+      "case_id": "P5-04",
+      "expectation": "deliver",
+      "gold": [
+        "P5-04-R05",
+        "P5-04-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P5-04-R05"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P5-04-R05"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P5-04-R05"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P5-04-R05"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P5-04-R05"
+          ]
+        }
+      },
+      "scenario": "related_context"
+    },
+    {
+      "case_id": "P5-05",
+      "expectation": "deliver",
+      "gold": [
+        "P5-05-R05",
+        "P5-05-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P5-05-R05"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P5-05-R05"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P5-05-R05"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P5-05-R05"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P5-05-R05"
+          ]
+        }
+      },
+      "scenario": "related_context"
+    },
+    {
+      "case_id": "P5-06",
+      "expectation": "deliver",
+      "gold": [
+        "P5-06-R05",
+        "P5-06-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P5-06-R05"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P5-06-R05"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P5-06-R05"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P5-06-R05"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P5-06-R05"
+          ]
+        }
+      },
+      "scenario": "related_context"
+    },
+    {
+      "case_id": "P5-07",
+      "expectation": "deliver",
+      "gold": [
+        "P5-07-R05",
+        "P5-07-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P5-07-R05"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P5-07-R05"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P5-07-R05"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P5-07-R05"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P5-07-R05"
+          ]
+        }
+      },
+      "scenario": "related_context"
+    },
+    {
+      "case_id": "P5-08",
+      "expectation": "deliver",
+      "gold": [
+        "P5-08-R05",
+        "P5-08-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P5-08-R05"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P5-08-R05"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P5-08-R05"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P5-08-R05"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P5-08-R05"
+          ]
+        }
+      },
+      "scenario": "related_context"
+    },
+    {
+      "case_id": "P5-09",
+      "expectation": "deliver",
+      "gold": [
+        "P5-09-R05",
+        "P5-09-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P5-09-R05"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P5-09-R05"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P5-09-R05"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P5-09-R05"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P5-09-R05"
+          ]
+        }
+      },
+      "scenario": "related_context"
+    },
+    {
+      "case_id": "P5-10",
+      "expectation": "deliver",
+      "gold": [
+        "P5-10-R05",
+        "P5-10-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P5-10-R05"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P5-10-R05"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P5-10-R05"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P5-10-R05"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P5-10-R05"
+          ]
+        }
+      },
+      "scenario": "related_context"
+    },
+    {
+      "case_id": "P6-01",
+      "expectation": "deliver",
+      "gold": [
+        "P6-01-R05",
+        "P6-01-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P6-01-R05",
+            "P6-01-R06"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P6-01-R05",
+            "P6-01-R06"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P6-01-R06",
+            "P6-01-R05"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P6-01-R06",
+            "P6-01-R05"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P6-01-R05",
+            "P6-01-R06"
+          ]
+        }
+      },
+      "scenario": "multi_memory"
+    },
+    {
+      "case_id": "P6-02",
+      "expectation": "deliver",
+      "gold": [
+        "P6-02-R05",
+        "P6-02-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P6-02-R05",
+            "P6-02-R06"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P6-02-R05",
+            "P6-02-R06"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P6-02-R06",
+            "P6-02-R05"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P6-02-R06",
+            "P6-02-R05"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P6-02-R05",
+            "P6-02-R06"
+          ]
+        }
+      },
+      "scenario": "multi_memory"
+    },
+    {
+      "case_id": "P6-03",
+      "expectation": "deliver",
+      "gold": [
+        "P6-03-R05",
+        "P6-03-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P6-03-R05",
+            "P6-03-R06"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P6-03-R05",
+            "P6-03-R06"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P6-03-R06",
+            "P6-03-R05"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P6-03-R06",
+            "P6-03-R05"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P6-03-R05",
+            "P6-03-R06"
+          ]
+        }
+      },
+      "scenario": "multi_memory"
+    },
+    {
+      "case_id": "P6-04",
+      "expectation": "deliver",
+      "gold": [
+        "P6-04-R05",
+        "P6-04-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P6-04-R05",
+            "P6-04-R06"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P6-04-R05",
+            "P6-04-R06"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P6-04-R06",
+            "P6-04-R05"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P6-04-R06",
+            "P6-04-R05"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P6-04-R05",
+            "P6-04-R06"
+          ]
+        }
+      },
+      "scenario": "multi_memory"
+    },
+    {
+      "case_id": "P6-05",
+      "expectation": "deliver",
+      "gold": [
+        "P6-05-R05",
+        "P6-05-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P6-05-R05",
+            "P6-05-R06"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P6-05-R05",
+            "P6-05-R06"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P6-05-R06",
+            "P6-05-R05"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P6-05-R06",
+            "P6-05-R05"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P6-05-R05",
+            "P6-05-R06"
+          ]
+        }
+      },
+      "scenario": "multi_memory"
+    },
+    {
+      "case_id": "P6-06",
+      "expectation": "deliver",
+      "gold": [
+        "P6-06-R05",
+        "P6-06-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P6-06-R05",
+            "P6-06-R06"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P6-06-R05",
+            "P6-06-R06"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P6-06-R06",
+            "P6-06-R05"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P6-06-R06",
+            "P6-06-R05"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P6-06-R05",
+            "P6-06-R06"
+          ]
+        }
+      },
+      "scenario": "multi_memory"
+    },
+    {
+      "case_id": "P6-07",
+      "expectation": "deliver",
+      "gold": [
+        "P6-07-R05",
+        "P6-07-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P6-07-R05",
+            "P6-07-R06"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P6-07-R05",
+            "P6-07-R06"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P6-07-R06",
+            "P6-07-R05"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P6-07-R06",
+            "P6-07-R05"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P6-07-R05",
+            "P6-07-R06"
+          ]
+        }
+      },
+      "scenario": "multi_memory"
+    },
+    {
+      "case_id": "P6-08",
+      "expectation": "deliver",
+      "gold": [
+        "P6-08-R05",
+        "P6-08-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P6-08-R05",
+            "P6-08-R06"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P6-08-R05",
+            "P6-08-R06"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P6-08-R06",
+            "P6-08-R05"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P6-08-R06",
+            "P6-08-R05"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P6-08-R05",
+            "P6-08-R06"
+          ]
+        }
+      },
+      "scenario": "multi_memory"
+    },
+    {
+      "case_id": "P6-09",
+      "expectation": "deliver",
+      "gold": [
+        "P6-09-R05",
+        "P6-09-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P6-09-R05",
+            "P6-09-R06"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P6-09-R05",
+            "P6-09-R06"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P6-09-R06",
+            "P6-09-R05"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P6-09-R06",
+            "P6-09-R05"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P6-09-R05",
+            "P6-09-R06"
+          ]
+        }
+      },
+      "scenario": "multi_memory"
+    },
+    {
+      "case_id": "P6-10",
+      "expectation": "deliver",
+      "gold": [
+        "P6-10-R05",
+        "P6-10-R06"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P6-10-R05",
+            "P6-10-R06"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P6-10-R05",
+            "P6-10-R06"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P6-10-R06",
+            "P6-10-R05"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P6-10-R06",
+            "P6-10-R05"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P6-10-R05",
+            "P6-10-R06"
+          ]
+        }
+      },
+      "scenario": "multi_memory"
+    },
+    {
+      "case_id": "P7-01",
+      "expectation": "abstain",
+      "gold": [],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P7-01-R01",
+            "P7-01-R02",
+            "P7-01-R03",
+            "P7-01-R04",
+            "P7-01-R05"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P7-01-R01",
+            "P7-01-R02",
+            "P7-01-R03",
+            "P7-01-R04",
+            "P7-01-R05"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P7-01-R05",
+            "P7-01-R01"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P7-01-R05",
+            "P7-01-R01",
+            "P7-01-R02"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P7-01-R01",
+            "P7-01-R02",
+            "P7-01-R03"
+          ]
+        }
+      },
+      "scenario": "no_answer"
+    },
+    {
+      "case_id": "P7-02",
+      "expectation": "abstain",
+      "gold": [],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P7-02-R01",
+            "P7-02-R02",
+            "P7-02-R03",
+            "P7-02-R04",
+            "P7-02-R05"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P7-02-R01",
+            "P7-02-R02",
+            "P7-02-R03",
+            "P7-02-R04",
+            "P7-02-R05"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P7-02-R05",
+            "P7-02-R01"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P7-02-R05",
+            "P7-02-R01",
+            "P7-02-R02"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P7-02-R01",
+            "P7-02-R02",
+            "P7-02-R03"
+          ]
+        }
+      },
+      "scenario": "no_answer"
+    },
+    {
+      "case_id": "P7-03",
+      "expectation": "abstain",
+      "gold": [],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P7-03-R01",
+            "P7-03-R02",
+            "P7-03-R03",
+            "P7-03-R04",
+            "P7-03-R05"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P7-03-R01",
+            "P7-03-R02",
+            "P7-03-R03",
+            "P7-03-R04",
+            "P7-03-R05"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P7-03-R05",
+            "P7-03-R01"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P7-03-R05",
+            "P7-03-R01",
+            "P7-03-R02"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P7-03-R01",
+            "P7-03-R02",
+            "P7-03-R03"
+          ]
+        }
+      },
+      "scenario": "no_answer"
+    },
+    {
+      "case_id": "P7-04",
+      "expectation": "abstain",
+      "gold": [],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P7-04-R01",
+            "P7-04-R02",
+            "P7-04-R03",
+            "P7-04-R04",
+            "P7-04-R05"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P7-04-R01",
+            "P7-04-R02",
+            "P7-04-R03",
+            "P7-04-R04",
+            "P7-04-R05"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P7-04-R05",
+            "P7-04-R01"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P7-04-R05",
+            "P7-04-R01",
+            "P7-04-R02"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P7-04-R01",
+            "P7-04-R02",
+            "P7-04-R03"
+          ]
+        }
+      },
+      "scenario": "no_answer"
+    },
+    {
+      "case_id": "P7-05",
+      "expectation": "abstain",
+      "gold": [],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P7-05-R01",
+            "P7-05-R02",
+            "P7-05-R03",
+            "P7-05-R04",
+            "P7-05-R05"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P7-05-R01",
+            "P7-05-R02",
+            "P7-05-R03",
+            "P7-05-R04",
+            "P7-05-R05"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P7-05-R05",
+            "P7-05-R01"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P7-05-R05",
+            "P7-05-R01",
+            "P7-05-R02"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P7-05-R01",
+            "P7-05-R02",
+            "P7-05-R03"
+          ]
+        }
+      },
+      "scenario": "no_answer"
+    },
+    {
+      "case_id": "P7-06",
+      "expectation": "abstain",
+      "gold": [],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P7-06-R01",
+            "P7-06-R02",
+            "P7-06-R03",
+            "P7-06-R04",
+            "P7-06-R05"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P7-06-R01",
+            "P7-06-R02",
+            "P7-06-R03",
+            "P7-06-R04",
+            "P7-06-R05"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P7-06-R05",
+            "P7-06-R01"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P7-06-R05",
+            "P7-06-R01",
+            "P7-06-R02"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P7-06-R01",
+            "P7-06-R02",
+            "P7-06-R03"
+          ]
+        }
+      },
+      "scenario": "no_answer"
+    },
+    {
+      "case_id": "P7-07",
+      "expectation": "abstain",
+      "gold": [],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P7-07-R01",
+            "P7-07-R02",
+            "P7-07-R03",
+            "P7-07-R04",
+            "P7-07-R05"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P7-07-R01",
+            "P7-07-R02",
+            "P7-07-R03",
+            "P7-07-R04",
+            "P7-07-R05"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P7-07-R05",
+            "P7-07-R01"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P7-07-R05",
+            "P7-07-R01",
+            "P7-07-R02"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P7-07-R01",
+            "P7-07-R02",
+            "P7-07-R03"
+          ]
+        }
+      },
+      "scenario": "no_answer"
+    },
+    {
+      "case_id": "P7-08",
+      "expectation": "abstain",
+      "gold": [],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P7-08-R01",
+            "P7-08-R02",
+            "P7-08-R03",
+            "P7-08-R04",
+            "P7-08-R05"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P7-08-R01",
+            "P7-08-R02",
+            "P7-08-R03",
+            "P7-08-R04",
+            "P7-08-R05"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P7-08-R05",
+            "P7-08-R01"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P7-08-R05",
+            "P7-08-R01",
+            "P7-08-R02"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P7-08-R01",
+            "P7-08-R02",
+            "P7-08-R03"
+          ]
+        }
+      },
+      "scenario": "no_answer"
+    },
+    {
+      "case_id": "P7-09",
+      "expectation": "abstain",
+      "gold": [],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P7-09-R01",
+            "P7-09-R02",
+            "P7-09-R03",
+            "P7-09-R04",
+            "P7-09-R05"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P7-09-R01",
+            "P7-09-R02",
+            "P7-09-R03",
+            "P7-09-R04",
+            "P7-09-R05"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P7-09-R05",
+            "P7-09-R01"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P7-09-R05",
+            "P7-09-R01",
+            "P7-09-R02"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P7-09-R01",
+            "P7-09-R02",
+            "P7-09-R03"
+          ]
+        }
+      },
+      "scenario": "no_answer"
+    },
+    {
+      "case_id": "P7-10",
+      "expectation": "abstain",
+      "gold": [],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P7-10-R01",
+            "P7-10-R02",
+            "P7-10-R03",
+            "P7-10-R04",
+            "P7-10-R05"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P7-10-R01",
+            "P7-10-R02",
+            "P7-10-R03",
+            "P7-10-R04",
+            "P7-10-R05"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P7-10-R05",
+            "P7-10-R01"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P7-10-R05",
+            "P7-10-R01",
+            "P7-10-R02"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P7-10-R01",
+            "P7-10-R02",
+            "P7-10-R03"
+          ]
+        }
+      },
+      "scenario": "no_answer"
+    },
+    {
+      "case_id": "P8-01",
+      "expectation": "deliver",
+      "gold": [
+        "P8-01-R42"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P8-01-R42"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P8-01-R42"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P8-01-R42"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P8-01-R42"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P8-01-R42"
+          ]
+        }
+      },
+      "scenario": "distractor_volume"
+    },
+    {
+      "case_id": "P8-02",
+      "expectation": "deliver",
+      "gold": [
+        "P8-02-R42"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P8-02-R42"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P8-02-R42"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P8-02-R42"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P8-02-R42"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P8-02-R42"
+          ]
+        }
+      },
+      "scenario": "distractor_volume"
+    },
+    {
+      "case_id": "P8-03",
+      "expectation": "deliver",
+      "gold": [
+        "P8-03-R42"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P8-03-R42"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P8-03-R42"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P8-03-R42"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P8-03-R42"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P8-03-R42"
+          ]
+        }
+      },
+      "scenario": "distractor_volume"
+    },
+    {
+      "case_id": "P8-04",
+      "expectation": "deliver",
+      "gold": [
+        "P8-04-R42"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P8-04-R42"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P8-04-R42"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P8-04-R42"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P8-04-R42"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P8-04-R42"
+          ]
+        }
+      },
+      "scenario": "distractor_volume"
+    },
+    {
+      "case_id": "P8-05",
+      "expectation": "deliver",
+      "gold": [
+        "P8-05-R42"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P8-05-R42"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P8-05-R42"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P8-05-R42"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P8-05-R42"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P8-05-R42"
+          ]
+        }
+      },
+      "scenario": "distractor_volume"
+    },
+    {
+      "case_id": "P8-06",
+      "expectation": "deliver",
+      "gold": [
+        "P8-06-R42"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P8-06-R42"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P8-06-R42"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P8-06-R42"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P8-06-R42"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P8-06-R42"
+          ]
+        }
+      },
+      "scenario": "distractor_volume"
+    },
+    {
+      "case_id": "P8-07",
+      "expectation": "deliver",
+      "gold": [
+        "P8-07-R42"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P8-07-R42"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P8-07-R42"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P8-07-R42"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P8-07-R42"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P8-07-R42"
+          ]
+        }
+      },
+      "scenario": "distractor_volume"
+    },
+    {
+      "case_id": "P8-08",
+      "expectation": "deliver",
+      "gold": [
+        "P8-08-R42"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P8-08-R42"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P8-08-R42"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P8-08-R42"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P8-08-R42"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P8-08-R42"
+          ]
+        }
+      },
+      "scenario": "distractor_volume"
+    },
+    {
+      "case_id": "P8-09",
+      "expectation": "deliver",
+      "gold": [
+        "P8-09-R42"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P8-09-R42"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P8-09-R42"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P8-09-R42"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P8-09-R42"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P8-09-R42"
+          ]
+        }
+      },
+      "scenario": "distractor_volume"
+    },
+    {
+      "case_id": "P8-10",
+      "expectation": "deliver",
+      "gold": [
+        "P8-10-R42"
+      ],
+      "policies": {
+        "P1": {
+          "delivered": [
+            "P8-10-R42"
+          ]
+        },
+        "P2": {
+          "delivered": [
+            "P8-10-R42"
+          ]
+        },
+        "P3v4": {
+          "delivered": [
+            "P8-10-R42"
+          ]
+        },
+        "P4": {
+          "delivered": [
+            "P8-10-R42"
+          ]
+        },
+        "P4-abl": {
+          "delivered": [
+            "P8-10-R42"
+          ]
+        }
+      },
+      "scenario": "distractor_volume"
+    }
+  ],
+  "policies": {
+    "P1": {
+      "abstention_rate": 0.0,
+      "availability": 0.8182,
+      "delivered": 160,
+      "max_per_case": 5,
+      "precision": 0.5625,
+      "scenario_availability": {
+        "contradiction": 1.0,
+        "current_state": 1.0,
+        "distractor_volume": 1.0,
+        "multi_memory": 1.0,
+        "no_answer": null,
+        "origin": 1.0,
+        "related_context": 0.5,
+        "supersession": 0.0
+      },
+      "scenario_precision": {
+        "contradiction": 1.0,
+        "current_state": 0.5,
+        "distractor_volume": 1.0,
+        "multi_memory": 1.0,
+        "no_answer": 0.0,
+        "origin": 1.0,
+        "related_context": 1.0,
+        "supersession": 0.0
+      }
+    },
+    "P2": {
+      "abstention_rate": 0.0,
+      "availability": 0.7455,
+      "delivered": 142,
+      "max_per_case": 5,
+      "precision": 0.5775,
+      "scenario_availability": {
+        "contradiction": 1.0,
+        "current_state": 1.0,
+        "distractor_volume": 1.0,
+        "multi_memory": 1.0,
+        "no_answer": null,
+        "origin": 0.6,
+        "related_context": 0.5,
+        "supersession": 0.0
+      },
+      "scenario_precision": {
+        "contradiction": 1.0,
+        "current_state": 1.0,
+        "distractor_volume": 1.0,
+        "multi_memory": 1.0,
+        "no_answer": 0.0,
+        "origin": 1.0,
+        "related_context": 1.0,
+        "supersession": 0.0
+      }
+    },
+    "P3v4": {
+      "abstention_rate": 0.0,
+      "availability": 0.9091,
+      "delivered": 120,
+      "max_per_case": 2,
+      "precision": 0.8333,
+      "scenario_availability": {
+        "contradiction": 1.0,
+        "current_state": 1.0,
+        "distractor_volume": 1.0,
+        "multi_memory": 1.0,
+        "no_answer": null,
+        "origin": 1.0,
+        "related_context": 0.5,
+        "supersession": 1.0
+      },
+      "scenario_precision": {
+        "contradiction": 1.0,
+        "current_state": 1.0,
+        "distractor_volume": 1.0,
+        "multi_memory": 1.0,
+        "no_answer": 0.0,
+        "origin": 1.0,
+        "related_context": 1.0,
+        "supersession": 1.0
+      }
+    },
+    "P4": {
+      "abstention_rate": 0.0,
+      "availability": 0.9091,
+      "delivered": 140,
+      "max_per_case": 3,
+      "precision": 0.7143,
+      "scenario_availability": {
+        "contradiction": 1.0,
+        "current_state": 1.0,
+        "distractor_volume": 1.0,
+        "multi_memory": 1.0,
+        "no_answer": null,
+        "origin": 1.0,
+        "related_context": 0.5,
+        "supersession": 1.0
+      },
+      "scenario_precision": {
+        "contradiction": 1.0,
+        "current_state": 0.5,
+        "distractor_volume": 1.0,
+        "multi_memory": 1.0,
+        "no_answer": 0.0,
+        "origin": 1.0,
+        "related_context": 1.0,
+        "supersession": 1.0
+      }
+    },
+    "P4-abl": {
+      "abstention_rate": 0.0,
+      "availability": 0.9091,
+      "delivered": 140,
+      "max_per_case": 3,
+      "precision": 0.7143,
+      "scenario_availability": {
+        "contradiction": 1.0,
+        "current_state": 1.0,
+        "distractor_volume": 1.0,
+        "multi_memory": 1.0,
+        "no_answer": null,
+        "origin": 1.0,
+        "related_context": 0.5,
+        "supersession": 1.0
+      },
+      "scenario_precision": {
+        "contradiction": 1.0,
+        "current_state": 0.5,
+        "distractor_volume": 1.0,
+        "multi_memory": 1.0,
+        "no_answer": 0.0,
+        "origin": 1.0,
+        "related_context": 1.0,
+        "supersession": 1.0
+      }
+    }
+  },
+  "prereg": "docs/ADMISSION_PORTFOLIO_V1_PREREG.md"
+}

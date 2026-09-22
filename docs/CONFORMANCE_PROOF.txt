@@ -1,5 +1,7 @@
 tests/test_admission_p3v4.py::test_product_p3v4_equals_frozen_v4_harness_on_the_whole_fixture
 tests/test_admission_p3v4.py::test_p3v4_constants_are_frozen
+tests/test_admission_portfolio_v1.py::test_fixture_regenerates_byte_identically
+tests/test_admission_portfolio_v1.py::test_harness_deterministic_and_recorded_verdicts
 tests/test_admission_shadow.py::test_shadow_record_is_derived_only_and_private
 tests/test_admission_shadow.py::test_event_rule_counterfactual_and_ranking
 tests/test_admission_shadow.py::test_shadow_is_off_by_default_and_recall_stays_identical
@@ -517,4 +519,4 @@ tests/test_whiteboard.py::test_size_and_consolidation_trigger
 tests/test_whiteboard.py::test_roundtrip
 tests/test_whiteboard.py::test_render
 
-518 tests collected in 0.08s
+520 tests collected in 0.08s

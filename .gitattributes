@@ -1,0 +1,10 @@
+# Line endings: LF in the repository and in every checkout (Windows included).
+# The lifecycle fixture and the conformance proof are compared byte-for-byte,
+# so a platform-dependent CRLF conversion would break those guarantees.
+* text=auto eol=lf
+
+# Binary artefacts (never converted or diffed as text).
+*.icns binary
+*.png binary
+*.dmg binary
+*.pyc binary

@@ -6,6 +6,8 @@ import json
 import sys
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "eval"))
 sys.path.insert(0, str(ROOT / "src"))
@@ -29,6 +31,9 @@ def test_recorded_verdicts():
 
 
 def test_u3a17_snippet_precheck():
+    if not (ROOT / "eval" / "graph_out"
+            / "u_diag_longmemeval_u3a.jsonl").exists():
+        pytest.skip("frozen snapshots not present in this checkout")
     cases = harness.v2.build_cases()
     info = harness.input_snippet_coverage(cases)
     rows = [r for r in info["rows"] if r["case"] == 17]

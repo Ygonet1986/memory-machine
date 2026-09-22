@@ -43,6 +43,11 @@ synthetic generator ─> sandbox ─> candidate screening ─> best candidate
    one closes (own pre-registration, same freeze discipline).
 6. The lab can run in parallel with the real window without contaminating
    it; this is the whole point of the two tracks.
+7. **Scope of the freeze ("nothing changes").** Nothing changes in the
+   product, in P3v4, in the schema, in the retrievers, in any default, or in
+   the real shadow window. The lab may experiment in parallel precisely
+   because it is isolated; **the bridge between the tracks does not exist
+   during the current window** - it opens only after `met: true`.
 
 ## Lab candidates (from the ideas record)
 

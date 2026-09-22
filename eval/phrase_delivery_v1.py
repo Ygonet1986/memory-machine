@@ -36,6 +36,10 @@ NUMBER_WORDS = {
 DIGIT_UNIT_RE = re.compile(rf"(\d+(?:[.,]\d+)?)\s*({UNITS})")
 WORD_UNIT_RE = re.compile(rf"\b({ '|'.join(NUMBER_WORDS) })\s+({UNITS})\b")
 CURRENCY_RE = re.compile(r"\$\s*(\d+(?:[.,]\d+)?)")
+ABSTENTION_RE = re.compile(
+    r"not enough information|information provided is not enough|"
+    r"insufficient information|cannot be determined|no information",
+    re.IGNORECASE)
 
 
 def phrases(text: str) -> list[tuple[str, str]]:
@@ -65,13 +69,17 @@ def phrase_present(phrase: tuple[str, str], span: str) -> bool:
     return False
 
 
-def check(case: dict, context: str, records: dict) -> dict[str, Any]:
+def check(case: dict, context: str, records: dict, *,
+          abstention_aware: bool = False) -> dict[str, Any]:
     spans = []
     for memory_id in case["required_ids"]:
         span, found = item_span(context, memory_id)
         if found:
             spans.append(span)
     union = " ".join(spans)
+    if abstention_aware and ABSTENTION_RE.search(str(case["gold"])):
+        return {"basis": "abstention", "applicable": False, "ok": True,
+                "gold_phrases": [], "missing": []}
     gold = gold_phrases(str(case["gold"]))
     if gold:
         missing = [f"{v}{u}" for v, u in gold if not phrase_present((v, u), union)]

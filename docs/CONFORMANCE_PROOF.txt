@@ -313,6 +313,10 @@ tests/test_groups.py::test_group_records_filters_archived
 tests/test_groups.py::test_manifest_roundtrip
 tests/test_groups.py::test_default_capacity_is_500
 tests/test_groups.py::test_group_of_500_then_next_group
+tests/test_ingestion_trace_v1.py::test_recorded_classifications
+tests/test_ingestion_trace_v1.py::test_abstention_metric_fix_default_path_unchanged
+tests/test_ingestion_trace_v1.py::test_u3a17_residual_recorded
+tests/test_ingestion_trace_v1.py::test_abstention_detection_patterns
 tests/test_lifecycle_contracts.py::test_same_input_same_decision
 tests/test_lifecycle_contracts.py::test_relevant_field_change_alters_input_hash
 tests/test_lifecycle_contracts.py::test_audit_only_field_does_not_alter_normative_content
@@ -544,4 +548,4 @@ tests/test_whiteboard.py::test_size_and_consolidation_trigger
 tests/test_whiteboard.py::test_roundtrip
 tests/test_whiteboard.py::test_render
 
-545 tests collected in 0.09s
+549 tests collected in 0.09s

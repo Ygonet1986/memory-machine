@@ -1,0 +1,129 @@
+{
+  "abstention_u3b41": {
+    "aware": {
+      "applicable": false,
+      "basis": "abstention",
+      "gold_phrases": [],
+      "missing": [],
+      "ok": true
+    },
+    "block": "u3b",
+    "case": 41,
+    "default_basis": "atom_fallback",
+    "gold": "The information provided is not enough. You mentioned living in Harajuku but not Shinjuku."
+  },
+  "all_pass": true,
+  "default_path_regression_u3a22": {
+    "basis": "phrase",
+    "gold_phrases": [
+      "2week"
+    ],
+    "missing": [],
+    "ok": true
+  },
+  "gates": {
+    "I1_classified": true,
+    "I2_metric_fix": true,
+    "I3_determinism": true,
+    "I4_origin_excerpts": true
+  },
+  "prereg": "docs/INGESTION_TRACE_V1_PREREG.md",
+  "residual_u3a17": {
+    "block": "u3a",
+    "case": 17,
+    "gold": "over a year",
+    "gold_phrases": [
+      "1year"
+    ],
+    "presence": {
+      "W0": false,
+      "W1": false,
+      "W3": false,
+      "W5": false
+    },
+    "segment_count": 213,
+    "segment_position": 106
+  },
+  "rows": [
+    {
+      "block": "u3a",
+      "case": 14,
+      "classification": "computation_needed",
+      "component_count": 3,
+      "gold": "3 weeks",
+      "origin_components": {
+        "dates": [
+          "may"
+        ],
+        "durations": [
+          "1week",
+          "24hour"
+        ]
+      },
+      "question": "How many weeks passed between the time I sold homemade baked goods at the Farmers' Market for the last time and the time I participated in the Spring Fling Market?"
+    },
+    {
+      "block": "u3a",
+      "case": 21,
+      "classification": "computation_needed",
+      "component_count": 10,
+      "gold": "10 years",
+      "origin_components": {
+        "dates": [
+          "2010",
+          "2014",
+          "2016",
+          "2020",
+          "may"
+        ],
+        "durations": [
+          "1hour",
+          "20minute",
+          "30minute",
+          "45minute",
+          "4year"
+        ]
+      },
+      "question": "How many years in total did I spend in formal education from high school to the completion of my Bachelor's degree?"
+    },
+    {
+      "block": "u3b",
+      "case": 30,
+      "classification": "computation_needed",
+      "component_count": 7,
+      "gold": "4 years and 9 months",
+      "origin_components": {
+        "dates": [
+          "may"
+        ],
+        "durations": [
+          "1000hour",
+          "2week",
+          "3month",
+          "4week",
+          "4year",
+          "9year"
+        ]
+      },
+      "question": "How long have I been working before I started my current job at NovaTech?"
+    },
+    {
+      "block": "u3b",
+      "case": 40,
+      "classification": "computation_needed",
+      "component_count": 5,
+      "gold": "12 days ago. 13 days (including the last day) is also acceptable.",
+      "origin_components": {
+        "dates": [
+          "2018",
+          "2020",
+          "january",
+          "march",
+          "may"
+        ],
+        "durations": []
+      },
+      "question": "How many days ago did I read the March 15th issue of The New Yorker?"
+    }
+  ]
+}

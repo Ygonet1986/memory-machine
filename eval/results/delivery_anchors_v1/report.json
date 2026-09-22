@@ -1,0 +1,988 @@
+{
+  "all_pass": false,
+  "case0": {
+    "block": "u3a",
+    "case": 12,
+    "cat": "single-session-user",
+    "gold": "16GB",
+    "numeric": true,
+    "policies": {
+      "W0": {
+        "all_present": true,
+        "chars": 4000,
+        "missing": [],
+        "presence": 1.0
+      },
+      "W1": {
+        "all_present": true,
+        "chars": 3921,
+        "missing": [],
+        "presence": 1.0
+      },
+      "W2": {
+        "all_present": true,
+        "chars": 3998,
+        "missing": [],
+        "presence": 1.0
+      }
+    }
+  },
+  "cases": 30,
+  "determinism": {
+    "identical": true,
+    "run1": "b99e03e8b4d650d968c909ef5b5b9ed1b11ef04c47e6673ff3f76cbec6eeec08",
+    "run2": "b99e03e8b4d650d968c909ef5b5b9ed1b11ef04c47e6673ff3f76cbec6eeec08"
+  },
+  "fixture": "/Users/igorcoutrimlacerda/memory-machine/eval/fixtures/composition_u4",
+  "gates": {
+    "D1_no_regression": true,
+    "D2_numeric_mean": true,
+    "D3_case0_anchor": false,
+    "D4_numeric_repairs": true,
+    "D5_nonnumeric_unchanged": true,
+    "D6_budget": true,
+    "D7_determinism": true
+  },
+  "per_case": [
+    {
+      "block": "u3a",
+      "case": 12,
+      "cat": "single-session-user",
+      "gold": "16GB",
+      "numeric": true,
+      "policies": {
+        "W0": {
+          "all_present": true,
+          "chars": 4000,
+          "missing": [],
+          "presence": 1.0
+        },
+        "W1": {
+          "all_present": true,
+          "chars": 3921,
+          "missing": [],
+          "presence": 1.0
+        },
+        "W2": {
+          "all_present": true,
+          "chars": 3998,
+          "missing": [],
+          "presence": 1.0
+        }
+      }
+    },
+    {
+      "block": "u3a",
+      "case": 13,
+      "cat": "single-session-assistant",
+      "gold": "+49 (0) 62 32 / 14 23 - 0",
+      "numeric": true,
+      "policies": {
+        "W0": {
+          "all_present": true,
+          "chars": 4008,
+          "missing": [],
+          "presence": 1.0
+        },
+        "W1": {
+          "all_present": true,
+          "chars": 3952,
+          "missing": [],
+          "presence": 1.0
+        },
+        "W2": {
+          "all_present": true,
+          "chars": 4006,
+          "missing": [],
+          "presence": 1.0
+        }
+      }
+    },
+    {
+      "block": "u3a",
+      "case": 14,
+      "cat": "temporal-reasoning",
+      "gold": "3 weeks",
+      "numeric": true,
+      "policies": {
+        "W0": {
+          "all_present": false,
+          "chars": 4004,
+          "missing": [
+            "number:3"
+          ],
+          "presence": 0.0
+        },
+        "W1": {
+          "all_present": false,
+          "chars": 3830,
+          "missing": [
+            "number:3"
+          ],
+          "presence": 0.0
+        },
+        "W2": {
+          "all_present": true,
+          "chars": 3998,
+          "missing": [],
+          "presence": 1.0
+        }
+      }
+    },
+    {
+      "block": "u3a",
+      "case": 15,
+      "cat": "multi-session",
+      "gold": "I currently own 4 musical instruments. I've had the Fender Stratocaster electric guitar for 5 years, the Yamaha FG800 acoustic guitar for 8 years, the 5-piece Pearl Export drum set for an unspecified amount of time, and the Korg B1 piano for 3 years.",
+      "numeric": true,
+      "policies": {
+        "W0": {
+          "all_present": false,
+          "chars": 4010,
+          "missing": [
+            "number:4",
+            "number:8",
+            "entity:yamaha"
+          ],
+          "presence": 0.7
+        },
+        "W1": {
+          "all_present": false,
+          "chars": 3882,
+          "missing": [
+            "number:8",
+            "entity:yamaha"
+          ],
+          "presence": 0.8
+        },
+        "W2": {
+          "all_present": false,
+          "chars": 4002,
+          "missing": [
+            "number:8",
+            "entity:yamaha"
+          ],
+          "presence": 0.8
+        }
+      }
+    },
+    {
+      "block": "u3a",
+      "case": 16,
+      "cat": "single-session-user",
+      "gold": "A staunch atheist",
+      "numeric": false,
+      "policies": {
+        "W0": {
+          "all_present": true,
+          "chars": 4000,
+          "missing": [],
+          "presence": 1.0
+        },
+        "W1": {
+          "all_present": true,
+          "chars": 3908,
+          "missing": [],
+          "presence": 1.0
+        },
+        "W2": {
+          "all_present": true,
+          "chars": 4000,
+          "missing": [],
+          "presence": 1.0
+        }
+      }
+    },
+    {
+      "block": "u3a",
+      "case": 17,
+      "cat": "single-session-user",
+      "gold": "over a year",
+      "numeric": true,
+      "policies": {
+        "W0": {
+          "all_present": true,
+          "chars": 4002,
+          "missing": [],
+          "presence": 1.0
+        },
+        "W1": {
+          "all_present": true,
+          "chars": 3879,
+          "missing": [],
+          "presence": 1.0
+        },
+        "W2": {
+          "all_present": true,
+          "chars": 3985,
+          "missing": [],
+          "presence": 1.0
+        }
+      }
+    },
+    {
+      "block": "u3a",
+      "case": 18,
+      "cat": "multi-session",
+      "gold": "4",
+      "numeric": true,
+      "policies": {
+        "W0": {
+          "all_present": false,
+          "chars": 4002,
+          "missing": [
+            "number:4"
+          ],
+          "presence": 0.0
+        },
+        "W1": {
+          "all_present": false,
+          "chars": 3698,
+          "missing": [
+            "number:4"
+          ],
+          "presence": 0.0
+        },
+        "W2": {
+          "all_present": false,
+          "chars": 3981,
+          "missing": [
+            "number:4"
+          ],
+          "presence": 0.0
+        }
+      }
+    },
+    {
+      "block": "u3a",
+      "case": 19,
+      "cat": "multi-session",
+      "gold": "$200",
+      "numeric": true,
+      "policies": {
+        "W0": {
+          "all_present": false,
+          "chars": 4004,
+          "missing": [
+            "number:200"
+          ],
+          "presence": 0.0
+        },
+        "W1": {
+          "all_present": false,
+          "chars": 3804,
+          "missing": [
+            "number:200"
+          ],
+          "presence": 0.0
+        },
+        "W2": {
+          "all_present": false,
+          "chars": 3990,
+          "missing": [
+            "number:200"
+          ],
+          "presence": 0.0
+        }
+      }
+    },
+    {
+      "block": "u3a",
+      "case": 20,
+      "cat": "single-session-user",
+      "gold": "Japanese short-grain rice",
+      "numeric": false,
+      "policies": {
+        "W0": {
+          "all_present": false,
+          "chars": 4018,
+          "missing": [
+            "entity:japanese"
+          ],
+          "presence": 0.0
+        },
+        "W1": {
+          "all_present": true,
+          "chars": 3966,
+          "missing": [],
+          "presence": 1.0
+        },
+        "W2": {
+          "all_present": false,
+          "chars": 4018,
+          "missing": [
+            "entity:japanese"
+          ],
+          "presence": 0.0
+        }
+      }
+    },
+    {
+      "block": "u3a",
+      "case": 21,
+      "cat": "multi-session",
+      "gold": "10 years",
+      "numeric": true,
+      "policies": {
+        "W0": {
+          "all_present": false,
+          "chars": 4006,
+          "missing": [
+            "number:10"
+          ],
+          "presence": 0.0
+        },
+        "W1": {
+          "all_present": false,
+          "chars": 3776,
+          "missing": [
+            "number:10"
+          ],
+          "presence": 0.0
+        },
+        "W2": {
+          "all_present": false,
+          "chars": 3997,
+          "missing": [
+            "number:10"
+          ],
+          "presence": 0.0
+        }
+      }
+    },
+    {
+      "block": "u3a",
+      "case": 22,
+      "cat": "single-session-user",
+      "gold": "two weeks",
+      "numeric": true,
+      "policies": {
+        "W0": {
+          "all_present": true,
+          "chars": 4002,
+          "missing": [],
+          "presence": 1.0
+        },
+        "W1": {
+          "all_present": true,
+          "chars": 3842,
+          "missing": [],
+          "presence": 1.0
+        },
+        "W2": {
+          "all_present": true,
+          "chars": 3997,
+          "missing": [],
+          "presence": 1.0
+        }
+      }
+    },
+    {
+      "block": "u3a",
+      "case": 23,
+      "cat": "temporal-reasoning",
+      "gold": "You posted a recipe for vegan chili on Instagram using the hashtag #FoodieAdventures first.",
+      "numeric": false,
+      "policies": {
+        "W0": {
+          "all_present": true,
+          "chars": 4004,
+          "missing": [],
+          "presence": 1.0
+        },
+        "W1": {
+          "all_present": true,
+          "chars": 3838,
+          "missing": [],
+          "presence": 1.0
+        },
+        "W2": {
+          "all_present": true,
+          "chars": 4004,
+          "missing": [],
+          "presence": 1.0
+        }
+      }
+    },
+    {
+      "block": "u3a",
+      "case": 24,
+      "cat": "multi-session",
+      "gold": "$1,300",
+      "numeric": true,
+      "policies": {
+        "W0": {
+          "all_present": false,
+          "chars": 4002,
+          "missing": [
+            "number:300"
+          ],
+          "presence": 0.5
+        },
+        "W1": {
+          "all_present": false,
+          "chars": 3832,
+          "missing": [
+            "number:300"
+          ],
+          "presence": 0.5
+        },
+        "W2": {
+          "all_present": false,
+          "chars": 3998,
+          "missing": [
+            "number:300"
+          ],
+          "presence": 0.5
+        }
+      }
+    },
+    {
+      "block": "u3a",
+      "case": 25,
+      "cat": "single-session-user",
+      "gold": "The painting is worth triple what I paid for it.",
+      "numeric": true,
+      "policies": {
+        "W0": {
+          "all_present": true,
+          "chars": 4022,
+          "missing": [],
+          "presence": 1.0
+        },
+        "W1": {
+          "all_present": true,
+          "chars": 4013,
+          "missing": [],
+          "presence": 1.0
+        },
+        "W2": {
+          "all_present": true,
+          "chars": 4021,
+          "missing": [],
+          "presence": 1.0
+        }
+      }
+    },
+    {
+      "block": "u3a",
+      "case": 26,
+      "cat": "knowledge-update",
+      "gold": 1300,
+      "numeric": true,
+      "policies": {
+        "W0": {
+          "all_present": true,
+          "chars": 4006,
+          "missing": [],
+          "presence": 1.0
+        },
+        "W1": {
+          "all_present": true,
+          "chars": 3976,
+          "missing": [],
+          "presence": 1.0
+        },
+        "W2": {
+          "all_present": true,
+          "chars": 4005,
+          "missing": [],
+          "presence": 1.0
+        }
+      }
+    },
+    {
+      "block": "u3b",
+      "case": 27,
+      "cat": "temporal-reasoning",
+      "gold": "the 'Walk for Hunger' charity event",
+      "numeric": false,
+      "policies": {
+        "W0": {
+          "all_present": true,
+          "chars": 4006,
+          "missing": [],
+          "presence": 1.0
+        },
+        "W1": {
+          "all_present": true,
+          "chars": 3721,
+          "missing": [],
+          "presence": 1.0
+        },
+        "W2": {
+          "all_present": true,
+          "chars": 4006,
+          "missing": [],
+          "presence": 1.0
+        }
+      }
+    },
+    {
+      "block": "u3b",
+      "case": 28,
+      "cat": "single-session-user",
+      "gold": "Dark Souls 3 DLC",
+      "numeric": false,
+      "policies": {
+        "W0": {
+          "all_present": false,
+          "chars": 4006,
+          "missing": [
+            "entity:dlc",
+            "entity:dark",
+            "entity:souls"
+          ],
+          "presence": 0.25
+        },
+        "W1": {
+          "all_present": true,
+          "chars": 3922,
+          "missing": [],
+          "presence": 1.0
+        },
+        "W2": {
+          "all_present": false,
+          "chars": 4006,
+          "missing": [
+            "entity:dlc",
+            "entity:dark",
+            "entity:souls"
+          ],
+          "presence": 0.25
+        }
+      }
+    },
+    {
+      "block": "u3b",
+      "case": 29,
+      "cat": "multi-session",
+      "gold": "10 times",
+      "numeric": true,
+      "policies": {
+        "W0": {
+          "all_present": false,
+          "chars": 4004,
+          "missing": [
+            "number:10"
+          ],
+          "presence": 0.0
+        },
+        "W1": {
+          "all_present": false,
+          "chars": 3888,
+          "missing": [
+            "number:10"
+          ],
+          "presence": 0.0
+        },
+        "W2": {
+          "all_present": false,
+          "chars": 3999,
+          "missing": [
+            "number:10"
+          ],
+          "presence": 0.0
+        }
+      }
+    },
+    {
+      "block": "u3b",
+      "case": 30,
+      "cat": "temporal-reasoning",
+      "gold": "4 years and 9 months",
+      "numeric": true,
+      "policies": {
+        "W0": {
+          "all_present": false,
+          "chars": 4004,
+          "missing": [
+            "number:4",
+            "number:9"
+          ],
+          "presence": 0.0
+        },
+        "W1": {
+          "all_present": false,
+          "chars": 3882,
+          "missing": [
+            "number:9"
+          ],
+          "presence": 0.5
+        },
+        "W2": {
+          "all_present": true,
+          "chars": 3993,
+          "missing": [],
+          "presence": 1.0
+        }
+      }
+    },
+    {
+      "block": "u3b",
+      "case": 31,
+      "cat": "temporal-reasoning",
+      "gold": "4",
+      "numeric": true,
+      "policies": {
+        "W0": {
+          "all_present": false,
+          "chars": 4010,
+          "missing": [
+            "number:4"
+          ],
+          "presence": 0.0
+        },
+        "W1": {
+          "all_present": false,
+          "chars": 3808,
+          "missing": [
+            "number:4"
+          ],
+          "presence": 0.0
+        },
+        "W2": {
+          "all_present": true,
+          "chars": 4003,
+          "missing": [],
+          "presence": 1.0
+        }
+      }
+    },
+    {
+      "block": "u3b",
+      "case": 32,
+      "cat": "single-session-user",
+      "gold": "The Grand Ballroom",
+      "numeric": false,
+      "policies": {
+        "W0": {
+          "all_present": false,
+          "chars": 4006,
+          "missing": [
+            "entity:ballroom",
+            "entity:grand"
+          ],
+          "presence": 0.0
+        },
+        "W1": {
+          "all_present": true,
+          "chars": 3902,
+          "missing": [],
+          "presence": 1.0
+        },
+        "W2": {
+          "all_present": false,
+          "chars": 4006,
+          "missing": [
+            "entity:ballroom",
+            "entity:grand"
+          ],
+          "presence": 0.0
+        }
+      }
+    },
+    {
+      "block": "u3b",
+      "case": 33,
+      "cat": "temporal-reasoning",
+      "gold": "my cousin's wedding",
+      "numeric": false,
+      "policies": {
+        "W0": {
+          "all_present": true,
+          "chars": 4000,
+          "missing": [],
+          "presence": 1.0
+        },
+        "W1": {
+          "all_present": true,
+          "chars": 3994,
+          "missing": [],
+          "presence": 1.0
+        },
+        "W2": {
+          "all_present": true,
+          "chars": 4000,
+          "missing": [],
+          "presence": 1.0
+        }
+      }
+    },
+    {
+      "block": "u3b",
+      "case": 34,
+      "cat": "temporal-reasoning",
+      "gold": "I signed a contract with my first client.",
+      "numeric": true,
+      "policies": {
+        "W0": {
+          "all_present": true,
+          "chars": 4004,
+          "missing": [],
+          "presence": 1.0
+        },
+        "W1": {
+          "all_present": true,
+          "chars": 3876,
+          "missing": [],
+          "presence": 1.0
+        },
+        "W2": {
+          "all_present": true,
+          "chars": 4004,
+          "missing": [],
+          "presence": 1.0
+        }
+      }
+    },
+    {
+      "block": "u3b",
+      "case": 35,
+      "cat": "multi-session",
+      "gold": "33",
+      "numeric": true,
+      "policies": {
+        "W0": {
+          "all_present": false,
+          "chars": 4006,
+          "missing": [
+            "number:33"
+          ],
+          "presence": 0.0
+        },
+        "W1": {
+          "all_present": false,
+          "chars": 3894,
+          "missing": [
+            "number:33"
+          ],
+          "presence": 0.0
+        },
+        "W2": {
+          "all_present": false,
+          "chars": 3996,
+          "missing": [
+            "number:33"
+          ],
+          "presence": 0.0
+        }
+      }
+    },
+    {
+      "block": "u3b",
+      "case": 36,
+      "cat": "single-session-user",
+      "gold": "10",
+      "numeric": true,
+      "policies": {
+        "W0": {
+          "all_present": true,
+          "chars": 4004,
+          "missing": [],
+          "presence": 1.0
+        },
+        "W1": {
+          "all_present": true,
+          "chars": 3900,
+          "missing": [],
+          "presence": 1.0
+        },
+        "W2": {
+          "all_present": true,
+          "chars": 3999,
+          "missing": [],
+          "presence": 1.0
+        }
+      }
+    },
+    {
+      "block": "u3b",
+      "case": 37,
+      "cat": "single-session-assistant",
+      "gold": "Grilled Snapper with Mango Salsa",
+      "numeric": false,
+      "policies": {
+        "W0": {
+          "all_present": true,
+          "chars": 4004,
+          "missing": [],
+          "presence": 1.0
+        },
+        "W1": {
+          "all_present": true,
+          "chars": 3886,
+          "missing": [],
+          "presence": 1.0
+        },
+        "W2": {
+          "all_present": true,
+          "chars": 4004,
+          "missing": [],
+          "presence": 1.0
+        }
+      }
+    },
+    {
+      "block": "u3b",
+      "case": 38,
+      "cat": "multi-session",
+      "gold": "I replaced or fixed five items: the kitchen faucet, the kitchen mat, the toaster, the coffee maker, and the kitchen shelves.",
+      "numeric": true,
+      "policies": {
+        "W0": {
+          "all_present": true,
+          "chars": 4012,
+          "missing": [],
+          "presence": 1.0
+        },
+        "W1": {
+          "all_present": true,
+          "chars": 3840,
+          "missing": [],
+          "presence": 1.0
+        },
+        "W2": {
+          "all_present": true,
+          "chars": 3992,
+          "missing": [],
+          "presence": 1.0
+        }
+      }
+    },
+    {
+      "block": "u3b",
+      "case": 39,
+      "cat": "single-session-user",
+      "gold": "Golden Retriever",
+      "numeric": false,
+      "policies": {
+        "W0": {
+          "all_present": false,
+          "chars": 4004,
+          "missing": [
+            "entity:golden",
+            "entity:retriever"
+          ],
+          "presence": 0.0
+        },
+        "W1": {
+          "all_present": false,
+          "chars": 3941,
+          "missing": [
+            "entity:golden",
+            "entity:retriever"
+          ],
+          "presence": 0.0
+        },
+        "W2": {
+          "all_present": false,
+          "chars": 4004,
+          "missing": [
+            "entity:golden",
+            "entity:retriever"
+          ],
+          "presence": 0.0
+        }
+      }
+    },
+    {
+      "block": "u3b",
+      "case": 40,
+      "cat": "temporal-reasoning",
+      "gold": "12 days ago. 13 days (including the last day) is also acceptable.",
+      "numeric": true,
+      "policies": {
+        "W0": {
+          "all_present": false,
+          "chars": 4000,
+          "missing": [
+            "number:12",
+            "number:13"
+          ],
+          "presence": 0.0
+        },
+        "W1": {
+          "all_present": false,
+          "chars": 3946,
+          "missing": [
+            "number:12",
+            "number:13"
+          ],
+          "presence": 0.0
+        },
+        "W2": {
+          "all_present": false,
+          "chars": 3999,
+          "missing": [
+            "number:12",
+            "number:13"
+          ],
+          "presence": 0.0
+        }
+      }
+    },
+    {
+      "block": "u3b",
+      "case": 41,
+      "cat": "knowledge-update",
+      "gold": "The information provided is not enough. You mentioned living in Harajuku but not Shinjuku.",
+      "numeric": true,
+      "policies": {
+        "W0": {
+          "all_present": false,
+          "chars": 4004,
+          "missing": [
+            "entity:harajuku",
+            "entity:shinjuku"
+          ],
+          "presence": 0.0
+        },
+        "W1": {
+          "all_present": false,
+          "chars": 3953,
+          "missing": [
+            "entity:shinjuku"
+          ],
+          "presence": 0.5
+        },
+        "W2": {
+          "all_present": false,
+          "chars": 4004,
+          "missing": [
+            "entity:shinjuku"
+          ],
+          "presence": 0.5
+        }
+      }
+    }
+  ],
+  "policies": {
+    "W0": {
+      "all_present_cases": 14,
+      "all_present_rate": 0.4667,
+      "mean_presence": 0.515,
+      "mean_presence_nonnumeric": 0.5833,
+      "mean_presence_numeric": 0.4857
+    },
+    "W1": {
+      "all_present_cases": 17,
+      "all_present_rate": 0.5667,
+      "mean_presence": 0.6433,
+      "mean_presence_nonnumeric": 0.8889,
+      "mean_presence_numeric": 0.5381
+    },
+    "W2": {
+      "all_present_cases": 17,
+      "all_present_rate": 0.5667,
+      "mean_presence": 0.635,
+      "mean_presence_nonnumeric": 0.5833,
+      "mean_presence_numeric": 0.6571
+    }
+  },
+  "prereg": "docs/DELIVERY_ANCHORS_V1_PREREG.md",
+  "repairs": {
+    "W1": 6,
+    "W2": 5
+  }
+}

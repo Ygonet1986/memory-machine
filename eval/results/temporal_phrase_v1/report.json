@@ -1,0 +1,198 @@
+{
+  "all_pass": true,
+  "answer": {
+    "arms": {
+      "W1": [
+        "correct",
+        "correct",
+        "correct"
+      ],
+      "W3": [
+        "incorrect",
+        "incorrect",
+        "incorrect"
+      ],
+      "W5": [
+        "correct",
+        "correct",
+        "correct"
+      ]
+    },
+    "failures": 0,
+    "gates": {
+      "T3_answers": true,
+      "T5_infra": true
+    },
+    "llm_calls": 18,
+    "score": {
+      "W1": 1.0,
+      "W3": 0.0,
+      "W5": 1.0
+    }
+  },
+  "gates": {
+    "T1_fixes_u3a22": true,
+    "T2_no_new_regressions": true,
+    "T3_answers": true,
+    "T4_determinism": true,
+    "T5_infra": true
+  },
+  "prereg": "docs/TEMPORAL_PHRASE_V1_PREREG.md",
+  "rows": [
+    {
+      "arm": "W1",
+      "basis": "phrase",
+      "block": "u3a",
+      "case": 12,
+      "chars": 3921,
+      "gold": "16GB",
+      "gold_phrases": [
+        "16gb"
+      ],
+      "missing": [],
+      "ok": true
+    },
+    {
+      "arm": "W3",
+      "basis": "phrase",
+      "block": "u3a",
+      "case": 12,
+      "chars": 3998,
+      "gold": "16GB",
+      "gold_phrases": [
+        "16gb"
+      ],
+      "missing": [],
+      "ok": true
+    },
+    {
+      "arm": "W5",
+      "basis": "phrase",
+      "block": "u3a",
+      "case": 12,
+      "chars": 3999,
+      "gold": "16GB",
+      "gold_phrases": [
+        "16gb"
+      ],
+      "missing": [],
+      "ok": true
+    },
+    {
+      "arm": "W1",
+      "basis": "phrase",
+      "block": "u3a",
+      "case": 19,
+      "chars": 3804,
+      "gold": "$200",
+      "gold_phrases": [
+        "200$"
+      ],
+      "missing": [
+        "200$"
+      ],
+      "ok": false
+    },
+    {
+      "arm": "W3",
+      "basis": "phrase",
+      "block": "u3a",
+      "case": 19,
+      "chars": 3990,
+      "gold": "$200",
+      "gold_phrases": [
+        "200$"
+      ],
+      "missing": [
+        "200$"
+      ],
+      "ok": false
+    },
+    {
+      "arm": "W5",
+      "basis": "phrase",
+      "block": "u3a",
+      "case": 19,
+      "chars": 3999,
+      "gold": "$200",
+      "gold_phrases": [
+        "200$"
+      ],
+      "missing": [
+        "200$"
+      ],
+      "ok": false
+    },
+    {
+      "arm": "W1",
+      "basis": "phrase",
+      "block": "u3a",
+      "case": 22,
+      "chars": 3842,
+      "gold": "two weeks",
+      "gold_phrases": [
+        "2week"
+      ],
+      "missing": [],
+      "ok": true
+    },
+    {
+      "arm": "W3",
+      "basis": "phrase",
+      "block": "u3a",
+      "case": 22,
+      "chars": 3997,
+      "gold": "two weeks",
+      "gold_phrases": [
+        "2week"
+      ],
+      "missing": [
+        "2week"
+      ],
+      "ok": false
+    },
+    {
+      "arm": "W5",
+      "basis": "phrase",
+      "block": "u3a",
+      "case": 22,
+      "chars": 3999,
+      "gold": "two weeks",
+      "gold_phrases": [
+        "2week"
+      ],
+      "missing": [],
+      "ok": true
+    },
+    {
+      "arm": "W1",
+      "basis": "atom_fallback",
+      "block": "u3b",
+      "case": 27,
+      "chars": 3721,
+      "gold": "the 'Walk for Hunger' charity event",
+      "missing": [],
+      "ok": true
+    },
+    {
+      "arm": "W3",
+      "basis": "atom_fallback",
+      "block": "u3b",
+      "case": 27,
+      "chars": 3721,
+      "gold": "the 'Walk for Hunger' charity event",
+      "missing": [],
+      "ok": true
+    },
+    {
+      "arm": "W5",
+      "basis": "atom_fallback",
+      "block": "u3b",
+      "case": 27,
+      "chars": 3721,
+      "gold": "the 'Walk for Hunger' charity event",
+      "missing": [],
+      "ok": true
+    }
+  ]
+}

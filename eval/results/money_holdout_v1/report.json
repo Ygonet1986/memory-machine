@@ -1,0 +1,241 @@
+{
+  "all_pass": false,
+  "delivery": {
+    "external_u3a24": {
+      "W1": {
+        "basis": "phrase",
+        "ok": false
+      },
+      "W4": {
+        "basis": "phrase",
+        "ok": false
+      }
+    },
+    "gates": {
+      "H1_new_fixture": false,
+      "H2_positions": false,
+      "H3_external": false,
+      "H4_budget": true
+    },
+    "positions": {
+      "early": {
+        "w1_missing": 0,
+        "w4_present": 4
+      },
+      "late": {
+        "w1_missing": 0,
+        "w4_present": 4
+      },
+      "middle": {
+        "w1_missing": 0,
+        "w4_present": 4
+      }
+    },
+    "rows": [
+      {
+        "arm": "W1",
+        "case_id": "H01",
+        "chars": 1275,
+        "gold": "$137",
+        "position": "early",
+        "present": true
+      },
+      {
+        "arm": "W4",
+        "case_id": "H01",
+        "chars": 1275,
+        "gold": "$137",
+        "position": "early",
+        "present": true
+      },
+      {
+        "arm": "W1",
+        "case_id": "H02",
+        "chars": 1262,
+        "gold": "$174",
+        "position": "middle",
+        "present": true
+      },
+      {
+        "arm": "W4",
+        "case_id": "H02",
+        "chars": 1262,
+        "gold": "$174",
+        "position": "middle",
+        "present": true
+      },
+      {
+        "arm": "W1",
+        "case_id": "H03",
+        "chars": 1281,
+        "gold": "$211",
+        "position": "late",
+        "present": true
+      },
+      {
+        "arm": "W4",
+        "case_id": "H03",
+        "chars": 1281,
+        "gold": "$211",
+        "position": "late",
+        "present": true
+      },
+      {
+        "arm": "W1",
+        "case_id": "H04",
+        "chars": 1254,
+        "gold": "$248",
+        "position": "early",
+        "present": true
+      },
+      {
+        "arm": "W4",
+        "case_id": "H04",
+        "chars": 1254,
+        "gold": "$248",
+        "position": "early",
+        "present": true
+      },
+      {
+        "arm": "W1",
+        "case_id": "H05",
+        "chars": 1266,
+        "gold": "$285",
+        "position": "middle",
+        "present": true
+      },
+      {
+        "arm": "W4",
+        "case_id": "H05",
+        "chars": 1266,
+        "gold": "$285",
+        "position": "middle",
+        "present": true
+      },
+      {
+        "arm": "W1",
+        "case_id": "H06",
+        "chars": 1268,
+        "gold": "$322",
+        "position": "late",
+        "present": true
+      },
+      {
+        "arm": "W4",
+        "case_id": "H06",
+        "chars": 1268,
+        "gold": "$322",
+        "position": "late",
+        "present": true
+      },
+      {
+        "arm": "W1",
+        "case_id": "H07",
+        "chars": 1263,
+        "gold": "$359",
+        "position": "early",
+        "present": true
+      },
+      {
+        "arm": "W4",
+        "case_id": "H07",
+        "chars": 1263,
+        "gold": "$359",
+        "position": "early",
+        "present": true
+      },
+      {
+        "arm": "W1",
+        "case_id": "H08",
+        "chars": 1266,
+        "gold": "$396",
+        "position": "middle",
+        "present": true
+      },
+      {
+        "arm": "W4",
+        "case_id": "H08",
+        "chars": 1266,
+        "gold": "$396",
+        "position": "middle",
+        "present": true
+      },
+      {
+        "arm": "W1",
+        "case_id": "H09",
+        "chars": 1272,
+        "gold": "$433",
+        "position": "late",
+        "present": true
+      },
+      {
+        "arm": "W4",
+        "case_id": "H09",
+        "chars": 1272,
+        "gold": "$433",
+        "position": "late",
+        "present": true
+      },
+      {
+        "arm": "W1",
+        "case_id": "H10",
+        "chars": 1268,
+        "gold": "$470",
+        "position": "early",
+        "present": true
+      },
+      {
+        "arm": "W4",
+        "case_id": "H10",
+        "chars": 1268,
+        "gold": "$470",
+        "position": "early",
+        "present": true
+      },
+      {
+        "arm": "W1",
+        "case_id": "H11",
+        "chars": 1266,
+        "gold": "$507",
+        "position": "middle",
+        "present": true
+      },
+      {
+        "arm": "W4",
+        "case_id": "H11",
+        "chars": 1266,
+        "gold": "$507",
+        "position": "middle",
+        "present": true
+      },
+      {
+        "arm": "W1",
+        "case_id": "H12",
+        "chars": 1263,
+        "gold": "$544",
+        "position": "late",
+        "present": true
+      },
+      {
+        "arm": "W4",
+        "case_id": "H12",
+        "chars": 1263,
+        "gold": "$544",
+        "position": "late",
+        "present": true
+      }
+    ],
+    "w1_present": 12,
+    "w4_present": 12
+  },
+  "gates": {
+    "H1_new_fixture": false,
+    "H2_positions": false,
+    "H3_external": false,
+    "H4_budget": true,
+    "H6_w4_frozen": true
+  },
+  "prereg": "docs/MONEY_HOLDOUT_V1_PREREG.md",
+  "w4_source_sha256": "9023e734b94684bd9fdbb2b413c43b85a9f40ee6862465a45b146e4e4da5a707",
+  "w4_unchanged": true
+}

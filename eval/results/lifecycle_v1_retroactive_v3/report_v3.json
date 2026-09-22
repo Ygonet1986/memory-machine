@@ -1,0 +1,567 @@
+{
+  "fixture": "eval/fixtures/lifecycle_v1",
+  "gates": {
+    "H3-1_trigger_quality": true,
+    "H3-2_recovery": false,
+    "H3-3_precision": true,
+    "H3-4_combined_recall": true,
+    "H3-5_selective": true,
+    "H3-6_no_regression": true,
+    "all_pass": false
+  },
+  "per_probe": [
+    {
+      "coverage_idf": 0.7321,
+      "coverage_plain": 0.5714,
+      "needed": [],
+      "probe_id": "P01",
+      "variants": {
+        "V3-A": {
+          "delivered": [],
+          "fired": false,
+          "found": []
+        },
+        "V3-B": {
+          "delivered": [],
+          "fired": false,
+          "found": []
+        },
+        "V3-C": {
+          "delivered": [],
+          "fired": false,
+          "found": []
+        }
+      }
+    },
+    {
+      "coverage_idf": 0.8155,
+      "coverage_plain": 0.6,
+      "needed": [],
+      "probe_id": "P02",
+      "variants": {
+        "V3-A": {
+          "delivered": [],
+          "fired": false,
+          "found": []
+        },
+        "V3-B": {
+          "delivered": [],
+          "fired": false,
+          "found": []
+        },
+        "V3-C": {
+          "delivered": [],
+          "fired": false,
+          "found": []
+        }
+      }
+    },
+    {
+      "coverage_idf": 0.7376,
+      "coverage_plain": 0.5,
+      "needed": [],
+      "probe_id": "P03",
+      "variants": {
+        "V3-A": {
+          "delivered": [],
+          "fired": false,
+          "found": []
+        },
+        "V3-B": {
+          "delivered": [],
+          "fired": false,
+          "found": []
+        },
+        "V3-C": {
+          "delivered": [],
+          "fired": false,
+          "found": []
+        }
+      }
+    },
+    {
+      "coverage_idf": 0.6465,
+      "coverage_plain": 0.4,
+      "needed": [],
+      "probe_id": "P04",
+      "variants": {
+        "V3-A": {
+          "delivered": [],
+          "fired": false,
+          "found": []
+        },
+        "V3-B": {
+          "delivered": [],
+          "fired": false,
+          "found": []
+        },
+        "V3-C": {
+          "delivered": [
+            "M0002"
+          ],
+          "fired": true,
+          "found": []
+        }
+      }
+    },
+    {
+      "coverage_idf": 0.2995,
+      "coverage_plain": 0.25,
+      "needed": [
+        "M0012"
+      ],
+      "probe_id": "P05",
+      "variants": {
+        "V3-A": {
+          "delivered": [
+            "M0012"
+          ],
+          "fired": true,
+          "found": [
+            "M0012"
+          ]
+        },
+        "V3-B": {
+          "delivered": [
+            "M0012"
+          ],
+          "fired": true,
+          "found": [
+            "M0012"
+          ]
+        },
+        "V3-C": {
+          "delivered": [
+            "M0012"
+          ],
+          "fired": true,
+          "found": [
+            "M0012"
+          ]
+        }
+      }
+    },
+    {
+      "coverage_idf": 1.0,
+      "coverage_plain": 1.0,
+      "needed": [],
+      "probe_id": "P06",
+      "variants": {
+        "V3-A": {
+          "delivered": [],
+          "fired": false,
+          "found": []
+        },
+        "V3-B": {
+          "delivered": [],
+          "fired": false,
+          "found": []
+        },
+        "V3-C": {
+          "delivered": [],
+          "fired": false,
+          "found": []
+        }
+      }
+    },
+    {
+      "coverage_idf": 0.2994,
+      "coverage_plain": 0.2,
+      "needed": [
+        "M0014"
+      ],
+      "probe_id": "P07",
+      "variants": {
+        "V3-A": {
+          "delivered": [
+            "M0014"
+          ],
+          "fired": true,
+          "found": [
+            "M0014"
+          ]
+        },
+        "V3-B": {
+          "delivered": [
+            "M0014"
+          ],
+          "fired": true,
+          "found": [
+            "M0014"
+          ]
+        },
+        "V3-C": {
+          "delivered": [
+            "M0014"
+          ],
+          "fired": true,
+          "found": [
+            "M0014"
+          ]
+        }
+      }
+    },
+    {
+      "coverage_idf": 0.7789,
+      "coverage_plain": 0.5714,
+      "needed": [],
+      "probe_id": "P08",
+      "variants": {
+        "V3-A": {
+          "delivered": [],
+          "fired": false,
+          "found": []
+        },
+        "V3-B": {
+          "delivered": [],
+          "fired": false,
+          "found": []
+        },
+        "V3-C": {
+          "delivered": [],
+          "fired": false,
+          "found": []
+        }
+      }
+    },
+    {
+      "coverage_idf": 0.7862,
+      "coverage_plain": 0.6,
+      "needed": [],
+      "probe_id": "P09",
+      "variants": {
+        "V3-A": {
+          "delivered": [],
+          "fired": false,
+          "found": []
+        },
+        "V3-B": {
+          "delivered": [],
+          "fired": false,
+          "found": []
+        },
+        "V3-C": {
+          "delivered": [],
+          "fired": false,
+          "found": []
+        }
+      }
+    },
+    {
+      "coverage_idf": 0.8369,
+      "coverage_plain": 0.6667,
+      "needed": [],
+      "probe_id": "P10",
+      "variants": {
+        "V3-A": {
+          "delivered": [],
+          "fired": false,
+          "found": []
+        },
+        "V3-B": {
+          "delivered": [],
+          "fired": false,
+          "found": []
+        },
+        "V3-C": {
+          "delivered": [],
+          "fired": false,
+          "found": []
+        }
+      }
+    },
+    {
+      "coverage_idf": 0.7596,
+      "coverage_plain": 0.5,
+      "needed": [],
+      "probe_id": "P11",
+      "variants": {
+        "V3-A": {
+          "delivered": [],
+          "fired": false,
+          "found": []
+        },
+        "V3-B": {
+          "delivered": [],
+          "fired": false,
+          "found": []
+        },
+        "V3-C": {
+          "delivered": [],
+          "fired": false,
+          "found": []
+        }
+      }
+    },
+    {
+      "coverage_idf": 0.9056,
+      "coverage_plain": 0.75,
+      "needed": [],
+      "probe_id": "P12",
+      "variants": {
+        "V3-A": {
+          "delivered": [],
+          "fired": false,
+          "found": []
+        },
+        "V3-B": {
+          "delivered": [],
+          "fired": false,
+          "found": []
+        },
+        "V3-C": {
+          "delivered": [],
+          "fired": false,
+          "found": []
+        }
+      }
+    },
+    {
+      "coverage_idf": 0.0,
+      "coverage_plain": 0.0,
+      "needed": [
+        "M0026"
+      ],
+      "probe_id": "P13",
+      "variants": {
+        "V3-A": {
+          "delivered": [
+            "M0026"
+          ],
+          "fired": true,
+          "found": [
+            "M0026"
+          ]
+        },
+        "V3-B": {
+          "delivered": [
+            "M0026"
+          ],
+          "fired": true,
+          "found": [
+            "M0026"
+          ]
+        },
+        "V3-C": {
+          "delivered": [
+            "M0026"
+          ],
+          "fired": true,
+          "found": [
+            "M0026"
+          ]
+        }
+      }
+    },
+    {
+      "coverage_idf": 0.9056,
+      "coverage_plain": 0.75,
+      "needed": [],
+      "probe_id": "P14",
+      "variants": {
+        "V3-A": {
+          "delivered": [],
+          "fired": false,
+          "found": []
+        },
+        "V3-B": {
+          "delivered": [],
+          "fired": false,
+          "found": []
+        },
+        "V3-C": {
+          "delivered": [],
+          "fired": false,
+          "found": []
+        }
+      }
+    },
+    {
+      "coverage_idf": 0.8518,
+      "coverage_plain": 0.6667,
+      "needed": [],
+      "probe_id": "P15",
+      "variants": {
+        "V3-A": {
+          "delivered": [],
+          "fired": false,
+          "found": []
+        },
+        "V3-B": {
+          "delivered": [],
+          "fired": false,
+          "found": []
+        },
+        "V3-C": {
+          "delivered": [],
+          "fired": false,
+          "found": []
+        }
+      }
+    },
+    {
+      "coverage_idf": 0.7638,
+      "coverage_plain": 0.5,
+      "needed": [],
+      "probe_id": "P16",
+      "variants": {
+        "V3-A": {
+          "delivered": [],
+          "fired": false,
+          "found": []
+        },
+        "V3-B": {
+          "delivered": [],
+          "fired": false,
+          "found": []
+        },
+        "V3-C": {
+          "delivered": [],
+          "fired": false,
+          "found": []
+        }
+      }
+    },
+    {
+      "coverage_idf": 0.7283,
+      "coverage_plain": 0.6667,
+      "needed": [],
+      "probe_id": "P17",
+      "variants": {
+        "V3-A": {
+          "delivered": [],
+          "fired": false,
+          "found": []
+        },
+        "V3-B": {
+          "delivered": [],
+          "fired": false,
+          "found": []
+        },
+        "V3-C": {
+          "delivered": [],
+          "fired": false,
+          "found": []
+        }
+      }
+    },
+    {
+      "coverage_idf": 0.3869,
+      "coverage_plain": 0.2857,
+      "needed": [],
+      "probe_id": "P18",
+      "variants": {
+        "V3-A": {
+          "delivered": [],
+          "fired": true,
+          "found": []
+        },
+        "V3-B": {
+          "delivered": [],
+          "fired": true,
+          "found": []
+        },
+        "V3-C": {
+          "delivered": [],
+          "fired": true,
+          "found": []
+        }
+      }
+    },
+    {
+      "coverage_idf": 0.5616,
+      "coverage_plain": 0.6,
+      "needed": [
+        "M0029"
+      ],
+      "probe_id": "P20",
+      "variants": {
+        "V3-A": {
+          "delivered": [],
+          "fired": false,
+          "found": []
+        },
+        "V3-B": {
+          "delivered": [],
+          "fired": false,
+          "found": []
+        },
+        "V3-C": {
+          "delivered": [],
+          "fired": false,
+          "found": []
+        }
+      }
+    }
+  ],
+  "probes_needing_fallback": 4,
+  "probes_total": 19,
+  "thresholds": {
+    "coverage_idf": 0.5,
+    "margin": 0.5,
+    "min_token_len": 4,
+    "top_k": 5
+  },
+  "v2_reference": {
+    "combined_recall_occurrences": 0.9524,
+    "counters": {
+      "fallback_not_triggered": 14,
+      "fallback_triggered": 5,
+      "irrelevant_retroactive_hits": 1,
+      "recoverable_false_negative": 4,
+      "retroactively_found": 3,
+      "retroactively_missed": 1
+    },
+    "fallback_rate": 0.2632,
+    "retroactive_precision_at_k": 0.75,
+    "retroactive_recovery_rate": 0.75,
+    "trigger_quality": 0.75
+  },
+  "variants": {
+    "V3-A": {
+      "combined_recall_occurrences": 0.9524,
+      "counters": {
+        "fallback_not_triggered": 15,
+        "fallback_triggered": 4,
+        "irrelevant_retroactive_hits": 0,
+        "recoverable_false_negative": 4,
+        "retroactively_found": 3,
+        "retroactively_missed": 1
+      },
+      "fallback_rate": 0.2105,
+      "retroactive_precision_at_k": 1.0,
+      "retroactive_recovery_rate": 0.75,
+      "trigger_quality": 0.75
+    },
+    "V3-B": {
+      "combined_recall_occurrences": 0.9524,
+      "counters": {
+        "fallback_not_triggered": 15,
+        "fallback_triggered": 4,
+        "irrelevant_retroactive_hits": 0,
+        "recoverable_false_negative": 4,
+        "retroactively_found": 3,
+        "retroactively_missed": 1
+      },
+      "fallback_rate": 0.2105,
+      "retroactive_precision_at_k": 1.0,
+      "retroactive_recovery_rate": 0.75,
+      "trigger_quality": 0.75
+    },
+    "V3-C": {
+      "combined_recall_occurrences": 0.9524,
+      "counters": {
+        "fallback_not_triggered": 14,
+        "fallback_triggered": 5,
+        "irrelevant_retroactive_hits": 1,
+        "recoverable_false_negative": 4,
+        "retroactively_found": 3,
+        "retroactively_missed": 1
+      },
+      "fallback_rate": 0.2632,
+      "retroactive_precision_at_k": 0.75,
+      "retroactive_recovery_rate": 0.75,
+      "trigger_quality": 0.75
+    }
+  }
+}

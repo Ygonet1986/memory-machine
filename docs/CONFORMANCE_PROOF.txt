@@ -308,6 +308,7 @@ tests/test_lifecycle_fixture.py::test_hard_cases_are_present
 tests/test_lifecycle_fixture.py::test_regeneration_is_byte_identical
 tests/test_lifecycle_report.py::test_report_runs_and_keeps_the_frozen_contract
 tests/test_lifecycle_retroactive_v2.py::test_v2_runs_deterministically_with_the_frozen_variants
+tests/test_lifecycle_retroactive_v3.py::test_v3_runs_deterministically_with_the_frozen_variants
 tests/test_llm.py::test_bare_object
 tests/test_llm.py::test_fenced_json_block
 tests/test_llm.py::test_leading_prose
@@ -492,4 +493,4 @@ tests/test_whiteboard.py::test_size_and_consolidation_trigger
 tests/test_whiteboard.py::test_roundtrip
 tests/test_whiteboard.py::test_render
 
-493 tests collected in 0.07s
+494 tests collected in 0.07s

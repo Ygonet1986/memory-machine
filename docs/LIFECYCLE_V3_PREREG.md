@@ -83,3 +83,37 @@ top_k=5, tie-break score/seq/memory_id).
 - The margin should remove single-irrelevant deliveries when a clearly better
   candidate exists; it cannot help when the irrelevant record *is* the best
   retro candidate (that requires a candidacy floor, a v4 hypothesis).
+
+## Execution record (2026-09-22)
+
+Run `eval/results/lifecycle_v1_retroactive_v3/report_v3.json` (fixture
+`e1021c20…`, v1 projection, one deterministic run).
+
+| variant | trigger quality | fallback rate | recovery | precision@k | combined recall |
+|---|---:|---:|---:|---:|---:|
+| V3-A (IDF, no margin) | 0.750 | 0.210 | 0.750 | 1.000 | 0.952 |
+| V3-B (primary) | 0.750 | 0.210 | 0.750 | 1.000 | 0.952 |
+| V3-C (v2 signal + margin) | 0.750 | 0.263 | 0.750 | 0.750 | 0.952 |
+| v2 T3 (reference) | 0.750 | 0.263 | 0.750 | 0.750 | 0.952 |
+
+**Gates (V3-B):** H3-1 PASS · H3-2 **FAIL** (recovery 0.75 < 0.80) · H3-3
+**PASS** (precision@k 1.000) · H3-4 PASS (0.952 ≥ 0.93) · H3-5 PASS (0.210) ·
+H3-6 PASS (no regression) ⇒ `all_pass = false`.
+
+**What the change did, measured:**
+
+1. **Noise eliminated.** The IDF signal removed the unnecessary P04 trigger
+   (fallback 0.263 → 0.210) and, with the margin, every delivered candidate was
+   relevant: precision@k 0.750 → **1.000**, `irrelevant_retroactive_hits` 1 → 0.
+2. **Recovery unchanged.** The single remaining miss is P20 (needed M0029):
+   `coverage_idf = 0.562` — IDF only reduced it from 0.600 to 0.562, because in
+   this small probe corpus even generic words ("combinado", "sexta") carry high
+   IDF when they appear in few documents. The wrong active records still cover
+   a majority of the weighted question.
+
+**Verdict.** Shadow-only per the stop rules (one gate fails). The architecture
+now passes **5 of 6** gates; the only open failure is coverage false-confidence
+on a generic-word question. Recorded v4 hypothesis space (new pre-registration
+required): a comparative coverage signal (event-log best score vs active best
+score, which requires maintaining a cheap lexical index over the event log) or
+a mandatory-coverage rule over the question's highest-IDF tokens.

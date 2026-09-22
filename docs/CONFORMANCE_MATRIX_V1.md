@@ -1,151 +1,145 @@
-# Memory Machine — Matriz de Conformidade v1
+# Memory Machine — Matriz de Conformidade v1.1 (corrigida)
 
-Versão: 1.0 · Data: 2026-09-21 · HEAD: `9d9a235` · Spec: `docs/NORMATIVE_SPEC_V1.md` (e2df0f8)
+Versão: 1.1 · Data: 2026-09-21 · HEAD: `9d9a235`+correções · Spec: `docs/NORMATIVE_SPEC_V1.md`
 
-**Método.** Suíte coletada e executada neste HEAD: **440 testes, 440 passed**
-(`PYTHONPATH=src python3 -m pytest -q`). As referências de teste abaixo são
-node IDs reais do repositório (`arquivo::teste`). Onde não existe teste direto,
-o status diz isso — nenhuma garantia foi inferida por narrativa.
+**Correções aplicadas nesta revisão** (auditoria documental externa):
+N10 resolvido (document layer é camada de ingestão *shipped*, não experimental);
+N1/N2/N4/N6/N9 com redação restrita e testes diretos novos; N8 com testes na
+suíte; gate reescrito em G1–G8 com métrica/limiar/prova/comando; regra de
+contagem de testes não frágil; referências declaram individual vs agregado.
 
-**Legenda de status**
+**Método (não frágil).** A prova é: **toda a suíte coletada passa, nenhum
+teste esperado desaparece e um piso mínimo evita queda silenciosa.** Nesta
+revisão: `pytest -q` → **460 passed** (440 + 20 novos destas correções). O
+manifesto completo de node IDs está em `docs/CONFORMANCE_PROOF.txt` (gerado
+por `python3 -m pytest --collect-only -q` neste commit).
 
-| Status | Significado |
+**Referências.** Node IDs individuais (`arquivo::teste`) são reais; quando a
+referência é agregada (`arquivo.py (N testes)`), ela identifica o módulo, não
+um node ID — sem alegação individual.
+
+**Legenda**
+
+| Status | Significado (mecânico) |
 |---|---|
-| **CONFORME** | código existe **e** há teste automatizado direto no repo |
-| **PARCIAL** | código existe; cobertura indireta, incompleta ou fora da suíte |
-| **INTENÇÃO** | norma-alvo da spec, ainda sem implementação |
-| **BLOQUEADO** | não avançar (ex.: congelado por gate) |
+| **CONFORME** | código existe **e** teste direto na suíte `tests/` (pytest/CI) |
+| **PARCIAL** | código existe; cobertura indireta, parcial ou de processo |
+| **INTENÇÃO** | norma-alvo sem implementação |
+| **BLOQUEADO** | congelado por gate (Trilepsia) |
 
 ---
 
-## 1. Invariantes N1–N14
+## 1. Invariantes N1–N14 (redações restritas)
 
-| # | Norma | Código | Teste(s) de referência | Status |
+| # | Norma (redação corrigida) | Código | Testes | Status |
 |---|---|---|---|---|
-| N1 | Fita é a única fonte da verdade | `tape.py`, `coordinator.py` | `test_tape.py::test_append_is_append_only`; `test_graph_hooks.py::test_projection_never_touches_the_tape_bytes` | **CONFORME** |
-| N2 | Projeções reconstruíveis a partir da fita/originais | `graph.py`, `documents.py`, `ingest_document.py` | `test_document_rebuild.py::test_round_trip_rebuild_reproduces_projection`; `::test_plain_build_graph_keeps_graph_v3_projection` | **CONFORME** |
-| N3 | Evidência com caminho até a memória (e ao original) | `graph_recall.py`, `graph.py` (explain) | `test_graph_recall.py::test_relation_provenance_maps_to_memory`; `test_document_rebuild.py::test_explain_shows_all_evidence_and_original_text` | **CONFORME** |
-| N4 | Anotação ≠ evidência (payload fornece o fato) | `payload.py`, `main_chatbot.py` | `test_main_chatbot.py::test_extra_context_is_in_prompt_but_not_whiteboard`; medição H2 (manual §40.10) | **CONFORME** |
+| N1 | Projeções **selecionam**; toda evidência persistente atribuída à MM é **reidratável até a fita ou o original preservado** | `tape.py`, `payload.py`, `graph*.py`, `documents.py` | `test_provenance_e2e.py::test_every_graph_row_points_back_to_tape_and_original`; `::test_rehydrated_payload_is_exact_and_traceable`; `test_graph_hooks.py::test_projection_never_touches_the_tape_bytes` | **CONFORME** (escopo restrito) |
+| N2 | Toda projeção **implementada** (índice de views, grafo, documentos) é reconstruível; a projeção T2 da Trilepsia não existe (fora de escopo) | `views.py`, `graph.py`, `documents.py` | `test_migration_compat.py::test_views_index_is_a_reproducible_projection`; `test_document_rebuild.py::test_round_trip_rebuild_reproduces_projection`; `::test_plain_build_graph_keeps_graph_v3_projection` | **CONFORME** (escopo declarado) |
+| N3 | Evidência com caminho até a memória (e ao original) | `graph_recall.py`, `graph.py` | `test_graph_recall.py::test_relation_provenance_maps_to_memory`; `test_provenance_e2e.py` | **CONFORME** |
+| N4 | Anotações são **sinais de seleção**; quando `evidence_payload≠off`, fatos atribuídos à memória vêm do **payload reidratado** (nunca só da nota) | `payload.py`, `main_chatbot.py` | `test_payload.py::test_run_appends_payload_to_context`; `test_main_chatbot.py::test_extra_context_is_in_prompt_but_not_whiteboard` | **CONFORME** (payload ligado; modo legado por notas = limitação declarada) |
 | N5 | Payload é efêmero (não acumula no quadro) | `payload.py` | `test_payload.py::test_recall_payload_is_not_persisted` | **CONFORME** |
-| N6 | Orçamento de contexto é limite duro | `payload.py`, `whiteboard.py` | `test_payload.py::test_payload_respects_budget_and_relevance`; `test_whiteboard.py::test_merge_ranks_and_applies_budget` | **CONFORME** |
-| N7 | Segredos bloqueiam toda escrita, inclusive envelopes | `secrets.py`, `trilepsia.py` | `test_secrets.py` (7 testes); `test_trilepsia.py::test_envelope_is_secret_scanned`; `test_document_ingest.py::test_secret_chunk_skipped_without_false_provenance` | **CONFORME** |
-| N8 | Spans exatos com offsets reversíveis | `eval/evidence_cards.py` | **nenhum teste na suíte pytest**; validação existe só no `--self-check`/`--report` de `eval/` | **PARCIAL** |
-| N9 | Atualizar = append (nunca editar conteúdo) | `tape.py` (status), `consolidate.py` | `test_tape.py::test_status_default_active`; `test_coordinator.py::test_rollup_derived_from_and_rehydrate` | **CONFORME** |
-| N10 | Camadas experimentais off e byte-equivalentes quando off | `config.py` | `test_config.py::test_graph_defaults_are_off_and_consistent`; `test_payload.py::test_payload_window_off_is_unchanged`; `test_attachments.py::test_ingest_records_byte_equivalent_without_new_fields` | **CONFORME** |
-| N11 | Pré-registro congelado antes de executar | processo (`docs/`) | sem teste; evidência nos artefatos (`PLASTICITY_V1`, `COMPOSITION_V1`, `TRILEPSIA_*`) | **PARCIAL** |
+| N6 | **No modo `budgeted`**, o payload (cabeçalhos incluídos) não excede o orçamento; o modo `full` não dá essa garantia (caveat do primeiro bloco > cap) | `payload.py` | `test_payload.py::test_payload_respects_budget_and_relevance`; `test_provenance_e2e.py` (soma de `used_chars` ≤ 4000) | **CONFORME** (budgeted) |
+| N7 | Segredos bloqueiam toda escrita, inclusive envelopes | `secrets.py`, `trilepsia.py` | `test_secrets.py` (7); `test_trilepsia.py::test_envelope_is_secret_scanned`; `test_document_ingest.py::test_secret_chunk_skipped_without_false_provenance` | **CONFORME** |
+| N8 | Spans exatos com offsets reversíveis | `eval/evidence_cards.py` | `test_evidence_cards.py` (5: substring exata, offsets reversíveis, paráfrase inválida, budget, determinismo) | **CONFORME** (agora na suíte) |
+| N9 | **Imutabilidade de conteúdo**: campos factuais nunca mudam; `status` é metadado administrativo; correção = novo registro; `delete` remove | `tape.py` | `test_tape_immutability.py` (4); `test_tape.py::test_append_is_append_only` | **CONFORME** |
+| N10 | **Recall/experimentais off por padrão**; document layer é camada de **ingestão shipped** (creation ON, recall OFF — intencional e testado) | `config.py` | `test_config.py::test_experimental_defaults_are_off`; `::test_graph_defaults_are_off_and_consistent` (inclui `document_graph_enabled is True`) | **CONFORME** (classificação corrigida) |
+| N11 | Pré-registro congelado antes de executar | processo (`docs/`) | sem teste; artefatos `PLASTICITY_V1`, `COMPOSITION_V1`, `TRILEPSIA_*` | **PARCIAL** |
 | N12 | Seleção no braço real não lê gold/verdicts | harnesses `eval/` | sem teste que audite os harnesses | **PARCIAL** |
-| N13 | Payload builder determinístico, sem LLM | `payload.py` | `test_payload.py` (11 testes; sem cliente LLM no caminho) | **CONFORME** |
+| N13 | Payload builder determinístico, sem LLM | `payload.py` | `test_payload.py::test_payload_respects_budget_and_relevance` (sem cliente) | **CONFORME** |
 | N14 | Piso de oscilação medido como limite mínimo de alegação | processo (`eval/`) | sem teste/CI; medições registradas (U4.2; E-lines) | **INTENÇÃO** |
 
-**Contagem: 10 CONFORME · 3 PARCIAL · 1 INTENÇÃO · 0 BLOQUEADO.**
+**Contagem: 11 CONFORME · 2 PARCIAL · 1 INTENÇÃO.**
 
 ## 2. Schemas e fluxos
 
-| Norma | Código | Testes | Status |
-|---|---|---|---|
-| Schema da fita (campos/status/id) | `tape.py` | `test_tape.py` (12) | **CONFORME** |
-| Schema do quadro (incl. merge/orçamento) | `whiteboard.py` | `test_whiteboard.py` (7) | **CONFORME** |
-| Schema do payload | `payload.py` | `test_payload.py` (11) | **CONFORME** |
-| Registry de documentos + originais (hash) | `documents.py`, `ingest_document.py` | `test_document_ingest.py` (10); `test_document_rebuild.py` (11) | **CONFORME** |
-| Grafo (meta/entities/relations/proveniência) | `graph.py`, `graph_extract.py`, `graph_resolve.py` | `test_graph.py`, `test_graph_v2.py`, `test_graph_extract.py`, `test_graph_resolve.py`, `test_graph_f4.py`, `test_graph_hooks.py` (≈70) | **CONFORME** |
-| Trilepsia (envelope/V/queues/validador) | `trilepsia.py` | `test_trilepsia.py` (14) | **CONFORME** (camada congelada por gate) |
-| Versão de schema + migrações | — | — | **INTENÇÃO** (spec §14) |
-| Fluxo de escrita (tape→views→projeções) | `coordinator.py`, `attachments.py` | `test_coordinator.py`, `test_attachments.py` (9), `test_graph_hooks.py` | **CONFORME** |
-| Fluxo de recall (plan→agents→quadro→payload) | `coordinator.py`, `view_router`/`routing` | `test_coordinator.py::test_recall_returns_whiteboard`; `test_view_router.py` (13); `test_routing.py` (30) | **CONFORME** |
-| Fluxo de checkpoint (grava volta) | `coordinator.py` | `test_coordinator.py::test_checkpoint_writes_back` | **CONFORME** |
-
-## 3. Defaults e configuração limpa
-
-| Norma | Teste | Status |
+| Norma | Testes | Status |
 |---|---|---|
-| Defaults válidos e normalizados | `test_config.py::test_defaults_are_valid`; `::test_clamps_capacity_and_budgets`; `::test_non_int_values_fall_back` | **CONFORME** |
-| Experimentais off (grafo; janela; payload window; trilepsia) | `test_config.py::test_graph_defaults_are_off_and_consistent`; `test_app_graph.py::test_graph_settings_default_to_off`; `test_payload.py::test_config_payload_window_defaults_off` | **CONFORME** |
-| Chaves desconhecidas ignoradas (compat) | `test_config.py::test_from_dict_ignores_unknown_keys` | **CONFORME** |
-| Defaults = arquitetura principal? | — (spec §1 marca `[CONFLITO]`) | **INTENÇÃO** (gate de default §8) |
+| Schema da fita (campos/status/id) | `test_tape.py` (12); `test_tape_immutability.py` (4) | **CONFORME** |
+| Schema do quadro + boards por dimensão | `test_whiteboard.py` (7); `test_dimension_boards.py` (4) | **CONFORME** |
+| Schema do payload | `test_payload.py` (11) | **CONFORME** |
+| Registro de documentos + originais (hash) | `test_document_ingest.py` (10); `test_document_rebuild.py` (11) | **CONFORME** |
+| Grafo (meta/entidades/relações/proveniência) | `test_graph*.py` (agregado: ≈70) | **CONFORME** |
+| Trilepsia (envelope/V/queues) | `test_trilepsia.py` (14) | **CONFORME** (camada congelada) |
+| Versão de schema + migrações | — | **INTENÇÃO** |
+| Fluxo de escrita | `test_coordinator.py`, `test_attachments.py` (9), `test_graph_hooks.py` (13) | **CONFORME** |
+| Fluxo de recall | `test_coordinator.py::test_recall_returns_whiteboard`; `test_view_router.py` (13); `test_routing.py` (30) | **CONFORME** |
+| Fluxo de checkpoint | `test_coordinator.py::test_checkpoint_writes_back` | **CONFORME** |
 
-## 4. Retenção, contradição/tempo, segurança, escala
+## 3. Defaults (teste de configuração limpa)
 
-| Norma | As-is | Alvo | Status |
-|---|---|---|---|
-| Níveis event log / episódico / semântico | turno vira `memory` (dedupe) + status + rollup | separar níveis e retenção | **INTENÇÃO** |
-| Rollup por idade | `test_coordinator.py::test_rollup_archives_old_records` | rollup semântico (schema+scope+validade) | **PARCIAL** |
-| Validade temporal | `created_at`, `superseded`, H5' medido | `valid_from/until`, `asserted_by`, confianças separadas | **PARCIAL** |
-| Contradição (`contradicts`/`supports`/`verification_status`) | Trilepsia T1 (congelada) tem `state/assumptions` | relações append-only na fita | **INTENÇÃO** |
-| Segurança: scanner + isolamento de contexto externo | `test_secrets.py`; `test_main_chatbot.py::test_extra_context_is_in_prompt_but_not_whiteboard` | sensibilidade/criptografia/injection | **PARCIAL** |
-| Chave só no Keychain (app) | `app/keychain.py` + fluxo do app | — | **CONFORME** (código; app fora do pytest) |
-| Escala 10k/100k/1M medida | — | benchmark reproduzível | **INTENÇÃO** |
+`test_config.py::test_defaults_are_valid`, `::test_clamps_capacity_and_budgets`,
+`::test_non_int_values_fall_back`, `::test_experimental_defaults_are_off`,
+`::test_graph_defaults_are_off_and_consistent` → **CONFORME**.
+Default-vs-arquitetura-principal permanece **INTENÇÃO** (gate G1–G8).
 
-## 5. Matriz de modos (combinações mínimas)
+## 4. Migração e compatibilidade
 
-| Modo | Config | Testes que cobrem | Status |
-|---|---|---|---|
-| **Legado** | `agent_mode=group`, `whiteboard_mode=single`, `attention_mode=off`, `evidence_payload=off`, `graph=off` | `test_coordinator.py` (14), `test_groups.py` (9), `test_agents.py` (15), `test_tape.py` (12) | **CONFORME** |
-| **Views sem atenção** | `agent_mode=view` + roteador lexical/LLM | `test_view_router.py` (13), `test_routing.py` (30) | **CONFORME** |
-| **Views + atenção** | `attention_mode=prior|context|state` | `test_attention.py` (12: decay/gate/anáfora/troca de tópico) | **CONFORME** |
-| **Views + boards** | `whiteboard_mode=dimension` | roteamento por dimensão coberto (`test_routing.py`); persistência/merge de `Whiteboard.boards` **sem teste direto** | **PARCIAL** |
-| **Payload off/budgeted/janela** | `evidence_payload=off|budgeted|full`; `evidence_payload_window` | `test_payload.py` (11) | **CONFORME** |
-| **Grafo off/on (+documento)** | `graph_enabled`; `document_graph_enabled` | `test_graph_hooks.py` (13), `test_app_graph.py` (9), `test_document_*` (21) | **CONFORME** |
-| **Trilepsia** | `trilepsia_*` | `test_trilepsia.py` (14) | **CONFORME** (congelada; off) |
-
-## 6. Migração e compatibilidade (instalações antigas)
-
-| Cenário | Cobertura | Status |
+| Cenário | Teste | Status |
 |---|---|---|
-| Config antigo com chaves desconhecidas | `test_config.py::test_from_dict_ignores_unknown_keys` | **CONFORME** |
-| Registro da fita sem campos novos (ex.: `trilepsia`) | `MemoryRecord.from_dict` tolerante; `test_tape.py` | **CONFORME** (por leitura tolerante; sem teste explícito de fita antiga com campo ausente) |
-| Anexos ingeridos antes dos campos novos | `test_attachments.py::test_ingest_records_byte_equivalent_without_new_fields` | **CONFORME** |
-| Grafo/doc layer desligado preserva projeção v3 | `test_document_rebuild.py::test_plain_build_graph_keeps_graph_v3_projection` | **CONFORME** |
-| Troca de `agent_mode`/`whiteboard_mode` sem perda/reescrita de dados | — | **INTENÇÃO** (teste de migração exigido pelo gate §8) |
-| Migração de schema da fita (versões) | — | **INTENÇÃO** |
+| Fita antiga sem campos novos | `test_migration_compat.py::test_old_tape_line_without_new_fields_loads` | **CONFORME** |
+| Campos desconhecidos / linha corrompida | `::test_unknown_fields_and_broken_lines_are_tolerated` | **CONFORME** |
+| Quadro antigo sem boards | `test_dimension_boards.py::test_legacy_whiteboard_without_boards_loads` | **CONFORME** |
+| Troca de modo não escreve na fita | `::test_mode_switch_is_read_only_on_the_tape` | **CONFORME** (estrutural: recall não grava) |
+| Anexos pré-campos-novos byte-equivalentes | `test_attachments.py::test_ingest_records_byte_equivalent_without_new_fields` | **CONFORME** |
+| Grafo v3 preservado com doc layer off | `test_document_rebuild.py::test_plain_build_graph_keeps_graph_v3_projection` | **CONFORME** |
+| Migração de schema versionado | — | **INTENÇÃO** |
 
-## 7. Harness público congelado (requisitos antes de revalidar defaults)
+## 5. Matriz de modos
 
-1. Datasets com hash fixado (LongMemEval limpo; LoCoMo; fixtures sintéticos com
-   seeds) + dados autorais.
-2. Braços: `no_memory | bm25 | dense(≥1) | agents_full | agents_view(+payload)`.
-3. Prompts, modelos, juiz (prompt congelado), orçamento e N=3 congelados antes
-   de rodar; juiz cego; ≥25% segunda passada com concordância publicada.
-4. Modo `--mock` (cliente determinístico) para CI sem chave.
-5. Saída: JSONL bruto + `run_manifest.json` (commits/hashes) + tabela com
-   ressalvas.
-   → **Status atual: PARCIAL** (harnesses existem; falta `--mock` e empacotamento).
+| Modo | Testes | Status |
+|---|---|---|
+| Legado (group/single/off/off) | `test_coordinator.py` (14), `test_groups.py` (9), `test_agents.py` (15) | **CONFORME** |
+| Views sem atenção | `test_view_router.py` (13), `test_routing.py` (30) | **CONFORME** |
+| Views + atenção | `test_attention.py` (12) | **CONFORME** |
+| Views + boards | `test_dimension_boards.py` (4) | **CONFORME** |
+| Payload off/budgeted/janela | `test_payload.py` (11) | **CONFORME** |
+| Grafo off/on (+documento) | `test_graph_hooks.py` (13), `test_app_graph.py` (9), `test_document_*` (21) | **CONFORME** |
+| Trilepsia | `test_trilepsia.py` (14) | **CONFORME** (congelada, off) |
 
-## 8. Gate para mudança de defaults (congelado)
+## 6. Gate para mudança de defaults — G1–G8
 
-Não alterar defaults (`agent_mode`, `whiteboard_mode`, `attention_mode`,
-`evidence_payload`) antes de **todos**:
+| # | Critério | Métrica/limiar | Prova exigida | Comando de reprodução | Status |
+|---|---|---|---|---|---|
+| G1 | Sem regressão significativa de resposta | ledger pareado; net acima do piso medido no fixture congelado; regra: net > piso×N (sem teste estatístico além de binomial reportado) | ledger + piso medido | `python3 eval/... --mock|--live` (harness público) | INTENÇÃO |
+| G2 | Evidence recall geral | ≥ 0,90 (média) | tabela por braço | idem | INTENÇÃO |
+| G3 | Evidence recall de composição | ≥ 0,85 e sem categoria acima do piso de regressão | tabela por categoria | idem | INTENÇÃO |
+| G4 | Categorias críticas | temporal ≥ baseline − piso; nenhuma categoria com regressão > piso | tabela por categoria | idem | INTENÇÃO |
+| G5 | Custo online | `calls_online` ≤ 6 por turno (roteador+agentes+metacognição+answerer); `calls_system` reportado separado (judge/embeddings) | telemetria do harness | idem | INTENÇÃO |
+| G6 | Latência | p50 ≤ 15 s **e p95 declarado** (limite a definir com dados) | p50/p95 | idem | INTENÇÃO |
+| G7 | Zero perda de dados na migração | fita byte-idêntica ao trocar de modo; testes de migração verdes | testes de migração | `pytest tests/test_migration_compat.py` | PARCIAL (estrutural ok; falta harness) |
+| G8 | Rollback reproduzível + documentação | uma chave de config volta ao legado; guia + changelog | doc + teste | manual | INTENÇÃO |
 
-1. nenhuma regressão significativa de resposta (ledger pareado; net acima do
-   piso medido no fixture público);
-2. evidence recall ≥ 0.90 no harness público (média) e ≥ 0.85 em composição;
-3. custo: calls/query ≤ 6 e latência p50 ≤ 15 s por turno (medidos);
-4. zero perda/reescrita de dados na migração (teste de migração verde);
-5. rollback documentado (uma chave de config volta ao legado);
-6. guia de migração compreensível + changelog.
-   → **Status: INTENÇÃO** (critérios definidos aqui; execução pendente).
+## 7. L1–L10 como tarefas verificáveis
 
-## 9. Lacunas L1–L10 como tarefas verificáveis
-
-| # | Lacuna | Critério de conclusão (verificável) | Evidência exigida |
+| # | Lacuna | Critério de conclusão | Evidência |
 |---|---|---|---|
-| L1 | Empacotamento | `pip install memory-machine` em venv limpo; `memory-cli --help` e `python -m memory_machine init` funcionam; plugin opencode instalado por script do repo | CI matrix + smoke log |
-| L2 | Defaults vs arquitetura principal | §8 cumprido; defaults alterados ou conflito documentado em README | ledger + decisão |
-| L3 | Contradição/validade | schema + testes adversariais (preferências conflitantes, validade por intervalo, correção parcial) | testes novos verdes |
-| L4 | Níveis de retenção | testes de ciclo de vida (event log expira; semântico persiste) | testes + doc |
-| L5 | Segurança alvo | níveis de sensibilidade + criptografia em repouso + exclusão verificável + injection guard em anexos | testes adversariais + threat model |
-| L6 | Escala | benchmark 1k/10k/100k com p50/p95/p99, calls, tokens, custo, rebuild | script + números publicados |
-| L7 | Ablações checklist/metacognição | braços V1/V2 com ledger pareado (piso medido) | resultado + doc |
-| L8 | Tagging corrigível | `tag_confidence/tag_source/tag_version` + retagging testado | schema + testes |
-| L9 | Rollup semântico | rollup por `schema+scope+validity` preservando estados | testes + resultado |
-| L10 | CI + suíte pública | GitHub Actions (3 SOs) verde com 440 testes + smoke `--mock` | workflow + badge |
+| L1 | Empacotamento | `pip install` em venv limpo; `memory-cli --help`; `python -m memory_machine init`; versão única | CI + smoke log |
+| L2 | Defaults vs principal | G1–G8 cumpridos; decisão registrada | ledger + decisão |
+| L3 | Contradição/validade | schema + testes adversariais | testes novos |
+| L4 | Níveis de retenção | testes de ciclo de vida | testes + doc |
+| L5 | Segurança alvo | sensibilidade/criptografia/injection | testes + threat model |
+| L6 | Escala | benchmark 1k/10k/100k (p50/p95, calls, custo, rebuild) | script + números |
+| L7 | Ablações checklist/metacognição | braços V1/V2 com ledger pareado | resultado |
+| L8 | Tagging corrigível | `tag_confidence/version` + retagging | schema + testes |
+| L9 | Rollup semântico | por `schema+scope+validity` | testes |
+| L10 | CI + suíte pública | Actions 3 SOs; **toda a suíte coletada passa; nenhum teste esperado desaparece; piso mínimo anti-queda silenciosa**; wheel artifact; modo `--mock` | workflow + badge |
 
-## 10. Leitura
+## 8. Harness público congelado (faltante)
 
-- A base **testável é forte**: 10 de 14 invariantes têm teste direto; a suíte
-  cobre todos os schemas, os três fluxos e a matriz de modos (exceto boards).
-- As **garantias científicas de processo** (N11/N12/N14) e a **validação de
-  span fora da suíte** (N8) são os pontos mais fracos — são exatamente os que
-  transformam "intenção" em auditabilidade de terceiros.
-- As **lacunas de produto** (L1/L10) continuam sendo as críticas para
-  publicação; L2–L9 dependem delas (sem CI não há prova executável da spec).
-- Nada de novo precisa ser medido agora para L1/L10: são engenharia e processo.
+Datasets com hash; braços `no_memory|bm25|dense|agents_full|agents_view`;
+prompts/juiz/orçamento/N congelados; juiz cego + segunda passada; `--mock` para
+CI; JSONL + manifest. **Status: PARCIAL** (harnesses existem; falta `--mock`,
+empacotamento e o fixture público único).
+
+## 9. Leitura
+
+- Após as correções, **11 de 14 invariantes têm prova direta** (o que faltava
+  era exatamente span/board/imutabilidade/migração — agora cobertos).
+- O que resta **não é código**: N11/N12/N14 são garantias de **processo** que
+  precisam de CI/auditoria de harness para virarem prova executável (entram em
+  L10).
+- O gate G1–G8 está operacional (métricas, limiares, provas e comandos), com
+  `calls_online` vs `calls_system` e p95 incluídos.
+- N10 está resolvido: document layer é camada **shipped** de ingestão
+  (creation ON, recall OFF), não experimental — e isso agora está fixado por
+  teste.

@@ -131,6 +131,9 @@ evaluation is a separate, non-required workflow.
   proofs live (releases + repository, never only CI artifacts).
 - [docs/ROADMAP.md](docs/ROADMAP.md) — the promise and the application
   progression (project memory first, personal longitudinal memory last).
+- [docs/EVIDENCE_PORTFOLIO_IDEAS.md](docs/EVIDENCE_PORTFOLIO_IDEAS.md) —
+  recorded proposals (typed evidence portfolio, versioned claims,
+  contradictions, planner, receipt); not scheduled.
 - Closure records: [docs/LIFECYCLE_CLOSURE.md](docs/LIFECYCLE_CLOSURE.md),
   [docs/TWO_TIER_CLOSURE.md](docs/TWO_TIER_CLOSURE.md),
   [docs/ADMISSION_SYNTHETIC_CLOSURE.md](docs/ADMISSION_SYNTHETIC_CLOSURE.md),

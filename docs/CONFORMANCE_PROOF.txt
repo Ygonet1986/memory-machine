@@ -310,6 +310,9 @@ tests/test_migration_compat.py::test_old_tape_line_without_new_fields_loads
 tests/test_migration_compat.py::test_unknown_fields_and_broken_lines_are_tolerated
 tests/test_migration_compat.py::test_mode_switch_is_read_only_on_the_tape
 tests/test_migration_compat.py::test_views_index_is_a_reproducible_projection
+tests/test_mock_guard.py::test_mock_requires_explicit_env
+tests/test_mock_guard.py::test_mock_is_marked_and_warns
+tests/test_mock_guard.py::test_env_mock_does_not_replace_direct_live_clients
 tests/test_multi_tapes.py::test_core_two_tapes_grow_agents_independently
 tests/test_multi_tapes.py::test_core_tapes_do_not_leak_between_topics
 tests/test_multi_tapes.py::test_backend_switching_loads_correct_tape
@@ -463,4 +466,4 @@ tests/test_whiteboard.py::test_size_and_consolidation_trigger
 tests/test_whiteboard.py::test_roundtrip
 tests/test_whiteboard.py::test_render
 
-464 tests collected in 0.06s
+467 tests collected in 0.06s

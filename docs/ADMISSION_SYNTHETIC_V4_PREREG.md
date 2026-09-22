@@ -84,3 +84,38 @@ a v4 == v3 invariant where no eligible correction exists), proof regenerated,
 one primary run plus the determinism rerun, execution record appended, all
 committed together.
 
+
+## Execution record (2026-09-22)
+
+Recorded run on the frozen v1 sample (hash `f61262d3...`), report at
+`eval/results/admission_synthetic_v4/report.json`; determinism rerun
+identical. Superseded records removed (P3v4): 30.
+
+| policy | availability | precision | delivered | max/case | abstention (S7) |
+|---|---:|---:|---:|---:|---:|
+| P1 margin50 | 0.900 | 0.310 | 290 | 5 | 0.000 |
+| P2 margin90 | 0.600 | 0.429 | 140 | 4 | 0.000 |
+| P3v1 (frozen) | 0.700 | 0.500 | 140 | 5 | 1.000 |
+| P3v2 (frozen) | 1.000 | 0.455 | 220 | 5 | 1.000 |
+| P3v3 (frozen) | 0.900 | 0.643 | 140 | 2 | 1.000 |
+| **P3v4** | **1.000** | **0.714** | 140 | **2** | **1.000** |
+
+Gates: **all true** - G1 1.000 >= 0.90; G2 0.714 >= 0.70; G3 dual frontier;
+G4 abstention 1.000; G5 every scenario >= 0.70; G6 determinism; G7 beats v3
+(1.000 >= 0.900 and 0.714 > 0.643); G8 cap verified; `all_pass` **true**.
+
+Findings:
+
+- **The structural slot resolved the trilemma.** Restoring the correction to
+  slot 1 recovered `corrected` (0.00 -> 1.00) without re-opening any tail:
+  deliveries stayed at 140 and precision rose 0.643 -> 0.714, above the 0.70
+  gate. Per-scenario precision: 1.00 in `volume`/`easy`/`multi_memory`/
+  `near_duplicate`/`old_vs_recent`; 0.50 where the second slot carries one
+  capped extra (`corrected`, `long_specific`, `shared_subject`,
+  `short_ambiguous`).
+- Declared expectations matched: availability 1.000, precision ~0.71
+  (0.714), the false-positive-marker risk did not materialize on this
+  fixture.
+- The synthetic line closes here by owner decision, with a **pass**; the
+  closure record documents the full curve, the mechanisms and the
+  overfitting caveat of four rounds on one sample.

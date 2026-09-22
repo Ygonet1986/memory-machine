@@ -97,3 +97,43 @@ Harness `eval/admission_portfolio_v1.py`, outputs
 recorded verdicts), proof regenerated, one primary run plus determinism
 rerun, execution record appended, all committed.
 
+
+## Execution record (2026-09-22)
+
+Recorded run on the frozen lab fixture; determinism rerun identical.
+
+| policy | availability | precision | delivered | max/case |
+|---|---:|---:|---:|---:|
+| P1 margin50 | 0.818 | 0.562 | 160 | 5 |
+| P2 margin90 | 0.746 | 0.578 | 142 | 5 |
+| **P3v4 (frozen)** | **0.909** | **0.833** | 120 | 2 |
+| P4-abl | 0.909 | 0.714 | 140 | 3 |
+| P4 (portfolio) | 0.909 | 0.714 | 140 | 3 |
+
+Gates: G1 **true** (0.909 >= 0.90); G2 **true** (0.714 >= 0.70); G3
+**false** (availability equal to P3v4, not greater); G4 **false**
+(`contradiction` and `origin` are 1.00 for P3v4 already); G5 **false** (no
+targeted gain over the ablation); G6 true; G7 true; `all_pass` **false**.
+
+Findings:
+
+- **The hypothesis is not supported by this fixture**: P3v4 already delivers
+  both records in `contradiction` and `origin` (its cap-2 and floors fit the
+  pairs), so the typed slots add no availability and cost precision
+  (0.833 -> 0.714) by filling the third slot with weak candidates.
+  `P4-abl` (no slots, same cap) is identical to P4 - the slots contribute
+  nothing measurable here.
+- **The single real gap is retrieval**: `related_context` is 0.50 for every
+  policy - the rationale record never reaches the delivered set. The pair
+  rule did not fire (decision and rationale share fewer than 3 tokens), and
+  no slot structure can fix a candidate that ranking buries. This repeats
+  the earlier lesson: admission cannot compensate for ranking.
+- Declared expectations missed: P3v4 was predicted to fail contradiction and
+  origin; the fixture did not create that tension (pairs rank high and fit
+  the cap). Recorded as a fixture-design limitation, not re-fitted.
+
+Stop rules applied: gates failed, nothing changed, nothing re-fitted. The
+lab evidence says: do not advance the typed-portfolio architecture as
+specified; the next lab iteration (if any) must create scenarios where the
+pair competes against high-gain decoys and target retrieval of rationale
+records. This remains lab-only evidence; no production impact.

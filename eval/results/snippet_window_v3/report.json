@@ -1,0 +1,2184 @@
+{
+  "aggregates": {
+    "S-head": {
+      "mean_coverage": 0.5339,
+      "total_undue_mean_per_case": 0.0667
+    },
+    "S-query": {
+      "mean_coverage": 0.705,
+      "total_undue_mean_per_case": 0.0333
+    }
+  },
+  "all_pass": true,
+  "cases": 30,
+  "failures": 0,
+  "gates": {
+    "H3-1_coverage": true,
+    "H3-2_undue": true,
+    "H3-3_u3a17": true,
+    "H3-4_infra": true
+  },
+  "input_snippet_coverage": {
+    "rows": [
+      {
+        "arm": "S-head",
+        "block": "u3a",
+        "case": 12,
+        "phrases": [
+          "16gb"
+        ],
+        "required": 1,
+        "snippet_contains": 0
+      },
+      {
+        "arm": "S-query",
+        "block": "u3a",
+        "case": 12,
+        "phrases": [
+          "16gb"
+        ],
+        "required": 1,
+        "snippet_contains": 0
+      },
+      {
+        "arm": "S-head",
+        "block": "u3a",
+        "case": 14,
+        "phrases": [
+          "3week"
+        ],
+        "required": 2,
+        "snippet_contains": 0
+      },
+      {
+        "arm": "S-query",
+        "block": "u3a",
+        "case": 14,
+        "phrases": [
+          "3week"
+        ],
+        "required": 2,
+        "snippet_contains": 0
+      },
+      {
+        "arm": "S-head",
+        "block": "u3a",
+        "case": 15,
+        "phrases": [
+          "5year",
+          "8year",
+          "3year"
+        ],
+        "required": 5,
+        "snippet_contains": 0
+      },
+      {
+        "arm": "S-query",
+        "block": "u3a",
+        "case": 15,
+        "phrases": [
+          "5year",
+          "8year",
+          "3year"
+        ],
+        "required": 5,
+        "snippet_contains": 0
+      },
+      {
+        "arm": "S-head",
+        "block": "u3a",
+        "case": 17,
+        "phrases": [
+          "1year"
+        ],
+        "required": 1,
+        "snippet_contains": 0
+      },
+      {
+        "arm": "S-query",
+        "block": "u3a",
+        "case": 17,
+        "phrases": [
+          "1year"
+        ],
+        "required": 1,
+        "snippet_contains": 1
+      },
+      {
+        "arm": "S-head",
+        "block": "u3a",
+        "case": 19,
+        "phrases": [
+          "200$"
+        ],
+        "required": 2,
+        "snippet_contains": 0
+      },
+      {
+        "arm": "S-query",
+        "block": "u3a",
+        "case": 19,
+        "phrases": [
+          "200$"
+        ],
+        "required": 2,
+        "snippet_contains": 0
+      },
+      {
+        "arm": "S-head",
+        "block": "u3a",
+        "case": 21,
+        "phrases": [
+          "10year"
+        ],
+        "required": 3,
+        "snippet_contains": 0
+      },
+      {
+        "arm": "S-query",
+        "block": "u3a",
+        "case": 21,
+        "phrases": [
+          "10year"
+        ],
+        "required": 3,
+        "snippet_contains": 0
+      },
+      {
+        "arm": "S-head",
+        "block": "u3a",
+        "case": 22,
+        "phrases": [
+          "2week"
+        ],
+        "required": 1,
+        "snippet_contains": 0
+      },
+      {
+        "arm": "S-query",
+        "block": "u3a",
+        "case": 22,
+        "phrases": [
+          "2week"
+        ],
+        "required": 1,
+        "snippet_contains": 0
+      },
+      {
+        "arm": "S-head",
+        "block": "u3a",
+        "case": 24,
+        "phrases": [
+          "1300$"
+        ],
+        "required": 2,
+        "snippet_contains": 0
+      },
+      {
+        "arm": "S-query",
+        "block": "u3a",
+        "case": 24,
+        "phrases": [
+          "1300$"
+        ],
+        "required": 2,
+        "snippet_contains": 0
+      },
+      {
+        "arm": "S-head",
+        "block": "u3b",
+        "case": 30,
+        "phrases": [
+          "4year",
+          "9month"
+        ],
+        "required": 2,
+        "snippet_contains": 0
+      },
+      {
+        "arm": "S-query",
+        "block": "u3b",
+        "case": 30,
+        "phrases": [
+          "4year",
+          "9month"
+        ],
+        "required": 2,
+        "snippet_contains": 0
+      },
+      {
+        "arm": "S-head",
+        "block": "u3b",
+        "case": 40,
+        "phrases": [
+          "12day",
+          "13day"
+        ],
+        "required": 1,
+        "snippet_contains": 0
+      },
+      {
+        "arm": "S-query",
+        "block": "u3b",
+        "case": 40,
+        "phrases": [
+          "12day",
+          "13day"
+        ],
+        "required": 1,
+        "snippet_contains": 0
+      }
+    ]
+  },
+  "llm_calls": 180,
+  "per_case": [
+    {
+      "block": "u3a",
+      "case": 12,
+      "required": [
+        "M0040"
+      ],
+      "runs": {
+        "S-head": [
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0040"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0040"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0040"
+            ],
+            "undue": []
+          }
+        ],
+        "S-query": [
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0040"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0040"
+            ],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3a",
+      "case": 13,
+      "required": [
+        "M0037"
+      ],
+      "runs": {
+        "S-head": [
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0037"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0037"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0037"
+            ],
+            "undue": []
+          }
+        ],
+        "S-query": [
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0037"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0037"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0037"
+            ],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3a",
+      "case": 14,
+      "required": [
+        "M0045",
+        "M0032"
+      ],
+      "runs": {
+        "S-head": [
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0032",
+              "M0045"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0032",
+              "M0045"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0032",
+              "M0045"
+            ],
+            "undue": []
+          }
+        ],
+        "S-query": [
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0032",
+              "M0045"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0032",
+              "M0045"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0032",
+              "M0045"
+            ],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3a",
+      "case": 15,
+      "required": [
+        "M0036",
+        "M0007",
+        "M0002",
+        "M0009",
+        "M0010"
+      ],
+      "runs": {
+        "S-head": [
+          {
+            "coverage": 0.8,
+            "ok": true,
+            "output": [
+              "M0002",
+              "M0007",
+              "M0009",
+              "M0036"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 0.8,
+            "ok": true,
+            "output": [
+              "M0002",
+              "M0007",
+              "M0009",
+              "M0036"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 0.8,
+            "ok": true,
+            "output": [
+              "M0002",
+              "M0007",
+              "M0009",
+              "M0036"
+            ],
+            "undue": []
+          }
+        ],
+        "S-query": [
+          {
+            "coverage": 0.2,
+            "ok": true,
+            "output": [
+              "M0007"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 0.6,
+            "ok": true,
+            "output": [
+              "M0002",
+              "M0007",
+              "M0010"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 0.2,
+            "ok": true,
+            "output": [
+              "M0007"
+            ],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3a",
+      "case": 16,
+      "required": [
+        "M0018"
+      ],
+      "runs": {
+        "S-head": [
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0018"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0018"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0018"
+            ],
+            "undue": []
+          }
+        ],
+        "S-query": [
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0018"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0018"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0018"
+            ],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3a",
+      "case": 17,
+      "required": [
+        "M0043"
+      ],
+      "runs": {
+        "S-head": [
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "undue": []
+          }
+        ],
+        "S-query": [
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0043"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0043"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0043"
+            ],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3a",
+      "case": 18,
+      "required": [
+        "M0022",
+        "M0018"
+      ],
+      "runs": {
+        "S-head": [
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "undue": []
+          }
+        ],
+        "S-query": [
+          {
+            "coverage": 0.5,
+            "ok": true,
+            "output": [
+              "M0022"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 0.5,
+            "ok": true,
+            "output": [
+              "M0022"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 0.5,
+            "ok": true,
+            "output": [
+              "M0022"
+            ],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3a",
+      "case": 19,
+      "required": [
+        "M0031",
+        "M0035"
+      ],
+      "runs": {
+        "S-head": [
+          {
+            "coverage": 0.5,
+            "ok": true,
+            "output": [
+              "M0031"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 0.5,
+            "ok": true,
+            "output": [
+              "M0031"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 0.5,
+            "ok": true,
+            "output": [
+              "M0031"
+            ],
+            "undue": []
+          }
+        ],
+        "S-query": [
+          {
+            "coverage": 0.5,
+            "ok": true,
+            "output": [
+              "M0031"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 0.5,
+            "ok": true,
+            "output": [
+              "M0031"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 0.5,
+            "ok": true,
+            "output": [
+              "M0031"
+            ],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3a",
+      "case": 20,
+      "required": [
+        "M0033"
+      ],
+      "runs": {
+        "S-head": [
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "undue": []
+          }
+        ],
+        "S-query": [
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0033"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0033"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0033"
+            ],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3a",
+      "case": 21,
+      "required": [
+        "M0006",
+        "M0039",
+        "M0026"
+      ],
+      "runs": {
+        "S-head": [
+          {
+            "coverage": 0.3333,
+            "ok": true,
+            "output": [
+              "M0006"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 0.3333,
+            "ok": true,
+            "output": [
+              "M0006"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 0.3333,
+            "ok": true,
+            "output": [
+              "M0006"
+            ],
+            "undue": []
+          }
+        ],
+        "S-query": [
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0006",
+              "M0026",
+              "M0039"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0006",
+              "M0026",
+              "M0039"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0006",
+              "M0026",
+              "M0039"
+            ],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3a",
+      "case": 22,
+      "required": [
+        "M0038"
+      ],
+      "runs": {
+        "S-head": [
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0038"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "undue": []
+          }
+        ],
+        "S-query": [
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0038"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0038"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0038"
+            ],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3a",
+      "case": 23,
+      "required": [
+        "M0014",
+        "M0022"
+      ],
+      "runs": {
+        "S-head": [
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0014",
+              "M0022"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0014",
+              "M0022"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0014",
+              "M0022"
+            ],
+            "undue": []
+          }
+        ],
+        "S-query": [
+          {
+            "coverage": 0.5,
+            "ok": true,
+            "output": [
+              "M0014"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 0.5,
+            "ok": true,
+            "output": [
+              "M0014"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 0.5,
+            "ok": true,
+            "output": [
+              "M0014"
+            ],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3a",
+      "case": 24,
+      "required": [
+        "M0035",
+        "M0012"
+      ],
+      "runs": {
+        "S-head": [
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0012",
+              "M0035"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0012",
+              "M0035"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0012",
+              "M0035"
+            ],
+            "undue": []
+          }
+        ],
+        "S-query": [
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0012",
+              "M0035"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0012",
+              "M0035"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0012",
+              "M0035"
+            ],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3a",
+      "case": 25,
+      "required": [
+        "M0040"
+      ],
+      "runs": {
+        "S-head": [
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "undue": []
+          }
+        ],
+        "S-query": [
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0040"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0040"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0040"
+            ],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3a",
+      "case": 26,
+      "required": [
+        "M0013",
+        "M0040"
+      ],
+      "runs": {
+        "S-head": [
+          {
+            "coverage": 0.5,
+            "ok": true,
+            "output": [
+              "M0040",
+              "M0042"
+            ],
+            "undue": [
+              "M0042"
+            ]
+          },
+          {
+            "coverage": 0.5,
+            "ok": true,
+            "output": [
+              "M0040",
+              "M0042"
+            ],
+            "undue": [
+              "M0042"
+            ]
+          },
+          {
+            "coverage": 0.5,
+            "ok": true,
+            "output": [
+              "M0040",
+              "M0042"
+            ],
+            "undue": [
+              "M0042"
+            ]
+          }
+        ],
+        "S-query": [
+          {
+            "coverage": 0.5,
+            "ok": true,
+            "output": [
+              "M0013"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 0.5,
+            "ok": true,
+            "output": [
+              "M0013"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 0.5,
+            "ok": true,
+            "output": [
+              "M0013"
+            ],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3b",
+      "case": 27,
+      "required": [
+        "M0023",
+        "M0002",
+        "M0029",
+        "M0011"
+      ],
+      "runs": {
+        "S-head": [
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.25,
+            "ok": true,
+            "output": [
+              "M0002"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 0.25,
+            "ok": true,
+            "output": [
+              "M0002"
+            ],
+            "undue": []
+          }
+        ],
+        "S-query": [
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.25,
+            "ok": true,
+            "output": [
+              "M0002"
+            ],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3b",
+      "case": 28,
+      "required": [
+        "M0032"
+      ],
+      "runs": {
+        "S-head": [
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "undue": []
+          }
+        ],
+        "S-query": [
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0032"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0032"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0032"
+            ],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3b",
+      "case": 29,
+      "required": [
+        "M0005",
+        "M0043",
+        "M0021",
+        "M0038"
+      ],
+      "runs": {
+        "S-head": [
+          {
+            "coverage": 0.75,
+            "ok": true,
+            "output": [
+              "M0021",
+              "M0038",
+              "M0043"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 0.75,
+            "ok": true,
+            "output": [
+              "M0021",
+              "M0038",
+              "M0043"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 0.75,
+            "ok": true,
+            "output": [
+              "M0021",
+              "M0038",
+              "M0043"
+            ],
+            "undue": []
+          }
+        ],
+        "S-query": [
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0005",
+              "M0021",
+              "M0038",
+              "M0043"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0005",
+              "M0021",
+              "M0038",
+              "M0043"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0005",
+              "M0021",
+              "M0038",
+              "M0043"
+            ],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3b",
+      "case": 30,
+      "required": [
+        "M0024",
+        "M0001"
+      ],
+      "runs": {
+        "S-head": [
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "undue": []
+          }
+        ],
+        "S-query": [
+          {
+            "coverage": 0.5,
+            "ok": true,
+            "output": [
+              "M0001"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 0.5,
+            "ok": true,
+            "output": [
+              "M0001"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 0.5,
+            "ok": true,
+            "output": [
+              "M0001"
+            ],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3b",
+      "case": 31,
+      "required": [
+        "M0013",
+        "M0038",
+        "M0036",
+        "M0034",
+        "M0031",
+        "M0025"
+      ],
+      "runs": {
+        "S-head": [
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0013",
+              "M0025",
+              "M0031",
+              "M0034",
+              "M0036",
+              "M0038"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0013",
+              "M0025",
+              "M0031",
+              "M0034",
+              "M0036",
+              "M0038"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0013",
+              "M0025",
+              "M0031",
+              "M0034",
+              "M0036",
+              "M0038"
+            ],
+            "undue": []
+          }
+        ],
+        "S-query": [
+          {
+            "coverage": 0.3333,
+            "ok": true,
+            "output": [
+              "M0013",
+              "M0034"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 0.3333,
+            "ok": true,
+            "output": [
+              "M0013",
+              "M0034"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 0.3333,
+            "ok": true,
+            "output": [
+              "M0013",
+              "M0034"
+            ],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3b",
+      "case": 32,
+      "required": [
+        "M0048"
+      ],
+      "runs": {
+        "S-head": [
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "undue": []
+          }
+        ],
+        "S-query": [
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0048"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0048"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0048"
+            ],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3b",
+      "case": 33,
+      "required": [
+        "M0046",
+        "M0031"
+      ],
+      "runs": {
+        "S-head": [
+          {
+            "coverage": 0.5,
+            "ok": true,
+            "output": [
+              "M0031"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 0.5,
+            "ok": true,
+            "output": [
+              "M0031"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 0.5,
+            "ok": true,
+            "output": [
+              "M0031"
+            ],
+            "undue": []
+          }
+        ],
+        "S-query": [
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3b",
+      "case": 34,
+      "required": [
+        "M0010",
+        "M0036"
+      ],
+      "runs": {
+        "S-head": [
+          {
+            "coverage": 0.5,
+            "ok": true,
+            "output": [
+              "M0010"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 0.5,
+            "ok": true,
+            "output": [
+              "M0010"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 0.5,
+            "ok": true,
+            "output": [
+              "M0010"
+            ],
+            "undue": []
+          }
+        ],
+        "S-query": [
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3b",
+      "case": 35,
+      "required": [
+        "M0029",
+        "M0008"
+      ],
+      "runs": {
+        "S-head": [
+          {
+            "coverage": 0.5,
+            "ok": true,
+            "output": [
+              "M0008"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 0.5,
+            "ok": true,
+            "output": [
+              "M0008"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 0.5,
+            "ok": true,
+            "output": [
+              "M0008"
+            ],
+            "undue": []
+          }
+        ],
+        "S-query": [
+          {
+            "coverage": 0.5,
+            "ok": true,
+            "output": [
+              "M0008"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 0.5,
+            "ok": true,
+            "output": [
+              "M0008"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 0.5,
+            "ok": true,
+            "output": [
+              "M0008"
+            ],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3b",
+      "case": 36,
+      "required": [
+        "M0009"
+      ],
+      "runs": {
+        "S-head": [
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0009"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0009"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0009"
+            ],
+            "undue": []
+          }
+        ],
+        "S-query": [
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0009"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0009"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0009"
+            ],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3b",
+      "case": 37,
+      "required": [
+        "M0048"
+      ],
+      "runs": {
+        "S-head": [
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0048"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0048"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0048"
+            ],
+            "undue": []
+          }
+        ],
+        "S-query": [
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0048"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0048"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0048"
+            ],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3b",
+      "case": 38,
+      "required": [
+        "M0011",
+        "M0044",
+        "M0035",
+        "M0030",
+        "M0005"
+      ],
+      "runs": {
+        "S-head": [
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0005",
+              "M0011",
+              "M0030",
+              "M0035",
+              "M0044"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 0.8,
+            "ok": true,
+            "output": [
+              "M0005",
+              "M0030",
+              "M0035",
+              "M0044"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 0.6,
+            "ok": true,
+            "output": [
+              "M0005",
+              "M0030",
+              "M0035"
+            ],
+            "undue": []
+          }
+        ],
+        "S-query": [
+          {
+            "coverage": 0.4,
+            "ok": true,
+            "output": [
+              "M0005",
+              "M0035"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 0.4,
+            "ok": true,
+            "output": [
+              "M0005",
+              "M0035"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 0.4,
+            "ok": true,
+            "output": [
+              "M0005",
+              "M0035"
+            ],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3b",
+      "case": 39,
+      "required": [
+        "M0027"
+      ],
+      "runs": {
+        "S-head": [
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0027"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "undue": []
+          }
+        ],
+        "S-query": [
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0027"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3b",
+      "case": 40,
+      "required": [
+        "M0006"
+      ],
+      "runs": {
+        "S-head": [
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0006"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0006"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0006"
+            ],
+            "undue": []
+          }
+        ],
+        "S-query": [
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0006"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0006"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0006"
+            ],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3b",
+      "case": 41,
+      "required": [
+        "M0010",
+        "M0033"
+      ],
+      "runs": {
+        "S-head": [
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [
+              "M0039"
+            ],
+            "undue": [
+              "M0039"
+            ]
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [
+              "M0039"
+            ],
+            "undue": [
+              "M0039"
+            ]
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [
+              "M0039"
+            ],
+            "undue": [
+              "M0039"
+            ]
+          }
+        ],
+        "S-query": [
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0010",
+              "M0033",
+              "M0039"
+            ],
+            "undue": [
+              "M0039"
+            ]
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0010",
+              "M0033",
+              "M0039"
+            ],
+            "undue": [
+              "M0039"
+            ]
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0010",
+              "M0033",
+              "M0039"
+            ],
+            "undue": [
+              "M0039"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "prereg": "docs/SNIPPET_WINDOW_V3_PREREG.md",
+  "runs": 3,
+  "u3a17": {
+    "m0043_hits": {
+      "S-head": 0,
+      "S-query": 3
+    },
+    "runs": {
+      "S-head": [
+        {
+          "coverage": 0.0,
+          "ok": true,
+          "output": [],
+          "undue": []
+        },
+        {
+          "coverage": 0.0,
+          "ok": true,
+          "output": [],
+          "undue": []
+        },
+        {
+          "coverage": 0.0,
+          "ok": true,
+          "output": [],
+          "undue": []
+        }
+      ],
+      "S-query": [
+        {
+          "coverage": 1.0,
+          "ok": true,
+          "output": [
+            "M0043"
+          ],
+          "undue": []
+        },
+        {
+          "coverage": 1.0,
+          "ok": true,
+          "output": [
+            "M0043"
+          ],
+          "undue": []
+        },
+        {
+          "coverage": 1.0,
+          "ok": true,
+          "output": [
+            "M0043"
+          ],
+          "undue": []
+        }
+      ]
+    }
+  }
+}

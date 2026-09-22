@@ -186,3 +186,16 @@ e2e snapshots (`eval/out`). Do not re-run the experiments for these tables.
   `eval/conversation_bench.py`, `eval/continuity_bench.py`,
   `eval/external_bench.py`, `eval/e2e_bench.py`.
 - The continuity benchmark output was not archived; see the manual, section 40.8.
+
+## Memory Lifecycle (v1–v4) — shadow-only line, closed 2026-09-22
+
+Closed by the pre-declared stop rule (a missed near-tie case exhausts the
+trigger approach). Measured on the frozen `lifecycle_v1` fixture: admission
+reduces the consultable set by 0.469 with promotion precision 0.765 (baseline
+0.531); coverage-trigger quality iterated 0.25 -> 0.75; the event-log BM25
+retriever finds every recoverable false discard at rank 1 (4/4); combined
+availability (active set + retroactive fallback) reaches 0.952 >= 0.93 floor
+with precision@k 1.000 and recovery 0.75 (one genuine near-tie: A*=2.734 vs
+E*=3.395, ratio 1.242 against the frozen 1.25). No promotion, no default
+change, tape untouched. Full record and pre-registrations:
+`docs/LIFECYCLE_CLOSURE.md`, `docs/LIFECYCLE_V*_PREREG.md`.

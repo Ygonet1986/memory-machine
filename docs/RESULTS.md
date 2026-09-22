@@ -199,3 +199,16 @@ with precision@k 1.000 and recovery 0.75 (one genuine near-tie: A*=2.734 vs
 E*=3.395, ratio 1.242 against the frozen 1.25). No promotion, no default
 change, tape untouched. Full record and pre-registrations:
 `docs/LIFECYCLE_CLOSURE.md`, `docs/LIFECYCLE_V*_PREREG.md`.
+
+## Two-tier retrieval (v1-v2) - shadow-only line, closed 2026-09-22
+
+Unconditional cheap-index retrieval recovers all four lifecycle false discards
+at rank 1 (availability 1.000 vs the 0.952 trigger reference) with zero added
+LLM calls, but full top-5 delivery precision is 0.512. Bounding candidacy with
+a 0.90 score margin reaches precision 0.826 at availability 0.905; the
+measured frontier (margins 0.50/0.70/0.90/1.00, budgets top-1/2/3) contains no
+point meeting both declared gates, because the noise shares the score band of
+the required second occurrences (one at rank 2 with ratio 0.50-0.70, one at
+rank 3 unreachable by any margin). Descriptive precision@1 is 0.947. No
+promotion; defaults untouched. Full record: `docs/TWO_TIER_CLOSURE.md`,
+`docs/TWO_TIER_RETRIEVAL_V1_PREREG.md`, `docs/TWO_TIER_RETRIEVAL_V2_PREREG.md`.

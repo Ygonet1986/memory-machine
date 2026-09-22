@@ -6,6 +6,8 @@ import json
 import sys
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "eval"))
 sys.path.insert(0, str(ROOT / "src"))
@@ -27,7 +29,11 @@ def test_u3a17_required_record_absent_from_payload_and_annotations():
 
 
 def test_frozen_snapshot_shows_agents_never_annotated_m0043():
+    """The snapshot lives under gitignored eval/graph_out; when present it
+    is the primary evidence; the payload_ids invariant is committed."""
     path = ROOT / "eval" / "graph_out" / "u_diag_longmemeval_u3a.jsonl"
+    if not path.exists():
+        pytest.skip("frozen snapshot not present in this checkout")
     rows = [json.loads(line) for line in path.read_text().splitlines()
             if line.strip()]
     row = next(r for r in rows if r.get("case") == 17)

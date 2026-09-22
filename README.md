@@ -8,7 +8,7 @@ a growing layer of **memory agents** that watch it in parallel, and a shared
 tape.jsonl (long-term memory)
    |-- G1 --> A1 \
    |-- G2 --> A2  \  all agents read the whiteboard in parallel
-   |-- G3 --> A3  /  and write reminders when a memory matters
+   |-- G3 --> A3  /  write reminders when a memory matters
    ...             /
          whiteboard.json (working memory)
                 |
@@ -17,350 +17,114 @@ tape.jsonl (long-term memory)
          durable memories -> tape
 ```
 
+The design separates four problems that long-term agent memory usually
+conflates: **preservation** (append-only tape), **organization** (rebuildable
+views and graph projections), **discovery** (agents over the tape) and
+**admission** (what earns the bounded context). The experimental program
+measures one layer at a time and records refutations; the open bottleneck is
+admission, instrumented before any policy change (see below).
+
 ## Install / run
 
-No dependencies. Python 3.11+ (uses `certifi` for TLS when available).
+No dependencies. Python 3.11+.
+
+```bash
+pip install .
+export DEEPSEEK_API_KEY="..."   # never commit this
+```
+
+From a source checkout without install:
 
 ```bash
 cd memory-machine
 export PYTHONPATH="$PWD/src"
-export DEEPSEEK_API_KEY="..."   # never commit this
 ```
 
 ## Quickstart
 
 ```bash
-python3 -m memory_machine init
+memory-cli init
 
-python3 -m memory_machine add --type decision \
+memory-cli add --type decision \
   --summary "Use Postgres for the primary datastore" --why "ACID + JSONB"
 
-python3 -m memory_machine subject "migrate the auth service to a database"
+memory-cli subject "migrate the auth service to a database"
 
-python3 -m memory_machine run \
-  --task "decide the database and connection strategy"
+memory-cli run --task "decide the database and connection strategy"
+
+memory-cli recall "which database did we choose?" --cross-session
 ```
 
-## Commands
+## Architecture (short)
 
-| Command | Purpose |
-|---------|---------|
-| `init` | Create an empty project (config + tape + manifest + whiteboard) |
-| `add --type T --summary S [--why W] [--files a,b]` | Append a memory to the tape |
-| `subject S [--objective O]` | Set the current whiteboard subject |
-| `run --task T` | Run one full cycle (agents -> whiteboard -> chatbot) |
-| `consolidate [--llm]` | Consolidate the whiteboard (one consolidator agent) |
-| `status` | Show tape / groups / agents / whiteboard state |
-| `whiteboard` | Print the whiteboard |
-| `context` | Print the main chatbot's conversation context |
-| `recall Q [--cross-session] [--views v1,v2]` | Run memory agents for a question (JSON); optionally search other sessions / filter by views |
-| `checkpoint Q S [--memories JSON]` | Record a turn back to memory (JSON) |
-| `remember --summary S [--type T] [--why W] [--views v1,v2]` | Append a memory (JSON) |
-| `list` / `archive ID` / `delete ID` | Manage tape records (JSON) |
-| `attach PATH [--chunk-size N]` | Ingest a `.txt` into the tape as labeled chunk memories |
-| `sessions` | List sessions (JSON) |
-| `views` | List memory views / projections (JSON) |
-| `rollup [--keep-recent N]` | Consolidate older tape records into one summary |
-| `rehydrate ID [--reactivate]` | Recover the original memories behind a rollup |
+- **Tape** (`tape.jsonl`) — append-only long-term memory; stable ids
+  (`M0001`, ...), types (`decision`, `lesson`, `preference`, `bugfix`,
+  `build`), and provenance (`derived_from` + `rehydrate`).
+- **Groups & agents** (`manifest.json`) — contiguous groups of `capacity`
+  records, one memory agent each; new groups appear as the tape grows.
+- **Whiteboard** (`whiteboard.json`) — bounded working memory: subject,
+  objective, metacognitive understanding, checklist and agents' reminders.
+- **Cycle** — agents read the whiteboard in parallel and write reminders; the
+  chatbot consumes the whiteboard, then durable facts are appended to the tape.
+- **Views / graph** — rebuildable projections over the canonical tape (`views`
+  for `time/…`, `type/…`, `source/…`, `topic/…`, `subject/…`; the graph adds
+  entities, paths and document windows). Never a factual source by themselves.
+- **Evidence payload** — the agents say *why* a memory matters; the payload
+  delivers *what it says* under a character budget (recall-local, never
+  persisted). The open research question is admission: which candidates deserve
+  those characters.
 
-Use `-C <dir>` to operate on a specific project directory. Run
-`python3 -m memory_machine <cmd> --help` for details.
+## Research status and versioning
 
-## Concepts
+- **Scientific phase:** experimental program **v1** — the H1–H6 ledger in
+  `docs/PAPER.md` (`RESULTS.md` has the generated tables). Confirmed:
+  perspective agents over views (H1), factual-content delivery (H2), budgeted
+  evidence at ~-70% context (H3), real timestamps + payload fix
+  evidence-complete temporal reasoning (H5'). Refuted: the memory-aware prompt
+  (H4), multi-session aggregation as the bottleneck (H5), the
+  temporal-computation prompt once timestamps were correct (H6a).
+- **Package version:** **0.2.1** — Semantic Versioning for the installable
+  package (see `CHANGELOG.md`). The "v1" of the research program and the
+  package version are different axes: the code is deliberately `0.x` while the
+  research phase is v1.
+- **Current focus:** admission control. `docs/ADMISSION_SHADOW_V1.md` describes
+  the opt-in shadow instrumentation that collects signals on real tapes before
+  any policy is frozen.
 
-- **Tape** (`tape.jsonl`) — append-only long-term memory. Each record has a
-  stable id (`M0001`, ...) and a type (`decision`, `lesson`, `preference`,
-  `bugfix`, `build`).
-- **Groups & agents** (`manifest.json`) — the tape is split into contiguous
-  groups of `capacity` records; one memory agent watches each group. A new
-  group/agent is created automatically as the tape grows.
-- **Whiteboard** (`whiteboard.json`) — the bounded working memory: subject,
-  objective, a **metacognitive** understanding (what the subject is about and
-  what is happening, refreshed every turn), context, pending, and the agents'
-  reminders.
-- **Cycle** — every agent reads the whiteboard in parallel and writes reminders
-  for memories that matter now; the main chatbot consumes the whiteboard and
-  continues the task, then durable facts are appended to the tape.
-- **Consolidation** — when the whiteboard grows too large, a single consolidator
-  agent shrinks it to a compact note after persisting the working state to the
-  tape (no loss of continuity).
-- **Chatbot context** — the main chatbot also keeps its own conversation
-  context (`context.json`) and consolidates it on its own schedule, independent
-  of the whiteboard, so it never runs out of context over a long project.
-- **Memory router** (opt-in, off by default) — selects the top-K partitions
-  (via group digests) instead of consulting every agent, cutting fan-out from
-  O(N) to O(K). Modes: `llm` (one routing call, semantic), `embedding` (cosine
-  over digests; needs an embeddings provider like Ollama), or `lexical` (BM25;
-  cheapest but unsafe for lexically-distant memories). It is opt-in because
-  measurements show it trades recall for cost: on external benchmarks the full
-  sweep scored 0.83-0.93 evidence recall vs 0.63-0.70 for the router.
-- **Evaluation** (`eval/`) — `agent_bench.py` (synthetic, lexically distant),
-  `external_bench.py` (LongMemEval / LoCoMo, with BM25, dense vector, full
-  agents and routed agents; `--arms` and `--embedding-models` select arms and
-  dense models) and `view_router_bench.py` (controlled topology: full vs
-  similarity vs view-BM25 vs view-LLM vs view-oracle vs cascades, with view
-  recall/precision, evidence and agent recall, reduction, expansion, fallback
-  reasons, calls/tokens/latency). Measured: on LongMemEval dense retrieval
-  beats BM25 and ties the agents (no agentic advantage); on LoCoMo the agents
-  lead (0.90 vs BM25 0.78 and dense 0.56). The agentic advantage is
-  benchmark-dependent: it emerges where relevance is contextual, not directly
-  similar.
-- **Provenance** — rollups record `derived_from`; `rehydrate <id>` recovers the
-  original (archived) memories so compression is never a dead end.
-- **Views (projections)** — a memory belongs to one canonical tape but can
-  appear in several views (`time/…`, `type/…`, `source/…`, `topic/…`,
-  `subject/…`) without physical duplication; the view index is a rebuildable
-  projection. List with `views`, filter recall with `--views`.
-- **Ingestion ablation** (`eval/e2e_bench.py --gfr --ingest-why N`) — the
-  external harness truncated sessions to 2k chars at write time; raising the
-  cap lifts Gold Fact Retention from 0.42 to 0.83 and strict accuracy from 0.33
-  to 0.50 (evidence recall constant at 0.75 — the loss was upstream of
-  retrieval).
-- **H5' (confirmed)** — with the payload delivered, restoring the real session
-  timestamps and the question date (`--ingest-dates`) lifts temporal-reasoning
-  0.29 -> 0.64 and temporal | evidence complete 0.44 -> 1.00 (9/9); overall
-  strict 0.56 -> 0.64 and AUR 0.76 -> 0.89. An oracle with all expected
-  sessions and no context cap collapses on multi-session, showing that more
-  evidence can hurt.
-- **H6a (refuted on temporal)** — a gated temporal-computation procedure added
-  nothing on temporal questions once the timestamps were correct (0.64 -> 0.64);
-  the small overall gain (0.64 -> 0.70) comes from non-temporal small-n cases.
-- **Harness bug (documented)** — the first H5'/H6a "dates" runs were missing
-  from the payload-delivery branch, so they measured whiteboard-only answers;
-  after the fix the results reversed. Old snapshots kept as `*_BUGGY.jsonl`.
-- **H4 (refuted)** — a memory-aware answer prompt (explicitly telling the
-  answerer the context is recalled history) did not help: payload 4000 dropped
-  0.56 -> 0.50 strict and the oracle stayed at 0.52. The dominant remaining
-  failure is evidence insufficiency (16-22 of ~25 errors), not temporal
-  misreading (1-5).
-- **Compression curve (H3)** — on LongMemEval 50q with full ingestion, payload
-  6000 matches the full context (0.60 vs 0.58 strict) with a 57% context
-  reduction, and payload 4000 stays within noise at 70% reduction; 2500 loses
-  accuracy, so the compression knee is around 4000.
-- **Evidence payload** (`evidence_payload: budgeted`) — the agents say *why* a
-  memory matters; the payload delivers *what it says* under a character budget
-  (relevance-ordered, `why` truncated first, rollups rehydrated from their
-  archived sources). It is recall-local (never persisted in the whiteboard).
-  Measured: 0.97 strict vs 0.88 for full injection on the controlled fixture.
-- **End-to-end answer accuracy** (`eval/e2e_bench.py`) — measures whether the
-  memory actually improves the final answer, not just retrieval: view agents +
-  full memory content score 0.88 strict (AUR 0.90) vs 0.72 (AUR 0.74) with
-  annotation notes only, at the same cost — the bottleneck is context loss, not
-  retrieval.
-- **Attention state** (opt-in) — `Whiteboard.attention` is a recency-weighted
-  prior over views (decay + saturating boost) that keeps the conversation's
-  active regions across turns: `prior` blends it into lexical routing,
-  `context` shows it to the LLM plan, `state` reuses it for anaphoric
-  follow-ups. Measured: anaphora resolved at 5.7 calls vs 10.7 (full sweep),
-  and the old topic decays 0.94 -> 0.56 after a topic shift.
-- **CLI/app modes** — `recall --agent-mode view --whiteboard-mode dimension
-  --dimension-mode auto` switches a single recall to perspective agents and
-  per-dimension boards; the app's settings expose the same as a "Memory mode"
-  selector. External sessions can be auto-tagged into views with
-  `eval/tag_sessions.py` + `external_bench.py --tag` (Fase 2).
-- **View router** (opt-in) — uses the write-time organization as a structural
-  retrieval prior: `router_mode: views` selects views (BM25 over view digests,
-  or an LLM call with the whiteboard) and consults only their records;
-  `router_mode: cascade` adds a recall-safe fallback (expand co-occurring
-  views → similarity router → full sweep) and records why it fell back. An
-  explicit `recall --views` overrides routing. With `view_dimension_mode:
-  auto` the router plans dimensions first (semantic/temporal/structural) and
-  intersects their record sets with progressive relaxation; `coverage_mode`
-  adds a recall-local coverage signal (agents/structural/both/judge) that the
-  cascade uses to expand. Controlled benchmarks (32 tasks): dimension-aware
-  view-BM25 raises view recall 0.67 -> 0.81 and reduction 0.63 -> 0.70 at 9.6
-  calls; the ground-truth-views oracle reaches 1.00 at 7.7 calls / 0.84
-  reduction, so the router and the coverage signal — not the topology — are the
-  bottleneck (manual 40.4/40.5).
+Detailed measurements moved to `docs/FINDINGS.md`; the paper is the
+authoritative narrative.
 
-## Status (v1.0)
-
-The experimental program tested one layer at a time. Confirmed: perspective
-agents over views (H1), factual-content delivery (H2), budgeted evidence with
-relative parity at -70% context (H3). Refuted: the memory-aware prompt (H4),
-multi-session aggregation as the bottleneck (H5), and the temporal-computation
-prompt once the timestamps were correct (H6a). Confirmed: real timestamps plus
-payload delivery fix evidence-complete temporal reasoning (H5').
-Two findings stand out: the external ingestion cap was losing ~80% of each
-session at write time, and an oracle with unlimited context scores *below* the
-4000-char payload — the budget is a protective filter, not just a cost play.
-The paper-phase flat dense baseline (one vector per session, top-5) confirms
-the boundary story from the other side: 0.24 evidence and 0.16 strict while
-delivering ~11k context characters — context size is not evidence. See
-`docs/PAPER.md` (draft), `docs/RESULTS.md` (generated tables) and
-`docs/RELATED_WORK.md`.
-
-## Configuration
-
-`config.json` (see `config.json.example`):
-
-| Key | Default | Meaning |
-|-----|---------|---------|
-| `capacity` | 500 | memories per group (per agent) |
-| `graph_enabled` | `false` | write-time graph extraction (opt-in) |
-| `graph_batch_size` / `graph_batch_max_chars` | 8 / 12000 | extraction batching limits |
-| `graph_recall_mode` | `off` | graph recall: `off` / `augment` / `augment_guarded` / `only` |
-| `graph_augment_min_score` / `graph_augment_max_items` | 0.80 / 3 | guarded augmentation: score floor and cap |
-| `graph_augment_hub_degree` | 20 | guarded traversal: stop-expanding degree (generic `graph_hub_degree` overrides) |
-| `graph_augment_question_gate` / `min_cov` | `false` / 0.30 | optional question veto over graph-only evidence (calibrated, pending the miss slice) |
-| `graph_hub_degree` | 0 | guarded traversal: stop-expanding degree (0 = off) |
-| `graph_resolver_candidates` | 10 | resolver shortlist size (doc-vector cache is always on) |
-| `document_graph_enabled` | `true` | project `.txt` attachments into the document graph |
-| `document_structure_level` | `chunk` | document scope: `chunk` / `document` / `both` |
-| `document_window_chars` | 12000 | content-cost budget per document window |
-| `plasticity_mode` | `off` | learned path priority: `off` / `observe` / `shadow` / `update` / `deliver` (P0 pre-registered; ledger in `<root>/plasticity/`) |
-| `evidence_payload_window` | `false` | opt-in fact-window truncation (U2b; no reliable gain in the U3 30-case audit — stays off) |
-| `graph_depth` / `graph_top_k` | 2 / 8 | traversal depth (semantic hops) and evidence cap |
-| `whiteboard_budget` | 4000 | char budget for reminders on the whiteboard |
-| `consolidate_threshold` | 6000 | whiteboard size that triggers consolidation |
-| `context_consolidate_threshold` | 6000 | chatbot context size that triggers its own consolidation |
-| `router_enabled` | `false` | enable partition routing (opt-in) |
-| `router_mode` | `llm` | `lexical` / `embedding` / `llm` / `views` / `cascade` |
-| `router_top_k` | 5 | partitions selected by the similarity router |
-| `view_router_mode` | `lexical` | view selection: `lexical` (BM25) / `llm` (contextual) |
-| `view_top_k` | 5 | views selected by the view router |
-| `view_dimension_mode` | `off` | `auto` = dimension-aware plan (semantic/temporal/structural) with intersection |
-| `view_prune` | `none` | `subject` = drop broad `subject/*` views when a topic matched |
-| `agent_mode` | `group` | `view` = one perspective agent per selected view |
-| `whiteboard_mode` | `single` | `dimension` = one working board per dimension |
-| `attention_mode` | `off` | persistent attention prior: `prior` / `context` / `state` |
-| `attention_decay` / `boost` / `found_boost` | 0.6 / 0.8 / 0.3 | attention decay and saturation boosts |
-| `attention_weight` | 0.5 | weight of the attention prior in view scoring |
-| `attention_gate_min` / `margin` | 0.5 / 0.1 | concentration required for the `state` gate |
-| `coverage_mode` | `off` | recall-local coverage signal: `agents` / `structural` / `views` / `judge` |
-| `cascade_min_score` | 0.0 | selection score below which the cascade expands |
-| `cascade_expand_top_k` | 5 | co-occurring views added on expansion |
-| `model` | `deepseek-v4-flash` | LLM model for agents, chatbot and consolidators |
-| `base_url` | `https://api.deepseek.com` | OpenAI-compatible endpoint |
-| `api_key_env` | `DEEPSEEK_API_KEY` | env var that holds the API key |
-
-The API key is read from the environment only; it is never written to disk.
-
-### Admission shadow instrumentation (opt-in)
-
-`MEMORY_MACHINE_ADMISSION_SHADOW=1` makes every recall append one JSON line of
-**derived admission signals** (candidate origin, score/rank, lexical overlap,
-IDF rare-term coverage, entity/date matches, characters each candidate would
-consume, counterfactual admission) to `admission_shadow.jsonl` in the session
-root (`MEMORY_MACHINE_ADMISSION_SHADOW_PATH` overrides the path). It never
-writes question text, summaries or notes — only IDs, hashes and metrics — and
-never changes a recall result. See `docs/ADMISSION_SHADOW_V1.md`.
-
-## Graph projection (Graph Memory Machine v1)
-
-The tape stays the single source of truth; the graph is a rebuildable
-projection over it (like views), never a factual source by itself:
-
-```text
-Memory:  "Kalak crossed the rock."        (M0001)
-             │
-Graph:  Kalak --cross--> rock ── M0001        (every edge keeps its memory)
-```
+## Tests and evaluation
 
 ```bash
-python3 -m memory_machine -C <root> graph build --rebuild   # project the tape
-python3 -m memory_machine -C <root> graph status            # versions + counts
-python3 -m memory_machine -C <root> graph query "Kalak"     # entities→paths→memories
-python3 -m memory_machine -C <root> graph path Kalak rochedo
-python3 -m memory_machine -C <root> graph explain R0001     # edge → memories → text
-python3 -m memory_machine -C <root> graph document D0001    # document subgraph + windows
-python3 -m memory_machine -C <root> graph document novella.txt --memory M0003 --span 100:400
-python3 -m memory_machine -C <root> graph review            # identity hypotheses
-python3 -m memory_machine -C <root> graph pending / failed / retry
-```
-
-Write-time extraction is opt-in (`graph_enabled=true`), batched
-(`graph_batch_size=8`; 20 real memories: 11.2s → 4.3s per memory, 411 → 55
-prompt tokens per memory from batch 1 → 16, zero failures). Recall adds the
-graph as a second, deterministic selection arm: `graph_recall_mode=off`
-(default) / `augment` / `only` — in every mode the evidence is rehydrated from
-the tape. Rebuilds are atomic (`graph.building/` + swap) and human review
-decisions survive them. See SPEC §20.
-
-`.txt` attachments project into the **document graph** (SPEC §20.12): each file
-is chunked onto the tape, registered in `graph/documents.jsonl` and its
-original preserved under `<root>/documents/`. Rebuilding replays the documented
-chunk/window scopes from the tape hash-gated against the preserved originals —
-a missing or altered original aborts the build explicitly, never approximate.
-`graph document` queries the subgraph (by `D####`, `name#hash` or file name,
-optionally filtered by `--memory` and `--span`) and `graph explain` shows every
-evidence span re-hydrated from the original file. See `docs/DOC_GRAPH.md`.
-
-## Tests
-
-```bash
-python3 -m pytest tests/
-```
-
-## Evaluation
-
-```bash
+python3 -m pytest -q                 # full suite (500+ tests)
+python3 -m ruff check src tests scripts
 python3 eval/gen_fixture.py --records 300 --out /tmp/mm-fixture
 python3 eval/bench.py /tmp/mm-fixture
 ```
 
-Compares naive full-tape context vs deterministic recall vs memory agents on
-recall and token economy.
+The CI matrix runs on Ubuntu, macOS and Windows with Python 3.11 and 3.14:
+static checks, the full suite with a coverage report (not a gate yet), a
+conformance proof manifest, an installed-wheel smoke test, deterministic
+offline harness checks, and a non-blocking dependency audit. The scientific
+evaluation is a separate, non-required workflow.
 
 ## Docs
 
-- [SPEC.md](SPEC.md) — the formal specification.
-- [docs/DOC_GRAPH.md](docs/DOC_GRAPH.md) — the operational document graph
-  (D-phase): rebuild, `graph document`, `explain` provenance, originals.
-- [docs/GRAPH_V1.md](docs/GRAPH_V1.md), [docs/GRAPH_V2.md](docs/GRAPH_V2.md),
-  [docs/GRAPH_UTIL.md](docs/GRAPH_UTIL.md), [docs/GRAPH_EVAL.md](docs/GRAPH_EVAL.md) —
-  graph recall, admission control, utilization and the F4 evaluation.
-- [docs/PLASTICITY_V1.md](docs/PLASTICITY_V1.md) — Fase P (learned path
-  priority): pre-registered protocol (P0 ledger, energy, modes, gates).
+- [SPEC.md](SPEC.md) — formal specification.
+- [docs/PAPER.md](docs/PAPER.md), [docs/RESULTS.md](docs/RESULTS.md) — the
+  paper draft and generated result tables; [docs/RELATED_WORK.md](docs/RELATED_WORK.md).
+- [docs/CLI.md](docs/CLI.md) — full CLI reference.
+- [docs/CONFIGURATION.md](docs/CONFIGURATION.md) — every `config.json` key.
+- [docs/ADMISSION_SHADOW_V1.md](docs/ADMISSION_SHADOW_V1.md) — admission
+  instrumentation (opt-in) and its privacy model.
+- [docs/DESKTOP_APP.md](docs/DESKTOP_APP.md) — macOS app (install, build).
+- [docs/GRAPH_USAGE.md](docs/GRAPH_USAGE.md) — graph projection usage.
+- [docs/DOC_GRAPH.md](docs/DOC_GRAPH.md) — the operational document graph.
+- Closure records: [docs/LIFECYCLE_CLOSURE.md](docs/LIFECYCLE_CLOSURE.md),
+  [docs/TWO_TIER_CLOSURE.md](docs/TWO_TIER_CLOSURE.md),
+  [docs/HISTORY_REWRITE_2026-09-22.md](docs/HISTORY_REWRITE_2026-09-22.md).
 
-## Desktop app (macOS)
+## License
 
-A native macOS menu-bar + window chatbot that runs the Memory Machine in
-process (PySide6), packaged as a self-contained `.app`.
-
-### Install
-
-1. Open `dist/Memory Machine.dmg`, drag `Memory Machine.app` to `/Applications`.
-2. First launch: right-click the app → **Open** (ad-hoc signed, not notarized —
-   Gatekeeper requires this once).
-
-### Build from source
-
-```bash
-./app/build.sh        # creates dist/Memory Machine.app (and re-verifies icon)
-```
-
-### App specifics
-
-- The DeepSeek API key is stored in the **macOS Keychain**
-  (`security find-generic-password -s memory-machine`), never in a file. The
-  model and memory root live in
-  `~/Library/Application Support/MemoryMachine/settings.json` (chmod 600,
-  never in the repo). Edit them in the app's **Settings** dialog.
-- Persistent memory is stored under
-  `~/Library/Application Support/MemoryMachine/data/`.
-- **Each topic owns its own tape.** A topic is a self-contained memory store
-  (`data/topics/<id>/`) named by its creation date/time (with an optional
-  label); memory agents are created per topic as that topic's tape grows.
-- **Auto topic (multi-topic)** — when enabled, an LLM router infers which topic
-  each message refers to (by time reference like "yesterday" and by subject)
-  and switches tapes internally, falling back to today's topic when nothing
-  matches. When disabled, use the topic selector manually.
-- **Automatic topic creation** — by default one topic per day is created
-  automatically (`auto_topic: day`). Alternatives in Settings: `idle` (a new
-  topic after N hours without activity) or `off` (fully manual).
-- **RAG documents + tape attachments** — the **Add files** button imports `.txt`
-  files: they are added as RAG reference material (`data/documents/`, retrieved
-  per message with BM25) **and** split into chunks that are appended to the
-  session's tape as labeled `attachment` memories, so the memory agents can
-  recall them. Attached chunks are secret-scanned and deduplicated by file
-  hash. (This is the one intentional exception to "external context never
-  touches the tape".)
-- **Web search** — a keyless DuckDuckGo lookup for the current message. In
-  **Auto** mode (default) it runs only when the question looks like it needs
-  current info; the checkbox forces it on. Results go to the chatbot for that
-  turn only (kept out of long-term memory).
-- The app runs in the menu bar; closing the window hides it. Use the tray menu
-  to reopen, open Settings, or quit.
-- Each reply shows **Remembered** memory ids (from the memory agents) and
-  **Saved to tape** ids (durable memories the chatbot produced).
+MIT — see [LICENSE](LICENSE).

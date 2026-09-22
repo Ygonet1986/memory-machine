@@ -1,5 +1,4 @@
 import json
-from pathlib import Path
 
 from memory_machine.attachments import ingest_attachment, remove_attachments
 from memory_machine.config import Config

@@ -14,7 +14,7 @@ from memory_machine.documents import documents_dir
 from memory_machine.graph import GraphStore
 from memory_machine.groups import Manifest
 from memory_machine.ingest_document import ingest_document
-from memory_machine.payload import build_evidence_payload, payload_as_context
+from memory_machine.payload import build_evidence_payload
 from memory_machine.tape import Tape
 from memory_machine.whiteboard import Annotation
 

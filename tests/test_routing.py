@@ -546,7 +546,6 @@ def test_recall_agent_mode_view(tmp_path):
         sys_text = text(messages, "system")
         if "memory agent watching the view" in sys_text:
             calls["n"] += 1
-            view = "topic/router" if "topic/router" in sys_text else "topic/benchmarks"
             return (
                 '{"digest":"d","annotations":[],"coverage":"complete"}'
             )

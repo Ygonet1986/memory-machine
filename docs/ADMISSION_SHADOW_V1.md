@@ -82,6 +82,26 @@ to be useful locally: the analysis runs on derived metrics, not content.
    `chars <= 4000`;
 6. promote only if it beats availability and precision **simultaneously**.
 
+## Privacy model (threat model, retention, permissions)
+
+- **What the log reveals.** Only derived signals, but they are not nothing:
+  the deterministic, unsalted question hash is dictionary-attackable in
+  low-entropy scenarios; matched entity/date tokens can expose identifiers
+  (file names, versions, ids); memory ids link to tape records that stay
+  local. Treat a log as personal data.
+- **Retention.** Append-only, one file per session, no rotation in v1. The
+  owner deletes the file (or the session) to delete the data; nothing is
+  uploaded anywhere by this module.
+- **Permissions.** The file is created with mode `0600`; a directory-level
+  override via `MEMORY_MACHINE_ADMISSION_SHADOW_PATH` inherits the ambient
+  umask.
+- **Sharing.** Aggregate metrics (counts, coverage distributions) are safe to
+  share; `entity_matches`, `date_matches` and the question hash should be
+  treated as potentially identifying and redacted when sharing raw lines.
+- **Planned hardening (v2).** Keyed HMAC for the question hash with a local
+  key, plus optional exclusion of entity/date token lists. Not implemented in
+  v1; no network or key management exists today.
+
 ## Non-goals
 
 No admission policy is applied by this module; no thresholds are frozen; no

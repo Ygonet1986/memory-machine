@@ -208,6 +208,8 @@ def record(*, root: Path, question: str, session_id: str,
             cached=cached, ts=ts)
         path = output_path(root)
         path.parent.mkdir(parents=True, exist_ok=True)
+        if not path.exists():
+            os.close(os.open(path, os.O_CREAT | os.O_WRONLY | os.O_APPEND, 0o600))
         with path.open("a", encoding="utf-8") as handle:
             handle.write(json.dumps(entry, ensure_ascii=False, sort_keys=True) + "\n")
         return entry

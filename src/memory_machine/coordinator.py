@@ -364,10 +364,11 @@ class Machine:
             dimension = (dimension_of(view) if view else None) or "semantic"
             groups.setdefault(dimension, []).append(annotation)
         kept: list[Any] = []
-        for dimension, annotations in groups.items():
+        for dimension, group_annotations in groups.items():
             board = self.whiteboard.for_dimension(dimension)
             kept.extend(
-                merge_annotations(board, annotations, budget=self.config.whiteboard_budget)
+                merge_annotations(board, group_annotations,
+                                  budget=self.config.whiteboard_budget)
             )
         self.whiteboard.annotations = kept
         return kept

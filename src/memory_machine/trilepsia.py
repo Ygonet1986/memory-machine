@@ -169,10 +169,10 @@ def _span_error(span: Any, original: str, lo: int, hi: int) -> str:
 
 
 def _item_error(key: str, item: dict[str, Any], original: str, lo: int, hi: int) -> str:
-    for field in REF_FIELDS:
-        value = item.get(field)
+    for field_name in REF_FIELDS:
+        value = item.get(field_name)
         if isinstance(value, str) and GRAPH_ID_RE.match(value.strip()):
-            return f"{field}={value!r} is a graph id (refs must be local)"
+            return f"{field_name}={value!r} is a graph id (refs must be local)"
     if "evidence_span" in item:
         error = _span_error(item.get("evidence_span"), original, lo, hi)
         if error:

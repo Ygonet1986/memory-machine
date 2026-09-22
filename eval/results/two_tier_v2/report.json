@@ -1,0 +1,1129 @@
+{
+  "arms": {
+    "T2v2-A90": {
+      "availability": 0.7143,
+      "delivered": 23,
+      "found": 15,
+      "mean_chars": 86.53,
+      "precision_at_k": 0.6522
+    },
+    "T2v2-B2": {
+      "availability": 0.9524,
+      "delivered": 36,
+      "found": 20,
+      "mean_chars": 122.16,
+      "precision_at_k": 0.5556
+    },
+    "T2v2-M70": {
+      "availability": 0.9048,
+      "delivered": 28,
+      "found": 19,
+      "mean_chars": 103.74,
+      "precision_at_k": 0.6786
+    },
+    "T2v2-P": {
+      "availability": 0.9048,
+      "delivered": 23,
+      "found": 19,
+      "mean_chars": 85.58,
+      "precision_at_k": 0.8261
+    },
+    "T2v2-U90": {
+      "availability": 0.9048,
+      "delivered": 25,
+      "found": 19,
+      "mean_chars": 92.47,
+      "precision_at_k": 0.76
+    }
+  },
+  "calls_added": 0,
+  "determinism": {
+    "identical": true,
+    "run1": "939b5756521c1f60b5062e1a1a8351db5c56abb2c41b7e94037fbec7469230fc",
+    "run2": "939b5756521c1f60b5062e1a1a8351db5c56abb2c41b7e94037fbec7469230fc"
+  },
+  "fixture": "/Users/igorcoutrimlacerda/memory-machine/eval/fixtures/lifecycle_v1",
+  "gates": {
+    "H6-1_availability": false,
+    "H6-2_precision": true,
+    "H6-3_budget": true,
+    "H6-4_no_regression_vs_unfiltered": true,
+    "H6-5_determinism": true,
+    "all_pass": false
+  },
+  "latency_ms": {
+    "T2v2-A90": {
+      "p50": 0.036,
+      "p95": 0.059,
+      "samples": 1900
+    },
+    "T2v2-B2": {
+      "p50": 0.051,
+      "p95": 0.08,
+      "samples": 1900
+    },
+    "T2v2-M70": {
+      "p50": 0.051,
+      "p95": 0.08,
+      "samples": 1900
+    },
+    "T2v2-P": {
+      "p50": 0.051,
+      "p95": 0.08,
+      "samples": 1900
+    },
+    "T2v2-U90": {
+      "p50": 0.057,
+      "p95": 0.089,
+      "samples": 1900
+    }
+  },
+  "per_probe": [
+    {
+      "T2v2-A90": {
+        "chars": 64,
+        "delivered": [
+          "M0003"
+        ],
+        "found": [
+          "M0003"
+        ]
+      },
+      "T2v2-B2": {
+        "chars": 150,
+        "delivered": [
+          "M0003",
+          "M0006"
+        ],
+        "found": [
+          "M0003"
+        ]
+      },
+      "T2v2-M70": {
+        "chars": 64,
+        "delivered": [
+          "M0003"
+        ],
+        "found": [
+          "M0003"
+        ]
+      },
+      "T2v2-P": {
+        "chars": 64,
+        "delivered": [
+          "M0003"
+        ],
+        "found": [
+          "M0003"
+        ]
+      },
+      "T2v2-U90": {
+        "chars": 64,
+        "delivered": [
+          "M0003"
+        ],
+        "found": [
+          "M0003"
+        ]
+      },
+      "probe_id": "P01",
+      "required": [
+        "M0003"
+      ]
+    },
+    {
+      "T2v2-A90": {
+        "chars": 65,
+        "delivered": [
+          "M0008"
+        ],
+        "found": [
+          "M0008"
+        ]
+      },
+      "T2v2-B2": {
+        "chars": 65,
+        "delivered": [
+          "M0008"
+        ],
+        "found": [
+          "M0008"
+        ]
+      },
+      "T2v2-M70": {
+        "chars": 65,
+        "delivered": [
+          "M0008"
+        ],
+        "found": [
+          "M0008"
+        ]
+      },
+      "T2v2-P": {
+        "chars": 65,
+        "delivered": [
+          "M0008"
+        ],
+        "found": [
+          "M0008"
+        ]
+      },
+      "T2v2-U90": {
+        "chars": 196,
+        "delivered": [
+          "M0008",
+          "M0009",
+          "M0018"
+        ],
+        "found": [
+          "M0008"
+        ]
+      },
+      "probe_id": "P02",
+      "required": [
+        "M0008"
+      ]
+    },
+    {
+      "T2v2-A90": {
+        "chars": 78,
+        "delivered": [
+          "M0010"
+        ],
+        "found": [
+          "M0010"
+        ]
+      },
+      "T2v2-B2": {
+        "chars": 108,
+        "delivered": [
+          "M0010",
+          "M0002"
+        ],
+        "found": [
+          "M0010"
+        ]
+      },
+      "T2v2-M70": {
+        "chars": 78,
+        "delivered": [
+          "M0010"
+        ],
+        "found": [
+          "M0010"
+        ]
+      },
+      "T2v2-P": {
+        "chars": 78,
+        "delivered": [
+          "M0010"
+        ],
+        "found": [
+          "M0010"
+        ]
+      },
+      "T2v2-U90": {
+        "chars": 78,
+        "delivered": [
+          "M0010"
+        ],
+        "found": [
+          "M0010"
+        ]
+      },
+      "probe_id": "P03",
+      "required": [
+        "M0010"
+      ]
+    },
+    {
+      "T2v2-A90": {
+        "chars": 68,
+        "delivered": [
+          "M0011"
+        ],
+        "found": [
+          "M0011"
+        ]
+      },
+      "T2v2-B2": {
+        "chars": 98,
+        "delivered": [
+          "M0011",
+          "M0002"
+        ],
+        "found": [
+          "M0011"
+        ]
+      },
+      "T2v2-M70": {
+        "chars": 68,
+        "delivered": [
+          "M0011"
+        ],
+        "found": [
+          "M0011"
+        ]
+      },
+      "T2v2-P": {
+        "chars": 68,
+        "delivered": [
+          "M0011"
+        ],
+        "found": [
+          "M0011"
+        ]
+      },
+      "T2v2-U90": {
+        "chars": 68,
+        "delivered": [
+          "M0011"
+        ],
+        "found": [
+          "M0011"
+        ]
+      },
+      "probe_id": "P04",
+      "required": [
+        "M0011"
+      ]
+    },
+    {
+      "T2v2-A90": {
+        "chars": 64,
+        "delivered": [
+          "M0003"
+        ],
+        "found": []
+      },
+      "T2v2-B2": {
+        "chars": 112,
+        "delivered": [
+          "M0012",
+          "M0003"
+        ],
+        "found": [
+          "M0012"
+        ]
+      },
+      "T2v2-M70": {
+        "chars": 48,
+        "delivered": [
+          "M0012"
+        ],
+        "found": [
+          "M0012"
+        ]
+      },
+      "T2v2-P": {
+        "chars": 48,
+        "delivered": [
+          "M0012"
+        ],
+        "found": [
+          "M0012"
+        ]
+      },
+      "T2v2-U90": {
+        "chars": 48,
+        "delivered": [
+          "M0012"
+        ],
+        "found": [
+          "M0012"
+        ]
+      },
+      "probe_id": "P05",
+      "required": [
+        "M0012"
+      ]
+    },
+    {
+      "T2v2-A90": {
+        "chars": 85,
+        "delivered": [
+          "M0013"
+        ],
+        "found": [
+          "M0013"
+        ]
+      },
+      "T2v2-B2": {
+        "chars": 115,
+        "delivered": [
+          "M0013",
+          "M0002"
+        ],
+        "found": [
+          "M0013"
+        ]
+      },
+      "T2v2-M70": {
+        "chars": 85,
+        "delivered": [
+          "M0013"
+        ],
+        "found": [
+          "M0013"
+        ]
+      },
+      "T2v2-P": {
+        "chars": 85,
+        "delivered": [
+          "M0013"
+        ],
+        "found": [
+          "M0013"
+        ]
+      },
+      "T2v2-U90": {
+        "chars": 85,
+        "delivered": [
+          "M0013"
+        ],
+        "found": [
+          "M0013"
+        ]
+      },
+      "probe_id": "P06",
+      "required": [
+        "M0013"
+      ]
+    },
+    {
+      "T2v2-A90": {
+        "chars": 85,
+        "delivered": [
+          "M0013"
+        ],
+        "found": []
+      },
+      "T2v2-B2": {
+        "chars": 152,
+        "delivered": [
+          "M0014",
+          "M0013"
+        ],
+        "found": [
+          "M0014"
+        ]
+      },
+      "T2v2-M70": {
+        "chars": 67,
+        "delivered": [
+          "M0014"
+        ],
+        "found": [
+          "M0014"
+        ]
+      },
+      "T2v2-P": {
+        "chars": 67,
+        "delivered": [
+          "M0014"
+        ],
+        "found": [
+          "M0014"
+        ]
+      },
+      "T2v2-U90": {
+        "chars": 67,
+        "delivered": [
+          "M0014"
+        ],
+        "found": [
+          "M0014"
+        ]
+      },
+      "probe_id": "P07",
+      "required": [
+        "M0014"
+      ]
+    },
+    {
+      "T2v2-A90": {
+        "chars": 86,
+        "delivered": [
+          "M0006"
+        ],
+        "found": [
+          "M0006"
+        ]
+      },
+      "T2v2-B2": {
+        "chars": 150,
+        "delivered": [
+          "M0006",
+          "M0003"
+        ],
+        "found": [
+          "M0006"
+        ]
+      },
+      "T2v2-M70": {
+        "chars": 150,
+        "delivered": [
+          "M0006",
+          "M0003"
+        ],
+        "found": [
+          "M0006"
+        ]
+      },
+      "T2v2-P": {
+        "chars": 86,
+        "delivered": [
+          "M0006"
+        ],
+        "found": [
+          "M0006"
+        ]
+      },
+      "T2v2-U90": {
+        "chars": 86,
+        "delivered": [
+          "M0006"
+        ],
+        "found": [
+          "M0006"
+        ]
+      },
+      "probe_id": "P08",
+      "required": [
+        "M0006"
+      ]
+    },
+    {
+      "T2v2-A90": {
+        "chars": 147,
+        "delivered": [
+          "M0003",
+          "M0019"
+        ],
+        "found": []
+      },
+      "T2v2-B2": {
+        "chars": 147,
+        "delivered": [
+          "M0003",
+          "M0019"
+        ],
+        "found": []
+      },
+      "T2v2-M70": {
+        "chars": 147,
+        "delivered": [
+          "M0003",
+          "M0019"
+        ],
+        "found": []
+      },
+      "T2v2-P": {
+        "chars": 147,
+        "delivered": [
+          "M0003",
+          "M0019"
+        ],
+        "found": []
+      },
+      "T2v2-U90": {
+        "chars": 147,
+        "delivered": [
+          "M0003",
+          "M0019"
+        ],
+        "found": []
+      },
+      "probe_id": "P09",
+      "required": [
+        "M0017"
+      ]
+    },
+    {
+      "T2v2-A90": {
+        "chars": 83,
+        "delivered": [
+          "M0019"
+        ],
+        "found": [
+          "M0019"
+        ]
+      },
+      "T2v2-B2": {
+        "chars": 147,
+        "delivered": [
+          "M0019",
+          "M0003"
+        ],
+        "found": [
+          "M0019"
+        ]
+      },
+      "T2v2-M70": {
+        "chars": 147,
+        "delivered": [
+          "M0019",
+          "M0003"
+        ],
+        "found": [
+          "M0019"
+        ]
+      },
+      "T2v2-P": {
+        "chars": 83,
+        "delivered": [
+          "M0019"
+        ],
+        "found": [
+          "M0019"
+        ]
+      },
+      "T2v2-U90": {
+        "chars": 83,
+        "delivered": [
+          "M0019"
+        ],
+        "found": [
+          "M0019"
+        ]
+      },
+      "probe_id": "P10",
+      "required": [
+        "M0019"
+      ]
+    },
+    {
+      "T2v2-A90": {
+        "chars": 72,
+        "delivered": [
+          "M0021"
+        ],
+        "found": [
+          "M0021"
+        ]
+      },
+      "T2v2-B2": {
+        "chars": 119,
+        "delivered": [
+          "M0021",
+          "M0004"
+        ],
+        "found": [
+          "M0021"
+        ]
+      },
+      "T2v2-M70": {
+        "chars": 119,
+        "delivered": [
+          "M0021",
+          "M0004"
+        ],
+        "found": [
+          "M0021"
+        ]
+      },
+      "T2v2-P": {
+        "chars": 72,
+        "delivered": [
+          "M0021"
+        ],
+        "found": [
+          "M0021"
+        ]
+      },
+      "T2v2-U90": {
+        "chars": 72,
+        "delivered": [
+          "M0021"
+        ],
+        "found": [
+          "M0021"
+        ]
+      },
+      "probe_id": "P11",
+      "required": [
+        "M0021"
+      ]
+    },
+    {
+      "T2v2-A90": {
+        "chars": 80,
+        "delivered": [
+          "M0022"
+        ],
+        "found": [
+          "M0022"
+        ]
+      },
+      "T2v2-B2": {
+        "chars": 110,
+        "delivered": [
+          "M0022",
+          "M0002"
+        ],
+        "found": [
+          "M0022"
+        ]
+      },
+      "T2v2-M70": {
+        "chars": 80,
+        "delivered": [
+          "M0022"
+        ],
+        "found": [
+          "M0022"
+        ]
+      },
+      "T2v2-P": {
+        "chars": 80,
+        "delivered": [
+          "M0022"
+        ],
+        "found": [
+          "M0022"
+        ]
+      },
+      "T2v2-U90": {
+        "chars": 80,
+        "delivered": [
+          "M0022"
+        ],
+        "found": [
+          "M0022"
+        ]
+      },
+      "probe_id": "P12",
+      "required": [
+        "M0022"
+      ]
+    },
+    {
+      "T2v2-A90": {
+        "chars": 0,
+        "delivered": [],
+        "found": []
+      },
+      "T2v2-B2": {
+        "chars": 57,
+        "delivered": [
+          "M0026"
+        ],
+        "found": [
+          "M0026"
+        ]
+      },
+      "T2v2-M70": {
+        "chars": 57,
+        "delivered": [
+          "M0026"
+        ],
+        "found": [
+          "M0026"
+        ]
+      },
+      "T2v2-P": {
+        "chars": 57,
+        "delivered": [
+          "M0026"
+        ],
+        "found": [
+          "M0026"
+        ]
+      },
+      "T2v2-U90": {
+        "chars": 57,
+        "delivered": [
+          "M0026"
+        ],
+        "found": [
+          "M0026"
+        ]
+      },
+      "probe_id": "P13",
+      "required": [
+        "M0026"
+      ]
+    },
+    {
+      "T2v2-A90": {
+        "chars": 45,
+        "delivered": [
+          "M0027"
+        ],
+        "found": [
+          "M0027"
+        ]
+      },
+      "T2v2-B2": {
+        "chars": 110,
+        "delivered": [
+          "M0027",
+          "M0008"
+        ],
+        "found": [
+          "M0027"
+        ]
+      },
+      "T2v2-M70": {
+        "chars": 45,
+        "delivered": [
+          "M0027"
+        ],
+        "found": [
+          "M0027"
+        ]
+      },
+      "T2v2-P": {
+        "chars": 45,
+        "delivered": [
+          "M0027"
+        ],
+        "found": [
+          "M0027"
+        ]
+      },
+      "T2v2-U90": {
+        "chars": 45,
+        "delivered": [
+          "M0027"
+        ],
+        "found": [
+          "M0027"
+        ]
+      },
+      "probe_id": "P14",
+      "required": [
+        "M0027"
+      ]
+    },
+    {
+      "T2v2-A90": {
+        "chars": 84,
+        "delivered": [
+          "M0030"
+        ],
+        "found": [
+          "M0030"
+        ]
+      },
+      "T2v2-B2": {
+        "chars": 170,
+        "delivered": [
+          "M0030",
+          "M0006"
+        ],
+        "found": [
+          "M0030",
+          "M0006"
+        ]
+      },
+      "T2v2-M70": {
+        "chars": 84,
+        "delivered": [
+          "M0030"
+        ],
+        "found": [
+          "M0030"
+        ]
+      },
+      "T2v2-P": {
+        "chars": 84,
+        "delivered": [
+          "M0030"
+        ],
+        "found": [
+          "M0030"
+        ]
+      },
+      "T2v2-U90": {
+        "chars": 84,
+        "delivered": [
+          "M0030"
+        ],
+        "found": [
+          "M0030"
+        ]
+      },
+      "probe_id": "P15",
+      "required": [
+        "M0006",
+        "M0030"
+      ]
+    },
+    {
+      "T2v2-A90": {
+        "chars": 125,
+        "delivered": [
+          "M0031",
+          "M0011"
+        ],
+        "found": [
+          "M0031"
+        ]
+      },
+      "T2v2-B2": {
+        "chars": 125,
+        "delivered": [
+          "M0031",
+          "M0011"
+        ],
+        "found": [
+          "M0031"
+        ]
+      },
+      "T2v2-M70": {
+        "chars": 125,
+        "delivered": [
+          "M0031",
+          "M0011"
+        ],
+        "found": [
+          "M0031"
+        ]
+      },
+      "T2v2-P": {
+        "chars": 125,
+        "delivered": [
+          "M0031",
+          "M0011"
+        ],
+        "found": [
+          "M0031"
+        ]
+      },
+      "T2v2-U90": {
+        "chars": 125,
+        "delivered": [
+          "M0031",
+          "M0011"
+        ],
+        "found": [
+          "M0031"
+        ]
+      },
+      "probe_id": "P16",
+      "required": [
+        "M0031"
+      ]
+    },
+    {
+      "T2v2-A90": {
+        "chars": 85,
+        "delivered": [
+          "M0013"
+        ],
+        "found": [
+          "M0013"
+        ]
+      },
+      "T2v2-B2": {
+        "chars": 173,
+        "delivered": [
+          "M0013",
+          "M0017"
+        ],
+        "found": [
+          "M0013"
+        ]
+      },
+      "T2v2-M70": {
+        "chars": 85,
+        "delivered": [
+          "M0013"
+        ],
+        "found": [
+          "M0013"
+        ]
+      },
+      "T2v2-P": {
+        "chars": 85,
+        "delivered": [
+          "M0013"
+        ],
+        "found": [
+          "M0013"
+        ]
+      },
+      "T2v2-U90": {
+        "chars": 85,
+        "delivered": [
+          "M0013"
+        ],
+        "found": [
+          "M0013"
+        ]
+      },
+      "probe_id": "P17",
+      "required": [
+        "M0013"
+      ]
+    },
+    {
+      "T2v2-A90": {
+        "chars": 319,
+        "delivered": [
+          "M0003",
+          "M0017",
+          "M0019",
+          "M0023"
+        ],
+        "found": [
+          "M0003",
+          "M0017"
+        ]
+      },
+      "T2v2-B2": {
+        "chars": 152,
+        "delivered": [
+          "M0003",
+          "M0017"
+        ],
+        "found": [
+          "M0003",
+          "M0017"
+        ]
+      },
+      "T2v2-M70": {
+        "chars": 405,
+        "delivered": [
+          "M0003",
+          "M0017",
+          "M0019",
+          "M0023",
+          "M0006"
+        ],
+        "found": [
+          "M0003",
+          "M0017"
+        ]
+      },
+      "T2v2-P": {
+        "chars": 235,
+        "delivered": [
+          "M0003",
+          "M0017",
+          "M0019"
+        ],
+        "found": [
+          "M0003",
+          "M0017"
+        ]
+      },
+      "T2v2-U90": {
+        "chars": 235,
+        "delivered": [
+          "M0003",
+          "M0017",
+          "M0019"
+        ],
+        "found": [
+          "M0003",
+          "M0017"
+        ]
+      },
+      "probe_id": "P18",
+      "required": [
+        "M0003",
+        "M0017"
+      ]
+    },
+    {
+      "T2v2-A90": {
+        "chars": 9,
+        "delivered": [
+          "M0028"
+        ],
+        "found": []
+      },
+      "T2v2-B2": {
+        "chars": 61,
+        "delivered": [
+          "M0029",
+          "M0028"
+        ],
+        "found": [
+          "M0029"
+        ]
+      },
+      "T2v2-M70": {
+        "chars": 52,
+        "delivered": [
+          "M0029"
+        ],
+        "found": [
+          "M0029"
+        ]
+      },
+      "T2v2-P": {
+        "chars": 52,
+        "delivered": [
+          "M0029"
+        ],
+        "found": [
+          "M0029"
+        ]
+      },
+      "T2v2-U90": {
+        "chars": 52,
+        "delivered": [
+          "M0029"
+        ],
+        "found": [
+          "M0029"
+        ]
+      },
+      "probe_id": "P20",
+      "required": [
+        "M0029"
+      ]
+    }
+  ],
+  "prereg": "docs/TWO_TIER_RETRIEVAL_V2_PREREG.md",
+  "probes_used": 19,
+  "projection": "/Users/igorcoutrimlacerda/memory-machine/eval/results/lifecycle_v1_report/projection",
+  "required_occurrences": 21,
+  "sensitivity": {
+    "budget": {
+      "1": [
+        0.8571,
+        0.9474
+      ],
+      "2": [
+        0.9524,
+        0.5556
+      ],
+      "3": [
+        1.0,
+        0.42
+      ]
+    },
+    "margin": {
+      "0.50": [
+        1.0,
+        0.5122
+      ],
+      "0.70": [
+        0.9048,
+        0.6786
+      ],
+      "0.90": [
+        0.9048,
+        0.8261
+      ],
+      "1.00": [
+        0.8571,
+        0.9474
+      ]
+    }
+  },
+  "thresholds": {
+    "margin_primary": 0.9,
+    "margin_variant": 0.7,
+    "top_k": 5
+  },
+  "v1_reference": {
+    "T2-B_availability": 0.9524,
+    "T2-B_precision": 0.4762,
+    "T2-C_precision": 0.5122
+  }
+}

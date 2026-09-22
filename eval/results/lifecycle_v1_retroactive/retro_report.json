@@ -1,0 +1,686 @@
+{
+  "counters": {
+    "fallback_not_triggered": 18,
+    "fallback_triggered": 1,
+    "irrelevant_retroactive_hits": 0,
+    "recoverable_false_negative": 4,
+    "retroactively_found": 1,
+    "retroactively_missed": 3,
+    "unrecoverable_due_to_ingestion": 1
+  },
+  "fixture": "eval/fixtures/lifecycle_v1",
+  "metrics": {
+    "retroactive_precision_at_k": 1.0,
+    "retroactive_recovery_rate": 0.25
+  },
+  "per_probe": [
+    {
+      "active_topk": [
+        {
+          "memory_id": "M0003",
+          "score": 2.0661,
+          "seq": 3
+        },
+        {
+          "memory_id": "M0006",
+          "score": 0.5139,
+          "seq": 6
+        }
+      ],
+      "after_seq": 7,
+      "gold_needed": [],
+      "probe_id": "P01",
+      "required": [
+        "M0003"
+      ],
+      "retro_rank": [],
+      "trigger_fired": false
+    },
+    {
+      "active_topk": [
+        {
+          "memory_id": "M0008",
+          "score": 9.3788,
+          "seq": 8
+        }
+      ],
+      "after_seq": 16,
+      "gold_needed": [],
+      "probe_id": "P02",
+      "required": [
+        "M0008"
+      ],
+      "retro_rank": [],
+      "trigger_fired": false
+    },
+    {
+      "active_topk": [
+        {
+          "memory_id": "M0010",
+          "score": 5.7342,
+          "seq": 11
+        },
+        {
+          "memory_id": "M0006",
+          "score": 1.4362,
+          "seq": 6
+        },
+        {
+          "memory_id": "M0011",
+          "score": 1.1461,
+          "seq": 12
+        }
+      ],
+      "after_seq": 16,
+      "gold_needed": [],
+      "probe_id": "P03",
+      "required": [
+        "M0010"
+      ],
+      "retro_rank": [
+        {
+          "memory_id": "M0002",
+          "score": 1.7004,
+          "seq": 2
+        },
+        {
+          "memory_id": "M0007",
+          "score": 1.7004,
+          "seq": 7
+        }
+      ],
+      "trigger_fired": false
+    },
+    {
+      "active_topk": [
+        {
+          "memory_id": "M0011",
+          "score": 2.8608,
+          "seq": 12
+        },
+        {
+          "memory_id": "M0008",
+          "score": 1.5631,
+          "seq": 8
+        },
+        {
+          "memory_id": "M0006",
+          "score": 1.4362,
+          "seq": 6
+        },
+        {
+          "memory_id": "M0010",
+          "score": 1.0448,
+          "seq": 11
+        }
+      ],
+      "after_seq": 16,
+      "gold_needed": [],
+      "probe_id": "P04",
+      "required": [
+        "M0011"
+      ],
+      "retro_rank": [
+        {
+          "memory_id": "M0002",
+          "score": 1.7004,
+          "seq": 2
+        }
+      ],
+      "trigger_fired": false
+    },
+    {
+      "active_topk": [
+        {
+          "memory_id": "M0003",
+          "score": 1.6354,
+          "seq": 3
+        }
+      ],
+      "after_seq": 16,
+      "gold_needed": [
+        "M0012"
+      ],
+      "probe_id": "P05",
+      "required": [
+        "M0012"
+      ],
+      "retro_rank": [
+        {
+          "memory_id": "M0012",
+          "score": 2.786,
+          "seq": 13
+        }
+      ],
+      "trigger_fired": false
+    },
+    {
+      "active_topk": [
+        {
+          "memory_id": "M0013",
+          "score": 8.2047,
+          "seq": 14
+        },
+        {
+          "memory_id": "M0006",
+          "score": 1.4362,
+          "seq": 6
+        }
+      ],
+      "after_seq": 16,
+      "gold_needed": [],
+      "probe_id": "P06",
+      "required": [
+        "M0013"
+      ],
+      "retro_rank": [
+        {
+          "memory_id": "M0002",
+          "score": 1.7004,
+          "seq": 2
+        },
+        {
+          "memory_id": "M0012",
+          "score": 1.393,
+          "seq": 13
+        }
+      ],
+      "trigger_fired": false
+    },
+    {
+      "active_topk": [
+        {
+          "memory_id": "M0013",
+          "score": 1.3802,
+          "seq": 14
+        }
+      ],
+      "after_seq": 16,
+      "gold_needed": [
+        "M0014"
+      ],
+      "probe_id": "P07",
+      "required": [
+        "M0014"
+      ],
+      "retro_rank": [
+        {
+          "memory_id": "M0014",
+          "score": 2.3594,
+          "seq": 15
+        }
+      ],
+      "trigger_fired": false
+    },
+    {
+      "active_topk": [
+        {
+          "memory_id": "M0006",
+          "score": 4.316,
+          "seq": 6
+        },
+        {
+          "memory_id": "M0003",
+          "score": 3.2793,
+          "seq": 3
+        },
+        {
+          "memory_id": "M0013",
+          "score": 2.0321,
+          "seq": 14
+        }
+      ],
+      "after_seq": 16,
+      "gold_needed": [],
+      "probe_id": "P08",
+      "required": [
+        "M0006"
+      ],
+      "retro_rank": [
+        {
+          "memory_id": "M0012",
+          "score": 1.393,
+          "seq": 13
+        }
+      ],
+      "trigger_fired": false
+    },
+    {
+      "active_topk": [
+        {
+          "memory_id": "M0003",
+          "score": 4.0149,
+          "seq": 3
+        },
+        {
+          "memory_id": "M0019",
+          "score": 3.8375,
+          "seq": 19
+        },
+        {
+          "memory_id": "M0017",
+          "score": 2.4308,
+          "seq": 17
+        },
+        {
+          "memory_id": "M0006",
+          "score": 2.2334,
+          "seq": 6
+        }
+      ],
+      "after_seq": 20,
+      "gold_needed": [],
+      "probe_id": "P09",
+      "required": [
+        "M0017"
+      ],
+      "retro_rank": [],
+      "trigger_fired": false
+    },
+    {
+      "active_topk": [
+        {
+          "memory_id": "M0019",
+          "score": 5.4212,
+          "seq": 19
+        },
+        {
+          "memory_id": "M0003",
+          "score": 3.6577,
+          "seq": 3
+        },
+        {
+          "memory_id": "M0017",
+          "score": 3.4961,
+          "seq": 17
+        },
+        {
+          "memory_id": "M0006",
+          "score": 2.2334,
+          "seq": 6
+        }
+      ],
+      "after_seq": 20,
+      "gold_needed": [],
+      "probe_id": "P10",
+      "required": [
+        "M0019"
+      ],
+      "retro_rank": [],
+      "trigger_fired": false
+    },
+    {
+      "active_topk": [
+        {
+          "memory_id": "M0021",
+          "score": 6.9803,
+          "seq": 21
+        },
+        {
+          "memory_id": "M0006",
+          "score": 1.6266,
+          "seq": 6
+        }
+      ],
+      "after_seq": 29,
+      "gold_needed": [],
+      "probe_id": "P11",
+      "required": [
+        "M0021"
+      ],
+      "retro_rank": [
+        {
+          "memory_id": "M0004",
+          "score": 3.489,
+          "seq": 4
+        }
+      ],
+      "trigger_fired": false
+    },
+    {
+      "active_topk": [
+        {
+          "memory_id": "M0022",
+          "score": 5.508,
+          "seq": 22
+        },
+        {
+          "memory_id": "M0006",
+          "score": 2.0742,
+          "seq": 6
+        },
+        {
+          "memory_id": "M0021",
+          "score": 1.9661,
+          "seq": 21
+        },
+        {
+          "memory_id": "M0011",
+          "score": 1.6097,
+          "seq": 12
+        },
+        {
+          "memory_id": "M0010",
+          "score": 1.4576,
+          "seq": 11
+        }
+      ],
+      "after_seq": 29,
+      "gold_needed": [],
+      "probe_id": "P12",
+      "required": [
+        "M0022"
+      ],
+      "retro_rank": [
+        {
+          "memory_id": "M0002",
+          "score": 1.9463,
+          "seq": 2
+        }
+      ],
+      "trigger_fired": false
+    },
+    {
+      "active_topk": [],
+      "after_seq": 29,
+      "gold_needed": [
+        "M0026"
+      ],
+      "probe_id": "P13",
+      "required": [
+        "M0026"
+      ],
+      "retro_rank": [
+        {
+          "memory_id": "M0026",
+          "score": 5.7796,
+          "seq": 26
+        }
+      ],
+      "trigger_fired": true
+    },
+    {
+      "active_topk": [
+        {
+          "memory_id": "M0027",
+          "score": 8.9869,
+          "seq": 27
+        },
+        {
+          "memory_id": "M0008",
+          "score": 5.0181,
+          "seq": 8
+        },
+        {
+          "memory_id": "M0021",
+          "score": 3.5758,
+          "seq": 21
+        },
+        {
+          "memory_id": "M0015",
+          "score": 1.7,
+          "seq": 16
+        }
+      ],
+      "after_seq": 29,
+      "gold_needed": [],
+      "probe_id": "P14",
+      "required": [
+        "M0027"
+      ],
+      "retro_rank": [],
+      "trigger_fired": false
+    },
+    {
+      "active_topk": [
+        {
+          "memory_id": "M0030",
+          "score": 6.3052,
+          "seq": 30
+        },
+        {
+          "memory_id": "M0006",
+          "score": 4.1225,
+          "seq": 6
+        },
+        {
+          "memory_id": "M0003",
+          "score": 3.0824,
+          "seq": 3
+        },
+        {
+          "memory_id": "M0017",
+          "score": 2.9371,
+          "seq": 17
+        },
+        {
+          "memory_id": "M0019",
+          "score": 2.9371,
+          "seq": 19
+        }
+      ],
+      "after_seq": 32,
+      "gold_needed": [],
+      "probe_id": "P15",
+      "required": [
+        "M0006",
+        "M0030"
+      ],
+      "retro_rank": [],
+      "trigger_fired": false
+    },
+    {
+      "active_topk": [
+        {
+          "memory_id": "M0031",
+          "score": 3.7619,
+          "seq": 31
+        },
+        {
+          "memory_id": "M0011",
+          "score": 3.5661,
+          "seq": 12
+        },
+        {
+          "memory_id": "M0008",
+          "score": 2.3885,
+          "seq": 8
+        },
+        {
+          "memory_id": "M0013",
+          "score": 2.0926,
+          "seq": 14
+        },
+        {
+          "memory_id": "M0006",
+          "score": 1.734,
+          "seq": 6
+        }
+      ],
+      "after_seq": 32,
+      "gold_needed": [],
+      "probe_id": "P16",
+      "required": [
+        "M0031"
+      ],
+      "retro_rank": [
+        {
+          "memory_id": "M0002",
+          "score": 2.0794,
+          "seq": 2
+        },
+        {
+          "memory_id": "M0026",
+          "score": 1.5547,
+          "seq": 26
+        }
+      ],
+      "trigger_fired": false
+    },
+    {
+      "active_topk": [
+        {
+          "memory_id": "M0013",
+          "score": 6.2482,
+          "seq": 14
+        },
+        {
+          "memory_id": "M0017",
+          "score": 2.5531,
+          "seq": 17
+        },
+        {
+          "memory_id": "M0020",
+          "score": 1.7379,
+          "seq": 20
+        },
+        {
+          "memory_id": "M0003",
+          "score": 1.0275,
+          "seq": 3
+        },
+        {
+          "memory_id": "M0019",
+          "score": 0.979,
+          "seq": 19
+        }
+      ],
+      "after_seq": 32,
+      "gold_needed": [],
+      "probe_id": "P17",
+      "required": [
+        "M0013"
+      ],
+      "retro_rank": [
+        {
+          "memory_id": "M0012",
+          "score": 1.6975,
+          "seq": 13
+        },
+        {
+          "memory_id": "M0014",
+          "score": 1.4341,
+          "seq": 15
+        }
+      ],
+      "trigger_fired": false
+    },
+    {
+      "active_topk": [
+        {
+          "memory_id": "M0003",
+          "score": 3.0824,
+          "seq": 3
+        },
+        {
+          "memory_id": "M0017",
+          "score": 2.9371,
+          "seq": 17
+        },
+        {
+          "memory_id": "M0019",
+          "score": 2.9371,
+          "seq": 19
+        },
+        {
+          "memory_id": "M0023",
+          "score": 2.8049,
+          "seq": 23
+        },
+        {
+          "memory_id": "M0006",
+          "score": 2.6841,
+          "seq": 6
+        }
+      ],
+      "after_seq": 32,
+      "gold_needed": [],
+      "probe_id": "P18",
+      "required": [
+        "M0003",
+        "M0017"
+      ],
+      "retro_rank": [],
+      "trigger_fired": false
+    },
+    {
+      "probe_id": "P19",
+      "skipped": "unrecoverable_due_to_ingestion"
+    },
+    {
+      "active_topk": [
+        {
+          "memory_id": "M0028",
+          "score": 2.7337,
+          "seq": 28
+        },
+        {
+          "memory_id": "M0008",
+          "score": 2.3885,
+          "seq": 8
+        },
+        {
+          "memory_id": "M0013",
+          "score": 2.0631,
+          "seq": 14
+        },
+        {
+          "memory_id": "M0020",
+          "score": 1.7379,
+          "seq": 20
+        },
+        {
+          "memory_id": "M0006",
+          "score": 1.734,
+          "seq": 6
+        }
+      ],
+      "after_seq": 32,
+      "gold_needed": [
+        "M0029"
+      ],
+      "probe_id": "P20",
+      "required": [
+        "M0029"
+      ],
+      "retro_rank": [
+        {
+          "memory_id": "M0029",
+          "score": 3.395,
+          "seq": 29
+        },
+        {
+          "memory_id": "M0002",
+          "score": 2.0794,
+          "seq": 2
+        },
+        {
+          "memory_id": "M0012",
+          "score": 1.6975,
+          "seq": 13
+        }
+      ],
+      "trigger_fired": false
+    }
+  ],
+  "retriever": {
+    "b": 0.75,
+    "k1": 1.5,
+    "name": "bm25",
+    "searchable_class": "event_only",
+    "threshold": "positive scores only",
+    "tie_break": "score desc, seq asc, memory_id asc",
+    "tokenizer": "memory_machine.retrieval.tokenize",
+    "top_k": 5
+  },
+  "retriever_capability": {
+    "rate": 1.0,
+    "required_checked": 4,
+    "required_found_with_opportunity": 4
+  },
+  "trigger_quality": {
+    "fired_when_needed": 1,
+    "probes_needing_fallback": 4,
+    "rate": 0.25
+  }
+}

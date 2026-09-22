@@ -1,6 +1,10 @@
+tests/test_admission_causal_holdout.py::test_holdout_regenerates_byte_identically
+tests/test_admission_causal_holdout.py::test_single_evaluation_recorded_verdicts
 tests/test_admission_causal_v1.py::test_fixture_regenerates_byte_identically
 tests/test_admission_causal_v1.py::test_harness_deterministic_and_recorded_verdicts
 tests/test_admission_causal_v1.py::test_expansion_adds_rationale_but_relative_floor_rejects_it
+tests/test_admission_causal_v2.py::test_slot_requires_cue_and_relation
+tests/test_admission_causal_v2.py::test_deterministic_and_recorded_verdicts
 tests/test_admission_p3v4.py::test_product_p3v4_equals_frozen_v4_harness_on_the_whole_fixture
 tests/test_admission_p3v4.py::test_p3v4_constants_are_frozen
 tests/test_admission_portfolio_v1.py::test_fixture_regenerates_byte_identically
@@ -522,4 +526,4 @@ tests/test_whiteboard.py::test_size_and_consolidation_trigger
 tests/test_whiteboard.py::test_roundtrip
 tests/test_whiteboard.py::test_render
 
-523 tests collected in 0.08s
+527 tests collected in 0.08s

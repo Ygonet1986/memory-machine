@@ -285,7 +285,7 @@ def test_incremental_rerun_projects_nothing_twice(tmp_path):
 def test_document_view_filters_windows_and_original(tmp_path):
     root, tape, manifest, src, store = _env(tmp_path)
     src.write_text(CONTENT)
-    result = _ingest(root, tape, manifest, src, store, WindowExtractor())
+    _ingest(root, tape, manifest, src, store, WindowExtractor())
     doc = store.documents()[0]
     chunks = [r for r in tape.read() if r.type == "attachment"]
 

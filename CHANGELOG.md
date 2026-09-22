@@ -33,3 +33,27 @@ Public-ready snapshot. No functional change to recall.
 - **Preflight.** Canonical placeholder excerpts are now accepted by excerpt
   rather than by path; re-run over the rewritten history reports 0 critical
   findings.
+
+## [0.2.2] - 2026-09-22
+
+Maintenance and communication after the external audit; no functional change
+to recall.
+
+- **CI hardening.** Actions pinned by full commit SHA
+  (`checkout` v7.0.1, `setup-python` v7.0.0, `upload-artifact` v7.0.1) and
+  explicit runner images (`ubuntu-24.04`, `macos-14`, `windows-2022`).
+- **Static quality.** `ruff` gate over `src/`, `tests/` and `scripts/`
+  (research harnesses under `eval/` stay unlinted so frozen artifacts are
+  never reformatted); coverage report in the test step (not a gate yet); a
+  non-blocking dependency audit job (`pip-audit`).
+- **README separation.** Front page is now promise + quickstart + short
+  architecture + status + links. Moved verbatim: CLI reference
+  (`docs/CLI.md`), configuration (`docs/CONFIGURATION.md`), graph usage
+  (`docs/GRAPH_USAGE.md`), macOS app (`docs/DESKTOP_APP.md`), measured notes
+  (`docs/FINDINGS.md`).
+- **Versioning clarity.** The README now states explicitly that the package
+  follows SemVer (`0.x` while the research phase is "experimental program
+  v1").
+- **Admission shadow privacy.** Log file created with mode `0600`; threat
+  model, retention, permissions and planned keyed-HMAC hardening documented
+  in `docs/ADMISSION_SHADOW_V1.md`.

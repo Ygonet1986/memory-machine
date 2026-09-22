@@ -13,7 +13,6 @@ import re
 import urllib.error
 import urllib.request
 from collections import Counter
-from typing import Any
 
 STOPWORDS = {
     "the", "and", "for", "are", "was", "what", "did", "we", "about", "using",

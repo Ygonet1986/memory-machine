@@ -2,7 +2,6 @@ from memory_machine.attention import (
     blend,
     classify,
     confidence,
-    contribution_summary,
     decay_reinforce,
     is_anaphoric,
 )

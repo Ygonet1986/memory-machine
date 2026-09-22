@@ -1,7 +1,6 @@
 """Verify multi-tape correctness: each topic owns an independent tape whose
 memory agents grow separately, and switching loads the right tape."""
 
-from pathlib import Path
 
 from memory_machine.config import Config
 from memory_machine.coordinator import Machine

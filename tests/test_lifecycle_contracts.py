@@ -172,7 +172,6 @@ def test_rebuild_is_normalised_identical_and_order_independent(tmp_path):
 
 
 def test_failure_never_publishes_a_partial_projection(tmp_path, monkeypatch):
-    projection = lc.LifecycleProjection(tmp_path)
     calls = {"n": 0}
     original = lc._classify
 

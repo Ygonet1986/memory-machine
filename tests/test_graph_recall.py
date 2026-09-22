@@ -266,7 +266,7 @@ def test_cli_query_and_path(tmp_path, capsys):
     from memory_machine.coordinator import Machine
 
     _base_graph(tmp_path)
-    machine = Machine(tmp_path, config=Config(graph_enabled=True), client=None)
+    Machine(tmp_path, config=Config(graph_enabled=True), client=None)
 
     query_args = argparse.Namespace(
         root=str(tmp_path), action="query", target="Kalak", target_b="",

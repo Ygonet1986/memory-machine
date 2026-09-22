@@ -268,7 +268,7 @@ def test_reexecution_projects_nothing_twice(tmp_path):
     src.write_text("Kalak fostered the birds. " * 10)
     extractor = WindowExtractor(window_fn=lambda w: _chunk_payload(w.members[0]))
 
-    first = ingest_document(
+    ingest_document(
         tape, manifest, src, chunk_size=60, overlap=0,
         store=store, extractor=extractor,
         enable_graph=True, structure_level="both",

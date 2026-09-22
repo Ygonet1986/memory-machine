@@ -1,4 +1,3 @@
-import json
 
 from memory_machine.config import Config
 from memory_machine.coordinator import Machine

@@ -3,6 +3,9 @@ name: CI
 # Deterministic, required-quality workflow: no secrets, no network model calls.
 # Everything here can run on a fork PR. The scientific evaluation lives in
 # scientific.yml and is intentionally non-blocking.
+#
+# Actions are pinned by full commit SHA (supply-chain hygiene) with the
+# human-readable version in a comment; bump both together.
 
 on:
   push:
@@ -23,14 +26,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-24.04, macos-14, windows-2022]
         # Oldest supported (3.11) + latest stable (bump when a new stable lands).
         python: ["3.11", "3.14"]
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
         with:
           python-version: ${{ matrix.python }}
 
@@ -39,8 +42,11 @@ jobs:
           python -m pip install --upgrade pip setuptools wheel
           pip install -e ".[dev]"
 
-      - name: Full test suite
-        run: python -m pytest -q
+      - name: Static checks (ruff)
+        run: python -m ruff check src tests scripts
+
+      - name: Full test suite (with coverage report; not a gate yet)
+        run: python -m pytest -q --cov=memory_machine --cov-report=term
 
       - name: Anti-disappearance (conformance proof manifest)
         run: python scripts/verify_proof_manifest.py --strict
@@ -58,14 +64,32 @@ jobs:
         run: pip wheel --no-deps -w dist .
 
       - name: Upload wheel
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           name: wheel-${{ matrix.os }}-py${{ matrix.python }}
           path: dist/*.whl
           if-no-files-found: error
 
       - name: Upload conformance proof
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           name: conformance-proof-${{ matrix.os }}-py${{ matrix.python }}
           path: docs/CONFORMANCE_PROOF.txt
+
+  audit:
+    name: dependency audit (informational)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: "3.14"
+
+      - name: Audit installed dependencies (non-blocking for now)
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]" pip-audit
+          pip-audit

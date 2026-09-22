@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 
 from memory_machine import admission_shadow as shadow
 from memory_machine.config import Config
@@ -111,6 +112,9 @@ def test_shadow_is_off_by_default_and_recall_stays_identical(tmp_path, monkeypat
     for key in ("annotations", "evidence_payload", "evidence_payload_chars",
                 "tape_records"):
         assert result[key] == control_result[key]
+
+    if os.name == "posix":
+        assert (shadow_path.stat().st_mode & 0o777) == 0o600
 
     lines = shadow_path.read_text(encoding="utf-8").splitlines()
     assert len(lines) == 1

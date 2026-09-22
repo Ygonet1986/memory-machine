@@ -97,3 +97,48 @@ modules), outputs `eval/results/admission_synthetic_v3/report.json` and
 regenerated, one primary run plus the determinism rerun, execution record
 appended, all committed together.
 
+
+## Execution record (2026-09-22)
+
+Recorded run on the frozen v1 sample (hash `f61262d3...`), report at
+`eval/results/admission_synthetic_v3/report.json`; determinism rerun
+identical. Superseded records removed (P3v3): 30.
+
+| policy | availability | precision | delivered | mean chars | max/case | abstention (S7) |
+|---|---:|---:|---:|---:|---:|---:|
+| P1 margin50 | 0.900 | 0.310 | 290 | 204 | 5 | 0.000 |
+| P2 margin90 | 0.600 | 0.429 | 140 | 107 | 4 | 0.000 |
+| P3v1 (frozen) | 0.700 | 0.500 | 140 | 108 | 5 | 1.000 |
+| P3v2 (frozen) | 1.000 | 0.455 | 220 | 169 | 5 | 1.000 |
+| **P3v3** | **0.900** | **0.643** | 140 | 113 | **2** | **1.000** |
+
+Gates: G1 **true**; G2 **false** (0.643 < 0.70); G3 **true** (0.900 > 0.600
+and 0.643 > 0.310); G4 **true**; G5 **false**; G6 true; G7 **false**
+(availability 0.900 < P3v2 1.000); G8 **true**; `all_pass` **false**.
+
+Findings:
+
+- **The two declared changes worked as mechanisms**: the removal dropped 30
+  superseded records, deliveries fell 220 -> 140 (cap active, max 2/case) and
+  precision rose 0.455 -> 0.643. `short_ambiguous`, `long_specific` and
+  `shared_subject` stopped carrying their tails.
+- **The cap truncated the correction**: `corrected` returned to 0.00. In
+  S3-01 the survivors order as R04 build (gain 0.412), R06 preference
+  (0.344), R03 correction (0.321); with two slots, the correction is third
+  and dropped. Supersession removal alone does not guarantee delivery - the
+  correction has no priority slot in the declared rule, and the global gain
+  order puts unrelated higher-scoring records first.
+- The v2-v3 pair is an exact trade: availability 1.000 -> 0.900, precision
+  0.455 -> 0.643; the joint gates still miss (G2 by 0.057, G5 on
+  `corrected`).
+- Declared expectations: availability 1.000 predicted, actual 0.900 - a miss
+  (the cap interaction with ordering was underestimated); precision 0.643
+  inside the predicted 0.65-0.75 band's lower edge (rounded).
+
+Stop rules applied: G2/G5/G7 failed, nothing promoted, nothing re-fitted.
+G7 failed only on availability, so **the cap is the named cause** (per
+section 7) and must be revisited before any further round. The iteration
+warning is active: this was the third round on the same fixture, and a fourth
+round must justify why it is not fitting the fixture - the principled
+candidate is a correction priority slot (supersession as a slot, not a
+score), not another constant.

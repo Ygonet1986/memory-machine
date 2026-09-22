@@ -36,6 +36,61 @@ class LLMError(RuntimeError):
     pass
 
 
+_MOCK_MEMORY_RE = None
+
+
+def _mock_reply(messages: list[dict[str, str]]) -> str:
+    """Deterministic offline reply for smoke tests (never for evaluation).
+
+    Echoes the first ``M####`` found in the prompt so the pipeline has a
+    plausible annotation target; other prompts get canned JSON/text.
+    """
+    import re
+
+    global _MOCK_MEMORY_RE
+    if _MOCK_MEMORY_RE is None:
+        _MOCK_MEMORY_RE = re.compile(r"\bM\d{4}\b")
+    text = "\n".join(str(m.get("content") or "") for m in messages)
+    if '"annotations"' in text:
+        match = _MOCK_MEMORY_RE.search(text)
+        annotations = (
+            [{"memory_id": match.group(0), "note": "mock note", "relevance": 0.9}]
+            if match
+            else []
+        )
+        return json.dumps({
+            "digest": "mock digest",
+            "checklist": [],
+            "annotations": annotations,
+            "coverage": "complete" if annotations else "none",
+        })
+    if '"understanding"' in text:
+        return json.dumps({"understanding": "mock understanding",
+                           "checklist": ["mock checklist item"]})
+    return "mock reply"
+
+
+class MockLLMClient:
+    """Offline LLM double enabled by ``MEMORY_MACHINE_MOCK=1``.
+
+    Exists for smoke tests and CI runs without an API key. It never calls the
+    network and must never be used to produce evaluation results.
+    """
+
+    is_mock = True
+
+    def complete(self, messages: list[dict[str, str]], *, temperature: float = 0.0) -> str:
+        return _mock_reply(messages)
+
+    def complete_with_reasoning(
+        self, messages: list[dict[str, str]], *, temperature: float = 0.0
+    ) -> tuple[str, str]:
+        return _mock_reply(messages), ""
+
+    def stream(self, messages: list[dict[str, str]], *, temperature: float = 0.0):
+        yield _mock_reply(messages), ""
+
+
 class LLMClient:
     def __init__(
         self,
@@ -56,6 +111,8 @@ class LLMClient:
 
     @classmethod
     def from_config(cls, config: Config, api_key: str | None = None) -> "LLMClient":
+        if os.environ.get("MEMORY_MACHINE_MOCK") == "1":
+            return MockLLMClient()  # type: ignore[return-value]
         key = api_key or os.environ.get(config.api_key_env, "")
         if not key:
             raise LLMError(f"{config.api_key_env} is not set")

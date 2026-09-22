@@ -10,7 +10,7 @@ contagem de testes não frágil; referências declaram individual vs agregado.
 
 **Método (não frágil).** A prova é: **toda a suíte coletada passa, nenhum
 teste esperado desaparece e um piso mínimo evita queda silenciosa.** Nesta
-revisão: `pytest -q` → **460 passed** (440 + 20 novos destas correções). O
+revisão: `pytest -q` → **464 passed** (440 + 24 novos: correções v1.1 + L1). O
 manifesto completo de node IDs está em `docs/CONFORMANCE_PROOF.txt` (gerado
 por `python3 -m pytest --collect-only -q` neste commit).
 
@@ -42,7 +42,7 @@ um node ID — sem alegação individual.
 | N7 | Segredos bloqueiam toda escrita, inclusive envelopes | `secrets.py`, `trilepsia.py` | `test_secrets.py` (7); `test_trilepsia.py::test_envelope_is_secret_scanned`; `test_document_ingest.py::test_secret_chunk_skipped_without_false_provenance` | **CONFORME** |
 | N8 | Spans exatos com offsets reversíveis | `eval/evidence_cards.py` | `test_evidence_cards.py` (5: substring exata, offsets reversíveis, paráfrase inválida, budget, determinismo) | **CONFORME** (agora na suíte) |
 | N9 | **Imutabilidade de conteúdo**: campos factuais nunca mudam; `status` é metadado administrativo; correção = novo registro; `delete` remove | `tape.py` | `test_tape_immutability.py` (4); `test_tape.py::test_append_is_append_only` | **CONFORME** |
-| N10 | **Recall/experimentais off por padrão**; document layer é camada de **ingestão shipped** (creation ON, recall OFF — intencional e testado) | `config.py` | `test_config.py::test_experimental_defaults_are_off`; `::test_graph_defaults_are_off_and_consistent` (inclui `document_graph_enabled is True`) | **CONFORME** (classificação corrigida) |
+| N10 | **Recall/experimentais off por padrão**; document layer é camada de **ingestão shipped** (creation ON, recall OFF — intencional e testado) | `config.py` | `test_config.py::test_experimental_defaults_are_off`; `::test_graph_defaults_are_off_and_consistent`; `test_document_defaults.py` (4: projeção falha não bloqueia, `enable_graph=False` sem chamada, recall não toca o grafo, reingestão idempotente) | **CONFORME** (classificação corrigida) |
 | N11 | Pré-registro congelado antes de executar | processo (`docs/`) | sem teste; artefatos `PLASTICITY_V1`, `COMPOSITION_V1`, `TRILEPSIA_*` | **PARCIAL** |
 | N12 | Seleção no braço real não lê gold/verdicts | harnesses `eval/` | sem teste que audite os harnesses | **PARCIAL** |
 | N13 | Payload builder determinístico, sem LLM | `payload.py` | `test_payload.py::test_payload_respects_budget_and_relevance` (sem cliente) | **CONFORME** |
@@ -113,7 +113,7 @@ Default-vs-arquitetura-principal permanece **INTENÇÃO** (gate G1–G8).
 
 | # | Lacuna | Critério de conclusão | Evidência |
 |---|---|---|---|
-| L1 | Empacotamento | `pip install` em venv limpo; `memory-cli --help`; `python -m memory_machine init`; versão única | CI + smoke log |
+| L1 | Empacotamento | `pip install` em venv limpo; `memory-cli --help`; `python -m memory_machine init`; versão única | **CONCLUÍDO**: wheel `memory_machine-0.2.0` + `scripts/smoke_installed.sh` PASS (venv limpo → wheel → init → remember → recall(mock) → restart → persistência); falta apenas o CI (L10) |
 | L2 | Defaults vs principal | G1–G8 cumpridos; decisão registrada | ledger + decisão |
 | L3 | Contradição/validade | schema + testes adversariais | testes novos |
 | L4 | Níveis de retenção | testes de ciclo de vida | testes + doc |

@@ -87,6 +87,10 @@ tests/test_dimension_boards.py::test_for_dimension_inherits_subject_and_keeps_ow
 tests/test_dimension_boards.py::test_boards_survive_roundtrip_and_render_selectively
 tests/test_dimension_boards.py::test_boards_do_not_count_toward_primary_consolidation_size
 tests/test_dimension_boards.py::test_legacy_whiteboard_without_boards_loads
+tests/test_document_defaults.py::test_projection_failure_does_not_block_ingestion
+tests/test_document_defaults.py::test_enable_graph_false_makes_no_llm_calls
+tests/test_document_defaults.py::test_default_recall_never_touches_the_graph
+tests/test_document_defaults.py::test_reingestion_preserves_previous_chunk_bytes
 tests/test_document_ingest.py::test_txt_becomes_tape_plus_document_plus_graph
 tests/test_document_ingest.py::test_provenance_reaches_graph_mention_and_evidence
 tests/test_document_ingest.py::test_durable_records_stay_free_of_provenance
@@ -459,4 +463,4 @@ tests/test_whiteboard.py::test_size_and_consolidation_trigger
 tests/test_whiteboard.py::test_roundtrip
 tests/test_whiteboard.py::test_render
 
-460 tests collected in 0.10s
+464 tests collected in 0.06s

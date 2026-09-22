@@ -1,0 +1,20 @@
+{"after_seq": 7, "probe_id": "P01", "question": "qual banco primário foi decidido para o serviço Aurora?", "required_ids": ["M0003"], "session": "S2"}
+{"after_seq": 16, "probe_id": "P02", "question": "qual foi o resultado do teste de carga com 500 usuários?", "required_ids": ["M0008"], "session": "S3"}
+{"after_seq": 16, "probe_id": "P03", "question": "o que fazer quando o deploy falha por permissão no bucket?", "required_ids": ["M0010"], "session": "S3"}
+{"after_seq": 16, "probe_id": "P04", "question": "com que frequência a chave de deploy é rotacionada?", "required_ids": ["M0011"], "session": "S3"}
+{"after_seq": 16, "probe_id": "P05", "question": "qual porta usar na demonstração?", "required_ids": ["M0012"], "session": "S3"}
+{"after_seq": 16, "probe_id": "P06", "question": "o que usamos para o cache local agora?", "required_ids": ["M0013"], "session": "S3"}
+{"after_seq": 16, "probe_id": "P07", "question": "o Redis ainda é usado em algum lugar?", "required_ids": ["M0014"], "session": "S3"}
+{"after_seq": 16, "probe_id": "P08", "question": "quais restrições existem para trocar o banco primário?", "required_ids": ["M0006"], "session": "S3"}
+{"after_seq": 20, "probe_id": "P09", "question": "qual é o banco primário atual do Aurora?", "required_ids": ["M0017"], "session": "S4"}
+{"after_seq": 20, "probe_id": "P10", "question": "o PostgreSQL ainda era o banco primário antes da migração?", "required_ids": ["M0019"], "session": "S4"}
+{"after_seq": 29, "probe_id": "P11", "question": "qual lição aprendemos sobre trocar o pool de conexões?", "required_ids": ["M0021"], "session": "S5"}
+{"after_seq": 29, "probe_id": "P12", "question": "o que fazer antes de um deploy grande?", "required_ids": ["M0022"], "session": "S5"}
+{"after_seq": 29, "probe_id": "P13", "question": "qual é o estado atual do cluster de staging?", "required_ids": ["M0026"], "session": "S5"}
+{"after_seq": 29, "probe_id": "P14", "question": "qual foi o p95 confirmado do teste de carga?", "required_ids": ["M0027"], "session": "S5"}
+{"after_seq": 32, "probe_id": "P15", "question": "qual é a regra sobre trocar o banco primário?", "required_ids": ["M0006", "M0030"], "session": "S6"}
+{"after_seq": 32, "probe_id": "P16", "question": "com que frequência a chave de deploy é rotacionada agora?", "required_ids": ["M0031"], "session": "S6"}
+{"after_seq": 32, "probe_id": "P17", "question": "qual banco é usado para o cache local?", "required_ids": ["M0013"], "session": "S6"}
+{"after_seq": 32, "probe_id": "P18", "question": "quais decisões temos registradas sobre o banco primário?", "required_ids": ["M0003", "M0017"], "session": "S6"}
+{"after_seq": 32, "probe_id": "P19", "question": "qual foi a duração total do projeto?", "required_ids": ["M9999"], "session": "S6", "unrecoverable": true}
+{"after_seq": 32, "probe_id": "P20", "question": "o que ficou combinado para sexta-feira?", "required_ids": ["M0029"], "session": "S6"}

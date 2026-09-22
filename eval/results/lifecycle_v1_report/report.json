@@ -1,0 +1,898 @@
+{
+  "arms": {
+    "A": {
+      "active_set_reduction_admissible": 0.0,
+      "active_set_reduction_received": 0.0,
+      "global_memory_metrics": {
+        "false_discard_rate": 0.0,
+        "found": 17,
+        "promoted": 32,
+        "promotion_precision": 0.5312,
+        "promotion_recall": 1.0,
+        "required": 17
+      },
+      "per_probe": {
+        "occurrence_recall": 0.8095,
+        "occurrences": 17,
+        "occurrences_total": 21,
+        "per_probe": [
+          {
+            "after_seq": 7,
+            "found": [
+              "M0003"
+            ],
+            "probe_id": "P01",
+            "recall": 1.0,
+            "required": [
+              "M0003"
+            ]
+          },
+          {
+            "after_seq": 16,
+            "found": [
+              "M0008"
+            ],
+            "probe_id": "P02",
+            "recall": 1.0,
+            "required": [
+              "M0008"
+            ]
+          },
+          {
+            "after_seq": 16,
+            "found": [
+              "M0010"
+            ],
+            "probe_id": "P03",
+            "recall": 1.0,
+            "required": [
+              "M0010"
+            ]
+          },
+          {
+            "after_seq": 16,
+            "found": [
+              "M0011"
+            ],
+            "probe_id": "P04",
+            "recall": 1.0,
+            "required": [
+              "M0011"
+            ]
+          },
+          {
+            "after_seq": 16,
+            "found": [],
+            "probe_id": "P05",
+            "recall": 0.0,
+            "required": [
+              "M0012"
+            ]
+          },
+          {
+            "after_seq": 16,
+            "found": [
+              "M0013"
+            ],
+            "probe_id": "P06",
+            "recall": 1.0,
+            "required": [
+              "M0013"
+            ]
+          },
+          {
+            "after_seq": 16,
+            "found": [],
+            "probe_id": "P07",
+            "recall": 0.0,
+            "required": [
+              "M0014"
+            ]
+          },
+          {
+            "after_seq": 16,
+            "found": [
+              "M0006"
+            ],
+            "probe_id": "P08",
+            "recall": 1.0,
+            "required": [
+              "M0006"
+            ]
+          },
+          {
+            "after_seq": 20,
+            "found": [
+              "M0017"
+            ],
+            "probe_id": "P09",
+            "recall": 1.0,
+            "required": [
+              "M0017"
+            ]
+          },
+          {
+            "after_seq": 20,
+            "found": [
+              "M0019"
+            ],
+            "probe_id": "P10",
+            "recall": 1.0,
+            "required": [
+              "M0019"
+            ]
+          },
+          {
+            "after_seq": 29,
+            "found": [
+              "M0021"
+            ],
+            "probe_id": "P11",
+            "recall": 1.0,
+            "required": [
+              "M0021"
+            ]
+          },
+          {
+            "after_seq": 29,
+            "found": [
+              "M0022"
+            ],
+            "probe_id": "P12",
+            "recall": 1.0,
+            "required": [
+              "M0022"
+            ]
+          },
+          {
+            "after_seq": 29,
+            "found": [],
+            "probe_id": "P13",
+            "recall": 0.0,
+            "required": [
+              "M0026"
+            ]
+          },
+          {
+            "after_seq": 29,
+            "found": [
+              "M0027"
+            ],
+            "probe_id": "P14",
+            "recall": 1.0,
+            "required": [
+              "M0027"
+            ]
+          },
+          {
+            "after_seq": 32,
+            "found": [
+              "M0006",
+              "M0030"
+            ],
+            "probe_id": "P15",
+            "recall": 1.0,
+            "required": [
+              "M0006",
+              "M0030"
+            ]
+          },
+          {
+            "after_seq": 32,
+            "found": [
+              "M0031"
+            ],
+            "probe_id": "P16",
+            "recall": 1.0,
+            "required": [
+              "M0031"
+            ]
+          },
+          {
+            "after_seq": 32,
+            "found": [
+              "M0013"
+            ],
+            "probe_id": "P17",
+            "recall": 1.0,
+            "required": [
+              "M0013"
+            ]
+          },
+          {
+            "after_seq": 32,
+            "found": [
+              "M0003",
+              "M0017"
+            ],
+            "probe_id": "P18",
+            "recall": 1.0,
+            "required": [
+              "M0003",
+              "M0017"
+            ]
+          },
+          {
+            "probe_id": "P19",
+            "skipped": "unrecoverable_due_to_ingestion"
+          },
+          {
+            "after_seq": 32,
+            "found": [],
+            "probe_id": "P20",
+            "recall": 0.0,
+            "required": [
+              "M0029"
+            ]
+          }
+        ]
+      },
+      "promoted": 32
+    },
+    "B": {
+      "active_set_reduction_admissible": 0.4688,
+      "active_set_reduction_received": 0.4688,
+      "confusion_matrix": {
+        "episodic": {
+          "episodic": 2,
+          "event_only": 3,
+          "reject": 0,
+          "semantic": 2
+        },
+        "event_only": {
+          "episodic": 0,
+          "event_only": 8,
+          "reject": 0,
+          "semantic": 1
+        },
+        "reject": {
+          "episodic": 0,
+          "event_only": 0,
+          "reject": 3,
+          "semantic": 0
+        },
+        "semantic": {
+          "episodic": 1,
+          "event_only": 1,
+          "reject": 0,
+          "semantic": 11
+        }
+      },
+      "false_semantic": {
+        "false_positive_rate": 0.1579,
+        "precision_error_rate": 0.2143,
+        "predicted_semantic": 14,
+        "wrong_semantic": 3
+      },
+      "global_memory_metrics": {
+        "false_discard_rate": 0.2353,
+        "found": 13,
+        "promoted": 17,
+        "promotion_precision": 0.7647,
+        "promotion_recall": 0.7647,
+        "required": 17
+      },
+      "per_pattern": {
+        "ack": {
+          "found": 0,
+          "promoted": 1,
+          "required": 0,
+          "total": 6
+        },
+        "build": {
+          "found": 0,
+          "promoted": 1,
+          "required": 0,
+          "total": 1
+        },
+        "correction": {
+          "found": 0,
+          "promoted": 2,
+          "required": 0,
+          "total": 2
+        },
+        "decision": {
+          "found": 0,
+          "promoted": 1,
+          "required": 0,
+          "total": 1
+        },
+        "decision_change": {
+          "found": 0,
+          "promoted": 1,
+          "required": 0,
+          "total": 1
+        },
+        "duplicate_exact": {
+          "found": 0,
+          "promoted": 0,
+          "required": 0,
+          "total": 1
+        },
+        "duplicate_normalized": {
+          "found": 0,
+          "promoted": 0,
+          "required": 0,
+          "total": 1
+        },
+        "experiment_result": {
+          "found": 0,
+          "promoted": 2,
+          "required": 0,
+          "total": 2
+        },
+        "failure_context": {
+          "found": 0,
+          "promoted": 1,
+          "required": 0,
+          "total": 1
+        },
+        "greeting": {
+          "found": 0,
+          "promoted": 0,
+          "required": 0,
+          "total": 1
+        },
+        "important_never_used": {
+          "found": 0,
+          "promoted": 1,
+          "required": 0,
+          "total": 1
+        },
+        "invalid_record": {
+          "found": 0,
+          "promoted": 0,
+          "required": 0,
+          "total": 1
+        },
+        "lesson": {
+          "found": 0,
+          "promoted": 1,
+          "required": 0,
+          "total": 1
+        },
+        "negation": {
+          "found": 0,
+          "promoted": 0,
+          "required": 0,
+          "total": 1
+        },
+        "operational": {
+          "found": 0,
+          "promoted": 0,
+          "required": 0,
+          "total": 2
+        },
+        "restriction": {
+          "found": 0,
+          "promoted": 1,
+          "required": 0,
+          "total": 1
+        },
+        "semantic_duplicate": {
+          "found": 0,
+          "promoted": 1,
+          "required": 0,
+          "total": 1
+        },
+        "temporary_preference": {
+          "found": 0,
+          "promoted": 0,
+          "required": 0,
+          "total": 1
+        },
+        "temporary_state": {
+          "found": 0,
+          "promoted": 0,
+          "required": 0,
+          "total": 2
+        },
+        "useful_low_appearance": {
+          "found": 0,
+          "promoted": 1,
+          "required": 0,
+          "total": 1
+        },
+        "valid_repetition": {
+          "found": 0,
+          "promoted": 2,
+          "required": 0,
+          "total": 2
+        },
+        "weak_future_intent": {
+          "found": 0,
+          "promoted": 1,
+          "required": 0,
+          "total": 1
+        }
+      },
+      "per_probe": {
+        "occurrence_recall": 0.8095,
+        "occurrences": 17,
+        "occurrences_total": 21,
+        "per_probe": [
+          {
+            "after_seq": 7,
+            "found": [
+              "M0003"
+            ],
+            "probe_id": "P01",
+            "recall": 1.0,
+            "required": [
+              "M0003"
+            ]
+          },
+          {
+            "after_seq": 16,
+            "found": [
+              "M0008"
+            ],
+            "probe_id": "P02",
+            "recall": 1.0,
+            "required": [
+              "M0008"
+            ]
+          },
+          {
+            "after_seq": 16,
+            "found": [
+              "M0010"
+            ],
+            "probe_id": "P03",
+            "recall": 1.0,
+            "required": [
+              "M0010"
+            ]
+          },
+          {
+            "after_seq": 16,
+            "found": [
+              "M0011"
+            ],
+            "probe_id": "P04",
+            "recall": 1.0,
+            "required": [
+              "M0011"
+            ]
+          },
+          {
+            "after_seq": 16,
+            "found": [],
+            "probe_id": "P05",
+            "recall": 0.0,
+            "required": [
+              "M0012"
+            ]
+          },
+          {
+            "after_seq": 16,
+            "found": [
+              "M0013"
+            ],
+            "probe_id": "P06",
+            "recall": 1.0,
+            "required": [
+              "M0013"
+            ]
+          },
+          {
+            "after_seq": 16,
+            "found": [],
+            "probe_id": "P07",
+            "recall": 0.0,
+            "required": [
+              "M0014"
+            ]
+          },
+          {
+            "after_seq": 16,
+            "found": [
+              "M0006"
+            ],
+            "probe_id": "P08",
+            "recall": 1.0,
+            "required": [
+              "M0006"
+            ]
+          },
+          {
+            "after_seq": 20,
+            "found": [
+              "M0017"
+            ],
+            "probe_id": "P09",
+            "recall": 1.0,
+            "required": [
+              "M0017"
+            ]
+          },
+          {
+            "after_seq": 20,
+            "found": [
+              "M0019"
+            ],
+            "probe_id": "P10",
+            "recall": 1.0,
+            "required": [
+              "M0019"
+            ]
+          },
+          {
+            "after_seq": 29,
+            "found": [
+              "M0021"
+            ],
+            "probe_id": "P11",
+            "recall": 1.0,
+            "required": [
+              "M0021"
+            ]
+          },
+          {
+            "after_seq": 29,
+            "found": [
+              "M0022"
+            ],
+            "probe_id": "P12",
+            "recall": 1.0,
+            "required": [
+              "M0022"
+            ]
+          },
+          {
+            "after_seq": 29,
+            "found": [],
+            "probe_id": "P13",
+            "recall": 0.0,
+            "required": [
+              "M0026"
+            ]
+          },
+          {
+            "after_seq": 29,
+            "found": [
+              "M0027"
+            ],
+            "probe_id": "P14",
+            "recall": 1.0,
+            "required": [
+              "M0027"
+            ]
+          },
+          {
+            "after_seq": 32,
+            "found": [
+              "M0006",
+              "M0030"
+            ],
+            "probe_id": "P15",
+            "recall": 1.0,
+            "required": [
+              "M0006",
+              "M0030"
+            ]
+          },
+          {
+            "after_seq": 32,
+            "found": [
+              "M0031"
+            ],
+            "probe_id": "P16",
+            "recall": 1.0,
+            "required": [
+              "M0031"
+            ]
+          },
+          {
+            "after_seq": 32,
+            "found": [
+              "M0013"
+            ],
+            "probe_id": "P17",
+            "recall": 1.0,
+            "required": [
+              "M0013"
+            ]
+          },
+          {
+            "after_seq": 32,
+            "found": [
+              "M0003",
+              "M0017"
+            ],
+            "probe_id": "P18",
+            "recall": 1.0,
+            "required": [
+              "M0003",
+              "M0017"
+            ]
+          },
+          {
+            "probe_id": "P19",
+            "skipped": "unrecoverable_due_to_ingestion"
+          },
+          {
+            "after_seq": 32,
+            "found": [],
+            "probe_id": "P20",
+            "recall": 0.0,
+            "required": [
+              "M0029"
+            ]
+          }
+        ]
+      },
+      "promoted": 17
+    },
+    "D": {
+      "active_set_reduction_admissible": 0.375,
+      "active_set_reduction_received": 0.375,
+      "false_semantic": {
+        "false_positive_rate": 0.0,
+        "precision_error_rate": 0.0,
+        "predicted_semantic": 13,
+        "wrong_semantic": 0
+      },
+      "global_memory_metrics": {
+        "false_discard_rate": 0.0,
+        "found": 17,
+        "promoted": 20,
+        "promotion_precision": 0.85,
+        "promotion_recall": 1.0,
+        "required": 17
+      },
+      "note": "diagnostic ceiling only; never used to tune the rules in this frozen round",
+      "per_probe": {
+        "occurrence_recall": 0.8095,
+        "occurrences": 17,
+        "occurrences_total": 21,
+        "per_probe": [
+          {
+            "after_seq": 7,
+            "found": [
+              "M0003"
+            ],
+            "probe_id": "P01",
+            "recall": 1.0,
+            "required": [
+              "M0003"
+            ]
+          },
+          {
+            "after_seq": 16,
+            "found": [
+              "M0008"
+            ],
+            "probe_id": "P02",
+            "recall": 1.0,
+            "required": [
+              "M0008"
+            ]
+          },
+          {
+            "after_seq": 16,
+            "found": [
+              "M0010"
+            ],
+            "probe_id": "P03",
+            "recall": 1.0,
+            "required": [
+              "M0010"
+            ]
+          },
+          {
+            "after_seq": 16,
+            "found": [
+              "M0011"
+            ],
+            "probe_id": "P04",
+            "recall": 1.0,
+            "required": [
+              "M0011"
+            ]
+          },
+          {
+            "after_seq": 16,
+            "found": [],
+            "probe_id": "P05",
+            "recall": 0.0,
+            "required": [
+              "M0012"
+            ]
+          },
+          {
+            "after_seq": 16,
+            "found": [
+              "M0013"
+            ],
+            "probe_id": "P06",
+            "recall": 1.0,
+            "required": [
+              "M0013"
+            ]
+          },
+          {
+            "after_seq": 16,
+            "found": [],
+            "probe_id": "P07",
+            "recall": 0.0,
+            "required": [
+              "M0014"
+            ]
+          },
+          {
+            "after_seq": 16,
+            "found": [
+              "M0006"
+            ],
+            "probe_id": "P08",
+            "recall": 1.0,
+            "required": [
+              "M0006"
+            ]
+          },
+          {
+            "after_seq": 20,
+            "found": [
+              "M0017"
+            ],
+            "probe_id": "P09",
+            "recall": 1.0,
+            "required": [
+              "M0017"
+            ]
+          },
+          {
+            "after_seq": 20,
+            "found": [
+              "M0019"
+            ],
+            "probe_id": "P10",
+            "recall": 1.0,
+            "required": [
+              "M0019"
+            ]
+          },
+          {
+            "after_seq": 29,
+            "found": [
+              "M0021"
+            ],
+            "probe_id": "P11",
+            "recall": 1.0,
+            "required": [
+              "M0021"
+            ]
+          },
+          {
+            "after_seq": 29,
+            "found": [
+              "M0022"
+            ],
+            "probe_id": "P12",
+            "recall": 1.0,
+            "required": [
+              "M0022"
+            ]
+          },
+          {
+            "after_seq": 29,
+            "found": [],
+            "probe_id": "P13",
+            "recall": 0.0,
+            "required": [
+              "M0026"
+            ]
+          },
+          {
+            "after_seq": 29,
+            "found": [
+              "M0027"
+            ],
+            "probe_id": "P14",
+            "recall": 1.0,
+            "required": [
+              "M0027"
+            ]
+          },
+          {
+            "after_seq": 32,
+            "found": [
+              "M0006",
+              "M0030"
+            ],
+            "probe_id": "P15",
+            "recall": 1.0,
+            "required": [
+              "M0006",
+              "M0030"
+            ]
+          },
+          {
+            "after_seq": 32,
+            "found": [
+              "M0031"
+            ],
+            "probe_id": "P16",
+            "recall": 1.0,
+            "required": [
+              "M0031"
+            ]
+          },
+          {
+            "after_seq": 32,
+            "found": [
+              "M0013"
+            ],
+            "probe_id": "P17",
+            "recall": 1.0,
+            "required": [
+              "M0013"
+            ]
+          },
+          {
+            "after_seq": 32,
+            "found": [
+              "M0003",
+              "M0017"
+            ],
+            "probe_id": "P18",
+            "recall": 1.0,
+            "required": [
+              "M0003",
+              "M0017"
+            ]
+          },
+          {
+            "probe_id": "P19",
+            "skipped": "unrecoverable_due_to_ingestion"
+          },
+          {
+            "after_seq": 32,
+            "found": [],
+            "probe_id": "P20",
+            "recall": 0.0,
+            "required": [
+              "M0029"
+            ]
+          }
+        ]
+      },
+      "promoted": 20
+    }
+  },
+  "fixture": "/Users/igorcoutrimlacerda/memory-machine/eval/fixtures/lifecycle_v1",
+  "projection_manifest": {
+    "arm": "B",
+    "counts": {
+      "decisions": 32,
+      "promoted": 17,
+      "records": 32
+    },
+    "decisions_sha256": "sha256:3f1f9c484e7feff9d6c5a9182c017166184c334f5d37bcd8ed4574d116778587",
+    "mode": "shadow",
+    "policy_version": "lifecycle-v1",
+    "records_sha256": "sha256:63157079cd45892d8a9b8ade644f0909d3fb4e62026e1bfe5ab66d41c03a49fb",
+    "schema_version": "1"
+  },
+  "rebuild_identical": true,
+  "required_memories": [
+    "M0003",
+    "M0006",
+    "M0008",
+    "M0010",
+    "M0011",
+    "M0012",
+    "M0013",
+    "M0014",
+    "M0017",
+    "M0019",
+    "M0021",
+    "M0022",
+    "M0026",
+    "M0027",
+    "M0029",
+    "M0030",
+    "M0031"
+  ]
+}

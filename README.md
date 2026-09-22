@@ -17,6 +17,12 @@ tape.jsonl (long-term memory)
          durable memories -> tape
 ```
 
+**The promise.** It does not aim to make the model recall everything at
+once; it aims to make the past preservable, traceable and recoverable -
+offering the model the right evidence, at the right moment, inside a limited
+budget. "Infinite" memory means preserve indefinitely and recover selectively
+(see `docs/ROADMAP.md`).
+
 The design separates four problems that long-term agent memory usually
 conflates: **preservation** (append-only tape), **organization** (rebuildable
 views and graph projections), **discovery** (agents over the tape) and
@@ -123,6 +129,8 @@ evaluation is a separate, non-required workflow.
 - [docs/DOC_GRAPH.md](docs/DOC_GRAPH.md) — the operational document graph.
 - [docs/EVIDENCE_RETENTION.md](docs/EVIDENCE_RETENTION.md) — where results and
   proofs live (releases + repository, never only CI artifacts).
+- [docs/ROADMAP.md](docs/ROADMAP.md) — the promise and the application
+  progression (project memory first, personal longitudinal memory last).
 - Closure records: [docs/LIFECYCLE_CLOSURE.md](docs/LIFECYCLE_CLOSURE.md),
   [docs/TWO_TIER_CLOSURE.md](docs/TWO_TIER_CLOSURE.md),
   [docs/HISTORY_REWRITE_2026-09-22.md](docs/HISTORY_REWRITE_2026-09-22.md).

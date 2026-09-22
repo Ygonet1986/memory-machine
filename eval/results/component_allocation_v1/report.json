@@ -1,0 +1,52 @@
+{
+  "all_pass": true,
+  "answer": {
+    "arms": {
+      "W4": [
+        "correct",
+        "correct",
+        "correct"
+      ],
+      "W6c": [
+        "correct",
+        "correct",
+        "correct"
+      ]
+    },
+    "failures": 0,
+    "gates": {
+      "Z4_answers": true,
+      "Z5_infra": true
+    },
+    "llm_calls": 12,
+    "score": {
+      "W4": 1.0,
+      "W6c": 1.0
+    }
+  },
+  "gates": {
+    "Z1_dev_both_components": true,
+    "Z2_holdout_no_regression": true,
+    "Z3_budget": true,
+    "Z3_determinism": true,
+    "Z4_answers": true,
+    "Z5_infra": true
+  },
+  "holdout_hits": {
+    "W4": 12,
+    "W6c": 12
+  },
+  "prereg": "docs/COMPONENT_ALLOCATION_V1_PREREG.md",
+  "u3a24_components": {
+    "W4": {
+      "1000": true,
+      "300": false
+    },
+    "W6c": {
+      "1000": true,
+      "300": true
+    }
+  },
+  "w4_source_sha256": "9023e734b94684bd9fdbb2b413c43b85a9f40ee6862465a45b146e4e4da5a707",
+  "w4_unchanged": true
+}

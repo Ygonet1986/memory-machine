@@ -37,6 +37,22 @@ the text (N3).
 The tape record keeps its own `type`; the lifecycle class is a separate,
 revisable label.
 
+**`reject` semantics (shadow vs production).** In shadow mode `reject` is a
+counterfactual decision: the record stays in the tape (nothing is deleted) and
+is only excluded from the *would-be* consultable set. If lifecycle is ever
+promoted to the main path, the team must decide whether rejection happens
+**before** the tape (which would change N1/N9 and requires a separate audit
+log) or whether rejected records remain on the tape with a separate audit
+trail. That decision is explicitly out of scope for v1 and is a prerequisite
+for any production promotion.
+
+**Deduplication scopes.** `duplicate_exact` and `duplicate_normalized` are the
+only dedup rules in v1, and they apply **within a recent window** (same
+session, previous N records) so that a valid repetition of a decision in a
+later period is preserved. Semantic duplication is never rejected by a lexical
+rule; it is classified as ambiguous and, in arm C, may be consolidated by the
+LLM with a recorded reason code.
+
 ## 4. Policy v1 (deterministic rules)
 
 The rules arm classifies each candidate record using only the record itself,
@@ -46,7 +62,9 @@ its neighbours and structured signals. Frozen rule families:
 |---|---|---|---|
 | Greeting/ack | lexical lists (`hi`, `ok`, `thanks`, `beleza`, …) and length < 24 chars | `event_only` | `greeting`, `ack` |
 | Operational chatter | short message with no new content tokens vs the previous record | `event_only` | `operational`, `no_new_utility` |
-| Duplicate | identical or ≥0.95-similar normalized text to a recent record | `reject` | `duplicate` |
+| Duplicate — exact | byte-identical text within the same session's recent window | `reject` | `duplicate_exact` |
+| Duplicate — normalised | case/whitespace/punctuation-normalised equality within the recent window | `reject` | `duplicate_normalized` |
+| Duplicate — semantic | paraphrases, near-synonyms, same fact reworded | **not** a rule: classified by content; if unclear, `ambiguous` (arm C) | `possible_duplicate_semantic` |
 | Typed durable records | tape `type` ∈ {decision, lesson, preference, bugfix, build} | `semantic` | `typed_record` + type-specific code |
 | Attachments | tape `type` = attachment (document chunks) | `episodic` | `attachment_chunk` |
 | Action/attempt | markers of an action taken or tried (`fixed`, `tried`, `ran`, `deployed`, `refactor`, …) | `episodic` | `action_taken` |
@@ -99,8 +117,10 @@ Decision row (frozen schema):
 
 `decided_at` is audit-only and never participates in ordering or hashing.
 Rebuilding the projection from the same tape and policy version must be
-byte-identical (deterministic rules) or reuse the frozen persisted LLM outputs
-(hybrid).
+identical in **normative content** — decisions, classes, reason codes, input
+hashes and policy/config hashes — with timestamps excluded from the comparison
+(or injected by a deterministic clock in tests) and hybrid outputs reused from
+the frozen persisted LLM records.
 
 ## 7. Retroactive retrieval protocol (specified; implemented after the experiment)
 

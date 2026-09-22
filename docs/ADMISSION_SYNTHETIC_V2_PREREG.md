@@ -103,3 +103,48 @@ structural test `tests/test_admission_synthetic_v2.py`, proof regenerated,
 one primary run plus the determinism rerun, execution record appended, all
 committed together.
 
+
+## Execution record (2026-09-22)
+
+Recorded run on the frozen v1 sample (hash `f61262d3...`), report at
+`eval/results/admission_synthetic_v2/report.json`; determinism rerun
+identical.
+
+| policy | availability | precision | delivered | mean chars | abstention (S7) |
+|---|---:|---:|---:|---:|---:|
+| P0 top1 | 0.500 | 0.500 | 100 | 80 | 0.000 |
+| P1 margin50 | 0.900 | 0.310 | 290 | 204 | 0.000 |
+| P2 margin90 | 0.600 | 0.429 | 140 | 107 | 0.000 |
+| P3v1 (frozen) | 0.700 | 0.500 | 140 | 108 | 1.000 |
+| **P3v2** | **1.000** | **0.455** | 220 | 169 | **1.000** |
+
+Gates: G1 **true**; G2 **false** (0.455 < 0.70); G3 **true** (1.000 > 0.600
+and 0.455 > 0.310); G4 **true**; G5 **true**; G6 true; G7 **false**
+(precision 0.455 < P3v1 0.500); `all_pass` **false**.
+
+Findings:
+
+- **Every availability gap closed**: `corrected` 0.00 -> 1.00,
+  `near_duplicate` 0.00 -> 1.00, `multi_memory` 0.50 -> 1.00. The three v2
+  mechanisms worked exactly where designed.
+- **The relative floor traded precision for availability**: +80 deliveries
+  vs P3v1 (220 vs 140) and precision 0.455, below both the 0.70 gate and the
+  v1 level, so G7 fails. Named contributors: `short_ambiguous` admits the
+  commodity-token tail (5 deliveries/case, precision 0.200); demoted
+  superseded records still pass the relative floor in `corrected`/`long_
+  specific`/`shared_subject` (3/case, precision 0.333); `multi_memory` also
+  admits extras (precision 0.500). The v1 absolute floor was the precision
+  mechanism; v2 replaced it - one failure mode for another, and the joint
+  gates are still unmet.
+- Declared expectations matched on the three targeted scenarios; precision
+  was predicted 0.55-0.75, actual 0.455 - recorded as a miss (the tail was
+  underestimated).
+
+Stop rules applied: G2/G7 failed, nothing promoted, nothing re-fitted. The
+next pre-registered hypothesis must **bound the delivery tail** while keeping
+v2's availability mechanisms: a cap on candidates per case and full removal
+(not demotion) of superseded records are the named directions, together with
+the standing finding that admission cannot compensate for ranking. Synthetic
+results remain non-evidence for real-world performance, and v2's constants
+(marker list, demotion 0.25, relative floor 0.60) were chosen after v1 and
+may overfit this fixture.

@@ -397,6 +397,25 @@ was promoted; the tape, classifier and retrieval path were untouched. Full
 record: `LIFECYCLE_CLOSURE.md`; pre-registrations with execution records:
 `LIFECYCLE_V1_PREREG.md` … `LIFECYCLE_V4_PREREG.md`.
 
+### 5.9 Unconditional retrieval: availability is free, precision is the price
+
+The lifecycle trigger missed one reconstructable case because deciding *when*
+to search is fragile. Removing the trigger entirely - always searching the
+promoted set plus a cheap lexical index of the non-rejected log, one ranking
+scale, one budget - recovers all four former false discards at rank 1
+(availability 1.000 vs 0.952) on the frozen fixture, but full top-5 delivery
+precision falls to 0.512. Bounding candidacy with a high-confidence margin
+(rank-1 plus score >= 0.90 x best) lifts precision to 0.826 above the 0.80
+floor while dropping availability to 0.905. The sensitivity curve shows the
+frontier is structural for score-margin and budget families: no point meets
+both gates (availability >= 0.952 with precision 0.556 at top-2; precision
+0.826 with availability 0.905 at margin 0.90). The causes are specific: one
+required occurrence sits at rank 2 with a score ratio in (0.50, 0.70), another
+at rank 3 unreachable by any margin, and the noise shares their score band.
+Descriptive precision@1 is 0.947 - the evidence is strong in the first slot
+and the cost lives in the second. Shadow-only; full record:
+`TWO_TIER_CLOSURE.md`.
+
 ---
 
 ## 6. Discussion

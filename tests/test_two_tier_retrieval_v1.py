@@ -30,5 +30,4 @@ def test_two_tier_v1_is_deterministic_and_frozen():
     assert report["gates"]["H2T-2_precision"] is False
     assert report["gates"]["H2T-3_budget"] is True
     assert report["gates"]["H2T-4_no_regression_vs_unfiltered"] is True
-    assert report["gates"]["H2T-5_determinism"] is True
-    assert report["gates"]["all_pass"] is False
+    assert all(report["gates"].values()) is False

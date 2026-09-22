@@ -396,7 +396,6 @@ tests/test_payload.py::test_payload_window_off_is_unchanged
 tests/test_payload.py::test_payload_window_reveals_mid_fact_within_budget
 tests/test_payload.py::test_config_payload_window_defaults_off
 tests/test_phrase_coverage_v1.py::test_delivery_stage_recorded
-tests/test_phrase_coverage_v1.py::test_u3a17_item_never_windows_because_room_negative
 tests/test_phrase_coverage_v1.py::test_recorded_answer_verdicts
 tests/test_phrase_delivery_v1.py::test_phrase_metric_recorded_verdicts
 tests/test_phrase_delivery_v1.py::test_phrase_helpers
@@ -520,6 +519,8 @@ tests/test_trilepsia.py::test_schema_change_same_version_is_skipped
 tests/test_trilepsia.py::test_status_counts
 tests/test_two_tier_retrieval_v1.py::test_two_tier_v1_is_deterministic_and_frozen
 tests/test_two_tier_retrieval_v2.py::test_two_tier_v2_is_deterministic_and_frozen
+tests/test_u3a17_selection_miss.py::test_u3a17_required_record_absent_from_payload_and_annotations
+tests/test_u3a17_selection_miss.py::test_frozen_snapshot_shows_agents_never_annotated_m0043
 tests/test_view_router.py::test_related_views_cooccurrence
 tests/test_view_router.py::test_related_views_excludes_structural_and_selected
 tests/test_view_router.py::test_select_views_llm_parses_and_filters
@@ -553,4 +554,4 @@ tests/test_whiteboard.py::test_size_and_consolidation_trigger
 tests/test_whiteboard.py::test_roundtrip
 tests/test_whiteboard.py::test_render
 
-554 tests collected in 0.09s
+555 tests collected in 0.09s

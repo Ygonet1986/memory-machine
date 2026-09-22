@@ -10,7 +10,6 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "eval"))
 sys.path.insert(0, str(ROOT / "src"))
 
-import delivery_combined_v1 as dc  # noqa: E402
 import phrase_coverage_v1 as harness  # noqa: E402
 
 OUT = ROOT / "eval" / "results" / "phrase_coverage_v1"
@@ -30,22 +29,6 @@ def test_delivery_stage_recorded():
     assert report["gates"]["P1_target_fixed"] is False
     assert report["gates"]["P2_no_removals"] is True
     assert report["w5_unchanged"] is True
-
-
-def test_u3a17_item_never_windows_because_room_negative():
-    from fact_presence import item_span
-
-    cases, records = dc.load_fixture(ROOT / "eval" / "fixtures" / "composition_u4")
-    case = next(c for c in cases if (c["block"], c["case"]) == ("u3a", 17))
-    record = records[(17, "M0043")]
-    span_w0, _ = item_span(case["context"], "M0043")
-    body_start = span_w0.find("\n")
-    frozen_body = span_w0[body_start + 1:]
-    room = len(frozen_body) - len(record["summary"]) - 1
-    assert room < 120  # guard skips every window for this item
-    spans = {arm: item_span(harness.rebuild(case, records, arm), "M0043")[0]
-             for arm in ("W5", "W6")}
-    assert spans["W5"] == spans["W6"] == span_w0
 
 
 def test_recorded_answer_verdicts():

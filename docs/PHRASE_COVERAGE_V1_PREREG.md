@@ -86,3 +86,31 @@ and exploratory.
 Nothing promoted; windows OFF. Open decision: whether to pre-register a
 summary-trade contract variant for the u3a-17 class, or close it as a
 contract limitation.
+
+## Correction (2026-09-22) — the u3a-17 root cause was misread
+
+The execution record's `room = -301` analysis was **wrong**: it computed a
+room from an **empty item span**. `item_span(context, "M0043")` returns
+`found = False` because **M0043 is not in the payload at all** - the
+delivered items are `M0018` and `M0022` (`payload_ids`), and the frozen
+snapshot (`eval/graph_out/u_diag_longmemeval_u3a.jsonl`, case 17) shows
+`agent_ids = ['M0018', 'M0022']`: the **memory agents never annotated
+M0043**. All five arms answered "no information", consistent with the fact
+never being selected.
+
+Therefore:
+
+- **u3a-17 is a recall/annotation miss** (the first diagnostic class:
+  "ranking did not present the memory"), not a delivery, window or contract
+  case. There is nothing to trade and no window to run.
+- **The proposed summary-trade contract variant has no applicable target on
+  this case** and is **not** pre-registered on this basis. It would need its
+  own motivating case and a holdout.
+- The recorded `delivery_loss_w1` flags for u3a-17 in
+  `temporal-breadth-v1`/`ingestion-trace-v1` are still correct at the
+  delivery stage (the fact is absent from the delivered set); only the
+  *cause* is corrected: selection, not allocation.
+
+Corrected next hypothesis for this class: a **selection-side** probe (why a
+required record was not annotated), which is item-1/recall territory. No
+rule or contract change was made.

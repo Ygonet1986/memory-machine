@@ -297,11 +297,16 @@ tests/test_lifecycle_contracts.py::test_ambiguous_and_no_signal_buckets
 tests/test_lifecycle_contracts.py::test_append_is_idempotent_and_conflicts_are_detected
 tests/test_lifecycle_contracts.py::test_rebuild_is_normalised_identical_and_order_independent
 tests/test_lifecycle_contracts.py::test_failure_never_publishes_a_partial_projection
+tests/test_lifecycle_contracts.py::test_context_is_canonical_for_context_free_rules
+tests/test_lifecycle_contracts.py::test_context_participates_in_duplicate_identity_without_false_conflict
+tests/test_lifecycle_contracts.py::test_seq_window_and_session_change_context_hash
+tests/test_lifecycle_contracts.py::test_non_eligible_predecessors_do_not_change_context
 tests/test_lifecycle_fixture.py::test_fixture_is_clean_and_reproducible
 tests/test_lifecycle_fixture.py::test_classifier_input_never_carries_gold_fields
 tests/test_lifecycle_fixture.py::test_probes_are_measured_after_the_required_records
 tests/test_lifecycle_fixture.py::test_hard_cases_are_present
 tests/test_lifecycle_fixture.py::test_regeneration_is_byte_identical
+tests/test_lifecycle_report.py::test_report_runs_and_keeps_the_frozen_contract
 tests/test_llm.py::test_bare_object
 tests/test_llm.py::test_fenced_json_block
 tests/test_llm.py::test_leading_prose
@@ -486,4 +491,4 @@ tests/test_whiteboard.py::test_size_and_consolidation_trigger
 tests/test_whiteboard.py::test_roundtrip
 tests/test_whiteboard.py::test_render
 
-487 tests collected in 0.07s
+492 tests collected in 0.07s

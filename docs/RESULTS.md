@@ -212,3 +212,14 @@ the required second occurrences (one at rank 2 with ratio 0.50-0.70, one at
 rank 3 unreachable by any margin). Descriptive precision@1 is 0.947. No
 promotion; defaults untouched. Full record: `docs/TWO_TIER_CLOSURE.md`,
 `docs/TWO_TIER_RETRIEVAL_V1_PREREG.md`, `docs/TWO_TIER_RETRIEVAL_V2_PREREG.md`.
+
+## Admission (synthetic v1-v4) - controlled evaluation, closed 2026-09-22
+
+Same frozen 100-case sample with known gold across four pre-registered
+rounds: P3v1 0.700/0.500, P3v2 1.000/0.455, P3v3 0.900/0.643, **P3v4
+1.000/0.714** (abstention 1.000, 140 deliveries, max 2/case). The multisignal
+policy with a correction priority slot dominates both score-margin
+references on both axes; the crossing came from a structural rule, not
+thresholds. Synthetic results are not real-world evidence; no promotion.
+Full record: `docs/ADMISSION_SYNTHETIC_CLOSURE.md` and the four
+pre-registrations `docs/ADMISSION_SYNTHETIC_V*_PREREG.md`.

@@ -7,15 +7,15 @@
 {"memory_id": "M0007", "seq": 7, "session": "S1", "tape_type": "memory", "text": "Por hoje é isso, obrigado!"}
 {"memory_id": "M0008", "seq": 8, "session": "S2", "tape_type": "build", "text": "Rodamos o teste de carga com 500 usuários; o p95 ficou em 820 ms."}
 {"memory_id": "M0009", "seq": 9, "session": "S2", "tape_type": "memory", "text": "Rodamos o teste de carga com 500 usuários; o p95 ficou em 820 ms."}
-{"memory_id": "M0010", "seq": 10, "session": "S2", "tape_type": "bugfix", "text": "O deploy falhou por falta de permissão no bucket; corrigi criando a role nova."}
-{"memory_id": "M0011", "seq": 11, "session": "S2", "tape_type": "memory", "text": "No fim do dia, a rotação da chave de deploy acontece a cada 90 dias."}
-{"memory_id": "M0012", "seq": 12, "session": "S2", "tape_type": "memory", "text": "Para a demonstração de amanhã, use a porta 8080."}
-{"memory_id": "M0013", "seq": 13, "session": "S2", "tape_type": "decision", "text": "A propósito: agora usamos SQLite para o cache local; não usamos mais Redis para isso."}
-{"memory_id": "M0014", "seq": 14, "session": "S2", "tape_type": "memory", "text": "O Redis continua sendo usado no serviço de sessões; isso não mudou."}
-{"memory_id": "M0015", "seq": 15, "session": "S2", "tape_type": "memory", "text": "Talvez devêssemos considerar Kafka no futuro, mas nenhuma decisão foi tomada."}
-{"memory_id": "M0016", "seq": 16, "session": "S2", "tape_type": "memory", "text": "ok, obrigado"}
+{"memory_id": "M0018", "seq": 10, "session": "S2", "tape_type": "memory", "text": "rodamos  o teste de carga com 500 usuários, o p95 ficou em 820 ms!"}
+{"memory_id": "M0010", "seq": 11, "session": "S2", "tape_type": "bugfix", "text": "O deploy falhou por falta de permissão no bucket; corrigi criando a role nova."}
+{"memory_id": "M0011", "seq": 12, "session": "S2", "tape_type": "memory", "text": "No fim do dia, a rotação da chave de deploy acontece a cada 90 dias."}
+{"memory_id": "M0012", "seq": 13, "session": "S2", "tape_type": "memory", "text": "Para a demonstração de amanhã, use a porta 8080."}
+{"memory_id": "M0013", "seq": 14, "session": "S2", "tape_type": "decision", "text": "A propósito: agora usamos SQLite para o cache local; não usamos mais Redis para isso."}
+{"memory_id": "M0014", "seq": 15, "session": "S2", "tape_type": "memory", "text": "O Redis continua sendo usado no serviço de sessões; isso não mudou."}
+{"memory_id": "M0015", "seq": 16, "session": "S2", "tape_type": "memory", "text": "Talvez devêssemos considerar Kafka no futuro, mas nenhuma decisão foi tomada."}
+{"memory_id": "M0016", "seq": 17, "session": "S2", "tape_type": "memory", "text": "ok, obrigado"}
 {"memory_id": "M0017", "seq": 17, "session": "S3", "tape_type": "decision", "text": "Atualização: trocamos o banco primário de PostgreSQL para CockroachDB na semana passada."}
-{"memory_id": "M0018", "seq": 18, "session": "S3", "tape_type": "memory", "text": "rodamos  o teste de carga com 500 usuários, o p95 ficou em 820 ms!"}
 {"memory_id": "M0019", "seq": 19, "session": "S3", "tape_type": "memory", "text": "Como combinado, o banco primário do Aurora segue sendo o PostgreSQL até a migração."}
 {"memory_id": "M0020", "seq": 20, "session": "S3", "tape_type": "decision", "text": "Vamos migrar para Kubernetes no Q1; ainda sem data definida."}
 {"memory_id": "M0021", "seq": 21, "session": "S4", "tape_type": "lesson", "text": "Lição: sempre rodar o teste de carga antes de trocar o pool de conexões."}

@@ -230,8 +230,8 @@
       "promoted": 32
     },
     "B": {
-      "active_set_reduction_admissible": 0.4688,
-      "active_set_reduction_received": 0.4688,
+      "active_set_reduction_admissible": 0.4375,
+      "active_set_reduction_received": 0.4375,
       "confusion_matrix": {
         "episodic": {
           "episodic": 2,
@@ -246,9 +246,9 @@
           "semantic": 1
         },
         "reject": {
-          "episodic": 0,
+          "episodic": 1,
           "event_only": 0,
-          "reject": 3,
+          "reject": 2,
           "semantic": 0
         },
         "semantic": {
@@ -267,8 +267,8 @@
       "global_memory_metrics": {
         "false_discard_rate": 0.2353,
         "found": 13,
-        "promoted": 17,
-        "promotion_precision": 0.7647,
+        "promoted": 18,
+        "promotion_precision": 0.7222,
         "promotion_recall": 0.7647,
         "required": 17
       },
@@ -311,7 +311,7 @@
         },
         "duplicate_normalized": {
           "found": 0,
-          "promoted": 0,
+          "promoted": 1,
           "required": 0,
           "total": 1
         },
@@ -622,7 +622,7 @@
           }
         ]
       },
-      "promoted": 17
+      "promoted": 18
     },
     "D": {
       "active_set_reduction_admissible": 0.375,
@@ -866,13 +866,13 @@
     "arm": "B",
     "counts": {
       "decisions": 32,
-      "promoted": 17,
+      "promoted": 18,
       "records": 32
     },
-    "decisions_sha256": "sha256:3f1f9c484e7feff9d6c5a9182c017166184c334f5d37bcd8ed4574d116778587",
+    "decisions_sha256": "sha256:0ada29930dd3e56a68b6879291bcc62a677b5ec0798253b8b35a2c2abf5a9238",
     "mode": "shadow",
     "policy_version": "lifecycle-v1",
-    "records_sha256": "sha256:63157079cd45892d8a9b8ade644f0909d3fb4e62026e1bfe5ab66d41c03a49fb",
+    "records_sha256": "sha256:c5a4b6d022549fae4f10c332cb60da97e7ff1891204f209a06a4517cf3f5e1c4",
     "schema_version": "1"
   },
   "rebuild_identical": true,

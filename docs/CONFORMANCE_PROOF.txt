@@ -313,6 +313,8 @@ tests/test_groups.py::test_group_records_filters_archived
 tests/test_groups.py::test_manifest_roundtrip
 tests/test_groups.py::test_default_capacity_is_500
 tests/test_groups.py::test_group_of_500_then_next_group
+tests/test_ingestion_caveats_v1.py::test_u3a14_components_are_header_dates
+tests/test_ingestion_caveats_v1.py::test_u3b40_reference_date_unavailable
 tests/test_ingestion_trace_v1.py::test_recorded_classifications
 tests/test_ingestion_trace_v1.py::test_abstention_metric_fix_default_path_unchanged
 tests/test_ingestion_trace_v1.py::test_u3a17_residual_recorded
@@ -393,6 +395,9 @@ tests/test_payload.py::test_fact_window_selects_mid_text
 tests/test_payload.py::test_payload_window_off_is_unchanged
 tests/test_payload.py::test_payload_window_reveals_mid_fact_within_budget
 tests/test_payload.py::test_config_payload_window_defaults_off
+tests/test_phrase_coverage_v1.py::test_delivery_stage_recorded
+tests/test_phrase_coverage_v1.py::test_u3a17_contexts_identical_because_room_negative
+tests/test_phrase_coverage_v1.py::test_recorded_answer_verdicts
 tests/test_phrase_delivery_v1.py::test_phrase_metric_recorded_verdicts
 tests/test_phrase_delivery_v1.py::test_phrase_helpers
 tests/test_provenance_e2e.py::test_every_graph_row_points_back_to_tape_and_original
@@ -548,4 +553,4 @@ tests/test_whiteboard.py::test_size_and_consolidation_trigger
 tests/test_whiteboard.py::test_roundtrip
 tests/test_whiteboard.py::test_render
 
-549 tests collected in 0.09s
+554 tests collected in 0.09s

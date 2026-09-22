@@ -1,0 +1,170 @@
+{
+  "all_pass": false,
+  "answer": {
+    "arms": {
+      "W5": [
+        "incorrect",
+        "incorrect",
+        "incorrect"
+      ],
+      "W6": [
+        "incorrect",
+        "incorrect",
+        "incorrect"
+      ]
+    },
+    "failures": 0,
+    "gates": {
+      "P3_answers": true,
+      "P5_infra": true
+    },
+    "llm_calls": 12,
+    "score": {
+      "W5": 0.0,
+      "W6": 0.0
+    }
+  },
+  "gates": {
+    "P1_target_fixed": false,
+    "P2_no_removals": true,
+    "P3_answers": true,
+    "P4_determinism": true,
+    "P5_infra": true,
+    "P6_w5_frozen": true
+  },
+  "prereg": "docs/PHRASE_COVERAGE_V1_PREREG.md",
+  "rows": [
+    {
+      "arm": "W5",
+      "basis": "phrase",
+      "block": "u3a",
+      "case": 12,
+      "chars": 3999,
+      "gold": "16GB",
+      "gold_phrases": [
+        "16gb"
+      ],
+      "missing": [],
+      "ok": true
+    },
+    {
+      "arm": "W6",
+      "basis": "phrase",
+      "block": "u3a",
+      "case": 12,
+      "chars": 3999,
+      "gold": "16GB",
+      "gold_phrases": [
+        "16gb"
+      ],
+      "missing": [],
+      "ok": true
+    },
+    {
+      "arm": "W5",
+      "basis": "phrase",
+      "block": "u3a",
+      "case": 17,
+      "chars": 3985,
+      "gold": "over a year",
+      "gold_phrases": [
+        "1year"
+      ],
+      "missing": [
+        "1year"
+      ],
+      "ok": false
+    },
+    {
+      "arm": "W6",
+      "basis": "phrase",
+      "block": "u3a",
+      "case": 17,
+      "chars": 3984,
+      "gold": "over a year",
+      "gold_phrases": [
+        "1year"
+      ],
+      "missing": [
+        "1year"
+      ],
+      "ok": false
+    },
+    {
+      "arm": "W5",
+      "basis": "phrase",
+      "block": "u3a",
+      "case": 19,
+      "chars": 3999,
+      "gold": "$200",
+      "gold_phrases": [
+        "200$"
+      ],
+      "missing": [
+        "200$"
+      ],
+      "ok": false
+    },
+    {
+      "arm": "W6",
+      "basis": "phrase",
+      "block": "u3a",
+      "case": 19,
+      "chars": 3988,
+      "gold": "$200",
+      "gold_phrases": [
+        "200$"
+      ],
+      "missing": [],
+      "ok": true
+    },
+    {
+      "arm": "W5",
+      "basis": "phrase",
+      "block": "u3a",
+      "case": 22,
+      "chars": 3999,
+      "gold": "two weeks",
+      "gold_phrases": [
+        "2week"
+      ],
+      "missing": [],
+      "ok": true
+    },
+    {
+      "arm": "W6",
+      "basis": "phrase",
+      "block": "u3a",
+      "case": 22,
+      "chars": 4000,
+      "gold": "two weeks",
+      "gold_phrases": [
+        "2week"
+      ],
+      "missing": [],
+      "ok": true
+    },
+    {
+      "arm": "W5",
+      "basis": "atom_fallback",
+      "block": "u3b",
+      "case": 27,
+      "chars": 3721,
+      "gold": "the 'Walk for Hunger' charity event",
+      "missing": [],
+      "ok": true
+    },
+    {
+      "arm": "W6",
+      "basis": "atom_fallback",
+      "block": "u3b",
+      "case": 27,
+      "chars": 3721,
+      "gold": "the 'Walk for Hunger' charity event",
+      "missing": [],
+      "ok": true
+    }
+  ],
+  "w5_source_sha256": "db5021c90c3c060d3c9176755d8860a6f370b10d80a0fb66f2bd8a8fd4976cb6",
+  "w5_unchanged": true
+}

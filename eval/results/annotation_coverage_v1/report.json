@@ -1,0 +1,817 @@
+{
+  "aggregate": {
+    "coverage_A": 0.8226,
+    "coverage_L10": 0.9839,
+    "coverage_L3": 0.7419,
+    "coverage_L5": 0.9355,
+    "coverage_L8": 0.9839,
+    "coverage_U5": 0.9839,
+    "missing_covered_by_L5": 10,
+    "missing_total": 11,
+    "required_total": 62,
+    "undue_proxy": 14
+  },
+  "all_pass": true,
+  "cases": 30,
+  "gates": {
+    "A1_processed": true,
+    "A2_determinism": true,
+    "A3_u3a17_visible": true
+  },
+  "per_case": [
+    {
+      "annotated": [
+        "M0040"
+      ],
+      "block": "u3a",
+      "case": 12,
+      "coverage": {
+        "A": 1.0,
+        "L10": 1.0,
+        "L3": 1.0,
+        "L5": 1.0,
+        "L8": 1.0,
+        "U5": 1.0
+      },
+      "missing": [],
+      "missing_covered_by_L5": [],
+      "question": "How much RAM did I upgrade my laptop to?",
+      "required": [
+        "M0040"
+      ],
+      "required_absent_from_fixture": []
+    },
+    {
+      "annotated": [
+        "M0007",
+        "M0011",
+        "M0025",
+        "M0037"
+      ],
+      "block": "u3a",
+      "case": 13,
+      "coverage": {
+        "A": 1.0,
+        "L10": 1.0,
+        "L3": 1.0,
+        "L5": 1.0,
+        "L8": 1.0,
+        "U5": 1.0
+      },
+      "missing": [],
+      "missing_covered_by_L5": [],
+      "question": "I'm planning my trip to Speyer again and I wanted to confirm, what's the phone number of the Speyer tourism board that you provided me earlier?",
+      "required": [
+        "M0037"
+      ],
+      "required_absent_from_fixture": []
+    },
+    {
+      "annotated": [
+        "M0032",
+        "M0045"
+      ],
+      "block": "u3a",
+      "case": 14,
+      "coverage": {
+        "A": 1.0,
+        "L10": 1.0,
+        "L3": 1.0,
+        "L5": 1.0,
+        "L8": 1.0,
+        "U5": 1.0
+      },
+      "missing": [],
+      "missing_covered_by_L5": [],
+      "question": "How many weeks passed between the time I sold homemade baked goods at the Farmers' Market for the last time and the time I participated in the Spring Fling Market?",
+      "required": [
+        "M0045",
+        "M0032"
+      ],
+      "required_absent_from_fixture": []
+    },
+    {
+      "annotated": [
+        "M0002",
+        "M0007",
+        "M0009",
+        "M0010",
+        "M0034",
+        "M0036"
+      ],
+      "block": "u3a",
+      "case": 15,
+      "coverage": {
+        "A": 1.0,
+        "L10": 1.0,
+        "L3": 0.6,
+        "L5": 0.8,
+        "L8": 1.0,
+        "U5": 1.0
+      },
+      "missing": [],
+      "missing_covered_by_L5": [],
+      "question": "How many musical instruments do I currently own?",
+      "required": [
+        "M0036",
+        "M0007",
+        "M0002",
+        "M0009",
+        "M0010"
+      ],
+      "required_absent_from_fixture": []
+    },
+    {
+      "annotated": [
+        "M0018"
+      ],
+      "block": "u3a",
+      "case": 16,
+      "coverage": {
+        "A": 1.0,
+        "L10": 1.0,
+        "L3": 1.0,
+        "L5": 1.0,
+        "L8": 1.0,
+        "U5": 1.0
+      },
+      "missing": [],
+      "missing_covered_by_L5": [],
+      "question": "What was my previous stance on spirituality?",
+      "required": [
+        "M0018"
+      ],
+      "required_absent_from_fixture": []
+    },
+    {
+      "annotated": [
+        "M0018",
+        "M0022"
+      ],
+      "block": "u3a",
+      "case": 17,
+      "coverage": {
+        "A": 0.0,
+        "L10": 1.0,
+        "L3": 1.0,
+        "L5": 1.0,
+        "L8": 1.0,
+        "U5": 1.0
+      },
+      "missing": [
+        "M0043"
+      ],
+      "missing_covered_by_L5": [
+        "M0043"
+      ],
+      "question": "How long did I wait for the decision on my asylum application?",
+      "required": [
+        "M0043"
+      ],
+      "required_absent_from_fixture": []
+    },
+    {
+      "annotated": [
+        "M0042"
+      ],
+      "block": "u3a",
+      "case": 18,
+      "coverage": {
+        "A": 0.0,
+        "L10": 0.5,
+        "L3": 0.5,
+        "L5": 0.5,
+        "L8": 0.5,
+        "U5": 0.5
+      },
+      "missing": [
+        "M0018",
+        "M0022"
+      ],
+      "missing_covered_by_L5": [
+        "M0022"
+      ],
+      "question": "What is the total number of siblings I have?",
+      "required": [
+        "M0022",
+        "M0018"
+      ],
+      "required_absent_from_fixture": []
+    },
+    {
+      "annotated": [
+        "M0031",
+        "M0035"
+      ],
+      "block": "u3a",
+      "case": 19,
+      "coverage": {
+        "A": 1.0,
+        "L10": 1.0,
+        "L3": 1.0,
+        "L5": 1.0,
+        "L8": 1.0,
+        "U5": 1.0
+      },
+      "missing": [],
+      "missing_covered_by_L5": [],
+      "question": "What is the total amount I spent on gifts for my coworker and brother?",
+      "required": [
+        "M0031",
+        "M0035"
+      ],
+      "required_absent_from_fixture": []
+    },
+    {
+      "annotated": [
+        "M0004",
+        "M0005",
+        "M0011",
+        "M0012",
+        "M0031",
+        "M0032",
+        "M0033",
+        "M0034",
+        "M0035",
+        "M0039"
+      ],
+      "block": "u3a",
+      "case": 20,
+      "coverage": {
+        "A": 1.0,
+        "L10": 1.0,
+        "L3": 1.0,
+        "L5": 1.0,
+        "L8": 1.0,
+        "U5": 1.0
+      },
+      "missing": [],
+      "missing_covered_by_L5": [],
+      "question": "What type of rice is my favorite?",
+      "required": [
+        "M0033"
+      ],
+      "required_absent_from_fixture": []
+    },
+    {
+      "annotated": [
+        "M0006",
+        "M0026",
+        "M0039"
+      ],
+      "block": "u3a",
+      "case": 21,
+      "coverage": {
+        "A": 1.0,
+        "L10": 1.0,
+        "L3": 0.6667,
+        "L5": 1.0,
+        "L8": 1.0,
+        "U5": 1.0
+      },
+      "missing": [],
+      "missing_covered_by_L5": [],
+      "question": "How many years in total did I spend in formal education from high school to the completion of my Bachelor's degree?",
+      "required": [
+        "M0006",
+        "M0039",
+        "M0026"
+      ],
+      "required_absent_from_fixture": []
+    },
+    {
+      "annotated": [
+        "M0034",
+        "M0038"
+      ],
+      "block": "u3a",
+      "case": 22,
+      "coverage": {
+        "A": 1.0,
+        "L10": 1.0,
+        "L3": 1.0,
+        "L5": 1.0,
+        "L8": 1.0,
+        "U5": 1.0
+      },
+      "missing": [],
+      "missing_covered_by_L5": [],
+      "question": "How long was I in Japan for?",
+      "required": [
+        "M0038"
+      ],
+      "required_absent_from_fixture": []
+    },
+    {
+      "annotated": [
+        "M0014",
+        "M0022"
+      ],
+      "block": "u3a",
+      "case": 23,
+      "coverage": {
+        "A": 1.0,
+        "L10": 1.0,
+        "L3": 1.0,
+        "L5": 1.0,
+        "L8": 1.0,
+        "U5": 1.0
+      },
+      "missing": [],
+      "missing_covered_by_L5": [],
+      "question": "Which event happened first, my participation in the #PlankChallenge or my post about vegan chili recipe?",
+      "required": [
+        "M0014",
+        "M0022"
+      ],
+      "required_absent_from_fixture": []
+    },
+    {
+      "annotated": [
+        "M0012",
+        "M0035"
+      ],
+      "block": "u3a",
+      "case": 24,
+      "coverage": {
+        "A": 1.0,
+        "L10": 1.0,
+        "L3": 1.0,
+        "L5": 1.0,
+        "L8": 1.0,
+        "U5": 1.0
+      },
+      "missing": [],
+      "missing_covered_by_L5": [],
+      "question": "What is the total amount I spent on the designer handbag and high-end skincare products?",
+      "required": [
+        "M0035",
+        "M0012"
+      ],
+      "required_absent_from_fixture": []
+    },
+    {
+      "annotated": [
+        "M0010",
+        "M0014",
+        "M0016",
+        "M0017",
+        "M0018",
+        "M0019",
+        "M0020",
+        "M0036",
+        "M0040"
+      ],
+      "block": "u3a",
+      "case": 25,
+      "coverage": {
+        "A": 1.0,
+        "L10": 1.0,
+        "L3": 1.0,
+        "L5": 1.0,
+        "L8": 1.0,
+        "U5": 1.0
+      },
+      "missing": [],
+      "missing_covered_by_L5": [],
+      "question": "How much is the painting of a sunset worth in terms of the amount I paid for it?",
+      "required": [
+        "M0040"
+      ],
+      "required_absent_from_fixture": []
+    },
+    {
+      "annotated": [
+        "M0013",
+        "M0040",
+        "M0042"
+      ],
+      "block": "u3a",
+      "case": 26,
+      "coverage": {
+        "A": 1.0,
+        "L10": 1.0,
+        "L3": 1.0,
+        "L5": 1.0,
+        "L8": 1.0,
+        "U5": 1.0
+      },
+      "missing": [],
+      "missing_covered_by_L5": [],
+      "question": "How many followers do I have on Instagram now?",
+      "required": [
+        "M0013",
+        "M0040"
+      ],
+      "required_absent_from_fixture": []
+    },
+    {
+      "annotated": [
+        "M0002",
+        "M0011",
+        "M0023",
+        "M0029"
+      ],
+      "block": "u3b",
+      "case": 27,
+      "coverage": {
+        "A": 1.0,
+        "L10": 1.0,
+        "L3": 0.75,
+        "L5": 1.0,
+        "L8": 1.0,
+        "U5": 1.0
+      },
+      "missing": [],
+      "missing_covered_by_L5": [],
+      "question": "What charity event did I participate in a month ago?",
+      "required": [
+        "M0023",
+        "M0002",
+        "M0029",
+        "M0011"
+      ],
+      "required_absent_from_fixture": []
+    },
+    {
+      "annotated": [
+        "M0012",
+        "M0032",
+        "M0041"
+      ],
+      "block": "u3b",
+      "case": 28,
+      "coverage": {
+        "A": 1.0,
+        "L10": 1.0,
+        "L3": 1.0,
+        "L5": 1.0,
+        "L8": 1.0,
+        "U5": 1.0
+      },
+      "missing": [],
+      "missing_covered_by_L5": [],
+      "question": "What game did I finally beat last weekend?",
+      "required": [
+        "M0032"
+      ],
+      "required_absent_from_fixture": []
+    },
+    {
+      "annotated": [
+        "M0021",
+        "M0038",
+        "M0043"
+      ],
+      "block": "u3b",
+      "case": 29,
+      "coverage": {
+        "A": 0.75,
+        "L10": 1.0,
+        "L3": 0.75,
+        "L5": 1.0,
+        "L8": 1.0,
+        "U5": 1.0
+      },
+      "missing": [
+        "M0005"
+      ],
+      "missing_covered_by_L5": [
+        "M0005"
+      ],
+      "question": "How many times did I ride rollercoasters across all the events I attended from July to October?",
+      "required": [
+        "M0005",
+        "M0043",
+        "M0021",
+        "M0038"
+      ],
+      "required_absent_from_fixture": []
+    },
+    {
+      "annotated": [
+        "M0001",
+        "M0024"
+      ],
+      "block": "u3b",
+      "case": 30,
+      "coverage": {
+        "A": 1.0,
+        "L10": 1.0,
+        "L3": 1.0,
+        "L5": 1.0,
+        "L8": 1.0,
+        "U5": 1.0
+      },
+      "missing": [],
+      "missing_covered_by_L5": [],
+      "question": "How long have I been working before I started my current job at NovaTech?",
+      "required": [
+        "M0024",
+        "M0001"
+      ],
+      "required_absent_from_fixture": []
+    },
+    {
+      "annotated": [
+        "M0013",
+        "M0025",
+        "M0031",
+        "M0034",
+        "M0036",
+        "M0038"
+      ],
+      "block": "u3b",
+      "case": 31,
+      "coverage": {
+        "A": 1.0,
+        "L10": 1.0,
+        "L3": 0.5,
+        "L5": 0.8333,
+        "L8": 1.0,
+        "U5": 1.0
+      },
+      "missing": [],
+      "missing_covered_by_L5": [],
+      "question": "How many charity events did I participate in before the 'Run for the Cure' event?",
+      "required": [
+        "M0013",
+        "M0038",
+        "M0036",
+        "M0034",
+        "M0031",
+        "M0025"
+      ],
+      "required_absent_from_fixture": []
+    },
+    {
+      "annotated": [
+        "M0044"
+      ],
+      "block": "u3b",
+      "case": 32,
+      "coverage": {
+        "A": 0.0,
+        "L10": 1.0,
+        "L3": 1.0,
+        "L5": 1.0,
+        "L8": 1.0,
+        "U5": 1.0
+      },
+      "missing": [
+        "M0048"
+      ],
+      "missing_covered_by_L5": [
+        "M0048"
+      ],
+      "question": "Where did I attend my cousin's wedding?",
+      "required": [
+        "M0048"
+      ],
+      "required_absent_from_fixture": []
+    },
+    {
+      "annotated": [
+        "M0010"
+      ],
+      "block": "u3b",
+      "case": 33,
+      "coverage": {
+        "A": 0.0,
+        "L10": 1.0,
+        "L3": 1.0,
+        "L5": 1.0,
+        "L8": 1.0,
+        "U5": 1.0
+      },
+      "missing": [
+        "M0031",
+        "M0046"
+      ],
+      "missing_covered_by_L5": [
+        "M0031",
+        "M0046"
+      ],
+      "question": "What was the the life event of one of my relatives that I participated in a week ago?",
+      "required": [
+        "M0046",
+        "M0031"
+      ],
+      "required_absent_from_fixture": []
+    },
+    {
+      "annotated": [
+        "M0013",
+        "M0023",
+        "M0033"
+      ],
+      "block": "u3b",
+      "case": 34,
+      "coverage": {
+        "A": 0.0,
+        "L10": 1.0,
+        "L3": 0.0,
+        "L5": 1.0,
+        "L8": 1.0,
+        "U5": 1.0
+      },
+      "missing": [
+        "M0010",
+        "M0036"
+      ],
+      "missing_covered_by_L5": [
+        "M0010",
+        "M0036"
+      ],
+      "question": "What was the significant buisiness milestone I mentioned four weeks ago?",
+      "required": [
+        "M0010",
+        "M0036"
+      ],
+      "required_absent_from_fixture": []
+    },
+    {
+      "annotated": [
+        "M0008",
+        "M0029",
+        "M0030"
+      ],
+      "block": "u3b",
+      "case": 35,
+      "coverage": {
+        "A": 1.0,
+        "L10": 1.0,
+        "L3": 0.5,
+        "L5": 1.0,
+        "L8": 1.0,
+        "U5": 1.0
+      },
+      "missing": [],
+      "missing_covered_by_L5": [],
+      "question": "How many years will I be when my friend Rachel gets married?",
+      "required": [
+        "M0029",
+        "M0008"
+      ],
+      "required_absent_from_fixture": []
+    },
+    {
+      "annotated": [
+        "M0009",
+        "M0024",
+        "M0041"
+      ],
+      "block": "u3b",
+      "case": 36,
+      "coverage": {
+        "A": 1.0,
+        "L10": 1.0,
+        "L3": 1.0,
+        "L5": 1.0,
+        "L8": 1.0,
+        "U5": 1.0
+      },
+      "missing": [],
+      "missing_covered_by_L5": [],
+      "question": "How many amateur comedians did I watch perform at the open mic night?",
+      "required": [
+        "M0009"
+      ],
+      "required_absent_from_fixture": []
+    },
+    {
+      "annotated": [
+        "M0022",
+        "M0045",
+        "M0048"
+      ],
+      "block": "u3b",
+      "case": 37,
+      "coverage": {
+        "A": 1.0,
+        "L10": 1.0,
+        "L3": 1.0,
+        "L5": 1.0,
+        "L8": 1.0,
+        "U5": 1.0
+      },
+      "missing": [],
+      "missing_covered_by_L5": [],
+      "question": "I was looking back at our previous conversation about Caribbean dishes and I was wondering, what was the name of that Jamaican dish you recommended I try with snapper that has fruit in it?",
+      "required": [
+        "M0048"
+      ],
+      "required_absent_from_fixture": []
+    },
+    {
+      "annotated": [
+        "M0005",
+        "M0011",
+        "M0030",
+        "M0031",
+        "M0035"
+      ],
+      "block": "u3b",
+      "case": 38,
+      "coverage": {
+        "A": 0.8,
+        "L10": 1.0,
+        "L3": 0.4,
+        "L5": 0.8,
+        "L8": 1.0,
+        "U5": 1.0
+      },
+      "missing": [
+        "M0044"
+      ],
+      "missing_covered_by_L5": [
+        "M0044"
+      ],
+      "question": "How many kitchen items did I replace or fix?",
+      "required": [
+        "M0011",
+        "M0044",
+        "M0035",
+        "M0030",
+        "M0005"
+      ],
+      "required_absent_from_fixture": []
+    },
+    {
+      "annotated": [
+        "M0002",
+        "M0027",
+        "M0047"
+      ],
+      "block": "u3b",
+      "case": 39,
+      "coverage": {
+        "A": 1.0,
+        "L10": 1.0,
+        "L3": 1.0,
+        "L5": 1.0,
+        "L8": 1.0,
+        "U5": 1.0
+      },
+      "missing": [],
+      "missing_covered_by_L5": [],
+      "question": "What breed is my dog?",
+      "required": [
+        "M0027"
+      ],
+      "required_absent_from_fixture": []
+    },
+    {
+      "annotated": [
+        "M0006"
+      ],
+      "block": "u3b",
+      "case": 40,
+      "coverage": {
+        "A": 1.0,
+        "L10": 1.0,
+        "L3": 1.0,
+        "L5": 1.0,
+        "L8": 1.0,
+        "U5": 1.0
+      },
+      "missing": [],
+      "missing_covered_by_L5": [],
+      "question": "How many days ago did I read the March 15th issue of The New Yorker?",
+      "required": [
+        "M0006"
+      ],
+      "required_absent_from_fixture": []
+    },
+    {
+      "annotated": [
+        "M0032",
+        "M0033",
+        "M0039"
+      ],
+      "block": "u3b",
+      "case": 41,
+      "coverage": {
+        "A": 0.5,
+        "L10": 1.0,
+        "L3": 0.5,
+        "L5": 1.0,
+        "L8": 1.0,
+        "U5": 1.0
+      },
+      "missing": [
+        "M0010"
+      ],
+      "missing_covered_by_L5": [
+        "M0010"
+      ],
+      "question": "How long have I been living in my current apartment in Shinjuku?",
+      "required": [
+        "M0010",
+        "M0033"
+      ],
+      "required_absent_from_fixture": []
+    }
+  ],
+  "prereg": "docs/ANNOTATION_COVERAGE_V1_PREREG.md"
+}

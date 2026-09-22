@@ -15,7 +15,7 @@
 {"memory_id": "M0015", "seq": 15, "session": "S2", "tape_type": "memory", "text": "Talvez devêssemos considerar Kafka no futuro, mas nenhuma decisão foi tomada."}
 {"memory_id": "M0016", "seq": 16, "session": "S2", "tape_type": "memory", "text": "ok, obrigado"}
 {"memory_id": "M0017", "seq": 17, "session": "S3", "tape_type": "decision", "text": "Atualização: trocamos o banco primário de PostgreSQL para CockroachDB na semana passada."}
-{"memory_id": "M0018", "seq": 18, "session": "S3", "tape_type": "memory", "text": "rodamos o teste de carga com 500 usuários, p95 = 820ms"}
+{"memory_id": "M0018", "seq": 18, "session": "S3", "tape_type": "memory", "text": "rodamos  o teste de carga com 500 usuários, o p95 ficou em 820 ms!"}
 {"memory_id": "M0019", "seq": 19, "session": "S3", "tape_type": "memory", "text": "Como combinado, o banco primário do Aurora segue sendo o PostgreSQL até a migração."}
 {"memory_id": "M0020", "seq": 20, "session": "S3", "tape_type": "decision", "text": "Vamos migrar para Kubernetes no Q1; ainda sem data definida."}
 {"memory_id": "M0021", "seq": 21, "session": "S4", "tape_type": "lesson", "text": "Lição: sempre rodar o teste de carga antes de trocar o pool de conexões."}

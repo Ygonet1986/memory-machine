@@ -76,8 +76,8 @@ RECORDS: list[tuple] = [
     # session S3 — decision change + normalized duplicate + valid repetition
     ("M0017", "S3", 17, "Atualização: trocamos o banco primário de PostgreSQL para CockroachDB na semana passada.",
      "decision", "semantic", "decision_change"),
-    ("M0018", "S3", 18, "rodamos o teste de carga com 500 usuários, p95 = 820ms", "memory",
-     "reject", "duplicate_normalized"),
+    ("M0018", "S3", 18, "rodamos  o teste de carga com 500 usuários, o p95 ficou em 820 ms!",
+     "memory", "reject", "duplicate_normalized"),
     ("M0019", "S3", 19, "Como combinado, o banco primário do Aurora segue sendo o PostgreSQL até a migração.",
      "memory", "semantic", "valid_repetition"),
     ("M0020", "S3", 20, "Vamos migrar para Kubernetes no Q1; ainda sem data definida.",

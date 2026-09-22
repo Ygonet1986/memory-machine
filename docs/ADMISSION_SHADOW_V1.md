@@ -114,9 +114,13 @@ This phase is exclusively shadow data collection. Rules for the duration:
 - Logs stay local (`0600`), treated as personal data; aggregate before sharing.
 - The pre-rewrite backup mirror is retained at least until the first sampling
   round is analyzed and the next release is published.
-- When enough data exists, the analysis itself gets a pre-registration
-  (signals, metrics, gates) before any policy comparison; promotion only if
-  availability **and** precision pass together, under the 4000-char budget.
+- The collection stop point is frozen in
+  `docs/ADMISSION_SHADOW_STOPPING_RULE.md` (independent of results; checked
+  by `scripts/shadow_stop_check.py`, which reports coverage criteria only).
+  Until it is met, no admission-outcome aggregate may be computed; only then
+  does the analysis get its own pre-registration (signals, metrics, gates),
+  and promotion requires availability **and** precision passing together
+  under the 4000-char budget.
 
 ## Non-goals
 

@@ -1,0 +1,845 @@
+{
+  "all_pass": true,
+  "cases": 40,
+  "evaluation": "single (holdout, frozen policy)",
+  "fixture": "/Users/igorcoutrimlacerda/memory-machine/eval/fixtures/admission_causal_holdout",
+  "gates": {
+    "H1_availability": true,
+    "H2_precision": true,
+    "H3_factual_control": true,
+    "H4_absence": true,
+    "H5_budget": true,
+    "H6_determinism": true
+  },
+  "gold_occurrences": 62,
+  "per_case": [
+    {
+      "case_id": "H1-01",
+      "gold": [
+        "H1-01-R07",
+        "H1-01-R08"
+      ],
+      "policies": {
+        "B": [
+          "H1-01-R07"
+        ],
+        "S": [
+          "H1-01-R08",
+          "H1-01-R07"
+        ]
+      },
+      "relation_source": "H1-01-R07",
+      "scenario": "causal_buried",
+      "slot_score": 0.0,
+      "slot_used": true
+    },
+    {
+      "case_id": "H1-02",
+      "gold": [
+        "H1-02-R07",
+        "H1-02-R08"
+      ],
+      "policies": {
+        "B": [
+          "H1-02-R07"
+        ],
+        "S": [
+          "H1-02-R08",
+          "H1-02-R07"
+        ]
+      },
+      "relation_source": "H1-02-R07",
+      "scenario": "causal_buried",
+      "slot_score": 0.0,
+      "slot_used": true
+    },
+    {
+      "case_id": "H1-03",
+      "gold": [
+        "H1-03-R07",
+        "H1-03-R08"
+      ],
+      "policies": {
+        "B": [
+          "H1-03-R07"
+        ],
+        "S": [
+          "H1-03-R08",
+          "H1-03-R07"
+        ]
+      },
+      "relation_source": "H1-03-R07",
+      "scenario": "causal_buried",
+      "slot_score": 0.0,
+      "slot_used": true
+    },
+    {
+      "case_id": "H1-04",
+      "gold": [
+        "H1-04-R07",
+        "H1-04-R08"
+      ],
+      "policies": {
+        "B": [
+          "H1-04-R07"
+        ],
+        "S": [
+          "H1-04-R08",
+          "H1-04-R07"
+        ]
+      },
+      "relation_source": "H1-04-R07",
+      "scenario": "causal_buried",
+      "slot_score": 0.0,
+      "slot_used": true
+    },
+    {
+      "case_id": "H1-05",
+      "gold": [
+        "H1-05-R07",
+        "H1-05-R08"
+      ],
+      "policies": {
+        "B": [
+          "H1-05-R07"
+        ],
+        "S": [
+          "H1-05-R08",
+          "H1-05-R07"
+        ]
+      },
+      "relation_source": "H1-05-R07",
+      "scenario": "causal_buried",
+      "slot_score": 0.0,
+      "slot_used": true
+    },
+    {
+      "case_id": "H1-06",
+      "gold": [
+        "H1-06-R07",
+        "H1-06-R08"
+      ],
+      "policies": {
+        "B": [
+          "H1-06-R07"
+        ],
+        "S": [
+          "H1-06-R08",
+          "H1-06-R07"
+        ]
+      },
+      "relation_source": "H1-06-R07",
+      "scenario": "causal_buried",
+      "slot_score": 0.0,
+      "slot_used": true
+    },
+    {
+      "case_id": "H1-07",
+      "gold": [
+        "H1-07-R07",
+        "H1-07-R08"
+      ],
+      "policies": {
+        "B": [
+          "H1-07-R07"
+        ],
+        "S": [
+          "H1-07-R08",
+          "H1-07-R07"
+        ]
+      },
+      "relation_source": "H1-07-R07",
+      "scenario": "causal_buried",
+      "slot_score": 0.0,
+      "slot_used": true
+    },
+    {
+      "case_id": "H1-08",
+      "gold": [
+        "H1-08-R07",
+        "H1-08-R08"
+      ],
+      "policies": {
+        "B": [
+          "H1-08-R07"
+        ],
+        "S": [
+          "H1-08-R08",
+          "H1-08-R07"
+        ]
+      },
+      "relation_source": "H1-08-R07",
+      "scenario": "causal_buried",
+      "slot_score": 0.0,
+      "slot_used": true
+    },
+    {
+      "case_id": "H1-09",
+      "gold": [
+        "H1-09-R07",
+        "H1-09-R08"
+      ],
+      "policies": {
+        "B": [
+          "H1-09-R07"
+        ],
+        "S": [
+          "H1-09-R08",
+          "H1-09-R07"
+        ]
+      },
+      "relation_source": "H1-09-R07",
+      "scenario": "causal_buried",
+      "slot_score": 0.0,
+      "slot_used": true
+    },
+    {
+      "case_id": "H1-10",
+      "gold": [
+        "H1-10-R07",
+        "H1-10-R08"
+      ],
+      "policies": {
+        "B": [
+          "H1-10-R07"
+        ],
+        "S": [
+          "H1-10-R08",
+          "H1-10-R07"
+        ]
+      },
+      "relation_source": "H1-10-R07",
+      "scenario": "causal_buried",
+      "slot_score": 0.0,
+      "slot_used": true
+    },
+    {
+      "case_id": "H1-11",
+      "gold": [
+        "H1-11-R07",
+        "H1-11-R08"
+      ],
+      "policies": {
+        "B": [
+          "H1-11-R07"
+        ],
+        "S": [
+          "H1-11-R08",
+          "H1-11-R07"
+        ]
+      },
+      "relation_source": "H1-11-R07",
+      "scenario": "causal_buried",
+      "slot_score": 0.0,
+      "slot_used": true
+    },
+    {
+      "case_id": "H1-12",
+      "gold": [
+        "H1-12-R07",
+        "H1-12-R08"
+      ],
+      "policies": {
+        "B": [
+          "H1-12-R07"
+        ],
+        "S": [
+          "H1-12-R08",
+          "H1-12-R07"
+        ]
+      },
+      "relation_source": "H1-12-R07",
+      "scenario": "causal_buried",
+      "slot_score": 0.0,
+      "slot_used": true
+    },
+    {
+      "case_id": "H2-01",
+      "gold": [
+        "H2-01-R07"
+      ],
+      "policies": {
+        "B": [
+          "H2-01-R07",
+          "H2-01-R01"
+        ],
+        "S": [
+          "H2-01-R07",
+          "H2-01-R01"
+        ]
+      },
+      "relation_source": null,
+      "scenario": "factual_control",
+      "slot_score": 0.0,
+      "slot_used": false
+    },
+    {
+      "case_id": "H2-02",
+      "gold": [
+        "H2-02-R07"
+      ],
+      "policies": {
+        "B": [
+          "H2-02-R07",
+          "H2-02-R01"
+        ],
+        "S": [
+          "H2-02-R07",
+          "H2-02-R01"
+        ]
+      },
+      "relation_source": null,
+      "scenario": "factual_control",
+      "slot_score": 0.0,
+      "slot_used": false
+    },
+    {
+      "case_id": "H2-03",
+      "gold": [
+        "H2-03-R07"
+      ],
+      "policies": {
+        "B": [
+          "H2-03-R07",
+          "H2-03-R01"
+        ],
+        "S": [
+          "H2-03-R07",
+          "H2-03-R01"
+        ]
+      },
+      "relation_source": null,
+      "scenario": "factual_control",
+      "slot_score": 0.0,
+      "slot_used": false
+    },
+    {
+      "case_id": "H2-04",
+      "gold": [
+        "H2-04-R07"
+      ],
+      "policies": {
+        "B": [
+          "H2-04-R07",
+          "H2-04-R01"
+        ],
+        "S": [
+          "H2-04-R07",
+          "H2-04-R01"
+        ]
+      },
+      "relation_source": null,
+      "scenario": "factual_control",
+      "slot_score": 0.0,
+      "slot_used": false
+    },
+    {
+      "case_id": "H2-05",
+      "gold": [
+        "H2-05-R07"
+      ],
+      "policies": {
+        "B": [
+          "H2-05-R07",
+          "H2-05-R01"
+        ],
+        "S": [
+          "H2-05-R07",
+          "H2-05-R01"
+        ]
+      },
+      "relation_source": null,
+      "scenario": "factual_control",
+      "slot_score": 0.0,
+      "slot_used": false
+    },
+    {
+      "case_id": "H2-06",
+      "gold": [
+        "H2-06-R07"
+      ],
+      "policies": {
+        "B": [
+          "H2-06-R07",
+          "H2-06-R01"
+        ],
+        "S": [
+          "H2-06-R07",
+          "H2-06-R01"
+        ]
+      },
+      "relation_source": null,
+      "scenario": "factual_control",
+      "slot_score": 0.0,
+      "slot_used": false
+    },
+    {
+      "case_id": "H2-07",
+      "gold": [
+        "H2-07-R07"
+      ],
+      "policies": {
+        "B": [
+          "H2-07-R07",
+          "H2-07-R01"
+        ],
+        "S": [
+          "H2-07-R07",
+          "H2-07-R01"
+        ]
+      },
+      "relation_source": null,
+      "scenario": "factual_control",
+      "slot_score": 0.0,
+      "slot_used": false
+    },
+    {
+      "case_id": "H2-08",
+      "gold": [
+        "H2-08-R07"
+      ],
+      "policies": {
+        "B": [
+          "H2-08-R07",
+          "H2-08-R01"
+        ],
+        "S": [
+          "H2-08-R07",
+          "H2-08-R01"
+        ]
+      },
+      "relation_source": null,
+      "scenario": "factual_control",
+      "slot_score": 0.0,
+      "slot_used": false
+    },
+    {
+      "case_id": "H3-01",
+      "gold": [
+        "H3-01-R08"
+      ],
+      "policies": {
+        "B": [
+          "H3-01-R08"
+        ],
+        "S": [
+          "H3-01-R08"
+        ]
+      },
+      "relation_source": null,
+      "scenario": "causal_absent",
+      "slot_score": 0.0,
+      "slot_used": false
+    },
+    {
+      "case_id": "H3-02",
+      "gold": [
+        "H3-02-R08"
+      ],
+      "policies": {
+        "B": [
+          "H3-02-R08"
+        ],
+        "S": [
+          "H3-02-R08"
+        ]
+      },
+      "relation_source": null,
+      "scenario": "causal_absent",
+      "slot_score": 0.0,
+      "slot_used": false
+    },
+    {
+      "case_id": "H3-03",
+      "gold": [
+        "H3-03-R08"
+      ],
+      "policies": {
+        "B": [
+          "H3-03-R08"
+        ],
+        "S": [
+          "H3-03-R08"
+        ]
+      },
+      "relation_source": null,
+      "scenario": "causal_absent",
+      "slot_score": 0.0,
+      "slot_used": false
+    },
+    {
+      "case_id": "H3-04",
+      "gold": [
+        "H3-04-R08"
+      ],
+      "policies": {
+        "B": [
+          "H3-04-R08"
+        ],
+        "S": [
+          "H3-04-R08"
+        ]
+      },
+      "relation_source": null,
+      "scenario": "causal_absent",
+      "slot_score": 0.0,
+      "slot_used": false
+    },
+    {
+      "case_id": "H3-05",
+      "gold": [
+        "H3-05-R08"
+      ],
+      "policies": {
+        "B": [
+          "H3-05-R08"
+        ],
+        "S": [
+          "H3-05-R08"
+        ]
+      },
+      "relation_source": null,
+      "scenario": "causal_absent",
+      "slot_score": 0.0,
+      "slot_used": false
+    },
+    {
+      "case_id": "H3-06",
+      "gold": [
+        "H3-06-R08"
+      ],
+      "policies": {
+        "B": [
+          "H3-06-R08"
+        ],
+        "S": [
+          "H3-06-R08"
+        ]
+      },
+      "relation_source": null,
+      "scenario": "causal_absent",
+      "slot_score": 0.0,
+      "slot_used": false
+    },
+    {
+      "case_id": "H3-07",
+      "gold": [
+        "H3-07-R08"
+      ],
+      "policies": {
+        "B": [
+          "H3-07-R08"
+        ],
+        "S": [
+          "H3-07-R08"
+        ]
+      },
+      "relation_source": null,
+      "scenario": "causal_absent",
+      "slot_score": 0.0,
+      "slot_used": false
+    },
+    {
+      "case_id": "H3-08",
+      "gold": [
+        "H3-08-R08"
+      ],
+      "policies": {
+        "B": [
+          "H3-08-R08"
+        ],
+        "S": [
+          "H3-08-R08"
+        ]
+      },
+      "relation_source": null,
+      "scenario": "causal_absent",
+      "slot_score": 0.0,
+      "slot_used": false
+    },
+    {
+      "case_id": "H3-09",
+      "gold": [
+        "H3-09-R08"
+      ],
+      "policies": {
+        "B": [
+          "H3-09-R08"
+        ],
+        "S": [
+          "H3-09-R08"
+        ]
+      },
+      "relation_source": null,
+      "scenario": "causal_absent",
+      "slot_score": 0.0,
+      "slot_used": false
+    },
+    {
+      "case_id": "H3-10",
+      "gold": [
+        "H3-10-R08"
+      ],
+      "policies": {
+        "B": [
+          "H3-10-R08"
+        ],
+        "S": [
+          "H3-10-R08"
+        ]
+      },
+      "relation_source": null,
+      "scenario": "causal_absent",
+      "slot_score": 0.0,
+      "slot_used": false
+    },
+    {
+      "case_id": "H4-01",
+      "gold": [
+        "H4-01-R07",
+        "H4-01-R08"
+      ],
+      "policies": {
+        "B": [
+          "H4-01-R07"
+        ],
+        "S": [
+          "H4-01-R08",
+          "H4-01-R07"
+        ]
+      },
+      "relation_source": "H4-01-R07",
+      "scenario": "causal_chain",
+      "slot_score": 0.0,
+      "slot_used": true
+    },
+    {
+      "case_id": "H4-02",
+      "gold": [
+        "H4-02-R07",
+        "H4-02-R08"
+      ],
+      "policies": {
+        "B": [
+          "H4-02-R07"
+        ],
+        "S": [
+          "H4-02-R08",
+          "H4-02-R07"
+        ]
+      },
+      "relation_source": "H4-02-R07",
+      "scenario": "causal_chain",
+      "slot_score": 0.0,
+      "slot_used": true
+    },
+    {
+      "case_id": "H4-03",
+      "gold": [
+        "H4-03-R07",
+        "H4-03-R08"
+      ],
+      "policies": {
+        "B": [
+          "H4-03-R07"
+        ],
+        "S": [
+          "H4-03-R08",
+          "H4-03-R07"
+        ]
+      },
+      "relation_source": "H4-03-R07",
+      "scenario": "causal_chain",
+      "slot_score": 0.0,
+      "slot_used": true
+    },
+    {
+      "case_id": "H4-04",
+      "gold": [
+        "H4-04-R07",
+        "H4-04-R08"
+      ],
+      "policies": {
+        "B": [
+          "H4-04-R07"
+        ],
+        "S": [
+          "H4-04-R08",
+          "H4-04-R07"
+        ]
+      },
+      "relation_source": "H4-04-R07",
+      "scenario": "causal_chain",
+      "slot_score": 0.0,
+      "slot_used": true
+    },
+    {
+      "case_id": "H4-05",
+      "gold": [
+        "H4-05-R07",
+        "H4-05-R08"
+      ],
+      "policies": {
+        "B": [
+          "H4-05-R07"
+        ],
+        "S": [
+          "H4-05-R08",
+          "H4-05-R07"
+        ]
+      },
+      "relation_source": "H4-05-R07",
+      "scenario": "causal_chain",
+      "slot_score": 0.0,
+      "slot_used": true
+    },
+    {
+      "case_id": "H4-06",
+      "gold": [
+        "H4-06-R07",
+        "H4-06-R08"
+      ],
+      "policies": {
+        "B": [
+          "H4-06-R07"
+        ],
+        "S": [
+          "H4-06-R08",
+          "H4-06-R07"
+        ]
+      },
+      "relation_source": "H4-06-R07",
+      "scenario": "causal_chain",
+      "slot_score": 0.0,
+      "slot_used": true
+    },
+    {
+      "case_id": "H4-07",
+      "gold": [
+        "H4-07-R07",
+        "H4-07-R08"
+      ],
+      "policies": {
+        "B": [
+          "H4-07-R07"
+        ],
+        "S": [
+          "H4-07-R08",
+          "H4-07-R07"
+        ]
+      },
+      "relation_source": "H4-07-R07",
+      "scenario": "causal_chain",
+      "slot_score": 0.0,
+      "slot_used": true
+    },
+    {
+      "case_id": "H4-08",
+      "gold": [
+        "H4-08-R07",
+        "H4-08-R08"
+      ],
+      "policies": {
+        "B": [
+          "H4-08-R07"
+        ],
+        "S": [
+          "H4-08-R08",
+          "H4-08-R07"
+        ]
+      },
+      "relation_source": "H4-08-R07",
+      "scenario": "causal_chain",
+      "slot_score": 0.0,
+      "slot_used": true
+    },
+    {
+      "case_id": "H4-09",
+      "gold": [
+        "H4-09-R07",
+        "H4-09-R08"
+      ],
+      "policies": {
+        "B": [
+          "H4-09-R07"
+        ],
+        "S": [
+          "H4-09-R08",
+          "H4-09-R07"
+        ]
+      },
+      "relation_source": "H4-09-R07",
+      "scenario": "causal_chain",
+      "slot_score": 0.0,
+      "slot_used": true
+    },
+    {
+      "case_id": "H4-10",
+      "gold": [
+        "H4-10-R07",
+        "H4-10-R08"
+      ],
+      "policies": {
+        "B": [
+          "H4-10-R07"
+        ],
+        "S": [
+          "H4-10-R08",
+          "H4-10-R07"
+        ]
+      },
+      "relation_source": "H4-10-R07",
+      "scenario": "causal_chain",
+      "slot_score": 0.0,
+      "slot_used": true
+    }
+  ],
+  "policies": {
+    "B": {
+      "availability": 0.6452,
+      "delivered": 48,
+      "max_items": 2,
+      "precision": 0.8333,
+      "scenario_availability": {
+        "causal_absent": 1.0,
+        "causal_buried": 0.5,
+        "causal_chain": 0.5,
+        "factual_control": 1.0
+      },
+      "scenario_precision": {
+        "causal_absent": 1.0,
+        "causal_buried": 1.0,
+        "causal_chain": 1.0,
+        "factual_control": 0.5
+      },
+      "undue_rate": 0.0
+    },
+    "S": {
+      "availability": 1.0,
+      "delivered": 70,
+      "max_items": 2,
+      "precision": 0.8857,
+      "scenario_availability": {
+        "causal_absent": 1.0,
+        "causal_buried": 1.0,
+        "causal_chain": 1.0,
+        "factual_control": 1.0
+      },
+      "scenario_precision": {
+        "causal_absent": 1.0,
+        "causal_buried": 1.0,
+        "causal_chain": 1.0,
+        "factual_control": 0.5
+      },
+      "undue_rate": 0.0
+    }
+  },
+  "prereg": "docs/ADMISSION_CAUSAL_V2_EXPLORATORY.md",
+  "requirements": {
+    "R1_factual_clean": true,
+    "R2_absent_clean": true,
+    "R3_budget": true
+  },
+  "round_type": "exploratory/mechanistic",
+  "slot_used_total": 22
+}

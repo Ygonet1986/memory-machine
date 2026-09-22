@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "memory-machine"
+description = "Persistent, auditable memory for long-running AI projects: an append-only tape, perspective memory agents and a working whiteboard."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Igor Coutrim Lacerda" }]
+keywords = ["memory", "llm", "agents", "rag", "whiteboard", "tape"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Software Development :: Libraries",
+]
+dependencies = []
+dynamic = ["version"]
+
+[project.optional-dependencies]
+app = ["PySide6>=6.6"]
+dev = ["pytest>=8"]
+# `eval` harnesses are stdlib-only; the extra exists so downstream users can
+# install the evaluation surface explicitly without pulling the app.
+eval = []
+
+[project.scripts]
+memory-cli = "memory_machine.cli:main"
+
+[project.urls]
+Documentation = "https://github.com/Ygonet1986/memory-machine/blob/main/docs/NORMATIVE_SPEC_V1.md"
+Source = "https://github.com/Ygonet1986/memory-machine"
+
+[tool.setuptools.dynamic]
+version = { attr = "memory_machine.__version__" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

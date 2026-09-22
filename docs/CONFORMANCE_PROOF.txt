@@ -1,6 +1,9 @@
 tests/test_admission_shadow.py::test_shadow_record_is_derived_only_and_private
 tests/test_admission_shadow.py::test_event_rule_counterfactual_and_ranking
 tests/test_admission_shadow.py::test_shadow_is_off_by_default_and_recall_stays_identical
+tests/test_admission_synthetic_v1.py::test_fixture_is_frozen_and_valid
+tests/test_admission_synthetic_v1.py::test_scenario_coverage_and_gold_shape
+tests/test_admission_synthetic_v1.py::test_harness_deterministic_and_recorded_gates
 tests/test_agents.py::test_parse_annotations
 tests/test_agents.py::test_parse_annotations_clamps_relevance
 tests/test_agents.py::test_parse_annotations_empty
@@ -503,4 +506,4 @@ tests/test_whiteboard.py::test_size_and_consolidation_trigger
 tests/test_whiteboard.py::test_roundtrip
 tests/test_whiteboard.py::test_render
 
-504 tests collected in 0.07s
+507 tests collected in 0.07s

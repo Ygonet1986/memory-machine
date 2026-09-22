@@ -125,3 +125,56 @@ test `tests/test_admission_synthetic_v1.py`, proof regenerated, one primary
 run plus the determinism rerun, execution record appended to this document,
 all committed together.
 
+
+## Execution record (2026-09-22)
+
+Pre-run correction, before any committed run: generator v1 mapped scenario-1
+gold to a stale record id (ids are assigned by renumbering after the builders
+run). A dry run detected it; generator v2 resolves gold from the renumbered
+records. No policy, weight, threshold or scenario changed; the defective
+sample hash `9d321d6a...` was discarded and its aggregates are not part of the
+record.
+
+Recorded run: sample hash `f61262d3...`, report at
+`eval/results/admission_synthetic_v1/report.json` (determinism rerun
+identical).
+
+| policy | availability | precision | delivered | mean chars | abstention (S7) |
+|---|---:|---:|---:|---:|---:|
+| P0 top1 | 0.500 | 0.500 | 100 | 80 | 0.000 |
+| P1 margin50 | 0.900 | 0.310 | 290 | 204 | 0.000 |
+| P2 margin90 | 0.600 | 0.429 | 140 | 107 | 0.000 |
+| **P3 multisignal** | **0.700** | **0.500** | 140 | 108 | **1.000** |
+
+Gates: G1 **false** (0.70 < 0.90); G2 **false** (0.50 < 0.70); G3 **true**
+(0.70 > 0.60 and 0.50 > 0.31); G4 **true**; G5 **false**; G6 true;
+`all_pass` **false**.
+
+Findings:
+
+- **Direction confirmed (G3).** P3 beats both references on both axes at once
+  - the result the two-tier closure could not reach with score margins.
+- **Absolute failure is decomposed, and mostly ranking, not admission.**
+  1. `corrected` is 0.00 for every policy: lexical ranking prefers the
+     superseded record (it matches more query tokens); no admission rule can
+     fix a ranking miss. Supersession needs the correction signal family
+     (lifecycle classification) or semantics - admission alone cannot do it.
+  2. `near_duplicate`: the two endpoint records tie at rank 1-2; P2 keeps the
+     pair, P3's declared redundancy penalty (> 0.60 Jaccard) drops the tied
+     correct one, and the entity pattern does not cover API paths, so the tie
+     is unresolvable by declared signals.
+  3. `multi_memory`: the required second record has `gain = 0.469` < the
+     declared 0.50 floor (`rare = 0.487` passes), so P3 keeps only one of the
+     two while P1 keeps both. The gain floor - not redundancy - costs it.
+  4. P3 wins wherever the declared signals apply: recency (`old_vs_recent`,
+     `short_ambiguous` 1.00 vs 0.00 for P2), volume/easy/long/shared perfect,
+     and abstention 1.000 (G4).
+- Declared expectations missed: predicted P3 wins on scenarios 2, 3 and 9
+  (2 lost to the redundancy rule, 3 to ranking, 9 to the gain floor) -
+  recorded as misses.
+
+Stop rules applied: G1/G5 failed, so nothing is promoted and nothing is
+re-fitted. The named gaps (supersession detection, entity coverage for paths,
+gain floor vs multi-memory) plus the standing finding that **admission cannot
+compensate for ranking** define the next pre-registered hypothesis. Synthetic
+results are not evidence of real-world performance.

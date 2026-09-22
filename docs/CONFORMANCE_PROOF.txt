@@ -477,6 +477,9 @@ tests/test_tape_immutability.py::test_status_change_preserves_every_factual_fiel
 tests/test_tape_immutability.py::test_correction_is_a_new_record_and_old_content_is_intact
 tests/test_tape_immutability.py::test_delete_removes_only_the_target_and_preserves_others
 tests/test_tape_immutability.py::test_reload_from_disk_keeps_written_bytes_unchanged
+tests/test_temporal_phrase_v1.py::test_delivery_stage_recorded
+tests/test_temporal_phrase_v1.py::test_recorded_answer_verdicts
+tests/test_temporal_phrase_v1.py::test_temporal_phrase_detector
 tests/test_topics.py::test_create_topic_name_is_timestamp
 tests/test_topics.py::test_create_topic_with_label
 tests/test_topics.py::test_create_topic_unique_ids
@@ -539,4 +542,4 @@ tests/test_whiteboard.py::test_size_and_consolidation_trigger
 tests/test_whiteboard.py::test_roundtrip
 tests/test_whiteboard.py::test_render
 
-540 tests collected in 0.08s
+543 tests collected in 0.08s

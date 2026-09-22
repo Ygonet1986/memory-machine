@@ -421,6 +421,10 @@ tests/test_sessions.py::test_sessions_dir_for
 tests/test_sessions.py::test_list_sessions
 tests/test_sessions.py::test_search_sessions
 tests/test_sessions.py::test_search_sessions_excludes_current
+tests/test_shadow_stop_check.py::test_not_met_reports_missing_criteria
+tests/test_shadow_stop_check.py::test_all_criteria_met_on_full_sample
+tests/test_shadow_stop_check.py::test_duplicates_and_malformed_ratio
+tests/test_shadow_stop_check.py::test_discover_logs_finds_nested_files
 tests/test_tape.py::test_format_and_parse_id
 tests/test_tape.py::test_append_assigns_stable_id
 tests/test_tape.py::test_read_and_range
@@ -499,4 +503,4 @@ tests/test_whiteboard.py::test_size_and_consolidation_trigger
 tests/test_whiteboard.py::test_roundtrip
 tests/test_whiteboard.py::test_render
 
-500 tests collected in 0.07s
+504 tests collected in 0.07s

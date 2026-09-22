@@ -1,0 +1,712 @@
+{
+  "fixture": "eval/fixtures/lifecycle_v1",
+  "gates": {
+    "H2-1_trigger_quality": true,
+    "H2-2_recovery": false,
+    "H2-3_precision": false,
+    "H2-4_combined_recall": true,
+    "H2-5_selective": true,
+    "all_pass": false
+  },
+  "per_probe": [
+    {
+      "coverage": 0.5714,
+      "needed": [],
+      "probe_id": "P01",
+      "t1_zero_overlap": false,
+      "variants": {
+        "T1": {
+          "fired": false,
+          "found": [],
+          "required_available": [
+            "M0003"
+          ],
+          "retro_ids": []
+        },
+        "T2": {
+          "fired": false,
+          "found": [],
+          "required_available": [
+            "M0003"
+          ],
+          "retro_ids": []
+        },
+        "T3": {
+          "fired": false,
+          "found": [],
+          "required_available": [
+            "M0003"
+          ],
+          "retro_ids": []
+        }
+      }
+    },
+    {
+      "coverage": 0.6,
+      "needed": [],
+      "probe_id": "P02",
+      "t1_zero_overlap": false,
+      "variants": {
+        "T1": {
+          "fired": false,
+          "found": [],
+          "required_available": [
+            "M0008"
+          ],
+          "retro_ids": []
+        },
+        "T2": {
+          "fired": false,
+          "found": [],
+          "required_available": [
+            "M0008"
+          ],
+          "retro_ids": []
+        },
+        "T3": {
+          "fired": false,
+          "found": [],
+          "required_available": [
+            "M0008"
+          ],
+          "retro_ids": []
+        }
+      }
+    },
+    {
+      "coverage": 0.5,
+      "needed": [],
+      "probe_id": "P03",
+      "t1_zero_overlap": false,
+      "variants": {
+        "T1": {
+          "fired": false,
+          "found": [],
+          "required_available": [
+            "M0010"
+          ],
+          "retro_ids": []
+        },
+        "T2": {
+          "fired": false,
+          "found": [],
+          "required_available": [
+            "M0010"
+          ],
+          "retro_ids": []
+        },
+        "T3": {
+          "fired": false,
+          "found": [],
+          "required_available": [
+            "M0010"
+          ],
+          "retro_ids": []
+        }
+      }
+    },
+    {
+      "coverage": 0.4,
+      "needed": [],
+      "probe_id": "P04",
+      "t1_zero_overlap": false,
+      "variants": {
+        "T1": {
+          "fired": false,
+          "found": [],
+          "required_available": [
+            "M0011"
+          ],
+          "retro_ids": []
+        },
+        "T2": {
+          "fired": true,
+          "found": [],
+          "required_available": [
+            "M0011"
+          ],
+          "retro_ids": [
+            "M0002"
+          ]
+        },
+        "T3": {
+          "fired": true,
+          "found": [],
+          "required_available": [
+            "M0011"
+          ],
+          "retro_ids": [
+            "M0002"
+          ]
+        }
+      }
+    },
+    {
+      "coverage": 0.25,
+      "needed": [
+        "M0012"
+      ],
+      "probe_id": "P05",
+      "t1_zero_overlap": false,
+      "variants": {
+        "T1": {
+          "fired": false,
+          "found": [],
+          "required_available": [],
+          "retro_ids": []
+        },
+        "T2": {
+          "fired": true,
+          "found": [
+            "M0012"
+          ],
+          "required_available": [
+            "M0012"
+          ],
+          "retro_ids": [
+            "M0012"
+          ]
+        },
+        "T3": {
+          "fired": true,
+          "found": [
+            "M0012"
+          ],
+          "required_available": [
+            "M0012"
+          ],
+          "retro_ids": [
+            "M0012"
+          ]
+        }
+      }
+    },
+    {
+      "coverage": 1.0,
+      "needed": [],
+      "probe_id": "P06",
+      "t1_zero_overlap": false,
+      "variants": {
+        "T1": {
+          "fired": false,
+          "found": [],
+          "required_available": [
+            "M0013"
+          ],
+          "retro_ids": []
+        },
+        "T2": {
+          "fired": false,
+          "found": [],
+          "required_available": [
+            "M0013"
+          ],
+          "retro_ids": []
+        },
+        "T3": {
+          "fired": false,
+          "found": [],
+          "required_available": [
+            "M0013"
+          ],
+          "retro_ids": []
+        }
+      }
+    },
+    {
+      "coverage": 0.2,
+      "needed": [
+        "M0014"
+      ],
+      "probe_id": "P07",
+      "t1_zero_overlap": false,
+      "variants": {
+        "T1": {
+          "fired": false,
+          "found": [],
+          "required_available": [],
+          "retro_ids": []
+        },
+        "T2": {
+          "fired": true,
+          "found": [
+            "M0014"
+          ],
+          "required_available": [
+            "M0014"
+          ],
+          "retro_ids": [
+            "M0014"
+          ]
+        },
+        "T3": {
+          "fired": true,
+          "found": [
+            "M0014"
+          ],
+          "required_available": [
+            "M0014"
+          ],
+          "retro_ids": [
+            "M0014"
+          ]
+        }
+      }
+    },
+    {
+      "coverage": 0.5714,
+      "needed": [],
+      "probe_id": "P08",
+      "t1_zero_overlap": false,
+      "variants": {
+        "T1": {
+          "fired": false,
+          "found": [],
+          "required_available": [
+            "M0006"
+          ],
+          "retro_ids": []
+        },
+        "T2": {
+          "fired": false,
+          "found": [],
+          "required_available": [
+            "M0006"
+          ],
+          "retro_ids": []
+        },
+        "T3": {
+          "fired": false,
+          "found": [],
+          "required_available": [
+            "M0006"
+          ],
+          "retro_ids": []
+        }
+      }
+    },
+    {
+      "coverage": 0.6,
+      "needed": [],
+      "probe_id": "P09",
+      "t1_zero_overlap": false,
+      "variants": {
+        "T1": {
+          "fired": false,
+          "found": [],
+          "required_available": [
+            "M0017"
+          ],
+          "retro_ids": []
+        },
+        "T2": {
+          "fired": false,
+          "found": [],
+          "required_available": [
+            "M0017"
+          ],
+          "retro_ids": []
+        },
+        "T3": {
+          "fired": false,
+          "found": [],
+          "required_available": [
+            "M0017"
+          ],
+          "retro_ids": []
+        }
+      }
+    },
+    {
+      "coverage": 0.6667,
+      "needed": [],
+      "probe_id": "P10",
+      "t1_zero_overlap": false,
+      "variants": {
+        "T1": {
+          "fired": false,
+          "found": [],
+          "required_available": [
+            "M0019"
+          ],
+          "retro_ids": []
+        },
+        "T2": {
+          "fired": false,
+          "found": [],
+          "required_available": [
+            "M0019"
+          ],
+          "retro_ids": []
+        },
+        "T3": {
+          "fired": false,
+          "found": [],
+          "required_available": [
+            "M0019"
+          ],
+          "retro_ids": []
+        }
+      }
+    },
+    {
+      "coverage": 0.5,
+      "needed": [],
+      "probe_id": "P11",
+      "t1_zero_overlap": false,
+      "variants": {
+        "T1": {
+          "fired": false,
+          "found": [],
+          "required_available": [
+            "M0021"
+          ],
+          "retro_ids": []
+        },
+        "T2": {
+          "fired": false,
+          "found": [],
+          "required_available": [
+            "M0021"
+          ],
+          "retro_ids": []
+        },
+        "T3": {
+          "fired": false,
+          "found": [],
+          "required_available": [
+            "M0021"
+          ],
+          "retro_ids": []
+        }
+      }
+    },
+    {
+      "coverage": 0.75,
+      "needed": [],
+      "probe_id": "P12",
+      "t1_zero_overlap": false,
+      "variants": {
+        "T1": {
+          "fired": false,
+          "found": [],
+          "required_available": [
+            "M0022"
+          ],
+          "retro_ids": []
+        },
+        "T2": {
+          "fired": false,
+          "found": [],
+          "required_available": [
+            "M0022"
+          ],
+          "retro_ids": []
+        },
+        "T3": {
+          "fired": false,
+          "found": [],
+          "required_available": [
+            "M0022"
+          ],
+          "retro_ids": []
+        }
+      }
+    },
+    {
+      "coverage": 0.0,
+      "needed": [
+        "M0026"
+      ],
+      "probe_id": "P13",
+      "t1_zero_overlap": true,
+      "variants": {
+        "T1": {
+          "fired": true,
+          "found": [
+            "M0026"
+          ],
+          "required_available": [
+            "M0026"
+          ],
+          "retro_ids": [
+            "M0026"
+          ]
+        },
+        "T2": {
+          "fired": true,
+          "found": [
+            "M0026"
+          ],
+          "required_available": [
+            "M0026"
+          ],
+          "retro_ids": [
+            "M0026"
+          ]
+        },
+        "T3": {
+          "fired": true,
+          "found": [
+            "M0026"
+          ],
+          "required_available": [
+            "M0026"
+          ],
+          "retro_ids": [
+            "M0026"
+          ]
+        }
+      }
+    },
+    {
+      "coverage": 0.75,
+      "needed": [],
+      "probe_id": "P14",
+      "t1_zero_overlap": false,
+      "variants": {
+        "T1": {
+          "fired": false,
+          "found": [],
+          "required_available": [
+            "M0027"
+          ],
+          "retro_ids": []
+        },
+        "T2": {
+          "fired": false,
+          "found": [],
+          "required_available": [
+            "M0027"
+          ],
+          "retro_ids": []
+        },
+        "T3": {
+          "fired": false,
+          "found": [],
+          "required_available": [
+            "M0027"
+          ],
+          "retro_ids": []
+        }
+      }
+    },
+    {
+      "coverage": 0.6667,
+      "needed": [],
+      "probe_id": "P15",
+      "t1_zero_overlap": false,
+      "variants": {
+        "T1": {
+          "fired": false,
+          "found": [],
+          "required_available": [
+            "M0006",
+            "M0030"
+          ],
+          "retro_ids": []
+        },
+        "T2": {
+          "fired": false,
+          "found": [],
+          "required_available": [
+            "M0006",
+            "M0030"
+          ],
+          "retro_ids": []
+        },
+        "T3": {
+          "fired": false,
+          "found": [],
+          "required_available": [
+            "M0006",
+            "M0030"
+          ],
+          "retro_ids": []
+        }
+      }
+    },
+    {
+      "coverage": 0.5,
+      "needed": [],
+      "probe_id": "P16",
+      "t1_zero_overlap": false,
+      "variants": {
+        "T1": {
+          "fired": false,
+          "found": [],
+          "required_available": [
+            "M0031"
+          ],
+          "retro_ids": []
+        },
+        "T2": {
+          "fired": false,
+          "found": [],
+          "required_available": [
+            "M0031"
+          ],
+          "retro_ids": []
+        },
+        "T3": {
+          "fired": false,
+          "found": [],
+          "required_available": [
+            "M0031"
+          ],
+          "retro_ids": []
+        }
+      }
+    },
+    {
+      "coverage": 0.6667,
+      "needed": [],
+      "probe_id": "P17",
+      "t1_zero_overlap": false,
+      "variants": {
+        "T1": {
+          "fired": false,
+          "found": [],
+          "required_available": [
+            "M0013"
+          ],
+          "retro_ids": []
+        },
+        "T2": {
+          "fired": false,
+          "found": [],
+          "required_available": [
+            "M0013"
+          ],
+          "retro_ids": []
+        },
+        "T3": {
+          "fired": false,
+          "found": [],
+          "required_available": [
+            "M0013"
+          ],
+          "retro_ids": []
+        }
+      }
+    },
+    {
+      "coverage": 0.2857,
+      "needed": [],
+      "probe_id": "P18",
+      "t1_zero_overlap": false,
+      "variants": {
+        "T1": {
+          "fired": false,
+          "found": [],
+          "required_available": [
+            "M0003",
+            "M0017"
+          ],
+          "retro_ids": []
+        },
+        "T2": {
+          "fired": true,
+          "found": [],
+          "required_available": [
+            "M0003",
+            "M0017"
+          ],
+          "retro_ids": []
+        },
+        "T3": {
+          "fired": true,
+          "found": [],
+          "required_available": [
+            "M0003",
+            "M0017"
+          ],
+          "retro_ids": []
+        }
+      }
+    },
+    {
+      "coverage": 0.6,
+      "needed": [
+        "M0029"
+      ],
+      "probe_id": "P20",
+      "t1_zero_overlap": false,
+      "variants": {
+        "T1": {
+          "fired": false,
+          "found": [],
+          "required_available": [],
+          "retro_ids": []
+        },
+        "T2": {
+          "fired": false,
+          "found": [],
+          "required_available": [],
+          "retro_ids": []
+        },
+        "T3": {
+          "fired": false,
+          "found": [],
+          "required_available": [],
+          "retro_ids": []
+        }
+      }
+    }
+  ],
+  "probes_needing_fallback": 4,
+  "probes_total": 19,
+  "thresholds": {
+    "coverage": 0.5,
+    "min_token_len": 4,
+    "top_k": 5
+  },
+  "unrecoverable_due_to_ingestion": 1,
+  "variants": {
+    "T1": {
+      "combined_recall_occurrences": 0.8571,
+      "counters": {
+        "fallback_not_triggered": 18,
+        "fallback_triggered": 1,
+        "irrelevant_retroactive_hits": 0,
+        "recoverable_false_negative": 4,
+        "retroactively_found": 1,
+        "retroactively_missed": 3
+      },
+      "fallback_rate": 0.0526,
+      "retroactive_precision_at_k": 1.0,
+      "retroactive_recovery_rate": 0.25,
+      "trigger_quality": 0.25
+    },
+    "T2": {
+      "combined_recall_occurrences": 0.9524,
+      "counters": {
+        "fallback_not_triggered": 14,
+        "fallback_triggered": 5,
+        "irrelevant_retroactive_hits": 1,
+        "recoverable_false_negative": 4,
+        "retroactively_found": 3,
+        "retroactively_missed": 1
+      },
+      "fallback_rate": 0.2632,
+      "retroactive_precision_at_k": 0.75,
+      "retroactive_recovery_rate": 0.75,
+      "trigger_quality": 0.75
+    },
+    "T3": {
+      "combined_recall_occurrences": 0.9524,
+      "counters": {
+        "fallback_not_triggered": 14,
+        "fallback_triggered": 5,
+        "irrelevant_retroactive_hits": 1,
+        "recoverable_false_negative": 4,
+        "retroactively_found": 3,
+        "retroactively_missed": 1
+      },
+      "fallback_rate": 0.2632,
+      "retroactive_precision_at_k": 0.75,
+      "retroactive_recovery_rate": 0.75,
+      "trigger_quality": 0.75
+    }
+  }
+}

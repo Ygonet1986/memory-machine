@@ -223,3 +223,16 @@ references on both axes; the crossing came from a structural rule, not
 thresholds. Synthetic results are not real-world evidence; no promotion.
 Full record: `docs/ADMISSION_SYNTHETIC_CLOSURE.md` and the four
 pre-registrations `docs/ADMISSION_SYNTHETIC_V*_PREREG.md`.
+
+## Causal admission (lab v1-v2 + holdout) - closed 2026-09-22
+
+Relation retrieval finds buried rationales; retrieval alone is not enough
+(the frozen admission's relative floor rejects them); a narrow structural
+slot for `justified_by` evidence (one item, depth 1, provenance mandatory,
+no threshold relief) improved **both** axes together on a one-shot holdout:
+availability 0.645 -> 1.000 and precision 0.833 -> 0.886, 22/22 buried cases
+recovered, controls clean. Lab-only evidence; the candidate stays immutable
+awaiting a future real window. Named abstraction: *operational retrieval
+provenance*. Full record: `docs/ADMISSION_CAUSAL_CLOSURE.md`,
+`docs/ADMISSION_CAUSAL_V2_EXPLORATORY.md`,
+`docs/ADMISSION_CAUSAL_HOLDOUT_PREREG.md`.

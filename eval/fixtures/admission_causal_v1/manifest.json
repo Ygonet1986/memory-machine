@@ -1,0 +1,22 @@
+{
+  "buried_verified": 20,
+  "cases": 40,
+  "cases_per_scenario": 10,
+  "cases_sha256": "cf597ae05fed3fc85e587e00beee56a6fe26f88fa8a5ef1e4b18bb5238bf3f33",
+  "counts_by_scenario": {
+    "causal_absent": 10,
+    "causal_buried": 10,
+    "causal_chain": 10,
+    "factual_control": 10
+  },
+  "generator": "gen_admission_causal_v1.py",
+  "generator_version": 1,
+  "gold_occurrences": 60,
+  "records": 320,
+  "scenarios": [
+    "causal_buried",
+    "factual_control",
+    "causal_absent",
+    "causal_chain"
+  ]
+}

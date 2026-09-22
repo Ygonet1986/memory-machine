@@ -139,6 +139,7 @@ evaluation is a separate, non-required workflow.
 - Closure records: [docs/LIFECYCLE_CLOSURE.md](docs/LIFECYCLE_CLOSURE.md),
   [docs/TWO_TIER_CLOSURE.md](docs/TWO_TIER_CLOSURE.md),
   [docs/ADMISSION_SYNTHETIC_CLOSURE.md](docs/ADMISSION_SYNTHETIC_CLOSURE.md),
+  [docs/ADMISSION_CAUSAL_CLOSURE.md](docs/ADMISSION_CAUSAL_CLOSURE.md),
   [docs/HISTORY_REWRITE_2026-09-22.md](docs/HISTORY_REWRITE_2026-09-22.md).
 
 ## License

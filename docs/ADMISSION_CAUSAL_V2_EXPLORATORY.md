@@ -61,3 +61,33 @@ Harness `eval/admission_causal_v2.py`, outputs
 `eval/results/admission_causal_v2/report.json` and `report.md`,
 `tests/test_admission_causal_v2.py` (determinism, mechanism, provenance,
 absence), proof regenerated, execution record appended, all committed.
+
+## Execution record (2026-09-22, exploratory)
+
+Recorded run; determinism rerun identical. Slot used in 20/20 causal cases
+(10 `causal_buried` + 10 `causal_chain`), 0 elsewhere.
+
+| policy | availability | precision | delivered | max items | undue (absent) |
+|---|---:|---:|---:|---:|---:|
+| B baseline | 0.667 | 0.800 | 50 | 2 | 0.000 |
+| **S relation slot** | **1.000** | **0.857** | 70 | 2 | 0.000 |
+
+Per-scenario availability: `causal_buried` 0.50 -> **1.00**,
+`causal_chain` 0.50 -> **1.00**, `factual_control` 1.00 (both),
+`causal_absent` 1.00 (both). Requirements R1 (factual clean), R2 (absence
+clean, undue 0.000), R3 (budget/cap: max 2 items), R4 (determinism) all
+**true**.
+
+Debugging note (exploratory): the tokenized causal cue missed `why` because
+`why` is a stopword in the product tokenizer, so v1's gated expansion never
+fired on the buried questions (its K-abl still expanded and the recorded
+conclusion - the relative gain floor rejects relation-linked evidence -
+stands; the v1 mechanism test locks it). In v2 the cue is matched on the raw
+lowercased question (`\b(why|reason|led|because|justification|explain)\b`
+plus Portuguese cues), and all 20 causal cases used the slot.
+
+Interpretation (exploratory only): the mechanism works on the fixture where
+it was discovered - **not** independent evidence. The slot adds exactly the
+missing gold item, keeps absence clean (no relations -> no slot) and keeps
+the factual control untouched. Policy and constants are now frozen for the
+holdout round (`docs/ADMISSION_CAUSAL_HOLDOUT_PREREG.md`).

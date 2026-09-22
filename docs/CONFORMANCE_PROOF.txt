@@ -111,6 +111,8 @@ tests/test_delivery_anchors_v1.py::test_case0_anchor_present_in_all_arms
 tests/test_delivery_combined_v1.py::test_eval_a_recorded_values_and_gates
 tests/test_delivery_combined_v1.py::test_non_numeric_w3_context_equals_w1
 tests/test_delivery_combined_v1.py::test_recorded_eval_b_verdicts
+tests/test_diagnostic_trace_v1.py::test_deterministic_stages_recorded
+tests/test_diagnostic_trace_v1.py::test_recorded_answer_stage
 tests/test_dimension_boards.py::test_for_dimension_inherits_subject_and_keeps_own_state
 tests/test_dimension_boards.py::test_boards_survive_roundtrip_and_render_selectively
 tests/test_dimension_boards.py::test_boards_do_not_count_toward_primary_consolidation_size
@@ -531,4 +533,4 @@ tests/test_whiteboard.py::test_size_and_consolidation_trigger
 tests/test_whiteboard.py::test_roundtrip
 tests/test_whiteboard.py::test_render
 
-532 tests collected in 0.08s
+534 tests collected in 0.08s

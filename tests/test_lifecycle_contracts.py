@@ -176,7 +176,7 @@ def test_failure_never_publishes_a_partial_projection(tmp_path, monkeypatch):
     calls = {"n": 0}
     original = lc._classify
 
-    def flaky(record, previous, *, arm="B"):
+    def flaky(record, previous, *, arm="B", window=lc.DEDUP_WINDOW):
         calls["n"] += 1
         if calls["n"] == 2:
             raise RuntimeError("simulated failure")
@@ -187,3 +187,57 @@ def test_failure_never_publishes_a_partial_projection(tmp_path, monkeypatch):
         lc.classify_records([_record(memory_id="M0001"),
                              _record(memory_id="M0002", seq=2)])
     assert not (tmp_path / "lifecycle" / "decisions.jsonl").exists()
+
+
+# ------------------------------------------------- context-aware identity (v1.1)
+
+
+def test_context_is_canonical_for_context_free_rules():
+    typed = lc.classify_record(_record(tape_type="decision"))
+    assert typed.context_hash == lc.canonical_context_hash()
+    secret = lc.classify_record(_record(text="sk-abcdefghijklmnopqrstuvwxyz123456"))
+    assert secret.context_hash == lc.canonical_context_hash()
+
+
+def test_context_participates_in_duplicate_identity_without_false_conflict(tmp_path):
+    target = _record(memory_id="M0042", tape_type="memory",
+                     text="vamos ver como fica amanhã")
+    without = lc.classify_record(target, previous=[])
+    assert without.context_hash != lc.canonical_context_hash()  # window inspected
+
+    predecessor = _record(memory_id="M0041", seq=0, tape_type="memory",
+                          text="vamos ver como fica amanhã")
+    with_dup = lc.classify_record(target, previous=[predecessor])
+    assert with_dup.decisive_reason == "duplicate_exact"
+    assert with_dup.context_hash != without.context_hash
+    assert with_dup.decision_key != without.decision_key
+
+    projection = lc.LifecycleProjection(tmp_path)
+    assert len(projection.append_decisions([without, with_dup])) == 2
+    assert len(projection.load_decisions()) == 2  # no false idempotency conflict
+
+
+def test_seq_window_and_session_change_context_hash():
+    base = _record(memory_id="M0007", tape_type="memory",
+                   text="vamos ver como fica amanhã", seq=5)
+    context = lc.context_hash(base, [])
+    assert lc.context_hash(_record(memory_id="M0007", seq=6,
+                                   tape_type="memory", text=base["text"]), []) != context
+    assert lc.context_hash(base, [], window=4) != context
+    assert lc.context_hash(_record(memory_id="M0007", session="S2",
+                                   tape_type="memory", text=base["text"], seq=5), []) != context
+
+
+def test_non_eligible_predecessors_do_not_change_context():
+    base = _record(memory_id="M0007", tape_type="memory",
+                   text="vamos ver como fica amanhã")
+    eligible = [_record(memory_id="M0005", seq=4, tape_type="memory", text="ok"),
+                _record(memory_id="M0006", seq=5, tape_type="memory", text="beleza")]
+    crowded = [_record(memory_id="M0001", text="")] + eligible  # empty ignored
+    assert lc.context_hash(base, eligible) == lc.context_hash(base, crowded)
+
+    beyond = eligible + [_record(memory_id=f"M{i:04d}", seq=100 + i,
+                                 tape_type="memory", text="ok")
+                         for i in range(20)]
+    windowed = lc.context_hash(base, beyond[-lc.DEDUP_WINDOW:])
+    assert lc.context_hash(base, beyond) == windowed  # only the window matters

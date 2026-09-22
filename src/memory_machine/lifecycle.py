@@ -129,8 +129,13 @@ def normalized_hash(text: str) -> str:
     return _sha256(comparison_form(text))
 
 
-def input_hash(record: dict[str, Any]) -> str:
-    """Hash of the RELEVANT fields only (audit fields never participate)."""
+def canonical_context_hash() -> str:
+    """Context value for rules that do not depend on any predecessor."""
+    return _sha256("context-free")
+
+
+def record_hash(record: dict[str, Any]) -> str:
+    """Hash of the record's RELEVANT fields (audit fields never participate)."""
     payload = {
         "text": normalize_text(record.get("text") or ""),
         "tape_type": str(record.get("tape_type") or ""),
@@ -139,11 +144,52 @@ def input_hash(record: dict[str, Any]) -> str:
     return _sha256(json.dumps(payload, ensure_ascii=False, sort_keys=True))
 
 
+#: Backwards-compatible name used by the frozen decision schema.
+input_hash = record_hash
+
+
+def eligible_predecessors(previous: Sequence[dict[str, Any]],
+                          *, window: int = DEDUP_WINDOW) -> list[dict[str, Any]]:
+    """The predecessors the duplicate rule actually inspects.
+
+    Same session (the caller's history), non-empty text, most recent
+    ``window`` records — future records are never passed in.
+    """
+    non_empty = [prior for prior in previous if normalize_text(prior.get("text") or "")]
+    return non_empty[-int(window):]
+
+
+def context_hash(record: dict[str, Any], eligible: Sequence[dict[str, Any]],
+                 *, window: int = DEDUP_WINDOW) -> str:
+    """Hash of everything the duplicate rule actually looks at.
+
+    Covers ``seq``, the configured window and the ordered fingerprints of the
+    eligible predecessors. Empty and out-of-window entries are ignored here as
+    well, so this function is the single source of truth for the context.
+    """
+    priors = eligible_predecessors(eligible, window=window)
+    payload = {
+        "seq": record.get("seq"),
+        "session": str(record.get("session") or ""),
+        "window": int(window),
+        "predecessors": [
+            [
+                str(prior.get("memory_id") or ""),
+                exact_hash(prior.get("text") or ""),
+                normalized_hash(prior.get("text") or ""),
+            ]
+            for prior in priors
+        ],
+    }
+    return _sha256(json.dumps(payload, ensure_ascii=False, sort_keys=True))
+
+
 def decision_key(*, memory_id: str, input_hash_value: str, arm: str,
-                 policy_version: str = POLICY_VERSION,
+                 context_hash_value: str = "", policy_version: str = POLICY_VERSION,
                  schema_version: str = SCHEMA_VERSION) -> str:
-    return _sha256("|".join(
-        (schema_version, policy_version, arm, memory_id, input_hash_value)))
+    return _sha256("|".join((
+        schema_version, policy_version, arm, memory_id, input_hash_value,
+        context_hash_value or canonical_context_hash())))
 
 
 @dataclass(frozen=True)
@@ -158,6 +204,7 @@ class Decision:
     input_hash: str
     duplicate_of: str | None = None
     duplicate_kind: str | None = None
+    context_hash: str = ""
     schema_version: str = SCHEMA_VERSION
     policy_version: str = POLICY_VERSION
     mode: str = MODE
@@ -166,7 +213,9 @@ class Decision:
     @property
     def decision_key(self) -> str:
         return decision_key(memory_id=self.memory_id, input_hash_value=self.input_hash,
-                            arm=self.arm, policy_version=self.policy_version,
+                            arm=self.arm,
+                            context_hash_value=self.context_hash or canonical_context_hash(),
+                            policy_version=self.policy_version,
                             schema_version=self.schema_version)
 
     def normative(self) -> dict[str, Any]:
@@ -176,6 +225,7 @@ class Decision:
             "policy_version": self.policy_version,
             "memory_id": self.memory_id,
             "input_hash": self.input_hash,
+            "context_hash": self.context_hash or canonical_context_hash(),
             "decision_key": self.decision_key,
             "arm": self.arm,
             "mode": self.mode,
@@ -206,6 +256,7 @@ class Decision:
             input_hash=str(data.get("input_hash") or ""),
             duplicate_of=data.get("duplicate_of"),
             duplicate_kind=data.get("duplicate_kind"),
+            context_hash=str(data.get("context_hash") or ""),
             schema_version=str(data.get("schema_version") or SCHEMA_VERSION),
             policy_version=str(data.get("policy_version") or POLICY_VERSION),
             mode=str(data.get("mode") or MODE),
@@ -219,21 +270,24 @@ class Decision:
 
 
 def _classify(record: dict[str, Any], previous: Sequence[dict[str, Any]],
-              *, arm: str = "B") -> Decision:
+              *, arm: str = "B", window: int = DEDUP_WINDOW) -> Decision:
     text = normalize_text(record.get("text") or "")
     tape_type = str(record.get("tape_type") or "")
     memory_id = str(record.get("memory_id") or "")
-    in_hash = input_hash(record)
+    in_hash = record_hash(record)
+    context = canonical_context_hash()
 
     def make(target_class: str, reason: str, codes: Iterable[str],
              *, duplicate_of: str | None = None,
-             duplicate_kind: str | None = None) -> Decision:
+             duplicate_kind: str | None = None,
+             context: str | None = None) -> Decision:
         return Decision(
             memory_id=memory_id, arm=arm, target_class=target_class,
             promoted=target_class in PROMOTED_CLASSES, decisive_reason=reason,
             reason_codes=tuple(dict.fromkeys(codes)), confidence=CONFIDENCE[reason],
             input_hash=in_hash, duplicate_of=duplicate_of,
             duplicate_kind=duplicate_kind,
+            context_hash=context or canonical_context_hash(),
         )
 
     if not text or PUNCT_ONLY.match(text):
@@ -251,19 +305,24 @@ def _classify(record: dict[str, Any], previous: Sequence[dict[str, Any]],
     if tape_type in _TYPED:
         return make("semantic", "typed_record", ["typed_record", tape_type])
 
+    # The duplicate rule is the first context-dependent level: from here on the
+    # decision identity must cover the window actually inspected.
+    eligible = eligible_predecessors(previous, window=window)
+    context = context_hash(record, previous, window=window)
     current_exact = exact_hash(text)
     current_norm = normalized_hash(text)
-    for prior in reversed(list(previous)[-DEDUP_WINDOW:]):
+    for prior in reversed(eligible):
         prior_text = normalize_text(prior.get("text") or "")
         if not prior_text:
             continue
         if exact_hash(prior_text) == current_exact:
             return make("reject", "duplicate_exact", ["duplicate_exact"],
-                        duplicate_of=str(prior.get("memory_id")), duplicate_kind="exact")
+                        duplicate_of=str(prior.get("memory_id")), duplicate_kind="exact",
+                        context=context)
         if normalized_hash(prior_text) == current_norm:
             return make("reject", "duplicate_normalized", ["duplicate_normalized"],
                         duplicate_of=str(prior.get("memory_id")),
-                        duplicate_kind="normalized")
+                        duplicate_kind="normalized", context=context)
 
     codes: list[str] = []
     if DECISION_MARKERS.search(text):
@@ -274,7 +333,7 @@ def _classify(record: dict[str, Any], previous: Sequence[dict[str, Any]],
         codes.append("restriction")
     if codes:
         decisive = "restriction" if "restriction" in codes else codes[0]
-        return make("semantic", decisive, codes)
+        return make("semantic", decisive, codes, context=context)
 
     codes = []
     if ACTION_MARKERS.search(text):
@@ -284,28 +343,31 @@ def _classify(record: dict[str, Any], previous: Sequence[dict[str, Any]],
     if RESULT_MARKERS.search(text):
         codes.append("experiment_result")
     if codes:
-        return make("episodic", codes[0], codes)
+        return make("episodic", codes[0], codes, context=context)
 
     if GREETING_MARKERS.search(text):
-        return make("event_only", "greeting", ["greeting"])
+        return make("event_only", "greeting", ["greeting"], context=context)
     if ACK_MARKERS.search(text):
-        return make("event_only", "ack", ["ack"])
+        return make("event_only", "ack", ["ack"], context=context)
 
     if AMBIGUOUS_MARKERS.search(text):
         return make("episodic", "ambiguous",
-                    ["ambiguous", "possible_preference", "future_intent"])
+                    ["ambiguous", "possible_preference", "future_intent"],
+                    context=context)
 
-    return make("event_only", "no_durable_signal", ["no_durable_signal"])
+    return make("event_only", "no_durable_signal", ["no_durable_signal"],
+                context=context)
 
 
 def classify_record(record: dict[str, Any], previous: Sequence[dict[str, Any]] = (),
-                    *, arm: str = "B") -> Decision:
+                    *, arm: str = "B", window: int = DEDUP_WINDOW) -> Decision:
     """Public, pure entry point (no I/O; deterministic)."""
-    return _classify(record, previous, arm=arm)
+    return _classify(record, previous, arm=arm, window=window)
 
 
 def classify_records(records: Sequence[dict[str, Any]], *, arm: str = "B",
-                     session_window: bool = True) -> list[Decision]:
+                     session_window: bool = True,
+                     window: int = DEDUP_WINDOW) -> list[Decision]:
     """Classify records in tape order; each record sees only PRIOR records.
 
     The dedup window is sequence-based: the last ``DEDUP_WINDOW`` records of
@@ -316,7 +378,7 @@ def classify_records(records: Sequence[dict[str, Any]], *, arm: str = "B",
     for record in records:
         session = str(record.get("session") or "")
         history = prior_same_session.get(session, []) if session_window else []
-        decisions.append(_classify(record, history, arm=arm))
+        decisions.append(_classify(record, history, arm=arm, window=window))
         prior_same_session.setdefault(session, []).append(record)
     return decisions
 

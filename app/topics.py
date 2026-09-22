@@ -45,8 +45,15 @@ def save_index(base: Path, index: dict[str, Any]) -> None:
 
 
 def list_topics(base: Path) -> list[dict[str, Any]]:
+    """Topics, newest first.
+
+    The id is the tie-breaker: coarse clocks (e.g. Windows) can stamp two
+    topics with the same ``created_at``; sorting on ``(created_at, id)``
+    makes the order deterministic across filesystems and platforms.
+    """
     topics = load_index(base)["topics"]
-    topics.sort(key=lambda t: t.get("created_at", ""), reverse=True)
+    topics.sort(key=lambda t: ((t.get("created_at") or ""), t.get("id", "")),
+                reverse=True)
     return topics
 
 
@@ -138,7 +145,11 @@ def most_recent_topic(base: Path) -> dict[str, Any] | None:
     topics = list_topics(base)
     if not topics:
         return None
-    topics.sort(key=lambda t: t.get("last_active") or t.get("created_at") or "", reverse=True)
+    topics.sort(
+        key=lambda t: ((t.get("last_active") or t.get("created_at") or ""),
+                       t.get("id", "")),
+        reverse=True,
+    )
     return topics[0]
 
 

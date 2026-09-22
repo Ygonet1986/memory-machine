@@ -10,7 +10,7 @@ contagem de testes não frágil; referências declaram individual vs agregado.
 
 **Método (não frágil).** A prova é: **toda a suíte coletada passa, nenhum
 teste esperado desaparece e um piso mínimo evita queda silenciosa.** Nesta
-revisão: `pytest -q` → **467 passed** (440 + 27 novos: correções v1.1, L1 e guardas do mock). O
+revisão: `pytest -q` → **468 passed** (440 + 28 novos: correções v1.1, L1, guardas do mock e ordem de tópicos). O
 manifesto completo de node IDs está em `docs/CONFORMANCE_PROOF.txt` (gerado
 por `python3 -m pytest --collect-only -q` neste commit).
 

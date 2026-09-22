@@ -103,3 +103,41 @@ trigger variant**, plus:
   the retriever and classifier are exonerated by the decomposition.
 - **Fail on noise**: the event log needs candidacy limits (score floor,
   per-session caps) before the repair is usable.
+
+## Execution record (2026-09-22)
+
+Run `eval/results/lifecycle_v1_retroactive_v2/report_v2.json` (fixture
+`e1021c20…`, v1 projection, three variants in one deterministic run).
+
+| variant | trigger quality | fallback rate | recovery | precision@k | combined recall |
+|---|---:|---:|---:|---:|---:|
+| T1 (v1 trigger) | 0.250 | 0.053 | 0.250 | 1.000 | 0.857 |
+| T2 (coverage < 0.50) | 0.750 | 0.263 | 0.750 | 0.750 | 0.952 |
+| T3 (OR, primary) | 0.750 | 0.263 | 0.750 | 0.750 | 0.952 |
+
+**Gates:** H2-1 trigger quality PASS (0.75) · H2-2 recovery **FAIL** (0.75 <
+0.80) · H2-3 precision **FAIL** (0.75 < 0.80) · H2-4 combined recall **PASS**
+(0.952 ≥ 0.93) · H2-5 selective PASS (0.263 ≤ 0.50) ⇒ `all_pass = false`.
+
+**Two remaining failure modes, precisely characterized:**
+
+1. **False-confidence coverage (P20).** The needed record is M0029; the
+   question's content tokens are covered at 0.60 by *wrong* active records that
+   share generic words ("combinado", "sexta", "para"), so T2 stays silent. The
+   plain token-fraction signal cannot separate this case.
+2. **Candidate noise (P04).** An unnecessary trigger delivered one irrelevant
+   retro candidate (M0002), dropping precision@k to 0.75 — with only four
+   delivered candidates, one irrelevant hit is expensive.
+
+**Verdict.** Lifecycle v2 stays **shadow-only** per the stop rules. The
+architecture moved substantially closer: trigger quality 0.25 → 0.75, recovery
+0.25 → 0.75, and the combined availability (active ∪ retroactive) reaches the
+recall floor (0.952 ≥ 0.93) — the "promoted set + retroactive fallback" path is
+now within one signal of the target, but does not pass. The tape, defaults,
+classifier and retriever remain unchanged; no promotion is applied.
+
+**Hypotheses for v3 (require a new pre-registration):** rare-token (IDF)
+weighting for the coverage signal so generic words do not create false
+confidence; a candidacy margin/floor for retroactive candidates (accept only
+candidates scoring ≥ α × best retro score) to bound noise; optionally a
+single-record confidence component.

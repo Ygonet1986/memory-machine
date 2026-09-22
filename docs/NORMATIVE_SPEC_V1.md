@@ -5,9 +5,15 @@ Autor do projeto: Igor Coutrim Lacerda
 
 **Precedência.** Este documento é a referência normativa da arquitetura. O
 manual/whitepaper v1.33 continua sendo a fonte histórica e de uso; onde houver
-conflito, vale esta especificação. Cada item é marcado:
+conflito, vale esta especificação.
 
-- `[IMPL]` — implementado e verificável no código (com o teste/arquivo);
+**Dois estados separados** (correção da auditoria): `[IMPL]` significa
+**implementado no código** — não é alegação de conformidade. A conformidade
+(implementado **e** coberto por teste na suíte) é classificada item a item em
+`docs/CONFORMANCE_MATRIX_V1.md`, com o manifesto de node IDs em
+`docs/CONFORMANCE_PROOF.txt`.
+
+- `[IMPL]` — implementado no código (teste pode ser direto, indireto ou ausente);
 - `[ALVO]` — norma decidida, ainda **não** implementada (lacuna declarada);
 - `[CONFLITO]` — documentação e código divergem; a resolução está indicada.
 
@@ -40,7 +46,8 @@ payload entrega a evidência.** Projeções (views, grafo, documentos, Trilepsia
 |---|---|---|---|
 | **Principal (medido)** | view agents + atenção + payload + views | `[IMPL]` atrás de flags; **não** é o default de fábrica | ver §9 |
 | **Legado** | agentes por grupo cronológico, quadro único | `[IMPL]` e default | `agent_mode="group"`, `whiteboard_mode="single"` |
-| **Experimental** | grafo v3, documento D3–D5, Trilepsia | `[IMPL]` default off; Trilepsia congelada pelo gate | `graph_enabled=false`, `trilepsia_*` off |
+| **Ingestão documental (D3–D5)** | tape chunks + registry + originais + projeção de documento | `[IMPL]` e **default ON** (intencional: creation ON, recall OFF) | `document_graph_enabled=true` |
+| **Experimental (recall)** | grafo v3 (recall), plasticidade, Trilepsia | `[IMPL]` default off; Trilepsia congelada pelo gate | `graph_enabled=false`, `graph_recall_mode="off"`, `plasticity_mode="off"`, `trilepsia_*` off |
 
 `[CONFLITO]` O manual (nota de consolidação v1.0) declara a cadeia de views
 como arquitetura principal, mas o código entrega `agent_mode="group"` como
@@ -50,24 +57,26 @@ fábrica* permanece o legado até que (a) o modo principal seja revalidado no
 harness público e (b) a DX de migração exista. Até então, documentar
 explicitamente "default conservador; modo principal opt-in".
 
-## 2. Invariantes obrigatórios
+## 2. Invariantes obrigatórios (redações restritas)
 
-| # | Invariante | Estado | Verificação |
-|---|---|---|---|
-| N1 | A fita é a única fonte da verdade; nenhum componente responde sozinho | `[IMPL]` | §44 manual; código |
-| N2 | Toda projeção é reconstruível a partir da fita/originais | `[IMPL]` | `graph rebuild`, `views`; `tests/test_document_rebuild.py` |
-| N3 | Nenhuma evidência factual sem caminho até uma memória (e ao original, quando houver) | `[IMPL]` | `graph explain`, `evidence_payload.derived_from` |
-| N4 | Anotação ≠ evidência: o conteúdo factual vem do payload/reidratação, nunca da nota | `[IMPL]` | H2; `payload.py` |
-| N5 | O payload é efêmero: nunca é acumulado no quadro persistente | `[IMP]` | `payload.py`; docstring |
-| N6 | Orçamento de contexto é limite duro (padrão 4000 chars) e filtro protetor | `[IMPL]` | H3; oracle collapse §40.15 |
-| N7 | Varredura de segredos bloqueia **toda** escrita na fita, inclusive envelopes/projeções | `[IMPL]` | `secrets.py`; T1 audit fix d311996 |
-| N8 | Evidência em cartões/spans deve ser substring exata com offsets reversíveis | `[IMPL]` | `evidence_cards.validate_card`; E0 100% |
-| N9 | Atualizar memória = gravar nova memória referenciando a antiga; nunca editar conteúdo | `[IMPL]` | `superseded`; `rehydrate` |
-| N10 | Camadas experimentais ficam **off** por padrão e byte-equivalentes quando off | `[IMPL]` | config; 440 testes |
-| N11 | Experimentos seguem pré-registro congelado; critérios não são re-ajustados após resultados | `[IMPL]` (processo) | docs/*.md (P, E, gate) |
-| N12 | Seleção de evidência em braço real não pode ler gabarito (gold/verdicts) | `[IMPL]` (processo) | guardas E0–E5 |
-| N13 | Payload builder é determinístico, sem chamada LLM | `[IMPL]` | `payload.py` |
-| N14 | Toda alegação publicada cita medição com piso de oscilação ≥7% (ou maior medido) | `[ALVO]` | §11 |
+A coluna **Conf.** referencia a classificação da matriz de conformidade.
+
+| # | Invariante | Impl. | Conf. | Verificação |
+|---|---|---|---|---|
+| N1 | Projeções **selecionam**; toda evidência persistente atribuída à MM é **reidratável até a fita ou o original preservado** | `[IMPL]` | CONFORME | `tests/test_provenance_e2e.py`; `test_graph_hooks.py` |
+| N2 | Toda projeção **implementada** (views, grafo, documentos) é reconstruível; a projeção T2 da Trilepsia não existe (fora de escopo) | `[IMPL]` | CONFORME | `test_migration_compat.py`; `test_document_rebuild.py` |
+| N3 | Nenhuma evidência factual sem caminho até uma memória (e ao original, quando houver) | `[IMPL]` | CONFORME | `test_graph_recall.py`; `test_provenance_e2e.py` |
+| N4 | Anotações são **sinais de seleção**; com `evidence_payload≠off`, fatos atribuídos à memória vêm do **payload reidratado** (nunca só da nota) | `[IMPL]` | CONFORME | `test_payload.py`; `test_main_chatbot.py` |
+| N5 | O payload é efêmero: nunca é acumulado no quadro persistente | `[IMPL]` | CONFORME | `test_payload.py::test_recall_payload_is_not_persisted` |
+| N6 | **No modo `budgeted`**, o payload (cabeçalhos incluídos) não excede o orçamento; `full` não dá essa garantia | `[IMPL]` | CONFORME | `test_payload.py`; `test_provenance_e2e.py` |
+| N7 | Varredura de segredos bloqueia **toda** escrita na fita, inclusive envelopes/projeções | `[IMPL]` | CONFORME | `test_secrets.py`; `test_trilepsia.py` |
+| N8 | Evidência em cartões/spans é substring exata com offsets reversíveis | `[IMPL]` | CONFORME | `tests/test_evidence_cards.py` |
+| N9 | **Imutabilidade de conteúdo**: campos factuais nunca mudam; `status` é metadado administrativo; correção = novo registro | `[IMPL]` | CONFORME | `tests/test_tape_immutability.py` |
+| N10 | **Recall/experimentais off por padrão**; a ingestão documental é camada *shipped* (creation ON, recall OFF) | `[IMPL]` | CONFORME | `test_config.py::test_experimental_defaults_are_off` |
+| N11 | Experimentos seguem pré-registro congelado; critérios não são re-ajustados após resultados | processo | PARCIAL | artefatos em `docs/`; sem CI |
+| N12 | Seleção de evidência em braço real não pode ler gabarito (gold/verdicts) | processo | PARCIAL | guardas E0–E5; sem auditoria de harness |
+| N13 | Payload builder é determinístico, sem chamada LLM | `[IMPL]` | CONFORME | `test_payload.py` |
+| N14 | Toda alegação publicada cita medição com piso de oscilação medido | `[ALVO]` | INTENÇÃO | §10; falta execução em CI |
 
 ## 3. Fluxos normativos
 

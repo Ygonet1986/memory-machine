@@ -60,3 +60,15 @@ def test_graph_config_clamps_and_normalizes():
     assert cfg.graph_confidence_auto == 0.5
     assert cfg.graph_confidence_hypothesis == 0.5
     assert cfg.graph_extract_types == "decision,lesson"
+
+
+def test_experimental_defaults_are_off():
+    """N10: every experimental/recall layer stays off in a clean config."""
+    cfg = Config()
+    assert cfg.evidence_payload == "off"
+    assert cfg.evidence_payload_window is False
+    assert cfg.plasticity_mode == "off"
+    assert cfg.trilepsia_enabled is False
+    assert cfg.trilepsia_recall_mode == "off"
+    assert cfg.router_enabled is False
+    assert cfg.document_graph_enabled is True  # shipped write-time layer, not recall

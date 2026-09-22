@@ -383,6 +383,8 @@ tests/test_mock_guard.py::test_mock_is_marked_and_warns
 tests/test_mock_guard.py::test_env_mock_does_not_replace_direct_live_clients
 tests/test_money_holdout_v1.py::test_w4_rule_is_frozen_by_source_hash
 tests/test_money_holdout_v1.py::test_recorded_holdout_outcome
+tests/test_money_holdout_v2.py::test_fixture_regenerates_and_design_holds
+tests/test_money_holdout_v2.py::test_recorded_verdicts
 tests/test_multi_tapes.py::test_core_two_tapes_grow_agents_independently
 tests/test_multi_tapes.py::test_core_tapes_do_not_leak_between_topics
 tests/test_multi_tapes.py::test_backend_switching_loads_correct_tape
@@ -566,4 +568,4 @@ tests/test_whiteboard.py::test_size_and_consolidation_trigger
 tests/test_whiteboard.py::test_roundtrip
 tests/test_whiteboard.py::test_render
 
-567 tests collected in 0.09s
+569 tests collected in 0.09s

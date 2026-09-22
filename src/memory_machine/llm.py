@@ -74,10 +74,24 @@ class MockLLMClient:
     """Offline LLM double enabled by ``MEMORY_MACHINE_MOCK=1``.
 
     Exists for smoke tests and CI runs without an API key. It never calls the
-    network and must never be used to produce evaluation results.
+    network and must never be used to produce evaluation results. Activation is
+    deliberately loud: the first construction prints a warning to stderr so a
+    mock can never be used silently in a real session or evaluation.
     """
 
     is_mock = True
+    _warned = False
+
+    def __init__(self) -> None:
+        if not MockLLMClient._warned:
+            MockLLMClient._warned = True
+            import sys
+
+            print(
+                "WARNING: MEMORY_MACHINE_MOCK=1 -> using the offline mock LLM. "
+                "Never use this for real sessions or evaluation results.",
+                file=sys.stderr,
+            )
 
     def complete(self, messages: list[dict[str, str]], *, temperature: float = 0.0) -> str:
         return _mock_reply(messages)

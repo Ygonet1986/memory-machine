@@ -10,7 +10,7 @@ contagem de testes não frágil; referências declaram individual vs agregado.
 
 **Método (não frágil).** A prova é: **toda a suíte coletada passa, nenhum
 teste esperado desaparece e um piso mínimo evita queda silenciosa.** Nesta
-revisão: `pytest -q` → **464 passed** (440 + 24 novos: correções v1.1 + L1). O
+revisão: `pytest -q` → **467 passed** (440 + 27 novos: correções v1.1, L1 e guardas do mock). O
 manifesto completo de node IDs está em `docs/CONFORMANCE_PROOF.txt` (gerado
 por `python3 -m pytest --collect-only -q` neste commit).
 
@@ -122,7 +122,13 @@ Default-vs-arquitetura-principal permanece **INTENÇÃO** (gate G1–G8).
 | L7 | Ablações checklist/metacognição | braços V1/V2 com ledger pareado | resultado |
 | L8 | Tagging corrigível | `tag_confidence/version` + retagging | schema + testes |
 | L9 | Rollup semântico | por `schema+scope+validity` | testes |
-| L10 | CI + suíte pública | Actions 3 SOs; **toda a suíte coletada passa; nenhum teste esperado desaparece; piso mínimo anti-queda silenciosa**; wheel artifact; modo `--mock` | workflow + badge |
+| L10 | CI + suíte pública | Actions 3 SOs; **toda a suíte coletada passa; nenhum teste esperado desaparece; piso mínimo anti-queda silenciosa**; wheel artifact; modo `--mock` | **IMPLEMENTADO, verificação pendente**: `.github/workflows/ci.yml` (3 SOs × py3.11/3.14, wheel, suíte, `verify_proof_manifest.py`, `smoke_installed.py`, dry-runs, artifacts) + `.github/workflows/scientific.yml` (schedule/dispatch, concurrency, timeout, `gate_report.py` tri-estado, artifacts); provas locais: suíte 467, smoke PASS, proof check PASS |
+
+## 7b. Guardas do mock (L10)
+
+`MEMORY_MACHINE_MOCK=1` é a única via para o mock, é detectável (`is_mock`) e
+**avisa em stderr na primeira construção** (nunca silencioso); clientes *live*
+construídos diretamente não são afetados. Provas: `tests/test_mock_guard.py` (3).
 
 ## 8. Harness público congelado (faltante)
 

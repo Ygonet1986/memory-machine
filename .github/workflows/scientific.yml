@@ -1,0 +1,67 @@
+name: Scientific evaluation (informational)
+
+# NON-BLOCKING by design: never configure this workflow as a required check.
+# It runs the frozen gate fixture with real providers, records raw artifacts and
+# evaluates G1-G8. Provider/network failures are classified as
+# INCONCLUSIVE_INFRASTRUCTURE, never as a scientific regression.
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"   # weekly, Monday 06:00 UTC
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: scientific-eval
+  cancel-in-progress: false
+
+jobs:
+  gate:
+    name: B2 vs B2+ gate replication (G1-G8)
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Install package + dev deps
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          pip install -e ".[dev]"
+
+      - name: Verify datasets by hash (informational)
+        id: datasets
+        continue-on-error: true
+        run: python scripts/verify_datasets.py
+
+      - name: Run gate replication (frozen fixture, committed corpus)
+        id: gate
+        if: ${{ env.DEEPSEEK_API_KEY != '' }}
+        continue-on-error: true
+        run: |
+          python eval/trilepsia_gate.py \
+            --fixture eval/fixtures/trilepsia_gate_v1 \
+            --out eval/results/trilepsia_gate_v1_ci
+
+      - name: Gate report (G1-G8, tri-state)
+        if: always()
+        run: |
+          python eval/gate_report.py \
+            --run eval/results/trilepsia_gate_v1_ci \
+            --out eval/results/trilepsia_gate_v1_ci
+
+      - name: Upload raw results and manifest
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: scientific-${{ github.run_id }}
+          path: eval/results/trilepsia_gate_v1_ci
+          if-no-files-found: warn
+          retention-days: 90

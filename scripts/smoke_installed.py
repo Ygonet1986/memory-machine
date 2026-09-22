@@ -78,6 +78,19 @@ def main() -> int:
     if "Use Postgres" not in listed:
         raise SystemExit("FAIL: memory did not survive the process restart")
 
+    # Mock determinism: the same question must reproduce the same annotations.
+    again = run([str(cli), "-C", str(memory), "recall",
+                 "which database did we choose?"], env=env)
+    def annotations(blob: str) -> object:
+        import json as _json
+
+        for line in blob.splitlines():
+            if line.startswith("{"):
+                return _json.loads(line).get("annotations")
+        return None
+    if annotations(recalled) != annotations(again):
+        raise SystemExit("FAIL: mock recall is not reproducible")
+
     print("PASS: installed smoke (wheel -> venv -> init -> remember -> "
           "recall(mock) -> restart -> persistence)")
     return 0

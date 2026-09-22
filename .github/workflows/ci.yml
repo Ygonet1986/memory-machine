@@ -43,7 +43,7 @@ jobs:
         run: python -m pytest -q
 
       - name: Anti-disappearance (conformance proof manifest)
-        run: python scripts/verify_proof_manifest.py
+        run: python scripts/verify_proof_manifest.py --strict
 
       - name: Installed smoke (wheel -> clean venv -> CLI)
         run: python scripts/smoke_installed.py

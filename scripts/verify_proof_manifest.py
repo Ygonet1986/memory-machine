@@ -33,6 +33,7 @@ def collected_ids() -> set[str]:
 
 
 def main() -> int:
+    strict = "--strict" in sys.argv
     expected = {
         line.strip() for line in EXPECTED.read_text(encoding="utf-8").splitlines()
         if line.strip().startswith("tests/")
@@ -51,7 +52,13 @@ def main() -> int:
         for node in missing:
             print(f"  - {node}")
         return 1
-    print("PASS: no expected test disappeared")
+    if strict and added:
+        print("FAIL (strict): collected tests are not in the committed manifest.")
+        print("Regenerate docs/CONFORMANCE_PROOF.txt and commit it:")
+        print("  python3 -m pytest --collect-only -q > docs/CONFORMANCE_PROOF.txt")
+        return 1
+    print("PASS: no expected test disappeared"
+          + (" (strict: manifest is exact)" if strict else ""))
     return 0
 
 

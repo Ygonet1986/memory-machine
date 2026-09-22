@@ -1,0 +1,376 @@
+{
+  "all_pass": true,
+  "counts": {
+    "delivery_loss_w1": 3,
+    "delivery_loss_w1_non_dev": 3,
+    "fixed_by_w5": 1,
+    "fixed_by_w5_non_dev": 1,
+    "w3_regressions": 1,
+    "w5_recovers_w3": 1,
+    "w5_regressions": 0
+  },
+  "gates": {
+    "V1_consistent": true,
+    "V2_determinism": true,
+    "V3_w5_no_regression": true,
+    "V4_budget": true
+  },
+  "phrase_cases": 6,
+  "prereg": "docs/TEMPORAL_BREADTH_V1_PREREG.md",
+  "rows": [
+    {
+      "arms": {
+        "W1": {
+          "chars": 3830,
+          "ok": false
+        },
+        "W3": {
+          "chars": 3998,
+          "ok": false
+        },
+        "W5": {
+          "chars": 3998,
+          "ok": false
+        }
+      },
+      "basis": "phrase",
+      "block": "u3a",
+      "case": 14,
+      "delivery_loss_w1": false,
+      "dev": false,
+      "fixed_by_w5": false,
+      "gold": "3 weeks",
+      "ingestion_ok": false,
+      "w3_regression": false,
+      "w5_recovers_w3": false,
+      "w5_regression": false
+    },
+    {
+      "arms": {
+        "W1": {
+          "chars": 3879,
+          "ok": false
+        },
+        "W3": {
+          "chars": 3985,
+          "ok": false
+        },
+        "W5": {
+          "chars": 3985,
+          "ok": false
+        }
+      },
+      "basis": "phrase",
+      "block": "u3a",
+      "case": 17,
+      "delivery_loss_w1": true,
+      "dev": false,
+      "fixed_by_w5": false,
+      "gold": "over a year",
+      "ingestion_ok": true,
+      "w3_regression": false,
+      "w5_recovers_w3": false,
+      "w5_regression": false
+    },
+    {
+      "arms": {
+        "W1": {
+          "chars": 3776,
+          "ok": false
+        },
+        "W3": {
+          "chars": 3997,
+          "ok": false
+        },
+        "W5": {
+          "chars": 3999,
+          "ok": false
+        }
+      },
+      "basis": "phrase",
+      "block": "u3a",
+      "case": 21,
+      "delivery_loss_w1": false,
+      "dev": false,
+      "fixed_by_w5": false,
+      "gold": "10 years",
+      "ingestion_ok": false,
+      "w3_regression": false,
+      "w5_recovers_w3": false,
+      "w5_regression": false
+    },
+    {
+      "arms": {
+        "W1": {
+          "chars": 3842,
+          "ok": true
+        },
+        "W3": {
+          "chars": 3997,
+          "ok": false
+        },
+        "W5": {
+          "chars": 3999,
+          "ok": true
+        }
+      },
+      "basis": "phrase",
+      "block": "u3a",
+      "case": 22,
+      "delivery_loss_w1": false,
+      "dev": true,
+      "fixed_by_w5": false,
+      "gold": "two weeks",
+      "ingestion_ok": true,
+      "w3_regression": true,
+      "w5_recovers_w3": true,
+      "w5_regression": false
+    },
+    {
+      "arms": {
+        "W1": {
+          "chars": 3721,
+          "ok": true
+        },
+        "W3": {
+          "chars": 3721,
+          "ok": true
+        },
+        "W5": {
+          "chars": 3721,
+          "ok": true
+        }
+      },
+      "basis": "atom_fallback",
+      "block": "u3b",
+      "case": 27,
+      "delivery_loss_w1": false,
+      "dev": false,
+      "fixed_by_w5": false,
+      "gold": "the 'Walk for Hunger' charity event",
+      "ingestion_ok": true,
+      "w3_regression": false,
+      "w5_recovers_w3": false,
+      "w5_regression": false
+    },
+    {
+      "arms": {
+        "W1": {
+          "chars": 3922,
+          "ok": true
+        },
+        "W3": {
+          "chars": 3922,
+          "ok": true
+        },
+        "W5": {
+          "chars": 3922,
+          "ok": true
+        }
+      },
+      "basis": "atom_fallback",
+      "block": "u3b",
+      "case": 28,
+      "delivery_loss_w1": false,
+      "dev": false,
+      "fixed_by_w5": false,
+      "gold": "Dark Souls 3 DLC",
+      "ingestion_ok": true,
+      "w3_regression": false,
+      "w5_recovers_w3": false,
+      "w5_regression": false
+    },
+    {
+      "arms": {
+        "W1": {
+          "chars": 3882,
+          "ok": false
+        },
+        "W3": {
+          "chars": 3993,
+          "ok": false
+        },
+        "W5": {
+          "chars": 4000,
+          "ok": false
+        }
+      },
+      "basis": "phrase",
+      "block": "u3b",
+      "case": 30,
+      "delivery_loss_w1": false,
+      "dev": false,
+      "fixed_by_w5": false,
+      "gold": "4 years and 9 months",
+      "ingestion_ok": false,
+      "w3_regression": false,
+      "w5_recovers_w3": false,
+      "w5_regression": false
+    },
+    {
+      "arms": {
+        "W1": {
+          "chars": 3808,
+          "ok": false
+        },
+        "W3": {
+          "chars": 4003,
+          "ok": true
+        },
+        "W5": {
+          "chars": 4000,
+          "ok": true
+        }
+      },
+      "basis": "atom_fallback",
+      "block": "u3b",
+      "case": 31,
+      "delivery_loss_w1": true,
+      "dev": false,
+      "fixed_by_w5": true,
+      "gold": "4",
+      "ingestion_ok": true,
+      "w3_regression": false,
+      "w5_recovers_w3": false,
+      "w5_regression": false
+    },
+    {
+      "arms": {
+        "W1": {
+          "chars": 3994,
+          "ok": true
+        },
+        "W3": {
+          "chars": 3994,
+          "ok": true
+        },
+        "W5": {
+          "chars": 3994,
+          "ok": true
+        }
+      },
+      "basis": "atom_fallback",
+      "block": "u3b",
+      "case": 33,
+      "delivery_loss_w1": false,
+      "dev": false,
+      "fixed_by_w5": false,
+      "gold": "my cousin's wedding",
+      "ingestion_ok": true,
+      "w3_regression": false,
+      "w5_recovers_w3": false,
+      "w5_regression": false
+    },
+    {
+      "arms": {
+        "W1": {
+          "chars": 3876,
+          "ok": true
+        },
+        "W3": {
+          "chars": 4004,
+          "ok": true
+        },
+        "W5": {
+          "chars": 4001,
+          "ok": true
+        }
+      },
+      "basis": "atom_fallback",
+      "block": "u3b",
+      "case": 34,
+      "delivery_loss_w1": false,
+      "dev": false,
+      "fixed_by_w5": false,
+      "gold": "I signed a contract with my first client.",
+      "ingestion_ok": true,
+      "w3_regression": false,
+      "w5_recovers_w3": false,
+      "w5_regression": false
+    },
+    {
+      "arms": {
+        "W1": {
+          "chars": 3894,
+          "ok": false
+        },
+        "W3": {
+          "chars": 3996,
+          "ok": false
+        },
+        "W5": {
+          "chars": 3999,
+          "ok": false
+        }
+      },
+      "basis": "atom_fallback",
+      "block": "u3b",
+      "case": 35,
+      "delivery_loss_w1": false,
+      "dev": false,
+      "fixed_by_w5": false,
+      "gold": "33",
+      "ingestion_ok": false,
+      "w3_regression": false,
+      "w5_recovers_w3": false,
+      "w5_regression": false
+    },
+    {
+      "arms": {
+        "W1": {
+          "chars": 3946,
+          "ok": false
+        },
+        "W3": {
+          "chars": 3999,
+          "ok": false
+        },
+        "W5": {
+          "chars": 3998,
+          "ok": false
+        }
+      },
+      "basis": "phrase",
+      "block": "u3b",
+      "case": 40,
+      "delivery_loss_w1": false,
+      "dev": false,
+      "fixed_by_w5": false,
+      "gold": "12 days ago. 13 days (including the last day) is also acceptable.",
+      "ingestion_ok": false,
+      "w3_regression": false,
+      "w5_recovers_w3": false,
+      "w5_regression": false
+    },
+    {
+      "arms": {
+        "W1": {
+          "chars": 3953,
+          "ok": false
+        },
+        "W3": {
+          "chars": 4004,
+          "ok": false
+        },
+        "W5": {
+          "chars": 4002,
+          "ok": false
+        }
+      },
+      "basis": "atom_fallback",
+      "block": "u3b",
+      "case": 41,
+      "delivery_loss_w1": true,
+      "dev": false,
+      "fixed_by_w5": false,
+      "gold": "The information provided is not enough. You mentioned living in Harajuku but not Shinjuku.",
+      "ingestion_ok": true,
+      "w3_regression": false,
+      "w5_recovers_w3": false,
+      "w5_regression": false
+    }
+  ],
+  "temporal_cases": 13,
+  "verdict": "recurring_class",
+  "w5_source_sha256": "db5021c90c3c060d3c9176755d8860a6f370b10d80a0fb66f2bd8a8fd4976cb6"
+}

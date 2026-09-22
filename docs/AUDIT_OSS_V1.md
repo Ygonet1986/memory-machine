@@ -1,6 +1,6 @@
 # Memory Machine — OSS readiness audit (v1)
 
-Data da auditoria: 2026-09-21 · HEAD auditado: `9d9a235` · Fontes: manual/whitepaper
+Data da auditoria: 2026-09-21 · HEAD auditado: `39b49a1` · Fontes: manual/whitepaper
 v1.33 (documento do autor, lido integralmente), repositório local
 (`/Users/igorcoutrimlacerda/memory-machine`, código e testes inspecionados), e
 pesquisa web de concorrentes (sources listadas na §7). Este documento separa

@@ -92,8 +92,8 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--accept-private-history", action="store_true",
-        help="accepted findings that only matter for public publication "
-             "(private first push); they are reported but do not fail")
+        help="accepted findings are reviewed and approved (canonical "
+             "placeholders); report them but do not fail")
     args = parser.parse_args()
 
     findings: list[str] = []
@@ -114,9 +114,9 @@ def main() -> int:
             seen_text += 1
             for rule in scan_text(content):
                 message = f"secret [{rule}] in blob {sha[:10]} ({path})"
-                if path.startswith("tests/") and any(
-                        fixture in content for fixture in FIXTURE_STRINGS):
-                    accepted.append(f"test fixture: {message}")
+                excerpt = getattr(rule, "excerpt", str(rule))
+                if any(fixture in excerpt for fixture in FIXTURE_STRINGS):
+                    accepted.append(f"canonical placeholder: {message}")
                 else:
                     findings.append(message)
         if size > LARGE_BLOB_BYTES:
@@ -175,7 +175,7 @@ def main() -> int:
         return 1
     if accepted and not args.accept_private_history:
         print(f"PREFLIGHT: {len(accepted)} reviewed finding(s) require a decision "
-              f"(use --accept-private-history for a private first push)")
+              f"(use --accept-private-history once they are reviewed)")
         return 1
     print("PREFLIGHT PASS: clear to publish")
     return 0

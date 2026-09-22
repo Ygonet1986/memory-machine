@@ -1,6 +1,6 @@
 # Memory Machine — Matriz de Conformidade v1.1 (corrigida)
 
-Versão: 1.1 · Data: 2026-09-21 · HEAD: `9d9a235`+correções · Spec: `docs/NORMATIVE_SPEC_V1.md`
+Versão: 1.1 · Data: 2026-09-21 · HEAD: `39b49a1`+correções · Spec: `docs/NORMATIVE_SPEC_V1.md`
 
 **Correções aplicadas nesta revisão** (auditoria documental externa):
 N10 resolvido (document layer é camada de ingestão *shipped*, não experimental);
@@ -122,7 +122,7 @@ Default-vs-arquitetura-principal permanece **INTENÇÃO** (gate G1–G8).
 | L7 | Ablações checklist/metacognição | braços V1/V2 com ledger pareado | resultado |
 | L8 | Tagging corrigível | `tag_confidence/version` + retagging | schema + testes |
 | L9 | Rollup semântico | por `schema+scope+validity` | testes |
-| L10 | CI + suíte pública | Actions 3 SOs; **toda a suíte coletada passa; nenhum teste esperado desaparece; piso mínimo anti-queda silenciosa**; wheel artifact; modo `--mock` | **CONCLUÍDO (com pendência de plano)**: CI verde na matriz real 3 SOs × py3.11/3.14 (run 35712803264, commit 181441d; registro em `docs/CI_RECORD.md`; 1 falha Windows corrigida com teste de regressão); tag anotada `v0.2.0`. **Branch protection pendente**: GitHub Pro ou repo público (403 no plano Free para repo privado). `.github/workflows/ci.yml` (3 SOs × py3.11/3.14, wheel, suíte, `verify_proof_manifest.py`, `smoke_installed.py`, dry-runs, artifacts) + `.github/workflows/scientific.yml` (schedule/dispatch, concurrency, timeout, `gate_report.py` tri-estado, artifacts); provas locais: suíte 467, smoke PASS, proof check PASS |
+| L10 | CI + suíte pública | Actions 3 SOs; **toda a suíte coletada passa; nenhum teste esperado desaparece; piso mínimo anti-queda silenciosa**; wheel artifact; modo `--mock` | **CONCLUÍDO (com pendência de plano)**: CI verde na matriz real 3 SOs × py3.11/3.14 (run 35712803264, commit 26f273f; registro em `docs/CI_RECORD.md`; 1 falha Windows corrigida com teste de regressão); tag anotada `v0.2.0`. **Branch protection pendente**: GitHub Pro ou repo público (403 no plano Free para repo privado). `.github/workflows/ci.yml` (3 SOs × py3.11/3.14, wheel, suíte, `verify_proof_manifest.py`, `smoke_installed.py`, dry-runs, artifacts) + `.github/workflows/scientific.yml` (schedule/dispatch, concurrency, timeout, `gate_report.py` tri-estado, artifacts); provas locais: suíte 467, smoke PASS, proof check PASS |
 
 ## 7b. Guardas do mock (L10)
 

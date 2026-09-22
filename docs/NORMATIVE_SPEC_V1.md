@@ -1,6 +1,6 @@
 # Memory Machine — Especificação Normativa v1
 
-Versão: 1.0 · Data: 2026-09-21 · HEAD de referência: `9d9a235`
+Versão: 1.0 · Data: 2026-09-21 · HEAD de referência: `39b49a1`
 Autor do projeto: Igor Coutrim Lacerda
 
 **Precedência.** Este documento é a referência normativa da arquitetura. O

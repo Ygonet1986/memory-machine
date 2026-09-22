@@ -1,10 +1,10 @@
 # plasticity-v1 — pre-registration (Fase P, P0)
 
-**Status: pre-registration frozen · P0 closed: `7cd3251` + `93708e1` (426
+**Status: pre-registration frozen · P0 closed: `1e764ab` + `f7232d3` (426
 green) · P1 observe EXECUTED (`eval/plasticity_observe.py` + run1; determinism
 proven; empty ledger ⇒ **0/30** changed) · **P2 shadow EXECUTED**
 (`eval/plasticity_shadow.py` + `plasticity_u42_shadow`; §12.5 budgeted-payload
-addendum `9594e92`; leak-guarded population train 0–11 + eval 12–41; negative
+addendum `f551d5d`; leak-guarded population train 0–11 + eval 12–41; negative
 control reproduced P1 byte-identically; A/B replication perfect) — **result:
 net +0 (0/30) ⇒ fails the 0.07–0.08 floor (§12.9), not promoted** · precedent:
 doc-graph-v1 gate (`doc-graph-v1` tag, closed), U4.2 oscillation floor, M0150
@@ -227,7 +227,7 @@ flip), per-case base-vs-plastic paths/energy/evidence/targets/budget table,
 two identical iterations per run for determinism, and a mutation guard that
 aborts (exit 2) if anything under the snapshot or ledger dirs changed.
 
-**Run `plasticity_u42_observe/run1`** (`git_commit 93708e1`, ledger empty,
+**Run `plasticity_u42_observe/run1`** (`git_commit f7232d3`, ledger empty,
 config default depth/top_k/max_paths + `wᵤ=0.5`, `hop_cost=0`):
 
 - cases: 30 (U4.2 u3a 12–26 + u3b 27–41); 24/30 resolve a non-empty search
@@ -249,7 +249,7 @@ cases **0–11** (disjoint from eval 12–41), frozen single version under the r
 (`ledger_frozen/`, deterministic ts mask — timestamps are audit-only), then
 evaluated on U4.2 **12–41**.
 
-**Run `plasticity_u42_shadow`** (`git_commit 9594e92`):
+**Run `plasticity_u42_shadow`** (`git_commit f551d5d`):
 
 - population: 12 train cases, 14 items, 42 paths, **98 edge events → 59 edge
   keys**, 0 leaks, 6 ground-only items skipped (4:M0016, 6:M0036, 7:M0040,
@@ -286,7 +286,7 @@ runs A/B from scratch). Committed after §13 froze the protocol.
 (train 20, eval trained-region 60, eval unexposed 24); `disjoint_train_eval
 true`.
 
-**Run `plasticity_u42_shared`** (`git_commit 23673cc`):
+**Run `plasticity_u42_shared`** (`git_commit c0bc28b`):
 
 - population: 20 train qids, 160 items, 384 paths, **636 edge events → 47 edge
   keys**, 0 leaks, 0 skipped. Global signal tally: **−0.40 × 573, +0.60 × 63**

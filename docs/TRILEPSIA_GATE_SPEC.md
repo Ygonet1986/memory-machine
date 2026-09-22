@@ -6,7 +6,7 @@ COMPOSITION_V1.md) is applied and committed. This document prepares the
 transition authorized by the user (2026-09-16); it executes nothing.
 
 Frozen contract it operationalizes: `docs/TRILEPSIA_V1.md` §8 (T0, commit
-aa8fc7c), ressalva **R1** — the gate must be **B2 vs B2+**, never B1 vs B2,
+33c8075), ressalva **R1** — the gate must be **B2 vs B2+**, never B1 vs B2,
 because the Memory Machine already has the graph (B2 exists without Trilepsia).
 The question the gate answers: *does the Trilepsia add retrievable analytical
 evidence beyond the graph, under a matched budget?* If Δ ≈ 0, the verdict is

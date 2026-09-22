@@ -17,3 +17,19 @@ First packaged release (L1).
   with install/uninstall scripts.
 - Offline mock LLM (`MEMORY_MACHINE_MOCK=1`) for smoke tests and CI; never for
   evaluation.
+
+## [0.2.1] - 2026-09-22
+
+Public-ready snapshot. No functional change to recall.
+
+- **Admission shadow instrumentation (opt-in).** `MEMORY_MACHINE_ADMISSION_SHADOW=1`
+  logs one JSON line per recall with derived admission signals (candidate
+  origin/score/rank, lexical overlap, IDF rare-term coverage, entity/date
+  matches, character costs, counterfactual admission). No question text,
+  summaries or notes; no behavior change. See `docs/ADMISSION_SHADOW_V1.md`.
+- **History rewrite.** The author's early personal notes (`.opencode/memory`)
+  were purged from all history with `git filter-repo`; all tags and cited
+  commit SHAs were rewritten (`docs/HISTORY_REWRITE_2026-09-22.md`).
+- **Preflight.** Canonical placeholder excerpts are now accepted by excerpt
+  rather than by path; re-run over the rewritten history reports 0 critical
+  findings.

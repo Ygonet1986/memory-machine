@@ -1,6 +1,6 @@
 # Graph recall measurement — M-phase results
 
-**Scope.** Measure the frozen Graph Memory Machine v1 (`graph-v1` → `e7319a2`)
+**Scope.** Measure the frozen Graph Memory Machine v1 (`graph-v1` → `f60bb62`)
 as a system: does the structural arm find evidence the traditional recall
 misses, does that evidence improve answers, and at what cost? This document is
 independent from the v1.0 paper: no frozen file (`eval/out`, `eval/archive`,

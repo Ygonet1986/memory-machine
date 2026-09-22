@@ -1,0 +1,35 @@
+{
+  "abstain_cases": 10,
+  "cases": 100,
+  "cases_per_scenario": 10,
+  "cases_sha256": "f61262d3bc3c8999ba41680792db18f17955021a9aa2f08277da87ea4506bb83",
+  "counts_by_scenario": {
+    "corrected": 10,
+    "distractor_volume": 10,
+    "easy_single": 10,
+    "long_specific": 10,
+    "multi_memory": 10,
+    "near_duplicate": 10,
+    "no_answer": 10,
+    "old_vs_recent": 10,
+    "shared_subject": 10,
+    "short_ambiguous": 10
+  },
+  "generator": "gen_admission_synthetic_v1.py",
+  "generator_version": 2,
+  "gold_occurrences": 100,
+  "records": 1020,
+  "scenarios": [
+    "easy_single",
+    "near_duplicate",
+    "corrected",
+    "shared_subject",
+    "short_ambiguous",
+    "long_specific",
+    "no_answer",
+    "old_vs_recent",
+    "multi_memory",
+    "distractor_volume"
+  ],
+  "seed": null
+}

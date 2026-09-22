@@ -48,6 +48,12 @@ def test_shadow_record_is_derived_only_and_private():
                 "evidence": "CONTEUDO SENSIVEL"}]
 
     entry = _record(records=[record], annotations=[annotation], payload=payload)
+    assert entry["v"] == 2
+    assert isinstance(entry["judged_subsample"], bool)
+    assert isinstance(entry["retrieval_ms"], (int, float))
+    assert set(entry["lexical"]) == {"candidates", "delivered", "delivered_chars",
+                                     "empty", "comparator_p1_margin50",
+                                     "comparator_p2_margin90"}
     line = json.dumps(entry, ensure_ascii=False)
     assert "Postgres" not in line
     assert "CONTEUDO SENSIVEL" not in line

@@ -57,3 +57,26 @@ to recall.
 - **Admission shadow privacy.** Log file created with mode `0600`; threat
   model, retention, permissions and planned keyed-HMAC hardening documented
   in `docs/ADMISSION_SHADOW_V1.md`.
+
+## [0.2.3] - 2026-09-22
+
+Admission-shadow-v2 preparation; no functional change to recall.
+
+- **Pre-registration** (`docs/ADMISSION_SHADOW_V2_PREREG.md`): new real-tape
+  window starting from zero, frozen P3v4 candidate tied to commit `44c0124`,
+  coverage-only stopping rule, judged subsample, joint availability+precision
+  gates, window freeze.
+- **`admission_p3v4`** (`src/memory_machine/admission_p3v4.py`): the frozen
+  candidate as shadow-only product code; proven equivalent to the
+  `admission-synthetic-v4` harness on the whole frozen fixture
+  (`tests/test_admission_p3v4.py`).
+- **`admission_shadow` schema v2**: adds the lexical candidate block with
+  P3v4 signals and counterfactual decision, P1/P2 comparators, the
+  judged-subsample flag and `retrieval_ms`. Derived data only; off by
+  default; the actual payload/behavior is untouched.
+- **`scripts/shadow_stop_check_v2.py`**: coverage-only checker for the new
+  window (200 scored recalls / 15 sessions / 21 days / category minima / 40
+  judged / 1% malformed).
+- Collection is **not** activated by this release; it starts only after the
+  preregistration, schema and tests are merged (they are), under the window
+  freeze.

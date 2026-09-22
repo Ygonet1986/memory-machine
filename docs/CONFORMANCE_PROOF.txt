@@ -1,3 +1,5 @@
+tests/test_admission_p3v4.py::test_product_p3v4_equals_frozen_v4_harness_on_the_whole_fixture
+tests/test_admission_p3v4.py::test_p3v4_constants_are_frozen
 tests/test_admission_shadow.py::test_shadow_record_is_derived_only_and_private
 tests/test_admission_shadow.py::test_event_rule_counterfactual_and_ranking
 tests/test_admission_shadow.py::test_shadow_is_off_by_default_and_recall_stays_identical
@@ -434,6 +436,9 @@ tests/test_shadow_stop_check.py::test_not_met_reports_missing_criteria
 tests/test_shadow_stop_check.py::test_all_criteria_met_on_full_sample
 tests/test_shadow_stop_check.py::test_duplicates_and_malformed_ratio
 tests/test_shadow_stop_check.py::test_discover_logs_finds_nested_files
+tests/test_shadow_stop_check_v2.py::test_full_sample_meets_every_criterion
+tests/test_shadow_stop_check_v2.py::test_duplicates_malformed_and_not_met
+tests/test_shadow_stop_check_v2.py::test_discover_finds_nested_logs
 tests/test_tape.py::test_format_and_parse_id
 tests/test_tape.py::test_append_assigns_stable_id
 tests/test_tape.py::test_read_and_range
@@ -512,4 +517,4 @@ tests/test_whiteboard.py::test_size_and_consolidation_trigger
 tests/test_whiteboard.py::test_roundtrip
 tests/test_whiteboard.py::test_render
 
-513 tests collected in 0.08s
+518 tests collected in 0.08s

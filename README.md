@@ -121,6 +121,8 @@ evaluation is a separate, non-required workflow.
 - [docs/DESKTOP_APP.md](docs/DESKTOP_APP.md) — macOS app (install, build).
 - [docs/GRAPH_USAGE.md](docs/GRAPH_USAGE.md) — graph projection usage.
 - [docs/DOC_GRAPH.md](docs/DOC_GRAPH.md) — the operational document graph.
+- [docs/EVIDENCE_RETENTION.md](docs/EVIDENCE_RETENTION.md) — where results and
+  proofs live (releases + repository, never only CI artifacts).
 - Closure records: [docs/LIFECYCLE_CLOSURE.md](docs/LIFECYCLE_CLOSURE.md),
   [docs/TWO_TIER_CLOSURE.md](docs/TWO_TIER_CLOSURE.md),
   [docs/HISTORY_REWRITE_2026-09-22.md](docs/HISTORY_REWRITE_2026-09-22.md).

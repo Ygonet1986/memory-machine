@@ -134,6 +134,8 @@ evaluation is a separate, non-required workflow.
 - [docs/EVIDENCE_PORTFOLIO_IDEAS.md](docs/EVIDENCE_PORTFOLIO_IDEAS.md) —
   recorded proposals (typed evidence portfolio, versioned claims,
   contradictions, planner, receipt); not scheduled.
+- [docs/DUAL_TRACK_PLAN.md](docs/DUAL_TRACK_PLAN.md) — synthetic lab vs real
+  shadow: separation rules and promotion path.
 - Closure records: [docs/LIFECYCLE_CLOSURE.md](docs/LIFECYCLE_CLOSURE.md),
   [docs/TWO_TIER_CLOSURE.md](docs/TWO_TIER_CLOSURE.md),
   [docs/ADMISSION_SYNTHETIC_CLOSURE.md](docs/ADMISSION_SYNTHETIC_CLOSURE.md),

@@ -370,6 +370,8 @@ tests/test_migration_compat.py::test_views_index_is_a_reproducible_projection
 tests/test_mock_guard.py::test_mock_requires_explicit_env
 tests/test_mock_guard.py::test_mock_is_marked_and_warns
 tests/test_mock_guard.py::test_env_mock_does_not_replace_direct_live_clients
+tests/test_money_holdout_v1.py::test_w4_rule_is_frozen_by_source_hash
+tests/test_money_holdout_v1.py::test_recorded_holdout_outcome
 tests/test_multi_tapes.py::test_core_two_tapes_grow_agents_independently
 tests/test_multi_tapes.py::test_core_tapes_do_not_leak_between_topics
 tests/test_multi_tapes.py::test_backend_switching_loads_correct_tape
@@ -537,4 +539,4 @@ tests/test_whiteboard.py::test_size_and_consolidation_trigger
 tests/test_whiteboard.py::test_roundtrip
 tests/test_whiteboard.py::test_render
 
-538 tests collected in 0.08s
+540 tests collected in 0.08s

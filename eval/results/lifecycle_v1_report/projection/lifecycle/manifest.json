@@ -1,0 +1,13 @@
+{
+  "arm": "B",
+  "counts": {
+    "decisions": 32,
+    "promoted": 18,
+    "records": 32
+  },
+  "decisions_sha256": "sha256:0ada29930dd3e56a68b6879291bcc62a677b5ec0798253b8b35a2c2abf5a9238",
+  "mode": "shadow",
+  "policy_version": "lifecycle-v1",
+  "records_sha256": "sha256:c5a4b6d022549fae4f10c332cb60da97e7ff1891204f209a06a4517cf3f5e1c4",
+  "schema_version": "1"
+}

@@ -1,0 +1,7 @@
+{
+  "buried_verified": 12,
+  "cases": 12,
+  "cases_sha256": "e352a6f25391a4b738963bb53f2d2952218b2e92c608c8cfbf8971ab53e3932d",
+  "generator": "gen_snippet_holdout_v1.py",
+  "generator_version": 1
+}

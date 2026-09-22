@@ -73,3 +73,40 @@ extra triggers vs v3, extra recoveries, extra irrelevant deliveries.
 - Extra triggers are expected on probes whose event log holds a strong
   non-promoted match that is **not** required; each such trigger can add an
   irrelevant candidate (precision cost) — the gates bound the acceptable noise.
+
+## Execution record (2026-09-22) — stop rule applied: trigger approach closed
+
+Run `eval/results/lifecycle_v1_retroactive_v4/report_v4.json` (fixture
+`e1021c20…`, v1 projection, one deterministic run).
+
+| variant | trigger quality | fallback rate | recovery | precision@k | combined recall |
+|---|---:|---:|---:|---:|---:|
+| V4-A (v3 reference) | 0.750 | 0.210 | 0.750 | 1.000 | 0.952 |
+| V4-B (primary) | 0.750 | 0.210 | 0.750 | 1.000 | 0.952 |
+| V4-C (comparative only) | 0.750 | 0.158 | 0.750 | 1.000 | 0.952 |
+| v3 B (reference) | 0.750 | 0.210 | 0.750 | 1.000 | 0.952 |
+
+Comparative diagnostics: fired 3 times, **0 extra triggers** vs v3, 0 extra
+recoveries, 0 extra irrelevant deliveries.
+
+**The knife edge.** P20 is still missed: `A* = 2.734`, `E* = 3.395`, ratio
+**1.242 < 1.25** — the frozen comparative factor misses the case by 0.8%. The
+active best belonged to a *wrong* active record that nearly matches the event
+log's required record. Lowering the factor to ≤ 1.24 would fire it, but
+changing a pre-declared threshold after seeing the result is forbidden.
+
+**Stop rule (pre-registered §4.4) applies:** the comparative rule still misses
+a false discard ⇒ **the trigger approach is exhausted** for v1-style signals
+(four designs: zero-overlap, plain coverage, IDF coverage, comparative ratio —
+each failing to catch P20 while holding the other gates). The line closes at
+the trigger approach; `all_pass` is false and lifecycle-v1-v4 remains
+**shadow-only**, with the tape, defaults, classifier and retriever untouched.
+
+**What is settled by the sequence.** Trigger quality 0.25 → 0.75, precision
+0.75 → 1.000, fallback 0.263 → 0.210/0.158, combined availability 0.857 →
+0.952 (above the 0.93 floor) — but the residual case is a genuine
+near-tie between a wrong active match and the event-log match, not a rarity,
+coverage or score-dominance problem. Any further progress requires a different
+mechanism class (e.g., retrieving from the event log unconditionally with a
+bounded candidacy rule — a cost problem, not a coverage problem), which needs
+its own pre-registration and cost instrumentation.

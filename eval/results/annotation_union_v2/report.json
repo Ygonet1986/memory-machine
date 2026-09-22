@@ -1,0 +1,2138 @@
+{
+  "aggregates": {
+    "A": {
+      "mean_coverage": 0.4856,
+      "total_undue_mean_per_case": 0.0444
+    },
+    "U": {
+      "mean_coverage": 0.5394,
+      "total_undue_mean_per_case": 0.0667
+    }
+  },
+  "all_pass": false,
+  "cases": 30,
+  "failures": 0,
+  "gates": {
+    "H2-1_coverage": true,
+    "H2-2_undue": true,
+    "H2-3_u3a17": false,
+    "H2-4_infra": true
+  },
+  "llm_calls": 180,
+  "per_case": [
+    {
+      "block": "u3a",
+      "case": 12,
+      "question": "How much RAM did I upgrade my laptop to?",
+      "required": [
+        "M0040"
+      ],
+      "runs": {
+        "A": [
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0040"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0040"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0040"
+            ],
+            "recovered": [],
+            "undue": []
+          }
+        ],
+        "U": [
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0040"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0040"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0040"
+            ],
+            "recovered": [],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3a",
+      "case": 13,
+      "question": "I'm planning my trip to Speyer again and I wanted to confirm, what's the phone number of the Speyer tourism board that you provided me earlier?",
+      "required": [
+        "M0037"
+      ],
+      "runs": {
+        "A": [
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0037"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0037"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0037"
+            ],
+            "recovered": [],
+            "undue": []
+          }
+        ],
+        "U": [
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0037"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0037"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0037"
+            ],
+            "recovered": [],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3a",
+      "case": 14,
+      "question": "How many weeks passed between the time I sold homemade baked goods at the Farmers' Market for the last time and the time I participated in the Spring Fling Market?",
+      "required": [
+        "M0045",
+        "M0032"
+      ],
+      "runs": {
+        "A": [
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0032",
+              "M0045"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0032",
+              "M0045"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0032",
+              "M0045"
+            ],
+            "recovered": [],
+            "undue": []
+          }
+        ],
+        "U": [
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0032",
+              "M0045"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0032",
+              "M0045"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0032",
+              "M0045"
+            ],
+            "recovered": [],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3a",
+      "case": 15,
+      "question": "How many musical instruments do I currently own?",
+      "required": [
+        "M0036",
+        "M0007",
+        "M0002",
+        "M0009",
+        "M0010"
+      ],
+      "runs": {
+        "A": [
+          {
+            "coverage": 0.8,
+            "ok": true,
+            "output": [
+              "M0002",
+              "M0007",
+              "M0009",
+              "M0036"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.8,
+            "ok": true,
+            "output": [
+              "M0002",
+              "M0007",
+              "M0009",
+              "M0036"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.8,
+            "ok": true,
+            "output": [
+              "M0002",
+              "M0007",
+              "M0009",
+              "M0036"
+            ],
+            "recovered": [],
+            "undue": []
+          }
+        ],
+        "U": [
+          {
+            "coverage": 0.8,
+            "ok": true,
+            "output": [
+              "M0002",
+              "M0007",
+              "M0009",
+              "M0036"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.8,
+            "ok": true,
+            "output": [
+              "M0002",
+              "M0007",
+              "M0009",
+              "M0036"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.8,
+            "ok": true,
+            "output": [
+              "M0002",
+              "M0007",
+              "M0009",
+              "M0036"
+            ],
+            "recovered": [],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3a",
+      "case": 16,
+      "question": "What was my previous stance on spirituality?",
+      "required": [
+        "M0018"
+      ],
+      "runs": {
+        "A": [
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0018"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0018"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0018"
+            ],
+            "recovered": [],
+            "undue": []
+          }
+        ],
+        "U": [
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0018"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0018"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0018"
+            ],
+            "recovered": [],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3a",
+      "case": 17,
+      "question": "How long did I wait for the decision on my asylum application?",
+      "required": [
+        "M0043"
+      ],
+      "runs": {
+        "A": [
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          }
+        ],
+        "U": [
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3a",
+      "case": 18,
+      "question": "What is the total number of siblings I have?",
+      "required": [
+        "M0022",
+        "M0018"
+      ],
+      "runs": {
+        "A": [
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          }
+        ],
+        "U": [
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3a",
+      "case": 19,
+      "question": "What is the total amount I spent on gifts for my coworker and brother?",
+      "required": [
+        "M0031",
+        "M0035"
+      ],
+      "runs": {
+        "A": [
+          {
+            "coverage": 0.5,
+            "ok": true,
+            "output": [
+              "M0031"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.5,
+            "ok": true,
+            "output": [
+              "M0031"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.5,
+            "ok": true,
+            "output": [
+              "M0031"
+            ],
+            "recovered": [],
+            "undue": []
+          }
+        ],
+        "U": [
+          {
+            "coverage": 0.5,
+            "ok": true,
+            "output": [
+              "M0031"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.5,
+            "ok": true,
+            "output": [
+              "M0014",
+              "M0031"
+            ],
+            "recovered": [],
+            "undue": [
+              "M0014"
+            ]
+          },
+          {
+            "coverage": 0.5,
+            "ok": true,
+            "output": [
+              "M0031"
+            ],
+            "recovered": [],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3a",
+      "case": 20,
+      "question": "What type of rice is my favorite?",
+      "required": [
+        "M0033"
+      ],
+      "runs": {
+        "A": [
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          }
+        ],
+        "U": [
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3a",
+      "case": 21,
+      "question": "How many years in total did I spend in formal education from high school to the completion of my Bachelor's degree?",
+      "required": [
+        "M0006",
+        "M0039",
+        "M0026"
+      ],
+      "runs": {
+        "A": [
+          {
+            "coverage": 0.3333,
+            "ok": true,
+            "output": [
+              "M0006"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.3333,
+            "ok": true,
+            "output": [
+              "M0006"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.3333,
+            "ok": true,
+            "output": [
+              "M0006"
+            ],
+            "recovered": [],
+            "undue": []
+          }
+        ],
+        "U": [
+          {
+            "coverage": 0.3333,
+            "ok": true,
+            "output": [
+              "M0006"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.3333,
+            "ok": true,
+            "output": [
+              "M0006"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.3333,
+            "ok": true,
+            "output": [
+              "M0006"
+            ],
+            "recovered": [],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3a",
+      "case": 22,
+      "question": "How long was I in Japan for?",
+      "required": [
+        "M0038"
+      ],
+      "runs": {
+        "A": [
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0038"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0038"
+            ],
+            "recovered": [],
+            "undue": []
+          }
+        ],
+        "U": [
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0038"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0038"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3a",
+      "case": 23,
+      "question": "Which event happened first, my participation in the #PlankChallenge or my post about vegan chili recipe?",
+      "required": [
+        "M0014",
+        "M0022"
+      ],
+      "runs": {
+        "A": [
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0014",
+              "M0022"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0014",
+              "M0022"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0014",
+              "M0022"
+            ],
+            "recovered": [],
+            "undue": []
+          }
+        ],
+        "U": [
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0014",
+              "M0022"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0014",
+              "M0022"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0014",
+              "M0022"
+            ],
+            "recovered": [],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3a",
+      "case": 24,
+      "question": "What is the total amount I spent on the designer handbag and high-end skincare products?",
+      "required": [
+        "M0035",
+        "M0012"
+      ],
+      "runs": {
+        "A": [
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0012",
+              "M0035"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0012",
+              "M0035"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0012",
+              "M0035"
+            ],
+            "recovered": [],
+            "undue": []
+          }
+        ],
+        "U": [
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0012",
+              "M0035"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0012",
+              "M0035"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0012",
+              "M0035"
+            ],
+            "recovered": [],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3a",
+      "case": 25,
+      "question": "How much is the painting of a sunset worth in terms of the amount I paid for it?",
+      "required": [
+        "M0040"
+      ],
+      "runs": {
+        "A": [
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          }
+        ],
+        "U": [
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3a",
+      "case": 26,
+      "question": "How many followers do I have on Instagram now?",
+      "required": [
+        "M0013",
+        "M0040"
+      ],
+      "runs": {
+        "A": [
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.5,
+            "ok": true,
+            "output": [
+              "M0040",
+              "M0042"
+            ],
+            "recovered": [],
+            "undue": [
+              "M0042"
+            ]
+          },
+          {
+            "coverage": 0.5,
+            "ok": true,
+            "output": [
+              "M0040"
+            ],
+            "recovered": [],
+            "undue": []
+          }
+        ],
+        "U": [
+          {
+            "coverage": 0.5,
+            "ok": true,
+            "output": [
+              "M0040",
+              "M0042"
+            ],
+            "recovered": [],
+            "undue": [
+              "M0042"
+            ]
+          },
+          {
+            "coverage": 0.5,
+            "ok": true,
+            "output": [
+              "M0040",
+              "M0042"
+            ],
+            "recovered": [],
+            "undue": [
+              "M0042"
+            ]
+          },
+          {
+            "coverage": 0.5,
+            "ok": true,
+            "output": [
+              "M0040"
+            ],
+            "recovered": [],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3b",
+      "case": 27,
+      "question": "What charity event did I participate in a month ago?",
+      "required": [
+        "M0023",
+        "M0002",
+        "M0029",
+        "M0011"
+      ],
+      "runs": {
+        "A": [
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.25,
+            "ok": true,
+            "output": [
+              "M0002"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          }
+        ],
+        "U": [
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3b",
+      "case": 28,
+      "question": "What game did I finally beat last weekend?",
+      "required": [
+        "M0032"
+      ],
+      "runs": {
+        "A": [
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          }
+        ],
+        "U": [
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3b",
+      "case": 29,
+      "question": "How many times did I ride rollercoasters across all the events I attended from July to October?",
+      "required": [
+        "M0005",
+        "M0043",
+        "M0021",
+        "M0038"
+      ],
+      "runs": {
+        "A": [
+          {
+            "coverage": 0.75,
+            "ok": true,
+            "output": [
+              "M0021",
+              "M0038",
+              "M0043"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.75,
+            "ok": true,
+            "output": [
+              "M0021",
+              "M0038",
+              "M0043"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.75,
+            "ok": true,
+            "output": [
+              "M0021",
+              "M0038",
+              "M0043"
+            ],
+            "recovered": [],
+            "undue": []
+          }
+        ],
+        "U": [
+          {
+            "coverage": 0.75,
+            "ok": true,
+            "output": [
+              "M0021",
+              "M0038",
+              "M0043"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.75,
+            "ok": true,
+            "output": [
+              "M0021",
+              "M0038",
+              "M0043"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.75,
+            "ok": true,
+            "output": [
+              "M0021",
+              "M0038",
+              "M0043"
+            ],
+            "recovered": [],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3b",
+      "case": 30,
+      "question": "How long have I been working before I started my current job at NovaTech?",
+      "required": [
+        "M0024",
+        "M0001"
+      ],
+      "runs": {
+        "A": [
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          }
+        ],
+        "U": [
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3b",
+      "case": 31,
+      "question": "How many charity events did I participate in before the 'Run for the Cure' event?",
+      "required": [
+        "M0013",
+        "M0038",
+        "M0036",
+        "M0034",
+        "M0031",
+        "M0025"
+      ],
+      "runs": {
+        "A": [
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0013",
+              "M0025",
+              "M0031",
+              "M0034",
+              "M0036",
+              "M0038"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0013",
+              "M0025",
+              "M0031",
+              "M0034",
+              "M0036",
+              "M0038"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0013",
+              "M0025",
+              "M0031",
+              "M0034",
+              "M0036",
+              "M0038"
+            ],
+            "recovered": [],
+            "undue": []
+          }
+        ],
+        "U": [
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0013",
+              "M0025",
+              "M0031",
+              "M0034",
+              "M0036",
+              "M0038"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0013",
+              "M0025",
+              "M0031",
+              "M0034",
+              "M0036",
+              "M0038"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0013",
+              "M0025",
+              "M0031",
+              "M0034",
+              "M0036",
+              "M0038"
+            ],
+            "recovered": [],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3b",
+      "case": 32,
+      "question": "Where did I attend my cousin's wedding?",
+      "required": [
+        "M0048"
+      ],
+      "runs": {
+        "A": [
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          }
+        ],
+        "U": [
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3b",
+      "case": 33,
+      "question": "What was the the life event of one of my relatives that I participated in a week ago?",
+      "required": [
+        "M0046",
+        "M0031"
+      ],
+      "runs": {
+        "A": [
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          }
+        ],
+        "U": [
+          {
+            "coverage": 0.5,
+            "ok": true,
+            "output": [
+              "M0031"
+            ],
+            "recovered": [
+              "M0031"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 0.5,
+            "ok": true,
+            "output": [
+              "M0031"
+            ],
+            "recovered": [
+              "M0031"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 0.5,
+            "ok": true,
+            "output": [
+              "M0031"
+            ],
+            "recovered": [
+              "M0031"
+            ],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3b",
+      "case": 34,
+      "question": "What was the significant buisiness milestone I mentioned four weeks ago?",
+      "required": [
+        "M0010",
+        "M0036"
+      ],
+      "runs": {
+        "A": [
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          }
+        ],
+        "U": [
+          {
+            "coverage": 0.5,
+            "ok": true,
+            "output": [
+              "M0010"
+            ],
+            "recovered": [
+              "M0010"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 0.5,
+            "ok": true,
+            "output": [
+              "M0010"
+            ],
+            "recovered": [
+              "M0010"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 0.5,
+            "ok": true,
+            "output": [
+              "M0010"
+            ],
+            "recovered": [
+              "M0010"
+            ],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3b",
+      "case": 35,
+      "question": "How many years will I be when my friend Rachel gets married?",
+      "required": [
+        "M0029",
+        "M0008"
+      ],
+      "runs": {
+        "A": [
+          {
+            "coverage": 0.5,
+            "ok": true,
+            "output": [
+              "M0008"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.5,
+            "ok": true,
+            "output": [
+              "M0008"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.5,
+            "ok": true,
+            "output": [
+              "M0008"
+            ],
+            "recovered": [],
+            "undue": []
+          }
+        ],
+        "U": [
+          {
+            "coverage": 0.5,
+            "ok": true,
+            "output": [
+              "M0008"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.5,
+            "ok": true,
+            "output": [
+              "M0008"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.5,
+            "ok": true,
+            "output": [
+              "M0008"
+            ],
+            "recovered": [],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3b",
+      "case": 36,
+      "question": "How many amateur comedians did I watch perform at the open mic night?",
+      "required": [
+        "M0009"
+      ],
+      "runs": {
+        "A": [
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0009"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0009"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0009"
+            ],
+            "recovered": [],
+            "undue": []
+          }
+        ],
+        "U": [
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0009"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0009"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0009"
+            ],
+            "recovered": [],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3b",
+      "case": 37,
+      "question": "I was looking back at our previous conversation about Caribbean dishes and I was wondering, what was the name of that Jamaican dish you recommended I try with snapper that has fruit in it?",
+      "required": [
+        "M0048"
+      ],
+      "runs": {
+        "A": [
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0048"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0048"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0048"
+            ],
+            "recovered": [],
+            "undue": []
+          }
+        ],
+        "U": [
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0048"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0048"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0048"
+            ],
+            "recovered": [],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3b",
+      "case": 38,
+      "question": "How many kitchen items did I replace or fix?",
+      "required": [
+        "M0011",
+        "M0044",
+        "M0035",
+        "M0030",
+        "M0005"
+      ],
+      "runs": {
+        "A": [
+          {
+            "coverage": 0.6,
+            "ok": true,
+            "output": [
+              "M0005",
+              "M0030",
+              "M0035"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.6,
+            "ok": true,
+            "output": [
+              "M0005",
+              "M0030",
+              "M0035"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.6,
+            "ok": true,
+            "output": [
+              "M0005",
+              "M0030",
+              "M0035"
+            ],
+            "recovered": [],
+            "undue": []
+          }
+        ],
+        "U": [
+          {
+            "coverage": 0.8,
+            "ok": true,
+            "output": [
+              "M0005",
+              "M0030",
+              "M0035",
+              "M0044"
+            ],
+            "recovered": [
+              "M0044"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 0.8,
+            "ok": true,
+            "output": [
+              "M0005",
+              "M0030",
+              "M0035",
+              "M0044"
+            ],
+            "recovered": [
+              "M0044"
+            ],
+            "undue": []
+          },
+          {
+            "coverage": 0.8,
+            "ok": true,
+            "output": [
+              "M0005",
+              "M0030",
+              "M0035",
+              "M0044"
+            ],
+            "recovered": [
+              "M0044"
+            ],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3b",
+      "case": 39,
+      "question": "What breed is my dog?",
+      "required": [
+        "M0027"
+      ],
+      "runs": {
+        "A": [
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          }
+        ],
+        "U": [
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0027"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [],
+            "recovered": [],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3b",
+      "case": 40,
+      "question": "How many days ago did I read the March 15th issue of The New Yorker?",
+      "required": [
+        "M0006"
+      ],
+      "runs": {
+        "A": [
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0006"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0006"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0006"
+            ],
+            "recovered": [],
+            "undue": []
+          }
+        ],
+        "U": [
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0006"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0006"
+            ],
+            "recovered": [],
+            "undue": []
+          },
+          {
+            "coverage": 1.0,
+            "ok": true,
+            "output": [
+              "M0006"
+            ],
+            "recovered": [],
+            "undue": []
+          }
+        ]
+      }
+    },
+    {
+      "block": "u3b",
+      "case": 41,
+      "question": "How long have I been living in my current apartment in Shinjuku?",
+      "required": [
+        "M0010",
+        "M0033"
+      ],
+      "runs": {
+        "A": [
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [
+              "M0039"
+            ],
+            "recovered": [],
+            "undue": [
+              "M0039"
+            ]
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [
+              "M0039"
+            ],
+            "recovered": [],
+            "undue": [
+              "M0039"
+            ]
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [
+              "M0039"
+            ],
+            "recovered": [],
+            "undue": [
+              "M0039"
+            ]
+          }
+        ],
+        "U": [
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [
+              "M0039"
+            ],
+            "recovered": [],
+            "undue": [
+              "M0039"
+            ]
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [
+              "M0039"
+            ],
+            "recovered": [],
+            "undue": [
+              "M0039"
+            ]
+          },
+          {
+            "coverage": 0.0,
+            "ok": true,
+            "output": [
+              "M0039"
+            ],
+            "recovered": [],
+            "undue": [
+              "M0039"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "prereg": "docs/ANNOTATION_UNION_V2_PREREG.md",
+  "recovered_required_runs": 9,
+  "runs": 3,
+  "u3a17": {
+    "m0043_hits": 0,
+    "runs": [
+      {
+        "coverage": 0.0,
+        "ok": true,
+        "output": [],
+        "recovered": [],
+        "undue": []
+      },
+      {
+        "coverage": 0.0,
+        "ok": true,
+        "output": [],
+        "recovered": [],
+        "undue": []
+      },
+      {
+        "coverage": 0.0,
+        "ok": true,
+        "output": [],
+        "recovered": [],
+        "undue": []
+      }
+    ]
+  }
+}

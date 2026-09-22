@@ -1,0 +1,11 @@
+{
+  "cases": 12,
+  "cases_sha256": "1cfac6e7aeb6e2c83fc16bc979b4c09074cb2babef07d706ec03f86874930e53",
+  "generator": "gen_money_holdout_v1.py",
+  "generator_version": 1,
+  "positions": {
+    "early": 4,
+    "late": 4,
+    "middle": 4
+  }
+}

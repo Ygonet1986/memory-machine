@@ -380,6 +380,23 @@ LongMemEval-100 with chunked retrieval, manual Part IV), though at a different
 granularity and not part of this e2e comparison; (ii) the arm was run once on
 the frozen 50-question sample.
 
+### 5.8 The memory lifecycle: admissions and retroactive recovery (shadow only)
+
+A separate shadow study asked whether a classification layer over the tape can
+shrink the consultable set without losing recoverable facts, and whether a
+coverage-triggered re-search of the event log can recover the rest. On the
+frozen fixture (32 records, 20 probes, 17 required): admissions reduce the
+consultable set by 46.9% while promotion precision rises from 0.531 to 0.765;
+the event-log BM25 retriever finds every recoverable false discard at rank 1
+(4/4); four pre-registered trigger designs (zero-overlap, plain coverage, IDF
+coverage, event-vs-active score ratio) raise trigger quality 0.25 → 0.75 with
+final precision@k 1.000 and combined availability 0.952 (floor 0.93), but the
+last case is a genuine near-tie (A*=2.734 vs E*=3.395, ratio 1.242 against the
+frozen 1.25 factor) and the line closed by its pre-declared stop rule. Nothing
+was promoted; the tape, classifier and retrieval path were untouched. Full
+record: `LIFECYCLE_CLOSURE.md`; pre-registrations with execution records:
+`LIFECYCLE_V1_PREREG.md` … `LIFECYCLE_V4_PREREG.md`.
+
 ---
 
 ## 6. Discussion

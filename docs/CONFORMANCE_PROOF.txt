@@ -374,6 +374,8 @@ tests/test_multi_tapes.py::test_core_two_tapes_grow_agents_independently
 tests/test_multi_tapes.py::test_core_tapes_do_not_leak_between_topics
 tests/test_multi_tapes.py::test_backend_switching_loads_correct_tape
 tests/test_multi_tapes.py::test_backend_new_topic_starts_empty
+tests/test_numeral_inclusion_v1.py::test_delivery_stage_recorded
+tests/test_numeral_inclusion_v1.py::test_recorded_answer_verdicts
 tests/test_payload.py::test_payload_respects_budget_and_relevance
 tests/test_payload.py::test_payload_preserves_summary_and_cuts_why
 tests/test_payload.py::test_payload_rehydrates_rollup_sources
@@ -535,4 +537,4 @@ tests/test_whiteboard.py::test_size_and_consolidation_trigger
 tests/test_whiteboard.py::test_roundtrip
 tests/test_whiteboard.py::test_render
 
-536 tests collected in 0.08s
+538 tests collected in 0.08s

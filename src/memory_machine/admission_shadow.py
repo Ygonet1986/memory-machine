@@ -22,10 +22,12 @@ import math
 import os
 import re
 import sys
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable
 
+from . import admission_p3v4
 from .retrieval import tokenize
 
 ENV_FLAG = "MEMORY_MACHINE_ADMISSION_SHADOW"
@@ -128,6 +130,42 @@ def _candidate_entry(*, origin: str, record: Any, memory_id: str, rank: int,
     }
 
 
+def _asked_subsample(question_hash: str) -> bool:
+    digest = hashlib.sha256(question_hash.encode("utf-8")).hexdigest()
+    return int(digest, 16) % 5 == 0
+
+
+def _lexical_entry(question: str, candidate: admission_p3v4.Candidate) -> dict[str, Any]:
+    return {
+        "memory_id": candidate.memory_id,
+        "rank": candidate.rank,
+        "score": round(float(candidate.score), 4),
+        "type": candidate.type,
+        "lexical_overlap": _lexical_overlap(tokenize(question),
+                                            tokenize(candidate.text)),
+        "rare_term_coverage": round(float(candidate.rare), 4),
+        "entity_matches": sorted(set(admission_p3v4.ENTITY_RE.findall(question))
+                                 & set(admission_p3v4.ENTITY_RE.findall(candidate.text))),
+        "date_matches": _matches(_DATE_RE, question, candidate.text),
+        "correction": bool(candidate.correction),
+        "temporal": bool(candidate.temporal),
+        "type_fit": float(candidate.type_fit),
+        "gain": round(float(candidate.gain), 4),
+        "removed_superseded": bool(candidate.removed_superseded),
+        "slot": int(candidate.slot),
+        "would_deliver_p3v4": bool(candidate.delivered),
+        "chars_if_admitted": int(candidate.chars),
+    }
+
+
+def _margin_ids(candidates: list[admission_p3v4.Candidate],
+                fraction: float) -> list[str]:
+    if not candidates:
+        return []
+    best = candidates[0].score
+    return [c.memory_id for c in candidates if c.score >= fraction * best]
+
+
 def build_record(*, question: str, session_id: str,
                  annotations: Iterable[Any], records: Iterable[Any],
                  payload: list[dict[str, Any]] | None,
@@ -159,6 +197,13 @@ def build_record(*, question: str, session_id: str,
             doc_text=_candidate_text(record), idf=idf, chars=chars,
             in_payload=in_payload, counterfactual=in_payload))
 
+    active_records = [record for record in record_list
+                      if getattr(record, "status", "active") == "active"]
+    started = time.perf_counter()
+    lexical = admission_p3v4.build_candidates(question, active_records)
+    admission_p3v4.decide(question, lexical, active_records)
+    retrieval_ms = (time.perf_counter() - started) * 1000.0
+
     hits = list(event_hits or [])
     best_hit = max((float(hit.get("score") or 0.0) for hit in hits), default=0.0)
     event_log: list[dict[str, Any]] = []
@@ -175,23 +220,38 @@ def build_record(*, question: str, session_id: str,
         entry["source_session"] = str(hit.get("session_id") or "")
         event_log.append(entry)
 
+    question_hash = hashlib.sha256(question.encode("utf-8")).hexdigest()[:16]
+    lexical_ids = admission_p3v4.delivered_ids(lexical)
     return {
-        "v": 1,
+        "v": 2,
         "ts": ts or datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "session_id": session_id,
         "cached": bool(cached),
         "policy": ("active=in-payload; "
-                   f"event_log=rank1-and-score>={EVENT_RULE_MARGIN:.2f}xbest"),
+                   f"event_log=rank1-and-score>={EVENT_RULE_MARGIN:.2f}xbest; "
+                   "lexical=P3v4-shadow"),
         "question": {
-            "sha256": hashlib.sha256(question.encode("utf-8")).hexdigest()[:16],
+            "sha256": question_hash,
             "chars": len(question),
             "tokens": len(question_tokens),
         },
         "corpus_records": len(record_list),
         "payload_items": len(payload_items),
         "payload_chars": sum(int(item.get("used_chars") or 0) for item in payload_items),
+        "judged_subsample": _asked_subsample(question_hash),
+        "retrieval_ms": round(retrieval_ms, 3),
         "active": active,
         "event_log": event_log,
+        "lexical": {
+            "candidates": [_lexical_entry(question, candidate)
+                           for candidate in lexical],
+            "delivered": lexical_ids,
+            "delivered_chars": sum(candidate.chars for candidate in lexical
+                                   if candidate.delivered),
+            "empty": not lexical_ids,
+            "comparator_p1_margin50": _margin_ids(lexical, 0.50),
+            "comparator_p2_margin90": _margin_ids(lexical, 0.90),
+        },
     }
 
 

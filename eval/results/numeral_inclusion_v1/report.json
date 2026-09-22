@@ -1,0 +1,168 @@
+{
+  "all_pass": true,
+  "answer": {
+    "cases": [
+      {
+        "arms": {
+          "W3": [
+            "incorrect",
+            "partial",
+            "incorrect"
+          ],
+          "W4": [
+            "correct",
+            "correct",
+            "incorrect"
+          ]
+        },
+        "block": "u3a",
+        "case": 19,
+        "gold": "$200",
+        "question": "What is the total amount I spent on gifts for my coworker and brother?"
+      },
+      {
+        "arms": {
+          "W3": [
+            "incorrect",
+            "incorrect",
+            "incorrect"
+          ],
+          "W4": [
+            "incorrect",
+            "incorrect",
+            "incorrect"
+          ]
+        },
+        "block": "u3a",
+        "case": 22,
+        "gold": "two weeks",
+        "question": "How long was I in Japan for?"
+      }
+    ],
+    "failures": 0,
+    "llm_calls": 24,
+    "runs": 3
+  },
+  "gates": {
+    "N1_fixes_u3a19": true,
+    "N2_no_new_regressions": true,
+    "N3_answers": true,
+    "N4_determinism": true,
+    "N5_infra": true
+  },
+  "prereg": "docs/NUMERAL_INCLUSION_V1_PREREG.md",
+  "rows": [
+    {
+      "arm": "W3",
+      "basis": "phrase",
+      "block": "u3a",
+      "case": 12,
+      "chars": 3998,
+      "gold": "16GB",
+      "gold_phrases": [
+        "16gb"
+      ],
+      "missing": [],
+      "ok": true,
+      "question": "How much RAM did I upgrade my laptop to?"
+    },
+    {
+      "arm": "W4",
+      "basis": "phrase",
+      "block": "u3a",
+      "case": 12,
+      "chars": 4000,
+      "gold": "16GB",
+      "gold_phrases": [
+        "16gb"
+      ],
+      "missing": [],
+      "ok": true,
+      "question": "How much RAM did I upgrade my laptop to?"
+    },
+    {
+      "arm": "W3",
+      "basis": "phrase",
+      "block": "u3a",
+      "case": 19,
+      "chars": 3990,
+      "gold": "$200",
+      "gold_phrases": [
+        "200$"
+      ],
+      "missing": [
+        "200$"
+      ],
+      "ok": false,
+      "question": "What is the total amount I spent on gifts for my coworker and brother?"
+    },
+    {
+      "arm": "W4",
+      "basis": "phrase",
+      "block": "u3a",
+      "case": 19,
+      "chars": 3987,
+      "gold": "$200",
+      "gold_phrases": [
+        "200$"
+      ],
+      "missing": [],
+      "ok": true,
+      "question": "What is the total amount I spent on gifts for my coworker and brother?"
+    },
+    {
+      "arm": "W3",
+      "basis": "phrase",
+      "block": "u3a",
+      "case": 22,
+      "chars": 3997,
+      "gold": "two weeks",
+      "gold_phrases": [
+        "2week"
+      ],
+      "missing": [
+        "2week"
+      ],
+      "ok": false,
+      "question": "How long was I in Japan for?"
+    },
+    {
+      "arm": "W4",
+      "basis": "phrase",
+      "block": "u3a",
+      "case": 22,
+      "chars": 3998,
+      "gold": "two weeks",
+      "gold_phrases": [
+        "2week"
+      ],
+      "missing": [
+        "2week"
+      ],
+      "ok": false,
+      "question": "How long was I in Japan for?"
+    },
+    {
+      "arm": "W3",
+      "basis": "atom_fallback",
+      "block": "u3b",
+      "case": 27,
+      "chars": 3721,
+      "gold": "the 'Walk for Hunger' charity event",
+      "missing": [],
+      "ok": true,
+      "question": "What charity event did I participate in a month ago?"
+    },
+    {
+      "arm": "W4",
+      "basis": "atom_fallback",
+      "block": "u3b",
+      "case": 27,
+      "chars": 3721,
+      "gold": "the 'Walk for Hunger' charity event",
+      "missing": [],
+      "ok": true,
+      "question": "What charity event did I participate in a month ago?"
+    }
+  ]
+}

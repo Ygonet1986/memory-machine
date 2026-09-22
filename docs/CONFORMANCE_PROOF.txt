@@ -385,6 +385,8 @@ tests/test_payload.py::test_fact_window_selects_mid_text
 tests/test_payload.py::test_payload_window_off_is_unchanged
 tests/test_payload.py::test_payload_window_reveals_mid_fact_within_budget
 tests/test_payload.py::test_config_payload_window_defaults_off
+tests/test_phrase_delivery_v1.py::test_phrase_metric_recorded_verdicts
+tests/test_phrase_delivery_v1.py::test_phrase_helpers
 tests/test_provenance_e2e.py::test_every_graph_row_points_back_to_tape_and_original
 tests/test_provenance_e2e.py::test_rehydrated_payload_is_exact_and_traceable
 tests/test_retrieval.py::test_tokenize_filters_stopwords_and_short
@@ -533,4 +535,4 @@ tests/test_whiteboard.py::test_size_and_consolidation_trigger
 tests/test_whiteboard.py::test_roundtrip
 tests/test_whiteboard.py::test_render
 
-534 tests collected in 0.08s
+536 tests collected in 0.08s

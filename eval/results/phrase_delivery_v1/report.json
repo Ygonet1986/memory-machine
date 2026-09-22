@@ -1,0 +1,252 @@
+{
+  "all_pass": true,
+  "gates": {
+    "P1_detects_u3a22": true,
+    "P2_controls": true,
+    "P3_locates_u3a19": true,
+    "P4_hashes": true,
+    "P5_determinism": true
+  },
+  "prereg": "docs/PHRASE_DELIVERY_V1_PREREG.md",
+  "rows": [
+    {
+      "answer_verdicts": [
+        "correct",
+        "correct",
+        "correct"
+      ],
+      "arm": "W0",
+      "basis": "phrase",
+      "block": "u3a",
+      "case": 12,
+      "context_sha256": "92d35e961aadae5617e7d39dd78fe727839d0a6aa4445bef91dd6e16602a2123",
+      "gold": "16GB",
+      "gold_phrases": [
+        "16gb"
+      ],
+      "missing": [],
+      "ok": true,
+      "question": "How much RAM did I upgrade my laptop to?",
+      "trace_context_sha256": "92d35e961aadae5617e7d39dd78fe727839d0a6aa4445bef91dd6e16602a2123"
+    },
+    {
+      "answer_verdicts": [
+        "correct",
+        "correct",
+        "correct"
+      ],
+      "arm": "W1",
+      "basis": "phrase",
+      "block": "u3a",
+      "case": 12,
+      "context_sha256": "2597e30c07cd9d03be54b6db97138d4349b812f6d113799384d8fb146627373b",
+      "gold": "16GB",
+      "gold_phrases": [
+        "16gb"
+      ],
+      "missing": [],
+      "ok": true,
+      "question": "How much RAM did I upgrade my laptop to?",
+      "trace_context_sha256": "2597e30c07cd9d03be54b6db97138d4349b812f6d113799384d8fb146627373b"
+    },
+    {
+      "answer_verdicts": [
+        "correct",
+        "correct",
+        "correct"
+      ],
+      "arm": "W3",
+      "basis": "phrase",
+      "block": "u3a",
+      "case": 12,
+      "context_sha256": "211f624605c95c918abfc2fd7954ea23b79fe46b637edbbfb0c50a524057b0f8",
+      "gold": "16GB",
+      "gold_phrases": [
+        "16gb"
+      ],
+      "missing": [],
+      "ok": true,
+      "question": "How much RAM did I upgrade my laptop to?",
+      "trace_context_sha256": "211f624605c95c918abfc2fd7954ea23b79fe46b637edbbfb0c50a524057b0f8"
+    },
+    {
+      "answer_verdicts": [
+        "incorrect",
+        "partial",
+        "incorrect"
+      ],
+      "arm": "W0",
+      "basis": "phrase",
+      "block": "u3a",
+      "case": 19,
+      "context_sha256": "597ff33656199313f33fee09251b0eaa581a3b9fb2807c6d67f8bd0e3992c05e",
+      "gold": "$200",
+      "gold_phrases": [
+        "200$"
+      ],
+      "missing": [
+        "200$"
+      ],
+      "ok": false,
+      "question": "What is the total amount I spent on gifts for my coworker and brother?",
+      "trace_context_sha256": "597ff33656199313f33fee09251b0eaa581a3b9fb2807c6d67f8bd0e3992c05e"
+    },
+    {
+      "answer_verdicts": [
+        "incorrect",
+        "incorrect",
+        "incorrect"
+      ],
+      "arm": "W1",
+      "basis": "phrase",
+      "block": "u3a",
+      "case": 19,
+      "context_sha256": "1da46bd35b5f2c4b4de29c50361da1023078500a2ba090262f1dbf7ab2ce73f6",
+      "gold": "$200",
+      "gold_phrases": [
+        "200$"
+      ],
+      "missing": [
+        "200$"
+      ],
+      "ok": false,
+      "question": "What is the total amount I spent on gifts for my coworker and brother?",
+      "trace_context_sha256": "1da46bd35b5f2c4b4de29c50361da1023078500a2ba090262f1dbf7ab2ce73f6"
+    },
+    {
+      "answer_verdicts": [
+        "incorrect",
+        "incorrect",
+        "partial"
+      ],
+      "arm": "W3",
+      "basis": "phrase",
+      "block": "u3a",
+      "case": 19,
+      "context_sha256": "d06123951c19b5d7e103c48d4ee770c158b07677387c2f9e9dc473ecb095d20a",
+      "gold": "$200",
+      "gold_phrases": [
+        "200$"
+      ],
+      "missing": [
+        "200$"
+      ],
+      "ok": false,
+      "question": "What is the total amount I spent on gifts for my coworker and brother?",
+      "trace_context_sha256": "d06123951c19b5d7e103c48d4ee770c158b07677387c2f9e9dc473ecb095d20a"
+    },
+    {
+      "answer_verdicts": [
+        "correct",
+        "correct",
+        "correct"
+      ],
+      "arm": "W0",
+      "basis": "phrase",
+      "block": "u3a",
+      "case": 22,
+      "context_sha256": "8b618bb504be286c8f0cbb59055e5595d273ff9a30fa964314d3e0836c17d2a0",
+      "gold": "two weeks",
+      "gold_phrases": [
+        "2week"
+      ],
+      "missing": [],
+      "ok": true,
+      "question": "How long was I in Japan for?",
+      "trace_context_sha256": "8b618bb504be286c8f0cbb59055e5595d273ff9a30fa964314d3e0836c17d2a0"
+    },
+    {
+      "answer_verdicts": [
+        "correct",
+        "correct",
+        "correct"
+      ],
+      "arm": "W1",
+      "basis": "phrase",
+      "block": "u3a",
+      "case": 22,
+      "context_sha256": "2584f688b793f0deca561fcf06c0351bdafe189ea52c92d9205450516655ac2e",
+      "gold": "two weeks",
+      "gold_phrases": [
+        "2week"
+      ],
+      "missing": [],
+      "ok": true,
+      "question": "How long was I in Japan for?",
+      "trace_context_sha256": "2584f688b793f0deca561fcf06c0351bdafe189ea52c92d9205450516655ac2e"
+    },
+    {
+      "answer_verdicts": [
+        "incorrect",
+        "incorrect",
+        "incorrect"
+      ],
+      "arm": "W3",
+      "basis": "phrase",
+      "block": "u3a",
+      "case": 22,
+      "context_sha256": "4589287be8b39efda513352e9f8b53946e5fad5c0f941851cf8f5ec184723be0",
+      "gold": "two weeks",
+      "gold_phrases": [
+        "2week"
+      ],
+      "missing": [
+        "2week"
+      ],
+      "ok": false,
+      "question": "How long was I in Japan for?",
+      "trace_context_sha256": "4589287be8b39efda513352e9f8b53946e5fad5c0f941851cf8f5ec184723be0"
+    },
+    {
+      "answer_verdicts": [
+        "partial",
+        "correct",
+        "correct"
+      ],
+      "arm": "W0",
+      "basis": "atom_fallback",
+      "block": "u3b",
+      "case": 27,
+      "context_sha256": "437fe3b2207ee237355505a04b593045bdf241d09592ecc3ae7d1fd2d6e3eb90",
+      "gold": "the 'Walk for Hunger' charity event",
+      "missing": [],
+      "ok": true,
+      "question": "What charity event did I participate in a month ago?",
+      "trace_context_sha256": "437fe3b2207ee237355505a04b593045bdf241d09592ecc3ae7d1fd2d6e3eb90"
+    },
+    {
+      "answer_verdicts": [
+        "correct",
+        "incorrect",
+        "correct"
+      ],
+      "arm": "W1",
+      "basis": "atom_fallback",
+      "block": "u3b",
+      "case": 27,
+      "context_sha256": "7ed48befb92a6654180364fa4a2e4100eb280d241a8e1f207ca7a8becefb3152",
+      "gold": "the 'Walk for Hunger' charity event",
+      "missing": [],
+      "ok": true,
+      "question": "What charity event did I participate in a month ago?",
+      "trace_context_sha256": "7ed48befb92a6654180364fa4a2e4100eb280d241a8e1f207ca7a8becefb3152"
+    },
+    {
+      "answer_verdicts": [
+        "correct",
+        "incorrect",
+        "correct"
+      ],
+      "arm": "W3",
+      "basis": "atom_fallback",
+      "block": "u3b",
+      "case": 27,
+      "context_sha256": "7ed48befb92a6654180364fa4a2e4100eb280d241a8e1f207ca7a8becefb3152",
+      "gold": "the 'Walk for Hunger' charity event",
+      "missing": [],
+      "ok": true,
+      "question": "What charity event did I participate in a month ago?",
+      "trace_context_sha256": "7ed48befb92a6654180364fa4a2e4100eb280d241a8e1f207ca7a8becefb3152"
+    }
+  ]
+}

@@ -236,6 +236,16 @@ delivering ~11k context characters — context size is not evidence. See
 
 The API key is read from the environment only; it is never written to disk.
 
+### Admission shadow instrumentation (opt-in)
+
+`MEMORY_MACHINE_ADMISSION_SHADOW=1` makes every recall append one JSON line of
+**derived admission signals** (candidate origin, score/rank, lexical overlap,
+IDF rare-term coverage, entity/date matches, characters each candidate would
+consume, counterfactual admission) to `admission_shadow.jsonl` in the session
+root (`MEMORY_MACHINE_ADMISSION_SHADOW_PATH` overrides the path). It never
+writes question text, summaries or notes — only IDs, hashes and metrics — and
+never changes a recall result. See `docs/ADMISSION_SHADOW_V1.md`.
+
 ## Graph projection (Graph Memory Machine v1)
 
 The tape stays the single source of truth; the graph is a rebuildable

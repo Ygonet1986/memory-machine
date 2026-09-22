@@ -33,6 +33,7 @@ from .llm import LLMClient, LLMError
 from .main_chatbot import memory_from_spec, run_main_chatbot
 from .metacognition import update_metacognition
 from .payload import build_evidence_payload, payload_as_context, payload_chars
+from . import admission_shadow
 from .retrieval import Embedder
 from .router import select_groups, select_groups_llm
 from .routing import (
@@ -1081,6 +1082,9 @@ class Machine:
                 self.save()
             if cross_session:
                 result["past_hits"] = self._cross_session_hits(question)
+            self._record_admission_shadow(
+                question, result.get("annotations") or [],
+                result.get("evidence_payload") or [], cached=True)
             return result
 
         client = self._ensure_client()
@@ -1197,7 +1201,28 @@ class Machine:
         self._save_recall_cache(question, result)
         if cross_session:
             result["past_hits"] = self._cross_session_hits(question)
+        self._record_admission_shadow(question, kept, payload, cached=False)
         return result
+
+    def _record_admission_shadow(self, question: str, annotations: list[Any],
+                                 payload: list[dict[str, Any]], *,
+                                 cached: bool) -> None:
+        """Read-only instrumentation; never changes the recall result."""
+        if not admission_shadow.enabled():
+            return
+        try:
+            admission_shadow.record(
+                root=self.root,
+                question=question,
+                session_id=self.root.name,
+                annotations=annotations,
+                records=self.tape.read(),
+                payload=payload,
+                event_hits=self._cross_session_hits(question),
+                cached=cached,
+            )
+        except Exception:  # instrumentation must never break recall
+            pass
 
     # ------------------------------------------------------------ graph recall
 

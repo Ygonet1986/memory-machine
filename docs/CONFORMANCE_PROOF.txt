@@ -477,6 +477,8 @@ tests/test_shadow_stop_check.py::test_discover_logs_finds_nested_files
 tests/test_shadow_stop_check_v2.py::test_full_sample_meets_every_criterion
 tests/test_shadow_stop_check_v2.py::test_duplicates_malformed_and_not_met
 tests/test_shadow_stop_check_v2.py::test_discover_finds_nested_logs
+tests/test_snippet_window_v3.py::test_recorded_verdicts
+tests/test_snippet_window_v3.py::test_u3a17_snippet_precheck
 tests/test_tape.py::test_format_and_parse_id
 tests/test_tape.py::test_append_assigns_stable_id
 tests/test_tape.py::test_read_and_range
@@ -562,4 +564,4 @@ tests/test_whiteboard.py::test_size_and_consolidation_trigger
 tests/test_whiteboard.py::test_roundtrip
 tests/test_whiteboard.py::test_render
 
-563 tests collected in 0.09s
+565 tests collected in 0.09s

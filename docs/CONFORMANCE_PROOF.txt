@@ -36,6 +36,9 @@ tests/test_agents.py::test_run_agents_fuses_checklist_and_annotations
 tests/test_agents.py::test_run_agents_checklist_falls_back_to_deterministic
 tests/test_agents.py::test_run_agents_skips_empty_groups
 tests/test_agents.py::test_run_agents_parses_digest
+tests/test_annotation_coverage_v1.py::test_recorded_aggregate
+tests/test_annotation_coverage_v1.py::test_u3a17_row
+tests/test_annotation_coverage_v1.py::test_recompute_when_snapshots_present
 tests/test_app_graph.py::test_graph_settings_default_to_off
 tests/test_app_graph.py::test_backend_maps_graph_settings_to_config
 tests/test_app_graph.py::test_backend_maps_recall_modes_exactly_like_cli
@@ -557,4 +560,4 @@ tests/test_whiteboard.py::test_size_and_consolidation_trigger
 tests/test_whiteboard.py::test_roundtrip
 tests/test_whiteboard.py::test_render
 
-558 tests collected in 0.09s
+561 tests collected in 0.09s

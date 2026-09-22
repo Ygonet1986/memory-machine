@@ -1,0 +1,16 @@
+{
+  "allocation": 3600,
+  "cases": 12,
+  "cases_sha256": "319ff6e831c7f8fef2e79a8efde59af75c3dc70b29b42a9ecaf7fcc4ca4f8d28",
+  "design_checks": {
+    "w1_contains_target": 4,
+    "w4_contains_target": 12
+  },
+  "generator": "gen_money_holdout_v2.py",
+  "generator_version": 1,
+  "positions": {
+    "early": 4,
+    "late": 4,
+    "middle": 4
+  }
+}

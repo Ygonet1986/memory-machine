@@ -102,6 +102,22 @@ to be useful locally: the analysis runs on derived metrics, not content.
   key, plus optional exclusion of entity/date token lists. Not implemented in
   v1; no network or key management exists today.
 
+## Phase status: admission-shadow-v1 — sampling freeze (2026-09-22)
+
+Publication is closed (public repo, tag `v0.2.2`, branch protection on `main`).
+This phase is exclusively shadow data collection. Rules for the duration:
+
+- Collect on real sessions with `MEMORY_MACHINE_ADMISSION_SHADOW=1`; **do not
+  change any policy, default, threshold, prompt or retrieval behavior while
+  sampling** - the analysis requires uncontaminated data.
+- No new experimental lines are opened during sampling.
+- Logs stay local (`0600`), treated as personal data; aggregate before sharing.
+- The pre-rewrite backup mirror is retained at least until the first sampling
+  round is analyzed and the next release is published.
+- When enough data exists, the analysis itself gets a pre-registration
+  (signals, metrics, gates) before any policy comparison; promotion only if
+  availability **and** precision pass together, under the 4000-char budget.
+
 ## Non-goals
 
 No admission policy is applied by this module; no thresholds are frozen; no

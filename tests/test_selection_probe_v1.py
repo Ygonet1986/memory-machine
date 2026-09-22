@@ -25,7 +25,8 @@ def test_recorded_counts():
                                 "lexically_retrievable_miss": 10,
                                 "lexical_gap": 1,
                                 "view_disjoint": 0}
-    assert report["gates"] == {"S1_classified": True, "S3_u3a17_visible": True}
+    assert report["gates"] == {"S1_classified": True, "S3_u3a17_visible": True,
+                               "S2_determinism": True}
     assert report["all_pass"] is True
 
 

@@ -1,0 +1,1619 @@
+{
+  "all_pass": false,
+  "evaluation_a": {
+    "gates": {
+      "A1_mean": true,
+      "A2_numeric": true,
+      "A3_nonnumeric_identical": true,
+      "A4_budget": true,
+      "A5_determinism": true
+    },
+    "per_case": [
+      {
+        "block": "u3a",
+        "case": 12,
+        "numeric": true,
+        "policies": {
+          "W0": {
+            "all_present": true,
+            "chars": 4000,
+            "missing": [],
+            "presence": 1.0
+          },
+          "W1": {
+            "all_present": true,
+            "chars": 3921,
+            "missing": [],
+            "presence": 1.0
+          },
+          "W3": {
+            "all_present": true,
+            "chars": 3998,
+            "missing": [],
+            "presence": 1.0
+          }
+        }
+      },
+      {
+        "block": "u3a",
+        "case": 13,
+        "numeric": true,
+        "policies": {
+          "W0": {
+            "all_present": true,
+            "chars": 4008,
+            "missing": [],
+            "presence": 1.0
+          },
+          "W1": {
+            "all_present": true,
+            "chars": 3952,
+            "missing": [],
+            "presence": 1.0
+          },
+          "W3": {
+            "all_present": true,
+            "chars": 4006,
+            "missing": [],
+            "presence": 1.0
+          }
+        }
+      },
+      {
+        "block": "u3a",
+        "case": 14,
+        "numeric": true,
+        "policies": {
+          "W0": {
+            "all_present": false,
+            "chars": 4004,
+            "missing": [
+              "number:3"
+            ],
+            "presence": 0.0
+          },
+          "W1": {
+            "all_present": false,
+            "chars": 3830,
+            "missing": [
+              "number:3"
+            ],
+            "presence": 0.0
+          },
+          "W3": {
+            "all_present": true,
+            "chars": 3998,
+            "missing": [],
+            "presence": 1.0
+          }
+        }
+      },
+      {
+        "block": "u3a",
+        "case": 15,
+        "numeric": true,
+        "policies": {
+          "W0": {
+            "all_present": false,
+            "chars": 4010,
+            "missing": [
+              "number:4",
+              "number:8",
+              "entity:yamaha"
+            ],
+            "presence": 0.7
+          },
+          "W1": {
+            "all_present": false,
+            "chars": 3882,
+            "missing": [
+              "number:8",
+              "entity:yamaha"
+            ],
+            "presence": 0.8
+          },
+          "W3": {
+            "all_present": false,
+            "chars": 4002,
+            "missing": [
+              "number:8",
+              "entity:yamaha"
+            ],
+            "presence": 0.8
+          }
+        }
+      },
+      {
+        "block": "u3a",
+        "case": 16,
+        "numeric": false,
+        "policies": {
+          "W0": {
+            "all_present": true,
+            "chars": 4000,
+            "missing": [],
+            "presence": 1.0
+          },
+          "W1": {
+            "all_present": true,
+            "chars": 3908,
+            "missing": [],
+            "presence": 1.0
+          },
+          "W3": {
+            "all_present": true,
+            "chars": 3908,
+            "missing": [],
+            "presence": 1.0
+          }
+        }
+      },
+      {
+        "block": "u3a",
+        "case": 17,
+        "numeric": true,
+        "policies": {
+          "W0": {
+            "all_present": true,
+            "chars": 4002,
+            "missing": [],
+            "presence": 1.0
+          },
+          "W1": {
+            "all_present": true,
+            "chars": 3879,
+            "missing": [],
+            "presence": 1.0
+          },
+          "W3": {
+            "all_present": true,
+            "chars": 3985,
+            "missing": [],
+            "presence": 1.0
+          }
+        }
+      },
+      {
+        "block": "u3a",
+        "case": 18,
+        "numeric": true,
+        "policies": {
+          "W0": {
+            "all_present": false,
+            "chars": 4002,
+            "missing": [
+              "number:4"
+            ],
+            "presence": 0.0
+          },
+          "W1": {
+            "all_present": false,
+            "chars": 3698,
+            "missing": [
+              "number:4"
+            ],
+            "presence": 0.0
+          },
+          "W3": {
+            "all_present": false,
+            "chars": 3981,
+            "missing": [
+              "number:4"
+            ],
+            "presence": 0.0
+          }
+        }
+      },
+      {
+        "block": "u3a",
+        "case": 19,
+        "numeric": true,
+        "policies": {
+          "W0": {
+            "all_present": false,
+            "chars": 4004,
+            "missing": [
+              "number:200"
+            ],
+            "presence": 0.0
+          },
+          "W1": {
+            "all_present": false,
+            "chars": 3804,
+            "missing": [
+              "number:200"
+            ],
+            "presence": 0.0
+          },
+          "W3": {
+            "all_present": false,
+            "chars": 3990,
+            "missing": [
+              "number:200"
+            ],
+            "presence": 0.0
+          }
+        }
+      },
+      {
+        "block": "u3a",
+        "case": 20,
+        "numeric": false,
+        "policies": {
+          "W0": {
+            "all_present": false,
+            "chars": 4018,
+            "missing": [
+              "entity:japanese"
+            ],
+            "presence": 0.0
+          },
+          "W1": {
+            "all_present": true,
+            "chars": 3966,
+            "missing": [],
+            "presence": 1.0
+          },
+          "W3": {
+            "all_present": true,
+            "chars": 3966,
+            "missing": [],
+            "presence": 1.0
+          }
+        }
+      },
+      {
+        "block": "u3a",
+        "case": 21,
+        "numeric": true,
+        "policies": {
+          "W0": {
+            "all_present": false,
+            "chars": 4006,
+            "missing": [
+              "number:10"
+            ],
+            "presence": 0.0
+          },
+          "W1": {
+            "all_present": false,
+            "chars": 3776,
+            "missing": [
+              "number:10"
+            ],
+            "presence": 0.0
+          },
+          "W3": {
+            "all_present": false,
+            "chars": 3997,
+            "missing": [
+              "number:10"
+            ],
+            "presence": 0.0
+          }
+        }
+      },
+      {
+        "block": "u3a",
+        "case": 22,
+        "numeric": true,
+        "policies": {
+          "W0": {
+            "all_present": true,
+            "chars": 4002,
+            "missing": [],
+            "presence": 1.0
+          },
+          "W1": {
+            "all_present": true,
+            "chars": 3842,
+            "missing": [],
+            "presence": 1.0
+          },
+          "W3": {
+            "all_present": true,
+            "chars": 3997,
+            "missing": [],
+            "presence": 1.0
+          }
+        }
+      },
+      {
+        "block": "u3a",
+        "case": 23,
+        "numeric": false,
+        "policies": {
+          "W0": {
+            "all_present": true,
+            "chars": 4004,
+            "missing": [],
+            "presence": 1.0
+          },
+          "W1": {
+            "all_present": true,
+            "chars": 3838,
+            "missing": [],
+            "presence": 1.0
+          },
+          "W3": {
+            "all_present": true,
+            "chars": 3838,
+            "missing": [],
+            "presence": 1.0
+          }
+        }
+      },
+      {
+        "block": "u3a",
+        "case": 24,
+        "numeric": true,
+        "policies": {
+          "W0": {
+            "all_present": false,
+            "chars": 4002,
+            "missing": [
+              "number:300"
+            ],
+            "presence": 0.5
+          },
+          "W1": {
+            "all_present": false,
+            "chars": 3832,
+            "missing": [
+              "number:300"
+            ],
+            "presence": 0.5
+          },
+          "W3": {
+            "all_present": false,
+            "chars": 3998,
+            "missing": [
+              "number:300"
+            ],
+            "presence": 0.5
+          }
+        }
+      },
+      {
+        "block": "u3a",
+        "case": 25,
+        "numeric": true,
+        "policies": {
+          "W0": {
+            "all_present": true,
+            "chars": 4022,
+            "missing": [],
+            "presence": 1.0
+          },
+          "W1": {
+            "all_present": true,
+            "chars": 4013,
+            "missing": [],
+            "presence": 1.0
+          },
+          "W3": {
+            "all_present": true,
+            "chars": 4021,
+            "missing": [],
+            "presence": 1.0
+          }
+        }
+      },
+      {
+        "block": "u3a",
+        "case": 26,
+        "numeric": true,
+        "policies": {
+          "W0": {
+            "all_present": true,
+            "chars": 4006,
+            "missing": [],
+            "presence": 1.0
+          },
+          "W1": {
+            "all_present": true,
+            "chars": 3976,
+            "missing": [],
+            "presence": 1.0
+          },
+          "W3": {
+            "all_present": true,
+            "chars": 4005,
+            "missing": [],
+            "presence": 1.0
+          }
+        }
+      },
+      {
+        "block": "u3b",
+        "case": 27,
+        "numeric": false,
+        "policies": {
+          "W0": {
+            "all_present": true,
+            "chars": 4006,
+            "missing": [],
+            "presence": 1.0
+          },
+          "W1": {
+            "all_present": true,
+            "chars": 3721,
+            "missing": [],
+            "presence": 1.0
+          },
+          "W3": {
+            "all_present": true,
+            "chars": 3721,
+            "missing": [],
+            "presence": 1.0
+          }
+        }
+      },
+      {
+        "block": "u3b",
+        "case": 28,
+        "numeric": false,
+        "policies": {
+          "W0": {
+            "all_present": false,
+            "chars": 4006,
+            "missing": [
+              "entity:dlc",
+              "entity:dark",
+              "entity:souls"
+            ],
+            "presence": 0.25
+          },
+          "W1": {
+            "all_present": true,
+            "chars": 3922,
+            "missing": [],
+            "presence": 1.0
+          },
+          "W3": {
+            "all_present": true,
+            "chars": 3922,
+            "missing": [],
+            "presence": 1.0
+          }
+        }
+      },
+      {
+        "block": "u3b",
+        "case": 29,
+        "numeric": true,
+        "policies": {
+          "W0": {
+            "all_present": false,
+            "chars": 4004,
+            "missing": [
+              "number:10"
+            ],
+            "presence": 0.0
+          },
+          "W1": {
+            "all_present": false,
+            "chars": 3888,
+            "missing": [
+              "number:10"
+            ],
+            "presence": 0.0
+          },
+          "W3": {
+            "all_present": false,
+            "chars": 3999,
+            "missing": [
+              "number:10"
+            ],
+            "presence": 0.0
+          }
+        }
+      },
+      {
+        "block": "u3b",
+        "case": 30,
+        "numeric": true,
+        "policies": {
+          "W0": {
+            "all_present": false,
+            "chars": 4004,
+            "missing": [
+              "number:4",
+              "number:9"
+            ],
+            "presence": 0.0
+          },
+          "W1": {
+            "all_present": false,
+            "chars": 3882,
+            "missing": [
+              "number:9"
+            ],
+            "presence": 0.5
+          },
+          "W3": {
+            "all_present": true,
+            "chars": 3993,
+            "missing": [],
+            "presence": 1.0
+          }
+        }
+      },
+      {
+        "block": "u3b",
+        "case": 31,
+        "numeric": true,
+        "policies": {
+          "W0": {
+            "all_present": false,
+            "chars": 4010,
+            "missing": [
+              "number:4"
+            ],
+            "presence": 0.0
+          },
+          "W1": {
+            "all_present": false,
+            "chars": 3808,
+            "missing": [
+              "number:4"
+            ],
+            "presence": 0.0
+          },
+          "W3": {
+            "all_present": true,
+            "chars": 4003,
+            "missing": [],
+            "presence": 1.0
+          }
+        }
+      },
+      {
+        "block": "u3b",
+        "case": 32,
+        "numeric": false,
+        "policies": {
+          "W0": {
+            "all_present": false,
+            "chars": 4006,
+            "missing": [
+              "entity:ballroom",
+              "entity:grand"
+            ],
+            "presence": 0.0
+          },
+          "W1": {
+            "all_present": true,
+            "chars": 3902,
+            "missing": [],
+            "presence": 1.0
+          },
+          "W3": {
+            "all_present": true,
+            "chars": 3902,
+            "missing": [],
+            "presence": 1.0
+          }
+        }
+      },
+      {
+        "block": "u3b",
+        "case": 33,
+        "numeric": false,
+        "policies": {
+          "W0": {
+            "all_present": true,
+            "chars": 4000,
+            "missing": [],
+            "presence": 1.0
+          },
+          "W1": {
+            "all_present": true,
+            "chars": 3994,
+            "missing": [],
+            "presence": 1.0
+          },
+          "W3": {
+            "all_present": true,
+            "chars": 3994,
+            "missing": [],
+            "presence": 1.0
+          }
+        }
+      },
+      {
+        "block": "u3b",
+        "case": 34,
+        "numeric": true,
+        "policies": {
+          "W0": {
+            "all_present": true,
+            "chars": 4004,
+            "missing": [],
+            "presence": 1.0
+          },
+          "W1": {
+            "all_present": true,
+            "chars": 3876,
+            "missing": [],
+            "presence": 1.0
+          },
+          "W3": {
+            "all_present": true,
+            "chars": 4004,
+            "missing": [],
+            "presence": 1.0
+          }
+        }
+      },
+      {
+        "block": "u3b",
+        "case": 35,
+        "numeric": true,
+        "policies": {
+          "W0": {
+            "all_present": false,
+            "chars": 4006,
+            "missing": [
+              "number:33"
+            ],
+            "presence": 0.0
+          },
+          "W1": {
+            "all_present": false,
+            "chars": 3894,
+            "missing": [
+              "number:33"
+            ],
+            "presence": 0.0
+          },
+          "W3": {
+            "all_present": false,
+            "chars": 3996,
+            "missing": [
+              "number:33"
+            ],
+            "presence": 0.0
+          }
+        }
+      },
+      {
+        "block": "u3b",
+        "case": 36,
+        "numeric": true,
+        "policies": {
+          "W0": {
+            "all_present": true,
+            "chars": 4004,
+            "missing": [],
+            "presence": 1.0
+          },
+          "W1": {
+            "all_present": true,
+            "chars": 3900,
+            "missing": [],
+            "presence": 1.0
+          },
+          "W3": {
+            "all_present": true,
+            "chars": 3999,
+            "missing": [],
+            "presence": 1.0
+          }
+        }
+      },
+      {
+        "block": "u3b",
+        "case": 37,
+        "numeric": false,
+        "policies": {
+          "W0": {
+            "all_present": true,
+            "chars": 4004,
+            "missing": [],
+            "presence": 1.0
+          },
+          "W1": {
+            "all_present": true,
+            "chars": 3886,
+            "missing": [],
+            "presence": 1.0
+          },
+          "W3": {
+            "all_present": true,
+            "chars": 3886,
+            "missing": [],
+            "presence": 1.0
+          }
+        }
+      },
+      {
+        "block": "u3b",
+        "case": 38,
+        "numeric": true,
+        "policies": {
+          "W0": {
+            "all_present": true,
+            "chars": 4012,
+            "missing": [],
+            "presence": 1.0
+          },
+          "W1": {
+            "all_present": true,
+            "chars": 3840,
+            "missing": [],
+            "presence": 1.0
+          },
+          "W3": {
+            "all_present": true,
+            "chars": 3992,
+            "missing": [],
+            "presence": 1.0
+          }
+        }
+      },
+      {
+        "block": "u3b",
+        "case": 39,
+        "numeric": false,
+        "policies": {
+          "W0": {
+            "all_present": false,
+            "chars": 4004,
+            "missing": [
+              "entity:golden",
+              "entity:retriever"
+            ],
+            "presence": 0.0
+          },
+          "W1": {
+            "all_present": false,
+            "chars": 3941,
+            "missing": [
+              "entity:golden",
+              "entity:retriever"
+            ],
+            "presence": 0.0
+          },
+          "W3": {
+            "all_present": false,
+            "chars": 3941,
+            "missing": [
+              "entity:golden",
+              "entity:retriever"
+            ],
+            "presence": 0.0
+          }
+        }
+      },
+      {
+        "block": "u3b",
+        "case": 40,
+        "numeric": true,
+        "policies": {
+          "W0": {
+            "all_present": false,
+            "chars": 4000,
+            "missing": [
+              "number:12",
+              "number:13"
+            ],
+            "presence": 0.0
+          },
+          "W1": {
+            "all_present": false,
+            "chars": 3946,
+            "missing": [
+              "number:12",
+              "number:13"
+            ],
+            "presence": 0.0
+          },
+          "W3": {
+            "all_present": false,
+            "chars": 3999,
+            "missing": [
+              "number:12",
+              "number:13"
+            ],
+            "presence": 0.0
+          }
+        }
+      },
+      {
+        "block": "u3b",
+        "case": 41,
+        "numeric": true,
+        "policies": {
+          "W0": {
+            "all_present": false,
+            "chars": 4004,
+            "missing": [
+              "entity:harajuku",
+              "entity:shinjuku"
+            ],
+            "presence": 0.0
+          },
+          "W1": {
+            "all_present": false,
+            "chars": 3953,
+            "missing": [
+              "entity:shinjuku"
+            ],
+            "presence": 0.5
+          },
+          "W3": {
+            "all_present": false,
+            "chars": 4004,
+            "missing": [
+              "entity:shinjuku"
+            ],
+            "presence": 0.5
+          }
+        }
+      }
+    ],
+    "summary": {
+      "W0": {
+        "mean_all": 0.515,
+        "mean_nonnumeric": 0.5833,
+        "mean_numeric": 0.4857
+      },
+      "W1": {
+        "mean_all": 0.6433,
+        "mean_nonnumeric": 0.8889,
+        "mean_numeric": 0.5381
+      },
+      "W3": {
+        "mean_all": 0.7267,
+        "mean_nonnumeric": 0.8889,
+        "mean_numeric": 0.6571
+      }
+    }
+  },
+  "evaluation_b": {
+    "calls": {
+      "failures": 0,
+      "judge_prompt_version": "v1",
+      "limit": 30,
+      "llm_calls": 180,
+      "pairs": 90
+    },
+    "gates": {
+      "B1_beats_W0": true,
+      "B2_vs_W1": true,
+      "B3_numeric_vs_W1": true,
+      "B4_downgrades": false
+    },
+    "inconclusive_infrastructure": false,
+    "per_case": [
+      {
+        "block": "u3a",
+        "case": 12,
+        "gold": "16GB",
+        "numeric": true,
+        "policies": {
+          "W0": {
+            "answer": "You upgraded your laptop to **16GB** of RAM.\n\nFrom our earlier conversation: your laptop is a Dell Inspiron 15 5000 series (2018), and you mentioned that before the RAM upgrade to 16GB you were getting about 6–7 hours of battery life, dropping to around 4–5 hours afterward.",
+            "reason": "Candidate states the RAM upgrade was to 16GB, matching the reference.",
+            "verdict": "correct"
+          },
+          "W1": {
+            "answer": "You upgraded your laptop to **16GB of RAM** — you mentioned this in the earlier troubleshooting thread, noting that before the upgrade to 16GB you were getting around 6–7 hours of battery life on your Dell Inspiron 15 5000 (2018) and roughly 4–5 hours afterward.",
+            "reason": "Candidate states the upgrade was to 16GB of RAM, matching the reference.",
+            "verdict": "correct"
+          },
+          "W3": {
+            "answer": "You upgraded your laptop to **16GB of RAM**.\n\nYou mentioned this directly while troubleshooting battery life: your Dell Inspiron 15 5000 series (2018) went from ~6–7 hours of battery life to ~4–5 hours after the RAM upgrade to 16GB.",
+            "reason": "Candidate states the RAM upgrade was to 16GB, matching the reference answer.",
+            "verdict": "correct"
+          }
+        }
+      },
+      {
+        "block": "u3a",
+        "case": 13,
+        "gold": "+49 (0) 62 32 / 14 23 - 0",
+        "numeric": true,
+        "policies": {
+          "W0": {
+            "answer": "From our earlier conversation, the contact details I gave you for the Speyer tourism board were:\n\n**Speyer Tourismus Marketing GmbH**\nMaximilianstraße 13\n67346 Speyer\nPhone: **+49 (0) 62 32 / 14 23 - 0**\nEmail: info@speyer.de\nWebsite: https://www.speyer.de/\n\nOne small caveat: that information came from an earlier exchange, so it's worth double-checking the number on the official website shortly be",
+            "reason": "Candidate provides the exact reference phone number.",
+            "verdict": "correct"
+          },
+          "W1": {
+            "answer": "Yes — here's what I gave you earlier for the Speyer tourism board:\n\n**Speyer Tourismus Marketing GmbH**\nMaximilianstraße 13\n67346 Speyer\n**Phone: +49 (0) 62 32 / 14 23 - 0**\nEmail: info@speyer.de\nWebsite: https://www.speyer.de/\n\nSo the number you're looking for is **+49 (0)62 32 / 14 23-0** (from outside Germany: +49 6232 1423-0).\n\nOne small caveat: that came from earlier in our conversation rathe",
+            "reason": "Candidate provides the same phone number +49 (0) 62 32 / 14 23 - 0 as the reference.",
+            "verdict": "correct"
+          },
+          "W3": {
+            "answer": "Here's the contact info I gave you earlier for the Speyer tourism board:\n\n**Speyer Tourismus Marketing GmbH**\n- Maximilianstraße 13\n- 67346 Speyer\n- **Phone: +49 (0) 62 32 / 14 23 - 0**\n- Email: info@speyer.de\n- Website: https://www.speyer.de/\n\nSo the number you're looking for is **+49 (0) 62 32 / 14 23 - 0** (from outside Germany: +49 6232 1423-0).\n\nOne small caveat: that's the number I provided ",
+            "reason": "Candidate gives the exact phone number +49 (0) 62 32 / 14 23 - 0 matching the reference.",
+            "verdict": "correct"
+          }
+        }
+      },
+      {
+        "block": "u3a",
+        "case": 14,
+        "gold": "3 weeks",
+        "numeric": true,
+        "policies": {
+          "W0": {
+            "answer": "About **3 weeks** passed.\n\n- Last Farmers’ Market baked-goods sale: **February 26, 2023**\n- Spring Fling Market: **March 20, 2023** (since you mentioned it was “yesterday” on March 21)\n\nThat’s **22 days**, or **3 weeks and 1 day** — so roughly **3 weeks**.",
+            "reason": "Candidate states about 3 weeks, matching the reference answer.",
+            "verdict": "correct"
+          },
+          "W1": {
+            "answer": "Based on the memories, the last Farmers’ Market baked-goods sale was on **February 26, 2023**, and the Spring Fling Market was on **March 20, 2023**.\n\nThat’s **22 days**, or **about 3 weeks** — specifically **3 weeks and 1 day**.",
+            "reason": "Candidate gives about 3 weeks (and specifies 3 weeks 1 day), matching the reference's 3-week answer.",
+            "verdict": "correct"
+          },
+          "W3": {
+            "answer": "Based on the available information:\n\n- **Last time you sold homemade baked goods at the Farmers' Market:** February 26, 2023 (from the memory dated 2023‑02‑26, where you said “today I sold homemade baked goods… at the Farmers’ Market”).\n- **Spring Fling Market:** March 20, 2023 (from the memory dated 2023‑03‑21, where you said you were at the Spring Fling Market “yesterday”).\n\nThe difference is **",
+            "reason": "The candidate concludes that roughly 3 weeks passed, which matches the reference answer of 3 weeks.",
+            "verdict": "correct"
+          }
+        }
+      },
+      {
+        "block": "u3a",
+        "case": 15,
+        "gold": "I currently own 4 musical instruments. I've had the Fender Stratocaster electric guitar for 5 years, the Yamaha FG800 acoustic guitar for 8 years, the 5-piece Pearl Export drum set for an unspecified amount of time, and the Korg B1 piano for 3 years.",
+        "numeric": true,
+        "policies": {
+          "W0": {
+            "answer": "Based on what I know about your gear, you currently own **3 musical instruments**:\n\n1. **Black Fender Stratocaster** (electric guitar) — the one you've been playing a lot and dialing in bluesy amp tones on.\n2. **Pearl Export 5-piece drum set** — your old kit that you hadn't played in years and were considering selling.\n3. **Korg B1 digital piano** — which you've had for about 3 years.\n\nA couple of",
+            "reason": "Reference states 4 instruments (including the Yamaha FG800 acoustic guitar); candidate says 3, omitting the Yamaha acoustic and thus contradicting the required count.",
+            "verdict": "incorrect"
+          },
+          "W1": {
+            "answer": "Based on what I remember, you currently own **3 musical instruments**:\n\n1. **Black Fender Stratocaster electric guitar**\n2. **Korg B1 digital piano**\n3. **5-piece Pearl Export drum set** — the one you were thinking of selling\n\nThe violin mentioned was your niece’s, not yours. So unless you’ve sold the drum set since then, the count is **3**.",
+            "reason": "Candidate says 3 instruments and omits the Yamaha FG800 acoustic guitar, contradicting the reference count of 4.",
+            "verdict": "incorrect"
+          },
+          "W3": {
+            "answer": "Based on what’s in the memories, you currently own **3 musical instruments**:\n\n1. **Korg B1 digital piano** — owned for about 3 years  \n2. **Black Fender Stratocaster electric guitar** — the one you’ve been playing a lot  \n3. **5-piece Pearl Export drum set** — you were considering selling it, but there’s no confirmed sale, so it still counts\n\nThe **violin** mentioned is your niece’s, not yours.\n\n",
+            "reason": "Candidate correctly identifies 3 of the 4 instruments (Fender Stratocaster, Pearl Export drum set, Korg B1 piano) but omits the Yamaha FG800 acoustic guitar and concludes 3 instead of 4.",
+            "verdict": "partial"
+          }
+        }
+      },
+      {
+        "block": "u3a",
+        "case": 16,
+        "gold": "A staunch atheist",
+        "numeric": false,
+        "policies": {
+          "W0": {
+            "answer": "Your previous stance on spirituality was **staunch atheism**.\n\nYou described it as a big shift: \"I used to be a staunch atheist, but I've been exploring other possibilities\" — specifically through reading a lot about Buddhism and looking into synchronicity and its connection to consciousness.\n\nSo the trajectory on record is: **staunch atheist → exploring Buddhism and synchronicity/spirituality** (",
+            "reason": "Candidate states the previous stance was staunch atheism, equivalent to reference.",
+            "verdict": "correct"
+          },
+          "W1": {
+            "answer": "Your previous stance was **staunch atheism**.\n\nYou described it yourself (May 24, 2023) as a \"big shift\": *\"I used to be a staunch atheist, but I've been exploring other possibilities\"* — prompted by reading a lot about Buddhism, and by your interest in synchronicity and its connection to consciousness.\n\nSo the arc on record is: staunch atheist → exploring Buddhism and other spiritual frameworks, ",
+            "reason": "Candidate states the previous stance was staunch atheism, matching the reference.",
+            "verdict": "correct"
+          },
+          "W3": {
+            "answer": "Based on our earlier conversation, your previous stance on spirituality was that of a **staunch atheist**.\n\nYou described reading about Buddhism as \"a big shift from my previous stance on spirituality\" — noting that you had been a staunch atheist but were now exploring other possibilities and reading widely on Buddhism, synchronicity, and consciousness.\n\nSo the arc was: committed atheism → opennes",
+            "reason": "The candidate explicitly states the previous stance was a staunch atheist, matching the reference.",
+            "verdict": "correct"
+          }
+        }
+      },
+      {
+        "block": "u3a",
+        "case": 17,
+        "gold": "over a year",
+        "numeric": true,
+        "policies": {
+          "W0": {
+            "answer": "I don't have any information about your asylum application — neither in the whiteboard notes nor in the remembered context available to me. The memories I can see are about Irish traditional music/dance resources and a blog post on ambiguity vs. uncertainty vs. indeterminacy, so there's nothing there to draw on for this question. I also can't see any earlier part of this conversation where you'd h",
+            "reason": "Candidate says it has no information and refuses to answer, while the reference provides the duration (over a year).",
+            "verdict": "incorrect"
+          },
+          "W1": {
+            "answer": "I don’t have enough information to answer that yet. The whiteboard and remembered notes don’t include your asylum application date or the date you received the decision, so I can’t calculate the waiting time.\n\nTo work it out, tell me:\n- the date you submitted your asylum application,\n- the date the decision was issued or received,\n- and whether there were any appeals, pauses, or additional stages.",
+            "reason": "Candidate says it lacks information, but reference states the wait was over a year.",
+            "verdict": "incorrect"
+          },
+          "W3": {
+            "answer": "I don't have any information about your asylum application — there are no dates, case details, or decision records in what I have access to here (the notes I can see are about unrelated topics like Irish traditional music and a blog post on ambiguity/uncertainty).\n\nTo answer this, I'd need from you:\n\n- **The date you lodged/submitted the application** (or the date it was formally received/register",
+            "reason": "Reference states the wait was over a year; candidate says it has no information and does not answer.",
+            "verdict": "incorrect"
+          }
+        }
+      },
+      {
+        "block": "u3a",
+        "case": 18,
+        "gold": "4",
+        "numeric": true,
+        "policies": {
+          "W0": {
+            "answer": "I don't have that information.\n\nLooking at what I actually have available:\n\n- **Whiteboard / memory:** nothing about your family, siblings, or personal household. The remembered items in the external context are about the Boeing 737 MAX and demographic tables for China, the US, and India — neither relates to you personally.\n- **This conversation:** your only message is the question itself.\n\nSo the",
+            "reason": "Candidate says it lacks the information, while the reference states the answer is 4.",
+            "verdict": "incorrect"
+          },
+          "W1": {
+            "answer": "I don’t have any information about your family or siblings in our conversation, so I can’t determine the total number you have.\n\nIf you tell me how many brothers and sisters you have, I can help you calculate the total.",
+            "reason": "Candidate says it cannot determine the number, while the reference states 4.",
+            "verdict": "incorrect"
+          },
+          "W3": {
+            "answer": "I don't have that information. Nothing in my current working memory (your whiteboard) or in the context I was given records anything about your family — the available notes cover unrelated topics (aviation/aircraft development and country-level demographic tables), and there's no prior statement from you about brothers, sisters, or family size.\n\nTo answer accurately, I'd need you to tell me, for e",
+            "reason": "Candidate says it lacks the information, while the reference answer is 4.",
+            "verdict": "incorrect"
+          }
+        }
+      },
+      {
+        "block": "u3a",
+        "case": 19,
+        "gold": "$200",
+        "numeric": true,
+        "policies": {
+          "W0": {
+            "answer": "## Answer\n\nBased on what's in the records, the only gift spending tied to these two people is:\n\n| Recipient | Gift | Amount |\n|---|---|---|\n| **Brother** | Graduation gift (May) — gift card to his favorite electronics store | **$100** |\n| **Coworker** | *(none found in the records)* | **$0** |\n\n**Total: $100**\n\nA couple of important caveats:\n\n- **The coworker gift isn't in the records.** The only ",
+            "reason": "Candidate says total is $100 and no coworker gift, contradicting the reference total of $200.",
+            "verdict": "incorrect"
+          },
+          "W1": {
+            "answer": "Looking at what I have on file, I can only pin down part of this:\n\n- **Brother:** $100 gift card to his favorite electronics store, given in May for his graduation. ✅\n\n- **Coworker:** I don't have any record of a gift purchase for a coworker. The only coworker-related item in my notes is an email you asked me to draft about a workflow model — nothing involving a gift or a dollar amount.\n\nSo the to",
+            "reason": "Identifies the $100 brother gift but does not include any coworker gift amount, so it does not reach the total $200.",
+            "verdict": "partial"
+          },
+          "W3": {
+            "answer": "You spent **$100** on your brother’s graduation gift.\n\nThe amount you spent on a gift for your **coworker** isn’t recorded — the notes only mention that you got a baby shower gift for a coworker’s baby, but no dollar amount. So the total for **coworker + brother** can’t be determined from the available information.\n\nIf you tell me what you spent on the coworker’s gift, I can add it to the $100.",
+            "reason": "Candidate states total can't be determined and gives $100, contradicting the reference total of $200.",
+            "verdict": "incorrect"
+          }
+        }
+      },
+      {
+        "block": "u3a",
+        "case": 20,
+        "gold": "Japanese short-grain rice",
+        "numeric": false,
+        "policies": {
+          "W0": {
+            "answer": "I don't have any information about your favorite type of rice. The notes I have on record cover other topics — a kitchen herb garden, BBQ ribs and smoke rings, healthier snacks (popcorn variations), intermittent fasting, road trip route planning, a story about a tram driver named Filon, *The Giver*, the cost of living in Leiden, the chamber of deputies, and a Bell Zephyr bike helmet — but nothing ",
+            "reason": "Candidate says it lacks information about the favorite rice, while reference states Japanese short-grain rice.",
+            "verdict": "incorrect"
+          },
+          "W1": {
+            "answer": "Based on your earlier message, your favorite rice is **Japanese short‑grain rice**.\n\nYou mentioned it while talking about the herb garden you were planning for your kitchen window — you said you were thinking of making some Japanese-style dishes with \"my favorite Japanese short-grain rice,\" which is the variety prized for its sticky, plump texture in sushi, onigiri, and donburi.",
+            "reason": "Candidate explicitly identifies the favorite rice as Japanese short-grain rice, matching the reference.",
+            "verdict": "correct"
+          },
+          "W3": {
+            "answer": "Your favorite is **Japanese short-grain rice** — you mentioned it while talking about making Japanese-style dishes (you noted your herb garden plans and then said you were thinking of cooking Japanese dishes with \"my favorite Japanese short-grain rice\").\n\nThat's the sticky, slightly sweet variety (like *japonica* rice, e.g., Koshihikari or Calrose-style) that clumps together well, which is why it'",
+            "reason": "Candidate states the favorite is Japanese short-grain rice, matching the reference exactly.",
+            "verdict": "correct"
+          }
+        }
+      },
+      {
+        "block": "u3a",
+        "case": 21,
+        "gold": "10 years",
+        "numeric": true,
+        "policies": {
+          "W0": {
+            "answer": "Based on what you’ve shared:\n\n- **High school:** standard U.S. high school = **4 years**\n- **Pasadena City College:** Associate’s degree earned May 2016; typically **2 years**\n- **UCLA:** Bachelor’s in Computer Science, completed in 2020, and you said it took **4 years**\n\nSo the total from the start of high school through your Bachelor’s is:\n\n**4 + 2 + 4 = 10 years**\n\nIf you meant only high school",
+            "reason": "Candidate computes total as 10 years, matching the reference.",
+            "verdict": "correct"
+          },
+          "W1": {
+            "answer": "You spent **10 years** in formal education from the start of high school through completion of your Bachelor’s degree.\n\nBreakdown:\n- **Arcadia High School:** 2010–2014 → **4 years**\n- **Pasadena City College (Associate’s in Computer Science):** 2014–May 2016 → **2 years**\n- **UCLA (Bachelor’s in Computer Science):** 2016–2020 → **4 years**\n\n**Total: 4 + 2 + 4 = 10 years.**",
+            "reason": "Candidate states 10 years total, matching the reference answer exactly.",
+            "verdict": "correct"
+          },
+          "W3": {
+            "answer": "You spent **10 years** in formal education from the start of high school through completing your Bachelor’s degree:\n\n- **Arcadia High School:** 2010–2014 → 4 years  \n- **Pasadena City College (Associate’s in Computer Science):** 2014–May 2016 → 2 years  \n- **UCLA (Bachelor’s in Computer Science):** 2016–2020 → 4 years  \n\n**Total: 4 + 2 + 4 = 10 years.**",
+            "reason": "Candidate states 10 years total, matching the reference answer.",
+            "verdict": "correct"
+          }
+        }
+      },
+      {
+        "block": "u3a",
+        "case": 22,
+        "gold": "two weeks",
+        "numeric": true,
+        "policies": {
+          "W0": {
+            "answer": "You were in Japan for **two weeks**, traveling solo around the country — you mentioned this when you told me you'd visited Fushimi Inari Shrine during that trip.",
+            "reason": "Candidate states two weeks, matching the reference answer.",
+            "verdict": "correct"
+          },
+          "W1": {
+            "answer": "You were in Japan for **two weeks** — you mentioned you spent two weeks traveling solo around the country, and you visited Fushimi Inari Shrine while there.\n\n(That's separate from the one-week family vacation in Barcelona you mentioned another time.)",
+            "reason": "Candidate states two weeks, matching the reference.",
+            "verdict": "correct"
+          },
+          "W3": {
+            "answer": "**I don't have that information.** Nothing in the remembered context states how long your Japan trip lasted.\n\nWhat the memories do record about Japan:\n\n- You visited **Fushimi Inari Shrine** \"a few months ago\" (as of May 2023), so the trip was around early 2023.\n- You traveled **solo** and stayed in \"small hostels and guesthouses.\"\n- You were considering other parts of Asia afterward (e.g., Ha Lon",
+            "reason": "Candidate says it lacks the information and does not give the two-week duration, contradicting the reference.",
+            "verdict": "incorrect"
+          }
+        }
+      },
+      {
+        "block": "u3a",
+        "case": 23,
+        "gold": "You posted a recipe for vegan chili on Instagram using the hashtag #FoodieAdventures first.",
+        "numeric": false,
+        "policies": {
+          "W0": {
+            "answer": "Your post about the **vegan chili recipe** happened first.\n\n- Vegan chili recipe (#FoodieAdventures): shared **yesterday** relative to **March 10, 2023** → around **March 9, 2023**.\n- #PlankChallenge participation: described as **today** on **March 15, 2023** → **March 15, 2023**.\n\nSo the vegan chili post came about **6 days before** your #PlankChallenge participation.",
+            "reason": "Candidate states the vegan chili recipe post happened before the #PlankChallenge, matching the reference.",
+            "verdict": "correct"
+          },
+          "W1": {
+            "answer": "Your **post about the vegan chili recipe** happened first.\n\n- The vegan chili recipe post was mentioned on **2023-03-10**, and you said you shared it **“yesterday”** — so around **2023-03-09**.\n- Your **#PlankChallenge** participation was mentioned on **2023-03-15**, and you said you participated **“today”** — so on **2023-03-15**.\n\nSo the vegan chili post came **about 6 days before** the #PlankCh",
+            "reason": "Candidate correctly states the vegan chili recipe post happened first, matching the reference.",
+            "verdict": "correct"
+          },
+          "W3": {
+            "answer": "Your **vegan chili recipe post happened first**.\n\n- **Vegan chili post:** In memory M0014 (dated **2023-03-10**), you said you shared the vegan chili recipe using **#FoodieAdventures “yesterday”** — so that would be **2023-03-09**.\n- **#PlankChallenge participation:** In memory M0022 (dated **2023-03-15**), you said you participated in the **#PlankChallenge “today”** — so that was **2023-03-15**.\n",
+            "reason": "Candidate states the vegan chili recipe post happened first, matching the reference.",
+            "verdict": "correct"
+          }
+        }
+      },
+      {
+        "block": "u3a",
+        "case": 24,
+        "gold": "$1,300",
+        "numeric": true,
+        "policies": {
+          "W0": {
+            "answer": "**Total: $1,300**\n\nBreakdown from what's on record:\n\n| Item | Amount | Source |\n|---|---|---|\n| Designer handbag (Coach) | $800 | Noted when discussing luxury watch deals (recent treat-yourself purchase) |\n| High-end skincare products (Nordstrom anniversary sale) | $500 | Noted when asking for skincare routine advice |\n| **Total** | **$1,300** | |\n\nBoth figures were mentioned by you directly in pr",
+            "reason": "Candidate states total of $1,300, matching the reference exactly.",
+            "verdict": "correct"
+          },
+          "W1": {
+            "answer": "Based on your remembered purchases:\n\n- **Coach designer handbag:** $800\n- **High-end skincare products (Nordstrom anniversary sale):** $500\n\n**Total: $1,300**",
+            "reason": "Candidate computes $800 + $500 = $1,300, matching the reference total.",
+            "verdict": "correct"
+          },
+          "W3": {
+            "answer": "Based on what you've shared previously:\n\n- **Coach handbag:** $800\n- **High-end skincare products** (Nordstrom anniversary sale): $500\n\n**Total: $1,300**",
+            "reason": "Candidate computes $800 + $500 = $1,300 total, matching the reference exactly.",
+            "verdict": "correct"
+          }
+        }
+      },
+      {
+        "block": "u3a",
+        "case": 25,
+        "gold": "The painting is worth triple what I paid for it.",
+        "numeric": true,
+        "policies": {
+          "W0": {
+            "answer": "I don't have any record of a painting of a sunset — no purchase, no price paid, and no valuation for it.\n\nLooking at what's actually in my memory for you, the closest threads are:\n\n- **M0010 (2023-05-22):** you asking for help organizing and researching rare items you'd *acquired or inherited* — but the item details weren't captured, and no painting is named.\n- **M0017 (2023-05-23):** a rare Slove",
+            "reason": "The candidate says it has no record or valuation, while the reference states the painting is worth triple what was paid.",
+            "verdict": "incorrect"
+          },
+          "W1": {
+            "answer": "Based on what you've told me before, your flea market find — the sunset painting — is worth **triple** what you paid for it.\n\nIn other words, if you paid *X* for it, its value is **3 × X**.\n\n(You mentioned this while talking about your art history interests: you'd realized the piece is worth three times its purchase price. If you'd like, I can help you think about how to get it appraised or where ",
+            "reason": "Candidate states the painting is worth triple/triple what was paid, matching the reference.",
+            "verdict": "correct"
+          },
+          "W3": {
+            "answer": "Based on your note about your flea market find, the painting of a sunset is worth **three times** what you paid for it — i.e., **triple your purchase price**. If you paid **X**, it’s worth **3X**.",
+            "reason": "Candidate says the painting is worth three times/triple what was paid, matching the reference.",
+            "verdict": "correct"
+          }
+        }
+      },
+      {
+        "block": "u3a",
+        "case": 26,
+        "gold": 1300,
+        "numeric": true,
+        "policies": {
+          "W0": {
+            "answer": "I can't see your live Instagram account, so I don't have your real-time follower count.\n\nThe last figure you gave me was back on **May 25, 2023** — you said you thought you were **close to 1,300 followers**.\n\nTo get your actual current number, you'd need to open Instagram → your profile → tap **Followers**.\n\nWant me to keep going — e.g., help you project growth or plan a post for your next milesto",
+            "reason": "Candidate mentions 1,300 but frames it as an uncertain past figure and does not confirm it as the current follower count, saying it cannot see the account.",
+            "verdict": "partial"
+          },
+          "W1": {
+            "answer": "**Short answer:** I can't see your live Instagram count — I have no access to your account or real-time data.\n\n**What I do know from our past chats:**\n- **1,250 followers** — confirmed by you on May 25, 2023.\n- **\"Close to 1,300\"** — your estimate later that same day. Not a confirmed number.\n\nSo the last *verified* figure is **1,250**, with ~1,300 likely at that point. I have no newer number.\n\nWou",
+            "reason": "Mentions ~1,300 as an estimate but does not give 1300 as the confirmed answer, instead citing 1,250 as last verified.",
+            "verdict": "partial"
+          },
+          "W3": {
+            "answer": "I can't see your Instagram account live, so I can't pull today's number.\n\nFrom what you've told me: **1,250 followers** (2023-05-25), and later that same day you said you were \"close to **1,300** now.\" That's the most recent count I have.\n\nWant me to continue with how to check your live count in the app?",
+            "reason": "Mentions 1,300 as close to the most recent count but does not state the exact current number and also cites 1,250.",
+            "verdict": "partial"
+          }
+        }
+      },
+      {
+        "block": "u3b",
+        "case": 27,
+        "gold": "the 'Walk for Hunger' charity event",
+        "numeric": false,
+        "policies": {
+          "W0": {
+            "answer": "Based on the memories, about a month ago from the most recent event (March 19, 2023), you participated in the **\"Books for Kids\" charity book drive** at your local library on **February 15, 2023**, where you helped sort and pack over 500 books for underprivileged kids.\n\n(Note: You also did the **\"24-Hour Bike Ride\"** charity event on February 14, 2023, so both fall around the same time frame.)",
+            "reason": "The candidate names 'Books for Kids' and '24-Hour Bike Ride' instead of the reference event, 'Walk for Hunger'.",
+            "verdict": "incorrect"
+          },
+          "W1": {
+            "answer": "Based on the remembered context, the charity event you participated in a month ago was the **“Walk for Hunger”** event. You did it with your colleagues from work, walking **5 kilometers** to raise money for the **local food bank**.\n\nThis is tied to the memory dated **2023-03-19**, which would be about a month before the current query.",
+            "reason": "Candidate identifies the 'Walk for Hunger' charity event, matching the reference.",
+            "verdict": "correct"
+          },
+          "W3": {
+            "answer": "A month ago (mid-February 2023), you participated in the **“24-Hour Bike Ride”** charity event on **February 14, 2023**, where you cycled for 4 hours non-stop to raise money for a local children’s hospital.\n\nYou also volunteered at the **“Books for Kids”** charity book drive on **February 15, 2023**, sorting and packing over 500 books for underprivileged kids—so that was right around the same time",
+            "reason": "Candidate names different charity events (“24-Hour Bike Ride” and “Books for Kids”) and does not mention the reference event “Walk for Hunger.”",
+            "verdict": "incorrect"
+          }
+        }
+      },
+      {
+        "block": "u3b",
+        "case": 28,
+        "gold": "Dark Souls 3 DLC",
+        "numeric": false,
+        "policies": {
+          "W0": {
+            "answer": "I don't have that information — nothing in my notes about you finishing a game last weekend.\n\nHere's what the relevant memories actually contain, and why none of them answer the question:\n\n- **Gaming PC build (M0032, 2023-05-26):** A discussion about components for 4K/high-refresh gaming (Ryzen 9 5900X, RTX 3080 Ti, etc.). This is about *hardware*, not a game you completed.\n- **\"Snatch\" card illus",
+            "reason": "Candidate says it lacks the information, but the reference answer (Dark Souls 3 DLC) is known.",
+            "verdict": "incorrect"
+          },
+          "W1": {
+            "answer": "You beat the final boss in the **Dark Souls III DLC** — you mentioned it was \"that last boss in the Dark Souls 3 DLC,\" which you'd been stuck on for weeks before finally taking it down.\n\nThat came up while we were talking about your 4K gaming PC build (a nice segue from component shopping to actually using the thing).\n\n(For the record, the other gaming memory in play was the Lakers–Bulls game at t",
+            "reason": "Candidate identifies Dark Souls III DLC as the game beaten, matching the reference.",
+            "verdict": "correct"
+          },
+          "W3": {
+            "answer": "**Dark Souls 3** — specifically the final boss of its DLC. You mentioned you'd finally beaten that boss last weekend after weeks of trying (the conversation came up while we were talking about 4K gaming PC builds back on May 26).",
+            "reason": "Candidate identifies Dark Souls 3 DLC, matching the reference.",
+            "verdict": "correct"
+          }
+        }
+      },
+      {
+        "block": "u3b",
+        "case": 29,
+        "gold": "10 times",
+        "numeric": true,
+        "policies": {
+          "W0": {
+            "answer": "Based on the memories provided, here's the count of your rollercoaster rides from July to October:\n\n**July — SeaWorld San Diego (one night):**\n- Mako\n- Kraken\n- Manta\n→ **3 rides**\n\n**September 24 — Disneyland, Mickey's Halloween Party:**\n- Space Mountain: Ghost Galaxy (rode it **three times**)\n→ **3 rides**\n\n**October 8 — Knott's Berry Farm:**\n- Xcelerator\n→ **1 ride**\n\n**Total: 3 + 3 + 1 = 7 rol",
+            "reason": "Candidate totals 7 rides, but the reference answer is 10.",
+            "verdict": "incorrect"
+          },
+          "W1": {
+            "answer": "You rode rollercoasters **7 times** total across those events:\n\n- **July – SeaWorld San Diego:** Mako, Kraken, and Manta = **3 rides**\n- **September 24 – Disneyland / Mickey’s Halloween Party:** Space Mountain: Ghost Galaxy = **3 rides**\n- **October 8 – Knott’s Berry Farm:** Xcelerator = **1 ride**\n\n**Total: 3 + 3 + 1 = 7 rollercoaster rides.**",
+            "reason": "Candidate says 7 times, contradicting reference answer of 10 times.",
+            "verdict": "incorrect"
+          },
+          "W3": {
+            "answer": "Based on what you’ve told me, your rollercoaster rides from July to October add up to **7 total**:\n\n- **July — SeaWorld San Diego:** Mako, Kraken, and Manta = **3 rides**\n- **September 24 — Disneyland / Mickey’s Halloween Party:** Space Mountain: Ghost Galaxy **3 times** = **3 rides**\n- **October 8 — Knott’s Berry Farm:** Xcelerator = **1 ride**\n\n**Total: 3 + 3 + 1 = 7 rollercoaster rides.**\n\nThis",
+            "reason": "Candidate totals 7 rollercoaster rides, contradicting the reference total of 10.",
+            "verdict": "incorrect"
+          }
+        }
+      },
+      {
+        "block": "u3b",
+        "case": 30,
+        "gold": "4 years and 9 months",
+        "numeric": true,
+        "policies": {
+          "W0": {
+            "answer": "I can't answer this from what's on the whiteboard — and I'd rather flag that than guess.\n\nHere's everything the remembered notes actually establish about your work timeline:\n\n- **M0001 (2023-05-25 01:29)** — You were working on an API performance project *at* NovaTech. So NovaTech is your current employer as of that date.\n- **M0024 (2023-05-25 00:34)** — You mentioned \"working long hours on a high",
+            "reason": "Candidate states the answer is unknown, but the reference provides a specific answer (4 years and 9 months).",
+            "verdict": "incorrect"
+          },
+          "W1": {
+            "answer": "**Short answer: I can't determine that from what's on record — and it may well be zero.**\n\nHere's what I actually have:\n\n**What's known**\n- As of **25 May 2023**, you told me you'd \"been working at NovaTech for about **4 years and 3 months**\" — which puts your NovaTech start around **February 2019**.\n- You also described yourself as a backend software engineer who has \"been in this field since I g",
+            "reason": "Candidate says it cannot determine the pre-NovaTech work duration and suggests it may be zero, contradicting the reference answer of 4 years and 9 months.",
+            "verdict": "incorrect"
+          },
+          "W3": {
+            "answer": "Based on what you’ve shared, you had about **4 years and 9 months** of professional work experience before starting at NovaTech.\n\nCalculation:\n- Total professional experience: **9 years**\n- Time at NovaTech: **4 years and 3 months**\n- Before NovaTech: **9 years − 4 years 3 months = 4 years 9 months**",
+            "reason": "Candidate states 4 years and 9 months, matching the reference exactly.",
+            "verdict": "correct"
+          }
+        }
+      },
+      {
+        "block": "u3b",
+        "case": 31,
+        "gold": "4",
+        "numeric": true,
+        "policies": {
+          "W0": {
+            "answer": "You participated in **4 charity events** before the **“Run for the Cure”** event on October 15th:\n\n1. **Dance for a Cause** — May 1st  \n2. **Walk for Wildlife** — June  \n3. **Charity golf tournament** — July 17th  \n4. **Food for Thought charity gala** — September 25th  \n\nThe **Bike-a-Thon** in November happened after “Run for the Cure,” so it doesn’t count.",
+            "reason": "Candidate states 4 charity events before the Run for the Cure, matching the reference.",
+            "verdict": "correct"
+          },
+          "W1": {
+            "answer": "You participated in **4 charity events** before the \"Run for the Cure\" event on October 15th:\n\n1. **Dance for a Cause** — May 1st  \n2. **Walk for Wildlife** — June  \n3. **Charity golf tournament** — July 17th  \n4. **Food for Thought charity gala** — September 25th  \n\nThe **Bike-a-Thon** in November occurred after the Run for the Cure, so it doesn’t count.",
+            "reason": "Candidate states 4 charity events, matching the reference number.",
+            "verdict": "correct"
+          },
+          "W3": {
+            "answer": "You participated in **4 charity events before the “Run for the Cure” event** on October 15th:\n\n1. **Dance for a Cause** — May 1st  \n2. **Walk for Wildlife** — June  \n3. **Charity golf tournament** — July 17th  \n4. **Food for Thought charity gala** — September 25th  \n\nThe **Bike-a-Thon** was in November, so it came after the “Run for the Cure” event and does not count.",
+            "reason": "Candidate states 4 charity events before the Run for the Cure, matching the reference.",
+            "verdict": "correct"
+          }
+        }
+      },
+      {
+        "block": "u3b",
+        "case": 32,
+        "gold": "The Grand Ballroom",
+        "numeric": false,
+        "policies": {
+          "W0": {
+            "answer": "I don't have any record of your cousin's wedding in the memories I can currently access. The notes I have about you cover other topics — concerts and live music (Billie Eilish in Philly, a local jazz night), sustainable energy events, gift ideas for your mom's birthday on the 15th, and recipes for the chicken and ground beef you bought — but nothing about a cousin's wedding or a travel destination",
+            "reason": "Candidate says it has no record and cannot answer, but the reference contains the venue (The Grand Ballroom).",
+            "verdict": "incorrect"
+          },
+          "W1": {
+            "answer": "**At the Grand Ballroom.**\n\nThat detail came up while we were talking about your mom's birthday gift — you mentioned you'd just been at your cousin's wedding at the Grand Ballroom the previous weekend, and that your mom looked stunning there, which is what inspired the Lavender Dreams Skincare Set idea.\n\nIf you need more specifics (city, venue, date), I don't have those — feel free to fill them in",
+            "reason": "Candidate states the wedding was at the Grand Ballroom, matching the reference.",
+            "verdict": "correct"
+          },
+          "W3": {
+            "answer": "You attended your cousin's wedding at the **Grand Ballroom** — you mentioned it was \"last weekend\" while we were brainstorming your mom's birthday gift (she looked stunning there, which is why you wanted the Lavender Dreams Skincare Set to help her keep that glow).\n\nNo new durable facts to store — that detail is already captured in memory.",
+            "reason": "Candidate states the wedding was at the Grand Ballroom, matching the reference.",
+            "verdict": "correct"
+          }
+        }
+      },
+      {
+        "block": "u3b",
+        "case": 33,
+        "gold": "my cousin's wedding",
+        "numeric": false,
+        "policies": {
+          "W0": {
+            "answer": "I don't have any record of that event. Nothing in my remembered notes mentions a relative's life event, and the external context I was given is about building a one-year SMART plan with first-year college students — unrelated to your personal life.\n\nSo I can't answer it, and I don't want to guess at something like this (a wedding, graduation, funeral, birth, etc. are all plausible and very differe",
+            "reason": "Candidate says it doesn't know and does not provide the reference answer, my cousin's wedding.",
+            "verdict": "incorrect"
+          },
+          "W1": {
+            "answer": "I don't have anything in my memory about a relative's life event you attended — the only context I have is unrelated (a SMART-goal planning exercise for college students), and there's no note about a wedding, graduation, funeral, baptism, birthday, anniversary, or any other family event you took part in roughly a week ago (around early April 2023, based on the last memory timestamp).\n\nSo I can't a",
+            "reason": "Candidate says it doesn't know and fails to provide the reference answer (cousin's wedding).",
+            "verdict": "incorrect"
+          },
+          "W3": {
+            "answer": "I don’t have any record or memory of a relative’s life event that you participated in a week ago. The only remembered context I have is about a SMART career-planning exercise for college students, which doesn’t include personal events.\n\nIf you remind me which relative it was and what kind of event it was—wedding, graduation, funeral, birthday, etc.—I can help you reconstruct or record it.",
+            "reason": "Candidate says it has no record of the event, while the reference answer states it was the cousin's wedding.",
+            "verdict": "incorrect"
+          }
+        }
+      },
+      {
+        "block": "u3b",
+        "case": 34,
+        "gold": "I signed a contract with my first client.",
+        "numeric": true,
+        "policies": {
+          "W0": {
+            "answer": "I don't have any record of a business milestone. Looking back at the notes I have from around four weeks ago (~early February 2023), the topics were all personal/household, not professional:\n\n- **~Feb 11** – You asked for board game recommendations similar to *Ticket to Ride*, mentioning a win against your roommate two weeks prior and a game night with neighbors playing *Carcassonne*.\n- **~Feb 21*",
+            "reason": "Candidate says it has no record of the business milestone and does not provide the reference answer (signing a contract with the first client).",
+            "verdict": "incorrect"
+          },
+          "W1": {
+            "answer": "I don't have any record of a business milestone from around four weeks ago — and I want to be straight with you rather than guess.\n\nWhat my memory actually contains for that window:\n\n- **Feb 11, 2023** — you asked for board game recommendations similar to *Ticket to Ride* and mentioned winning a game against your roommate plus a game night with neighbors (two rounds of *Carcassonne*).\n- **Feb 21, ",
+            "reason": "The candidate says it has no record of the business milestone and does not state the reference fact that the user signed a contract with their first client.",
+            "verdict": "incorrect"
+          },
+          "W3": {
+            "answer": "I don't have any record of a business milestone — and I want to flag that rather than guess, because none of the memories I can see touch on work or business at all.\n\nHere's everything I have from roughly the relevant window:\n\n- **2023-02-11** — You asked for board game recommendations similar to *Ticket to Ride*. You mentioned you'd **won a game against your roommate two weeks prior** and had a g",
+            "reason": "Candidate does not provide the reference answer and explicitly says it lacks any record of the business milestone.",
+            "verdict": "incorrect"
+          }
+        }
+      },
+      {
+        "block": "u3b",
+        "case": 35,
+        "gold": "33",
+        "numeric": true,
+        "policies": {
+          "W0": {
+            "answer": "I can’t give an exact age because you never told me how old you are.\n\nFrom the memory dated **September 1, 2022**, you said Rachel was getting married **“next year,”** so that would be **2023**. That means you’d be **one year older than you were in 2022**.\n\nIf you tell me your age in 2022—or your birth year—I can calculate exactly how old you were/will be in 2023.",
+            "reason": "Candidate does not provide the reference answer 33; it says it cannot determine the age.",
+            "verdict": "incorrect"
+          },
+          "W1": {
+            "answer": "## Short answer\n\nI can't calculate this — you never told me your age (or your birth date), and that's the one piece of information the math needs.\n\n## What I do know\n\n- **Rachel's wedding date:** From our conversation on **September 1, 2022**, you said \"my friend Rachel's getting married **next year**\" — so the wedding is in **2023**.\n- **Your age:** Unknown. You've asked me about skincare \"for so",
+            "reason": "Candidate says it cannot calculate the age, while the reference answer is 33; it does not provide the required answer definitively.",
+            "verdict": "incorrect"
+          },
+          "W3": {
+            "answer": "Based on what you've told me, here's the math:\n\n- **You're 32** (you mentioned this when we talked about skincare for your age group).\n- **Rachel's wedding is \"next year\"** — so about a year out from when you said that.\n\nThat puts you at **33** around the time she gets married.\n\nOne caveat: without knowing your birthday or the exact wedding date, it's possible you'd still be 32 if the wedding fall",
+            "reason": "Candidate concludes the age is 33, matching the reference answer.",
+            "verdict": "correct"
+          }
+        }
+      },
+      {
+        "block": "u3b",
+        "case": 36,
+        "gold": "10",
+        "numeric": true,
+        "policies": {
+          "W0": {
+            "answer": "You told me you saw **10 amateur comedians** perform at that open mic night (mentioned on 2023-05-22, when you were asking for comedy writing tips for your stand-up class). You described it as really inspiring to see people trying out new material.\n\nNo new durable facts to record — this is already captured in memory.",
+            "reason": "Candidate states 10 amateur comedians, matching the reference.",
+            "verdict": "correct"
+          },
+          "W1": {
+            "answer": "You watched **10 amateur comedians** perform at the open mic night — you mentioned this while asking for comedy writing tips for your stand-up class, saying it was inspiring to see people trying out new material.",
+            "reason": "Candidate states 10 amateur comedians, matching the reference.",
+            "verdict": "correct"
+          },
+          "W3": {
+            "answer": "You watched **10 amateur comedians** perform at the open mic night. (You mentioned this while asking for comedy writing tips for your stand-up class, and you brought it up again later, saying you'd had a great time there a few weeks earlier.)",
+            "reason": "Candidate states 10 amateur comedians, matching the reference exactly.",
+            "verdict": "correct"
+          }
+        }
+      },
+      {
+        "block": "u3b",
+        "case": 37,
+        "gold": "Grilled Snapper with Mango Salsa",
+        "numeric": false,
+        "policies": {
+          "W0": {
+            "answer": "I think there's a small mix-up between two different dishes from that conversation:\n\n- **The dish I actually recommended you try first** was **Escovitch Fish** — a classic Jamaican preparation of crispy fried snapper topped with a spicy, tangy pickled sauce made with carrots, onion, bell peppers, and vinegar. It's bold and acidic, but it **doesn't contain fruit**.\n- **The dish with fruit** was **G",
+            "reason": "The candidate names the dish 'Grilled Snapper with Mango Salsa' as the fruit-containing snapper dish, matching the reference answer.",
+            "verdict": "correct"
+          },
+          "W1": {
+            "answer": "There's a small mix-up in the premise worth untangling — I didn't recommend a Jamaican dish that has fruit in it. Two separate dishes from that conversation:\n\n**What I actually recommended you try: Escovitch Fish** — the Jamaican dish. Fried snapper topped with a spicy, tangy pickled vegetable sauce (carrots, onion, bell peppers, vinegar). Bold, acidic, and no fruit involved.\n\n**The dish with frui",
+            "reason": "Candidate explicitly names 'Grilled Snapper with Mango Salsa' as the fruit dish, matching the reference.",
+            "verdict": "correct"
+          },
+          "W3": {
+            "answer": "Small mix-up to untangle — the two details come from two different dishes:\n\n- **The Jamaican dish I recommended** was **Escovitch Fish** — crispy fried snapper topped with a spicy, tangy pickled vegetable sauce (carrots, onion, bell peppers, vinegar). It's bold and acidic, but there's **no fruit** in it.\n- **The dish with fruit** was **Grilled Snapper with Mango Salsa** — grilled snapper topped wi",
+            "reason": "Names Grilled Snapper with Mango Salsa as the fruity snapper dish, matching the reference answer.",
+            "verdict": "correct"
+          }
+        }
+      },
+      {
+        "block": "u3b",
+        "case": 38,
+        "gold": "I replaced or fixed five items: the kitchen faucet, the kitchen mat, the toaster, the coffee maker, and the kitchen shelves.",
+        "numeric": true,
+        "policies": {
+          "W0": {
+            "answer": "You replaced or fixed **3 kitchen items**:\n\n1. **Kitchen shelves** — fixed them  \n2. **Toaster** — replaced with a toaster oven  \n3. **Kitchen faucet** — replaced with a new Moen touchless faucet  \n\nThe kitchen mat was a new addition, not a replacement or repair, so it isn’t counted.",
+            "reason": "Reference counts five items including the kitchen mat and coffee maker; candidate counts only three and explicitly excludes the kitchen mat, contradicting the reference.",
+            "verdict": "incorrect"
+          },
+          "W1": {
+            "answer": "You mentioned **3 kitchen items** that you either replaced or fixed:\n\n1. **Kitchen shelves** — fixed them (mentioned 2023-05-20); you said the kitchen felt much more spacious afterward.\n2. **Toaster → toaster oven** — got rid of the old toaster and replaced it with a toaster oven (2023-05-26).\n3. **Kitchen faucet** — replaced your old faucet with a new touchless Moen one (2023-05-28).\n\nNot counted",
+            "reason": "Says 3 (or 4) items, omits the coffee maker, and contradicts the reference count of five.",
+            "verdict": "incorrect"
+          },
+          "W3": {
+            "answer": "You replaced or fixed **3 kitchen items**:\n\n1. **Kitchen shelves** — fixed them last weekend.\n2. **Toaster** — replaced it with a toaster oven.\n3. **Kitchen faucet** — replaced the old one with a new Moen touchless faucet.",
+            "reason": "Lists 3 of the 5 items (faucet, toaster, shelves) but omits the kitchen mat and coffee maker, giving a count of 3 instead of 5.",
+            "verdict": "partial"
+          }
+        }
+      },
+      {
+        "block": "u3b",
+        "case": 39,
+        "gold": "Golden Retriever",
+        "numeric": false,
+        "policies": {
+          "W0": {
+            "answer": "I don't actually have anything on file about your dog's breed — that's genuinely missing from what I know.\n\nHere's what I *do* have from our earlier conversations:\n\n- Your dog's name is **Max** (from when we talked about finding a dog walker and whether they could handle his flea/tick prevention every two weeks).\n- Nothing in our history mentions Max's breed, size, coat, coloring, or where you got",
+            "reason": "Candidate says the breed is unknown, whereas the reference answer is Golden Retriever.",
+            "verdict": "incorrect"
+          },
+          "W1": {
+            "answer": "I don't have that information. Across everything I have on record for you, your dog's breed has never come up — the only canine detail I have is that your dog is named **Max**, mentioned in the context of flea and tick prevention medication every two weeks. Nothing in my notes (which also include your garden pest control and your 20-gallon aquarium) mentions breed, size, coat type, or anything els",
+            "reason": "Candidate states it lacks the information and does not give the reference answer, Golden Retriever.",
+            "verdict": "incorrect"
+          },
+          "W3": {
+            "answer": "I don't have that information. Nothing in what I have on file mentions your dog's breed — the only detail I have is that your dog's name is Max (from when we talked about finding a dog walker and flea/tick medication).\n\nIf you'd like help narrowing it down, tell me:\n- Size and weight, and approximate age\n- Coat type (short/long, curly, wiry, double-coated) and color/markings\n- Ear shape (upright, ",
+            "reason": "Candidate says it lacks the information and does not give the breed, while the reference states Golden Retriever.",
+            "verdict": "incorrect"
+          }
+        }
+      },
+      {
+        "block": "u3b",
+        "case": 40,
+        "gold": "12 days ago. 13 days (including the last day) is also acceptable.",
+        "numeric": true,
+        "policies": {
+          "W0": {
+            "answer": "You read the **March 15th issue** of *The New Yorker* on **March 20, 2023** — that’s the day you said you “finally got around to reading” it.\n\nAs of today, **May 9, 2026**, that was **1,146 days ago**.",
+            "reason": "The reference says 12 (or 13) days ago, but the candidate gives 1,146 days ago, contradicting the required number.",
+            "verdict": "incorrect"
+          },
+          "W1": {
+            "answer": "You read the March 15 issue on **March 20, 2023** — that’s the day you said you read it “today.”\n\nAs of **May 9, 2026**, that was **1,146 days ago**.",
+            "reason": "Candidate gives 1,146 days ago, not the reference's 12 or 13 days.",
+            "verdict": "incorrect"
+          },
+          "W3": {
+            "answer": "You read it on **March 20, 2023** — the same day you mentioned it in that conversation. So relative to that moment, it was **0 days ago**.\n\nThe issue was dated **March 15**, so you read it **5 days after the issue date**.",
+            "reason": "Candidate says 0 days ago (or 5 days after issue date on March 20), contradicting the reference answer of 12/13 days ago.",
+            "verdict": "incorrect"
+          }
+        }
+      },
+      {
+        "block": "u3b",
+        "case": 41,
+        "gold": "The information provided is not enough. You mentioned living in Harajuku but not Shinjuku.",
+        "numeric": true,
+        "policies": {
+          "W0": {
+            "answer": "**Short answer: about 7 months** (as of the most recent note, mid‑October 2023).\n\nHere's the reasoning from what I have on record:\n\n- In a conversation dated **2023‑10‑15**, you described \"the recent move to my new apartment **in March**,\" along with the stress of packing/unpacking and settling in. That's the only move‑in date I have for your current place.\n- Counting from March 2023 to mid‑Octobe",
+            "reason": "Reference says the info is insufficient (Harajuku mentioned, not Shinjuku); candidate asserts a specific ~7 months answer, contradicting the reference.",
+            "verdict": "incorrect"
+          },
+          "W1": {
+            "answer": "You've been in your current place about **7 months** — but there's a wrinkle in the records worth flagging.\n\n**What the memories say:**\n\n- **M0039 (2023-10-15):** You described \"the recent move to my new apartment in **March**,\" and said the packing/unpacking process took weeks to settle.\n- **M0033 (2023-10-15, same day):** You mentioned \"I've been living in **Harajuku** for **3 months** now.\"\n\n**",
+            "reason": "Candidate acknowledges no memory places the user in Shinjuku and notes the record can't be resolved, matching the reference's core point, but also headlines a specific '7 months' answer that the reference says cannot be determined.",
+            "verdict": "partial"
+          },
+          "W3": {
+            "answer": "## Answer: I can't confirm a Shinjuku apartment — and the timeline in my memory conflicts\n\nNothing I've retained mentions Shinjuku. What I do have are two statements from October 2023 that don't fit together:\n\n| Source | Date | What you said | Implied move-in | Implied duration at that date |\n|---|---|---|---|---|\n| M0039 | 2023‑10‑15 | \"the recent move to my new apartment in **March**\" | ~March 2",
+            "reason": "Candidate states Shinjuku cannot be confirmed and notes only Harajuku was mentioned, matching the reference that information is insufficient.",
+            "verdict": "correct"
+          }
+        }
+      }
+    ],
+    "summary": {
+      "W0": {
+        "counts": {
+          "correct": 11,
+          "incorrect": 18,
+          "infra_error": 0,
+          "partial": 1
+        },
+        "numeric_score": 0.4048,
+        "score": 0.3833,
+        "strict": 0.3667
+      },
+      "W1": {
+        "counts": {
+          "correct": 16,
+          "incorrect": 11,
+          "infra_error": 0,
+          "partial": 3
+        },
+        "numeric_score": 0.5,
+        "score": 0.5833,
+        "strict": 0.5333
+      },
+      "W3": {
+        "counts": {
+          "correct": 17,
+          "incorrect": 10,
+          "infra_error": 0,
+          "partial": 3
+        },
+        "numeric_score": 0.5952,
+        "score": 0.6167,
+        "strict": 0.5667
+      }
+    }
+  },
+  "fixture": "/Users/igorcoutrimlacerda/memory-machine/eval/fixtures/composition_u4",
+  "prereg": "docs/DELIVERY_COMBINED_V1_PREREG.md"
+}

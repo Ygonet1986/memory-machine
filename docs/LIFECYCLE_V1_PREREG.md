@@ -197,3 +197,90 @@ M0009).
   as specified cannot reach them (hypothesis for lifecycle-v2).
 - **Stop rule applied:** reduction reached but recall beyond the floor ⇒
   lifecycle stays **shadow-only**; the tape and defaults remain untouched.
+
+## Addendum 2 — retroactive recovery contract (frozen before execution)
+
+Frozen 2026-09-22 before running step 6. Arm C is **not executed** this round:
+the official run shows the four false discards are `no_durable_signal`, not
+`ambiguous`, so the pre-registered hybrid (LLM only on ambiguous records) is
+causally unable to repair H-L2. Recorded as *not executed due to causal
+inapplicability* — neither a favourable nor an unfavourable H-L6 result.
+Routing `no_durable_signal` to the LLM is a lifecycle-v2 hypothesis and needs a
+new pre-registration.
+
+### Retriever (product defaults, no tuning against the misses)
+
+- BM25 `retrieval.bm25` (k1=1.5, b=0.75) with the product tokenizer
+  `retrieval.tokenize`; `top_k = 5` (the product's `view_top_k` default);
+  candidates = positive-score records inside top_k; no score threshold.
+- Stable tie-break: score desc → `seq` asc → `memory_id` asc.
+- Configuration registered in the run manifest.
+
+### Protocol (gold never enters query, ranking or the trigger)
+
+Per probe (questions are the only probe field used before retrieval):
+
+1. temporal filter: only records with `seq < probe.after_seq`;
+2. active recall over the promoted set (BM25 top_k);
+3. **trigger**: fires iff the active top_k contains **no positive score**;
+4. event-log search over non-promoted, searchable records
+   (`target_class == event_only` only; `reject`/invalid/secret are excluded);
+5. candidates returned with the full ranking preserved;
+6. only **after** retrieval, compare with `required_ids` (reporting only).
+
+No promotion is applied during the round; a retroactive hit never changes later
+probes.
+
+### Counters and metrics
+
+`recoverable_false_negative`, `retroactively_found`, `retroactively_missed`,
+`unrecoverable_due_to_ingestion`, `fallback_triggered`,
+`fallback_not_triggered`, `irrelevant_retroactive_hits`.
+
+- `retroactive_recovery_rate = found / recoverable_false_negative`
+  (H-L5 gate: ≥ 0.80).
+- `retroactive_precision@k = required_recovered / retro_candidates_delivered`.
+- H-L5 does not pass by returning the right memory buried in noise: precision@k
+  is reported next to it.
+
+### Trigger / retriever / total decomposition (reporting only)
+
+- **trigger quality**: fired when needed? (needed = the probe has a recoverable
+  false negative; the check reads gold only after retrieval);
+- **retriever quality**: with the opportunity granted unconditionally, would
+  the event-log retriever return the required record? (diagnostic);
+- **total**: trigger + retrieval, i.e. the protocol result.
+
+`não buscou` → coverage failure; `buscou e não achou` → retrieval failure;
+`achou` → recovery.
+
+### Addendum 2 — execution record (2026-09-22)
+
+Run `eval/results/lifecycle_v1_retroactive/retro_report.json` on the official
+projection (fixture `e1021c20…`), retriever BM25 top_k=5.
+
+| counter | value |
+|---|---:|
+| recoverable_false_negative | 4 |
+| retroactively_found | 1 |
+| retroactively_missed | 3 |
+| unrecoverable_due_to_ingestion | 1 |
+| fallback_triggered / not_triggered | 1 / 18 |
+| irrelevant_retroactive_hits | 0 |
+
+- `retroactive_recovery_rate` = **0.250** → **H-L5 FAIL** (gate ≥ 0.80).
+- `retroactive_precision@k` = **1.000** (the single triggered fallback returned
+  exactly the required memory; no noise).
+- **Decomposition**: trigger quality **1/4 = 0.25** (fired when needed only once);
+  retriever capability **4/4 = 1.000** (with the opportunity granted
+  unconditionally, the event-log BM25 returns every one of the four false
+  negatives). The bottleneck is therefore **coverage detection (the trigger)**,
+  not retrieval: `não buscou → falha de cobertura` in 3 of 4 cases.
+- No promotion was applied; full rankings are preserved per probe in the JSON.
+
+**Verdict for lifecycle-v1.** A/B/D gave H-L1 PASS, H-L2 FAIL, H-L3 PASS
+(shadow-only per the stop rule). The retroactive experiment shows the promoted
+set alone is insufficient **and** the repair mechanism works when invoked but
+is invoked too rarely. Lifecycle v1 remains a measurement instrument; v2 must
+pre-register a stronger gold-free coverage signal before any promotion to the
+main path.

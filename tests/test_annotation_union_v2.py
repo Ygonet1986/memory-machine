@@ -17,8 +17,8 @@ OUT = ROOT / "eval" / "results" / "annotation_union_v2"
 
 def test_recorded_verdicts():
     report = json.loads((OUT / "report.json").read_text(encoding="utf-8"))
-    assert report["aggregates"]["A"]["mean_coverage"] == 0.486
-    assert report["aggregates"]["U"]["mean_coverage"] == 0.539
+    assert report["aggregates"]["A"]["mean_coverage"] == 0.4856
+    assert report["aggregates"]["U"]["mean_coverage"] == 0.5387
     assert report["u3a17"]["m0043_hits"] == 0
     assert report["llm_calls"] == 180
     assert report["failures"] == 0

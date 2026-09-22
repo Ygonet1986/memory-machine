@@ -1,7 +1,7 @@
 # doc-graph-v1 — review + pre-registered rebuild-fidelity protocol
 
 **Status: PRE-REGISTERED (frozen before execution)** · review target:
-D5 @ `a7f4ae3` (+docs `4d93fd6`) · suite: **406 green** · precedent: U4.2
+D5 @ `3689989` (+docs `9392221`) · suite: **406 green** · precedent: U4.2
 byte-identical replication and its oscillation-floor lesson.
 **Execution:** deterministic arm registered **PASS** (Δ=0 everywhere,
 provenance clean); LLM arm registered **FAIL** on F5 only — see §11.
@@ -195,9 +195,9 @@ protocol measures; only Fase P proposes plasticity changes afterwards.
 
 ## 11. Execution record (registered verbatim, no criterion re-fit)
 
-Run 1, both arms, committed protocol `1f9a5ce` + harness `4234bc7`; full
+Run 1, both arms, committed protocol `8b3b136` + harness `02bee7e`; full
 table in `eval/results/dg_v1_llm/doc_graph_rebuild.json` + `_summary.md`
-(commit `27da7fd`). Extractor `llm/v1` (`GraphExtractor`, temperature 0.0),
+(commit `7617a01`). Extractor `llm/v1` (`GraphExtractor`, temperature 0.0),
 canonical corpus params as §3.
 
 | block | O | A | B |

@@ -1,7 +1,7 @@
 # Graph Memory Machine v1 — status
 
-**Status: COMPLETE** · reference tag **`graph-v1`** → `e7319a2` · baseline: **334 tests**
-(frozen paper snapshot: `v1.0` → `7796211`, untouched).
+**Status: COMPLETE** · reference tag **`graph-v1`** → `f60bb62` · baseline: **334 tests**
+(frozen paper snapshot: `v1.0` → `c89b58b`, untouched).
 
 ## Final invariant
 
@@ -13,12 +13,12 @@
 
 | Phase | Commit | Delivered |
 |---|---|---|
-| F0 | `f7dfe90` | Clear docs button + capacity default 500 |
-| F1 | `36426fc` | Append-only graph store (`graph/`), indices, rebuild, CLI `graph build/status/explain` |
-| F2 | `747da99` | LLM `GraphExtractor` (semantic refs, never `E####`), resolver bands 0.90/0.60, write-time hooks, pending/failed policy |
-| F3 | `02c978e` | Graph recall `off/augment/only`, semantic-hop traversal (event = 1 hop), explainable paths, global budget after union |
-| F4 | `55e4cd2` | Batching (11.245 → 4.320 ms/mem; 411 → 55 tok/mem), `meta.json` versioning, atomic rebuild, hypothesis review, `pending/failed/retry` |
-| F5 | `e7319a2` | Settings toggle + recall mode, read-only viewer with provenance, governed review, admin actions, packaging |
+| F0 | `46ff40d` | Clear docs button + capacity default 500 |
+| F1 | `a86cbcd` | Append-only graph store (`graph/`), indices, rebuild, CLI `graph build/status/explain` |
+| F2 | `bbb4071` | LLM `GraphExtractor` (semantic refs, never `E####`), resolver bands 0.90/0.60, write-time hooks, pending/failed policy |
+| F3 | `1f985d1` | Graph recall `off/augment/only`, semantic-hop traversal (event = 1 hop), explainable paths, global budget after union |
+| F4 | `ea48c1c` | Batching (11.245 → 4.320 ms/mem; 411 → 55 tok/mem), `meta.json` versioning, atomic rebuild, hypothesis review, `pending/failed/retry` |
+| F5 | `f60bb62` | Settings toggle + recall mode, read-only viewer with provenance, governed review, admin actions, packaging |
 
 ## Architecture (frozen)
 

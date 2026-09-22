@@ -164,7 +164,7 @@ cross-checks fixture→snapshot→tape with 0 failures.
 
 ## 10. E1 execution record (registered verbatim, no criterion re-fit)
 
-Run `eval/results/composition_u4_e1` (harness commit `371037b`; fixture sha1
+Run `eval/results/composition_u4_e1` (harness commit `710777d`; fixture sha1
 `24b390955b228bbfad5150bc7412ca67c6ae4cc5`; single batch, model
 `deepseek-v4-flash`, judge `deepseek-v4-flash`, N=3, flips N=5 on the 18 cases
 whose precise↔cards modal diverged). Raw answers and judge reasons preserved in
@@ -246,7 +246,7 @@ judge, single batch):
 **N**: 5 per case-arm (E1 found 17/90 non-unanimous case-arms).
 
 **Primary metric**: strict modal. **Secondaries**: all-present, item rate,
-paired ledger (repairs/regressions). The E1 ledger is frozen at `a0edc08` and
+paired ledger (repairs/regressions). The E1 ledger is frozen at `ad58bfa` and
 is neither re-run nor re-interpreted here.
 
 **Promotion gate (all four, frozen):**
@@ -266,8 +266,8 @@ evidence exists.
 ## 12. E2 execution record (registered verbatim, no criterion re-fit)
 
 Run `eval/results/composition_u4_e2` (harness + pre-registration §11 at
-`2b73aba`; fixture sha1 `24b390955b228bbfad5150bc7412ca67c6ae4cc5`; E1 ledger
-frozen at `a0edc08`; single batch, model/judge `deepseek-v4-flash`, N=5; 300/300
+`15c9227`; fixture sha1 `24b390955b228bbfad5150bc7412ca67c6ae4cc5`; E1 ledger
+frozen at `ad58bfa`; single batch, model/judge `deepseek-v4-flash`, N=5; 300/300
 case-arm-replicates). Raw answers+jurors preserved in `answers.jsonl` (sha1
 `b45daa8f…`), contexts in `contexts.jsonl`, atom audit in `atoms.jsonl`,
 paired ledger in `paired_ledger.jsonl`, summary `e2_summary.json` (sha1
@@ -360,7 +360,7 @@ graph/delivery defaults; no new substrate; no tuning after results.
 
 ## 14. E5 execution record (registered verbatim, no criterion re-fit)
 
-Run `eval/results/composition_u4_e5` (harness `9d9a235`, pre-registration
+Run `eval/results/composition_u4_e5` (harness `39b49a1`, pre-registration
 §13; fixture sha1 `24b390955b228bbfad5150bc7412ca67c6ae4cc5`; N=5;
 model/judge `deepseek-v4-flash`; 450/450). Operational incident: repeated
 urllib connection hangs (the known mode) plus one host reboot that cleared

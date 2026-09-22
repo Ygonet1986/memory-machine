@@ -5,7 +5,7 @@ Date: 2026-09-22 · Repository: `github.com/Ygonet1986/memory-machine` (private)
 ## First green matrix
 
 - **Run:** [35712803264](https://github.com/Ygonet1986/memory-machine/actions/runs/35712803264) — conclusion **success**
-- **Commit:** `181441d` ("fix: deterministic topic order under coarse clocks")
+- **Commit:** `26f273f` ("fix: deterministic topic order under coarse clocks")
 - **Jobs (all green):** ubuntu-latest · py3.11; ubuntu-latest · py3.14;
   macos-latest · py3.11; macos-latest · py3.14; windows-latest · py3.11;
   windows-latest · py3.14.

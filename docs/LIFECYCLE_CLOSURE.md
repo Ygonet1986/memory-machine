@@ -49,7 +49,7 @@ re-fit after seeing this.
   reports and all pre-registrations (v1–v4 with execution records).
 - `lifecycle_mode` does **not exist** in the product's configuration; nothing
   in the recall path imports the lifecycle projection.
-- The `0.2.0` release (tag on `181441d`) is untouched; `main` receives this
+- The `0.2.0` release (tag on `26f273f`) is untouched; `main` receives this
   record plus the shadow instrumentation only.
 
 ## Registered follow-ups (not executed; each needs a new pre-registration)

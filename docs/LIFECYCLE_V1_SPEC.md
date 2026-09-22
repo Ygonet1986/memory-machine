@@ -2,7 +2,7 @@
 
 Status: **draft for pre-registration** (docs/LIFECYCLE_V1_PREREG.md freezes the
 experiment). Branch: `memory-lifecycle-v1`. Reference baseline: `v0.2.0`
-(commit `181441d`, CI green 35712803264).
+(commit `26f273f`, CI green 35712803264).
 
 ## 1. Purpose
 

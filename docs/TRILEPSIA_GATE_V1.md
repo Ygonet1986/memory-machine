@@ -1,8 +1,8 @@
 # trilepsia gate B2 vs B2+ — execution pre-registration (V1)
 
 Frozen 2026-09-16 before any gate LLM call. Registers the execution details of
-`docs/TRILEPSIA_GATE_SPEC.md` (538077a) and T0 (`docs/TRILEPSIA_V1.md`,
-aa8fc7c, R1–R5). Any change after this commit is a new pre-registration.
+`docs/TRILEPSIA_GATE_SPEC.md` (40dccd6) and T0 (`docs/TRILEPSIA_V1.md`,
+33c8075, R1–R5). Any change after this commit is a new pre-registration.
 
 ## 1. Fixture build (one-time, frozen before any arm runs)
 
@@ -100,7 +100,7 @@ E1/E2 substrates for this gate.
 
 ## 8. Execution record (registered verbatim, no criterion re-fit)
 
-Run `eval/results/trilepsia_gate_v1` (harness + fixture commit `e9843b7`;
+Run `eval/results/trilepsia_gate_v1` (harness + fixture commit `f65970b`;
 fixture sha1 `cec309defe1acecb82adbf57e08a6e8f76cfe533`; N=5; model/judge
 `deepseek-v4-flash`; 360/360 case-arm-replicates). One harness hang occurred
 mid-run (urllib connection held; known mode) and the run was resumed from the

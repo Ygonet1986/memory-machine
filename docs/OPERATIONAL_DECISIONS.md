@@ -22,17 +22,16 @@ scheduled/dispatch-only.
 Engineering readiness is accepted (L1 packaging, L10 CI, preflight). Public
 opening requires, in order:
 
-1. **Resolve `.opencode/memory` in history.** Content reviewed: the author's
-   own early project notes (`manifest.json`, `whiteboard.json`, removed from
-   HEAD in `09b4397`; no secret patterns). They are personal data, so under the
-   author's rule they must be **purged from history before any public
-   opening**. The purge is not executed yet; the repository stays private until
-   the public-open go.
-2. **After any history rewrite**: re-run `scripts/preflight_publication.py`
-   across every new blob, re-create the annotated tag, update every recorded
-   SHA reference (CI records, docs), and verify CI on the rewritten `main`.
-3. **Never publish first and clean later** — clones and caches make reversal
-   incomplete.
+1. **Resolved (2026-09-22): `.opencode/memory` purged from history** with
+   `git filter-repo` after a mirror backup; details and verification in
+   `HISTORY_REWRITE_2026-09-22.md`.
+2. **Executed after the rewrite**: preflight re-run over all rewritten blobs
+   (0 critical, 14 reviewed canonical placeholders, PASS with
+   `--accept-private-history`); every cited SHA remapped from the commit map;
+   tags rewritten; CI green on the rewritten `main`; `v0.2.1` will mark the
+   public-ready snapshot.
+3. **Never publish first and clean later** — the purge happened before any
+   public exposure, as required.
 
-Until steps 1-2 complete, publication remains conditional; nothing about the
-private repository's visibility changes as a side effect of this record.
+The public-open condition is now met at the repository level; the visibility
+flip itself remains an explicit owner action.

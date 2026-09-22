@@ -208,7 +208,7 @@ metric-absent-but-correct tracked separately), as pre-registered.
 `rebuild_delivery` asserts equality with the snapshot context or aborts). Arms
 `graph_augment_precise` and `i5_single` over the 30 U3 cases; N=3, and N=5 on
 the U3 flip cases (20, 22, 26, 38, 41). The U2b round (0, 9, 86, 88) is
-excluded: its contexts predate the payload-window code change (8db0885) and are
+excluded: its contexts predate the payload-window code change (a92f7e5) and are
 not byte-reproducible — replicating them on current code would measure a new
 arm, violating the pre-registered fidelity rule.
 

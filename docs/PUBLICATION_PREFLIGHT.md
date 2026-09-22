@@ -9,7 +9,7 @@ Date: 2026-09-22 · Tool: `scripts/preflight_publication.py` (history-wide scan,
 
 Rationale: the history contains two early-commit paths with the author's own
 personal notes (`.opencode/memory/manifest.json`, `.opencode/memory/whiteboard.json`,
-removed from HEAD in `09b4397`). They hold no secret patterns and concern this
+removed from HEAD in `ec96d64`). They hold no secret patterns and concern this
 very project, but they are personal data in history. Making the repository
 public later requires a decision: keep them (they are the author's own notes on
 this project) or purge them from history (which would rewrite every SHA and
@@ -37,3 +37,21 @@ without an explicit decision). A private first push preserves the clean
 3. Branch protection: require `ci.yml`; keep `scientific.yml` informational.
 4. Record the first green run as the L10 proof, then annotate the `0.2.0` tag.
 5. Open `memory-lifecycle-v1` from the green reference.
+
+## Post-rewrite re-run (2026-09-22)
+
+The keep/purge decision was made and executed: `.opencode/memory` was purged
+from all history with `git filter-repo` (see
+`HISTORY_REWRITE_2026-09-22.md`), a mirror backup was taken first, and this
+scan was re-run over every rewritten blob.
+
+- **736 text blobs scanned across the rewritten history.**
+- **0 critical findings.**
+- 14 reviewed hits, all canonical test placeholders (`sk-...`, `Bearer ...`,
+  PEM header samples) in `tests/`, this report and the tool itself; accepted
+  with `--accept-private-history` after review.
+- Commit SHAs cited in the docs were remapped from the filter-repo commit map;
+  pre-rewrite SHAs are invalid.
+
+Result: **PREFLIGHT PASS** on the rewritten history — clear for the public
+push once the owner flips the visibility.

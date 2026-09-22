@@ -1,7 +1,7 @@
 # Memory Lifecycle v1 — pre-registration
 
 Frozen before any execution. Branch `memory-lifecycle-v1`; baseline `v0.2.0`
-(`181441d`). Spec: `docs/LIFECYCLE_V1_SPEC.md`. Any change after this commit is
+(`26f273f`). Spec: `docs/LIFECYCLE_V1_SPEC.md`. Any change after this commit is
 a new pre-registration.
 
 ## 0. Governance (provisional, 2026-09-22)

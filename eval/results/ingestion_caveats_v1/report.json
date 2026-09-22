@@ -1,0 +1,41 @@
+{
+  "prereg": "docs/INGESTION_TRACE_V1_PREREG.md",
+  "u3a14": {
+    "case": "u3a:14",
+    "distinct_date_like": [],
+    "prose_dates": [
+      {
+        "hits": [],
+        "memory_id": "M0045"
+      },
+      {
+        "hits": [],
+        "memory_id": "M0032"
+      }
+    ],
+    "question": "How many weeks passed between ..."
+  },
+  "u3b40": {
+    "case": "u3b:40",
+    "case_keys": [
+      "block",
+      "case",
+      "cat",
+      "context",
+      "context_sha1",
+      "gold",
+      "payload_chars",
+      "payload_ids",
+      "question",
+      "required_ids",
+      "verdict_precise"
+    ],
+    "delivered_header_dates": [
+      "2023-03-20 18:06"
+    ],
+    "gold": "12 days ago. 13 days (including the last day) is also acceptable.",
+    "has_question_date_field": false,
+    "question": "How many days ago did I read the March 15th issue of The New Yorker?",
+    "question_date_tokens": []
+  }
+}

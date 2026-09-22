@@ -1,0 +1,849 @@
+{
+  "cases": 40,
+  "determinism": {
+    "identical": true,
+    "run1": "684a7c316d6908ef03252b380d8d6b16fc8443b6b28602cab83456a4aad3fbba",
+    "run2": "684a7c316d6908ef03252b380d8d6b16fc8443b6b28602cab83456a4aad3fbba"
+  },
+  "fixture": "/Users/igorcoutrimlacerda/memory-machine/eval/fixtures/admission_causal_v1",
+  "gates": {
+    "G1_availability": false,
+    "G2_precision": true,
+    "G3_causal_wins": false,
+    "G4_factual_unharmed": true,
+    "G5_negatives": true,
+    "G6_gating_matters": true,
+    "G7_determinism": true,
+    "all_pass": false
+  },
+  "gold_occurrences": 60,
+  "per_case": [
+    {
+      "case_id": "C1-01",
+      "gold": [
+        "C1-01-R07",
+        "C1-01-R08"
+      ],
+      "policies": {
+        "B": [
+          "C1-01-R07"
+        ],
+        "K": [
+          "C1-01-R07"
+        ],
+        "K-abl": [
+          "C1-01-R07"
+        ]
+      },
+      "scenario": "causal_buried"
+    },
+    {
+      "case_id": "C1-02",
+      "gold": [
+        "C1-02-R07",
+        "C1-02-R08"
+      ],
+      "policies": {
+        "B": [
+          "C1-02-R07"
+        ],
+        "K": [
+          "C1-02-R07"
+        ],
+        "K-abl": [
+          "C1-02-R07"
+        ]
+      },
+      "scenario": "causal_buried"
+    },
+    {
+      "case_id": "C1-03",
+      "gold": [
+        "C1-03-R07",
+        "C1-03-R08"
+      ],
+      "policies": {
+        "B": [
+          "C1-03-R07"
+        ],
+        "K": [
+          "C1-03-R07"
+        ],
+        "K-abl": [
+          "C1-03-R07"
+        ]
+      },
+      "scenario": "causal_buried"
+    },
+    {
+      "case_id": "C1-04",
+      "gold": [
+        "C1-04-R07",
+        "C1-04-R08"
+      ],
+      "policies": {
+        "B": [
+          "C1-04-R07"
+        ],
+        "K": [
+          "C1-04-R07"
+        ],
+        "K-abl": [
+          "C1-04-R07"
+        ]
+      },
+      "scenario": "causal_buried"
+    },
+    {
+      "case_id": "C1-05",
+      "gold": [
+        "C1-05-R07",
+        "C1-05-R08"
+      ],
+      "policies": {
+        "B": [
+          "C1-05-R07"
+        ],
+        "K": [
+          "C1-05-R07"
+        ],
+        "K-abl": [
+          "C1-05-R07"
+        ]
+      },
+      "scenario": "causal_buried"
+    },
+    {
+      "case_id": "C1-06",
+      "gold": [
+        "C1-06-R07",
+        "C1-06-R08"
+      ],
+      "policies": {
+        "B": [
+          "C1-06-R07"
+        ],
+        "K": [
+          "C1-06-R07"
+        ],
+        "K-abl": [
+          "C1-06-R07"
+        ]
+      },
+      "scenario": "causal_buried"
+    },
+    {
+      "case_id": "C1-07",
+      "gold": [
+        "C1-07-R07",
+        "C1-07-R08"
+      ],
+      "policies": {
+        "B": [
+          "C1-07-R07"
+        ],
+        "K": [
+          "C1-07-R07"
+        ],
+        "K-abl": [
+          "C1-07-R07"
+        ]
+      },
+      "scenario": "causal_buried"
+    },
+    {
+      "case_id": "C1-08",
+      "gold": [
+        "C1-08-R07",
+        "C1-08-R08"
+      ],
+      "policies": {
+        "B": [
+          "C1-08-R07"
+        ],
+        "K": [
+          "C1-08-R07"
+        ],
+        "K-abl": [
+          "C1-08-R07"
+        ]
+      },
+      "scenario": "causal_buried"
+    },
+    {
+      "case_id": "C1-09",
+      "gold": [
+        "C1-09-R07",
+        "C1-09-R08"
+      ],
+      "policies": {
+        "B": [
+          "C1-09-R07"
+        ],
+        "K": [
+          "C1-09-R07"
+        ],
+        "K-abl": [
+          "C1-09-R07"
+        ]
+      },
+      "scenario": "causal_buried"
+    },
+    {
+      "case_id": "C1-10",
+      "gold": [
+        "C1-10-R07",
+        "C1-10-R08"
+      ],
+      "policies": {
+        "B": [
+          "C1-10-R07"
+        ],
+        "K": [
+          "C1-10-R07"
+        ],
+        "K-abl": [
+          "C1-10-R07"
+        ]
+      },
+      "scenario": "causal_buried"
+    },
+    {
+      "case_id": "C2-01",
+      "gold": [
+        "C2-01-R07"
+      ],
+      "policies": {
+        "B": [
+          "C2-01-R07",
+          "C2-01-R04"
+        ],
+        "K": [
+          "C2-01-R07",
+          "C2-01-R04"
+        ],
+        "K-abl": [
+          "C2-01-R07",
+          "C2-01-R04"
+        ]
+      },
+      "scenario": "factual_control"
+    },
+    {
+      "case_id": "C2-02",
+      "gold": [
+        "C2-02-R07"
+      ],
+      "policies": {
+        "B": [
+          "C2-02-R07",
+          "C2-02-R04"
+        ],
+        "K": [
+          "C2-02-R07",
+          "C2-02-R04"
+        ],
+        "K-abl": [
+          "C2-02-R07",
+          "C2-02-R04"
+        ]
+      },
+      "scenario": "factual_control"
+    },
+    {
+      "case_id": "C2-03",
+      "gold": [
+        "C2-03-R07"
+      ],
+      "policies": {
+        "B": [
+          "C2-03-R07",
+          "C2-03-R04"
+        ],
+        "K": [
+          "C2-03-R07",
+          "C2-03-R04"
+        ],
+        "K-abl": [
+          "C2-03-R07",
+          "C2-03-R04"
+        ]
+      },
+      "scenario": "factual_control"
+    },
+    {
+      "case_id": "C2-04",
+      "gold": [
+        "C2-04-R07"
+      ],
+      "policies": {
+        "B": [
+          "C2-04-R07",
+          "C2-04-R04"
+        ],
+        "K": [
+          "C2-04-R07",
+          "C2-04-R04"
+        ],
+        "K-abl": [
+          "C2-04-R07",
+          "C2-04-R04"
+        ]
+      },
+      "scenario": "factual_control"
+    },
+    {
+      "case_id": "C2-05",
+      "gold": [
+        "C2-05-R07"
+      ],
+      "policies": {
+        "B": [
+          "C2-05-R07",
+          "C2-05-R04"
+        ],
+        "K": [
+          "C2-05-R07",
+          "C2-05-R04"
+        ],
+        "K-abl": [
+          "C2-05-R07",
+          "C2-05-R04"
+        ]
+      },
+      "scenario": "factual_control"
+    },
+    {
+      "case_id": "C2-06",
+      "gold": [
+        "C2-06-R07"
+      ],
+      "policies": {
+        "B": [
+          "C2-06-R07",
+          "C2-06-R04"
+        ],
+        "K": [
+          "C2-06-R07",
+          "C2-06-R04"
+        ],
+        "K-abl": [
+          "C2-06-R07",
+          "C2-06-R04"
+        ]
+      },
+      "scenario": "factual_control"
+    },
+    {
+      "case_id": "C2-07",
+      "gold": [
+        "C2-07-R07"
+      ],
+      "policies": {
+        "B": [
+          "C2-07-R07",
+          "C2-07-R04"
+        ],
+        "K": [
+          "C2-07-R07",
+          "C2-07-R04"
+        ],
+        "K-abl": [
+          "C2-07-R07",
+          "C2-07-R04"
+        ]
+      },
+      "scenario": "factual_control"
+    },
+    {
+      "case_id": "C2-08",
+      "gold": [
+        "C2-08-R07"
+      ],
+      "policies": {
+        "B": [
+          "C2-08-R07",
+          "C2-08-R04"
+        ],
+        "K": [
+          "C2-08-R07",
+          "C2-08-R04"
+        ],
+        "K-abl": [
+          "C2-08-R07",
+          "C2-08-R04"
+        ]
+      },
+      "scenario": "factual_control"
+    },
+    {
+      "case_id": "C2-09",
+      "gold": [
+        "C2-09-R07"
+      ],
+      "policies": {
+        "B": [
+          "C2-09-R07",
+          "C2-09-R04"
+        ],
+        "K": [
+          "C2-09-R07",
+          "C2-09-R04"
+        ],
+        "K-abl": [
+          "C2-09-R07",
+          "C2-09-R04"
+        ]
+      },
+      "scenario": "factual_control"
+    },
+    {
+      "case_id": "C2-10",
+      "gold": [
+        "C2-10-R07"
+      ],
+      "policies": {
+        "B": [
+          "C2-10-R07",
+          "C2-10-R04"
+        ],
+        "K": [
+          "C2-10-R07",
+          "C2-10-R04"
+        ],
+        "K-abl": [
+          "C2-10-R07",
+          "C2-10-R04"
+        ]
+      },
+      "scenario": "factual_control"
+    },
+    {
+      "case_id": "C3-01",
+      "gold": [
+        "C3-01-R08"
+      ],
+      "policies": {
+        "B": [
+          "C3-01-R08"
+        ],
+        "K": [
+          "C3-01-R08"
+        ],
+        "K-abl": [
+          "C3-01-R08"
+        ]
+      },
+      "scenario": "causal_absent"
+    },
+    {
+      "case_id": "C3-02",
+      "gold": [
+        "C3-02-R08"
+      ],
+      "policies": {
+        "B": [
+          "C3-02-R08"
+        ],
+        "K": [
+          "C3-02-R08"
+        ],
+        "K-abl": [
+          "C3-02-R08"
+        ]
+      },
+      "scenario": "causal_absent"
+    },
+    {
+      "case_id": "C3-03",
+      "gold": [
+        "C3-03-R08"
+      ],
+      "policies": {
+        "B": [
+          "C3-03-R08"
+        ],
+        "K": [
+          "C3-03-R08"
+        ],
+        "K-abl": [
+          "C3-03-R08"
+        ]
+      },
+      "scenario": "causal_absent"
+    },
+    {
+      "case_id": "C3-04",
+      "gold": [
+        "C3-04-R08"
+      ],
+      "policies": {
+        "B": [
+          "C3-04-R08"
+        ],
+        "K": [
+          "C3-04-R08"
+        ],
+        "K-abl": [
+          "C3-04-R08"
+        ]
+      },
+      "scenario": "causal_absent"
+    },
+    {
+      "case_id": "C3-05",
+      "gold": [
+        "C3-05-R08"
+      ],
+      "policies": {
+        "B": [
+          "C3-05-R08"
+        ],
+        "K": [
+          "C3-05-R08"
+        ],
+        "K-abl": [
+          "C3-05-R08"
+        ]
+      },
+      "scenario": "causal_absent"
+    },
+    {
+      "case_id": "C3-06",
+      "gold": [
+        "C3-06-R08"
+      ],
+      "policies": {
+        "B": [
+          "C3-06-R08"
+        ],
+        "K": [
+          "C3-06-R08"
+        ],
+        "K-abl": [
+          "C3-06-R08"
+        ]
+      },
+      "scenario": "causal_absent"
+    },
+    {
+      "case_id": "C3-07",
+      "gold": [
+        "C3-07-R08"
+      ],
+      "policies": {
+        "B": [
+          "C3-07-R08"
+        ],
+        "K": [
+          "C3-07-R08"
+        ],
+        "K-abl": [
+          "C3-07-R08"
+        ]
+      },
+      "scenario": "causal_absent"
+    },
+    {
+      "case_id": "C3-08",
+      "gold": [
+        "C3-08-R08"
+      ],
+      "policies": {
+        "B": [
+          "C3-08-R08"
+        ],
+        "K": [
+          "C3-08-R08"
+        ],
+        "K-abl": [
+          "C3-08-R08"
+        ]
+      },
+      "scenario": "causal_absent"
+    },
+    {
+      "case_id": "C3-09",
+      "gold": [
+        "C3-09-R08"
+      ],
+      "policies": {
+        "B": [
+          "C3-09-R08"
+        ],
+        "K": [
+          "C3-09-R08"
+        ],
+        "K-abl": [
+          "C3-09-R08"
+        ]
+      },
+      "scenario": "causal_absent"
+    },
+    {
+      "case_id": "C3-10",
+      "gold": [
+        "C3-10-R08"
+      ],
+      "policies": {
+        "B": [
+          "C3-10-R08"
+        ],
+        "K": [
+          "C3-10-R08"
+        ],
+        "K-abl": [
+          "C3-10-R08"
+        ]
+      },
+      "scenario": "causal_absent"
+    },
+    {
+      "case_id": "C4-01",
+      "gold": [
+        "C4-01-R07",
+        "C4-01-R08"
+      ],
+      "policies": {
+        "B": [
+          "C4-01-R07"
+        ],
+        "K": [
+          "C4-01-R07"
+        ],
+        "K-abl": [
+          "C4-01-R07"
+        ]
+      },
+      "scenario": "causal_chain"
+    },
+    {
+      "case_id": "C4-02",
+      "gold": [
+        "C4-02-R07",
+        "C4-02-R08"
+      ],
+      "policies": {
+        "B": [
+          "C4-02-R07"
+        ],
+        "K": [
+          "C4-02-R07"
+        ],
+        "K-abl": [
+          "C4-02-R07"
+        ]
+      },
+      "scenario": "causal_chain"
+    },
+    {
+      "case_id": "C4-03",
+      "gold": [
+        "C4-03-R07",
+        "C4-03-R08"
+      ],
+      "policies": {
+        "B": [
+          "C4-03-R07"
+        ],
+        "K": [
+          "C4-03-R07"
+        ],
+        "K-abl": [
+          "C4-03-R07"
+        ]
+      },
+      "scenario": "causal_chain"
+    },
+    {
+      "case_id": "C4-04",
+      "gold": [
+        "C4-04-R07",
+        "C4-04-R08"
+      ],
+      "policies": {
+        "B": [
+          "C4-04-R07"
+        ],
+        "K": [
+          "C4-04-R07"
+        ],
+        "K-abl": [
+          "C4-04-R07"
+        ]
+      },
+      "scenario": "causal_chain"
+    },
+    {
+      "case_id": "C4-05",
+      "gold": [
+        "C4-05-R07",
+        "C4-05-R08"
+      ],
+      "policies": {
+        "B": [
+          "C4-05-R07"
+        ],
+        "K": [
+          "C4-05-R07"
+        ],
+        "K-abl": [
+          "C4-05-R07"
+        ]
+      },
+      "scenario": "causal_chain"
+    },
+    {
+      "case_id": "C4-06",
+      "gold": [
+        "C4-06-R07",
+        "C4-06-R08"
+      ],
+      "policies": {
+        "B": [
+          "C4-06-R07"
+        ],
+        "K": [
+          "C4-06-R07"
+        ],
+        "K-abl": [
+          "C4-06-R07"
+        ]
+      },
+      "scenario": "causal_chain"
+    },
+    {
+      "case_id": "C4-07",
+      "gold": [
+        "C4-07-R07",
+        "C4-07-R08"
+      ],
+      "policies": {
+        "B": [
+          "C4-07-R07"
+        ],
+        "K": [
+          "C4-07-R07"
+        ],
+        "K-abl": [
+          "C4-07-R07"
+        ]
+      },
+      "scenario": "causal_chain"
+    },
+    {
+      "case_id": "C4-08",
+      "gold": [
+        "C4-08-R07",
+        "C4-08-R08"
+      ],
+      "policies": {
+        "B": [
+          "C4-08-R07"
+        ],
+        "K": [
+          "C4-08-R07"
+        ],
+        "K-abl": [
+          "C4-08-R07"
+        ]
+      },
+      "scenario": "causal_chain"
+    },
+    {
+      "case_id": "C4-09",
+      "gold": [
+        "C4-09-R07",
+        "C4-09-R08"
+      ],
+      "policies": {
+        "B": [
+          "C4-09-R07"
+        ],
+        "K": [
+          "C4-09-R07"
+        ],
+        "K-abl": [
+          "C4-09-R07"
+        ]
+      },
+      "scenario": "causal_chain"
+    },
+    {
+      "case_id": "C4-10",
+      "gold": [
+        "C4-10-R07",
+        "C4-10-R08"
+      ],
+      "policies": {
+        "B": [
+          "C4-10-R07"
+        ],
+        "K": [
+          "C4-10-R07"
+        ],
+        "K-abl": [
+          "C4-10-R07"
+        ]
+      },
+      "scenario": "causal_chain"
+    }
+  ],
+  "policies": {
+    "B": {
+      "availability": 0.6667,
+      "delivered": 50,
+      "precision": 0.8,
+      "scenario_availability": {
+        "causal_absent": 1.0,
+        "causal_buried": 0.5,
+        "causal_chain": 0.5,
+        "factual_control": 1.0
+      },
+      "scenario_precision": {
+        "causal_absent": 1.0,
+        "causal_buried": 1.0,
+        "causal_chain": 1.0,
+        "factual_control": 0.5
+      },
+      "undue_rate": 0.0
+    },
+    "K": {
+      "availability": 0.6667,
+      "delivered": 50,
+      "precision": 0.8,
+      "scenario_availability": {
+        "causal_absent": 1.0,
+        "causal_buried": 0.5,
+        "causal_chain": 0.5,
+        "factual_control": 1.0
+      },
+      "scenario_precision": {
+        "causal_absent": 1.0,
+        "causal_buried": 1.0,
+        "causal_chain": 1.0,
+        "factual_control": 0.5
+      },
+      "undue_rate": 0.0
+    },
+    "K-abl": {
+      "availability": 0.6667,
+      "delivered": 50,
+      "precision": 0.8,
+      "scenario_availability": {
+        "causal_absent": 1.0,
+        "causal_buried": 0.5,
+        "causal_chain": 0.5,
+        "factual_control": 1.0
+      },
+      "scenario_precision": {
+        "causal_absent": 1.0,
+        "causal_buried": 1.0,
+        "causal_chain": 1.0,
+        "factual_control": 0.5
+      },
+      "undue_rate": 0.0
+    }
+  },
+  "prereg": "docs/ADMISSION_CAUSAL_V1_PREREG.md"
+}

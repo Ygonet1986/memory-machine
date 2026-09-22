@@ -458,6 +458,9 @@ tests/test_secrets.py::test_scan_no_false_positive
 tests/test_secrets.py::test_assert_clean_raises
 tests/test_secrets.py::test_tape_rejects_secret
 tests/test_secrets.py::test_tape_accepts_clean
+tests/test_selection_probe_v1.py::test_recorded_counts
+tests/test_selection_probe_v1.py::test_u3a17_reference_row
+tests/test_selection_probe_v1.py::test_recompute_when_snapshots_present
 tests/test_sessions.py::test_sessions_dir_for
 tests/test_sessions.py::test_list_sessions
 tests/test_sessions.py::test_search_sessions
@@ -554,4 +557,4 @@ tests/test_whiteboard.py::test_size_and_consolidation_trigger
 tests/test_whiteboard.py::test_roundtrip
 tests/test_whiteboard.py::test_render
 
-555 tests collected in 0.09s
+558 tests collected in 0.09s

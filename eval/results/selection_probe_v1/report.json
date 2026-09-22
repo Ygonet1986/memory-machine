@@ -1,0 +1,206 @@
+{
+  "affected_cases": [
+    "u3a:17",
+    "u3a:18",
+    "u3b:29",
+    "u3b:32",
+    "u3b:33",
+    "u3b:34",
+    "u3b:38",
+    "u3b:41"
+  ],
+  "all_pass": true,
+  "counts": {
+    "lexical_gap": 1,
+    "lexically_retrievable_miss": 10,
+    "missing_records": 11,
+    "view_disjoint": 0
+  },
+  "gates": {
+    "S1_classified": true,
+    "S2_determinism": true,
+    "S3_u3a17_visible": true
+  },
+  "missing_records": [
+    {
+      "annotated_ids": [
+        "M0018",
+        "M0022"
+      ],
+      "block": "u3a",
+      "case": 17,
+      "classification": "lexically_retrievable_miss",
+      "gold": "over a year",
+      "lexical_overlap": 0.8,
+      "lexical_rank": 1,
+      "memory_id": "M0043",
+      "question": "How long did I wait for the decision on my asylum application?",
+      "view_disjoint": false,
+      "view_overlap": true
+    },
+    {
+      "annotated_ids": [
+        "M0042"
+      ],
+      "block": "u3a",
+      "case": 18,
+      "classification": "lexical_gap",
+      "gold": "4",
+      "lexical_overlap": 0.0,
+      "lexical_rank": 0,
+      "memory_id": "M0018",
+      "question": "What is the total number of siblings I have?",
+      "view_disjoint": false,
+      "view_overlap": true
+    },
+    {
+      "annotated_ids": [
+        "M0042"
+      ],
+      "block": "u3a",
+      "case": 18,
+      "classification": "lexically_retrievable_miss",
+      "gold": "4",
+      "lexical_overlap": 0.3333,
+      "lexical_rank": 2,
+      "memory_id": "M0022",
+      "question": "What is the total number of siblings I have?",
+      "view_disjoint": false,
+      "view_overlap": true
+    },
+    {
+      "annotated_ids": [
+        "M0021",
+        "M0038",
+        "M0043"
+      ],
+      "block": "u3b",
+      "case": 29,
+      "classification": "lexically_retrievable_miss",
+      "gold": "10 times",
+      "lexical_overlap": 0.4444,
+      "lexical_rank": 3,
+      "memory_id": "M0005",
+      "question": "How many times did I ride rollercoasters across all the events I attended from July to October?",
+      "view_disjoint": false,
+      "view_overlap": true
+    },
+    {
+      "annotated_ids": [
+        "M0044"
+      ],
+      "block": "u3b",
+      "case": 32,
+      "classification": "lexically_retrievable_miss",
+      "gold": "The Grand Ballroom",
+      "lexical_overlap": 0.75,
+      "lexical_rank": 1,
+      "memory_id": "M0048",
+      "question": "Where did I attend my cousin's wedding?",
+      "view_disjoint": false,
+      "view_overlap": true
+    },
+    {
+      "annotated_ids": [
+        "M0010"
+      ],
+      "block": "u3b",
+      "case": 33,
+      "classification": "lexically_retrievable_miss",
+      "gold": "my cousin's wedding",
+      "lexical_overlap": 0.2857,
+      "lexical_rank": 2,
+      "memory_id": "M0031",
+      "question": "What was the the life event of one of my relatives that I participated in a week ago?",
+      "view_disjoint": false,
+      "view_overlap": true
+    },
+    {
+      "annotated_ids": [
+        "M0010"
+      ],
+      "block": "u3b",
+      "case": 33,
+      "classification": "lexically_retrievable_miss",
+      "gold": "my cousin's wedding",
+      "lexical_overlap": 0.2857,
+      "lexical_rank": 3,
+      "memory_id": "M0046",
+      "question": "What was the the life event of one of my relatives that I participated in a week ago?",
+      "view_disjoint": false,
+      "view_overlap": true
+    },
+    {
+      "annotated_ids": [
+        "M0013",
+        "M0023",
+        "M0033"
+      ],
+      "block": "u3b",
+      "case": 34,
+      "classification": "lexically_retrievable_miss",
+      "gold": "I signed a contract with my first client.",
+      "lexical_overlap": 0.2857,
+      "lexical_rank": 5,
+      "memory_id": "M0010",
+      "question": "What was the significant buisiness milestone I mentioned four weeks ago?",
+      "view_disjoint": false,
+      "view_overlap": true
+    },
+    {
+      "annotated_ids": [
+        "M0013",
+        "M0023",
+        "M0033"
+      ],
+      "block": "u3b",
+      "case": 34,
+      "classification": "lexically_retrievable_miss",
+      "gold": "I signed a contract with my first client.",
+      "lexical_overlap": 0.1429,
+      "lexical_rank": 4,
+      "memory_id": "M0036",
+      "question": "What was the significant buisiness milestone I mentioned four weeks ago?",
+      "view_disjoint": false,
+      "view_overlap": true
+    },
+    {
+      "annotated_ids": [
+        "M0005",
+        "M0011",
+        "M0030",
+        "M0031",
+        "M0035"
+      ],
+      "block": "u3b",
+      "case": 38,
+      "classification": "lexically_retrievable_miss",
+      "gold": "I replaced or fixed five items: the kitchen faucet, the kitchen mat, the toaster, the coffee maker, and the kitchen shelves.",
+      "lexical_overlap": 0.4,
+      "lexical_rank": 2,
+      "memory_id": "M0044",
+      "question": "How many kitchen items did I replace or fix?",
+      "view_disjoint": false,
+      "view_overlap": true
+    },
+    {
+      "annotated_ids": [
+        "M0032",
+        "M0033",
+        "M0039"
+      ],
+      "block": "u3b",
+      "case": 41,
+      "classification": "lexically_retrievable_miss",
+      "gold": "The information provided is not enough. You mentioned living in Harajuku but not Shinjuku.",
+      "lexical_overlap": 0.6667,
+      "lexical_rank": 1,
+      "memory_id": "M0010",
+      "question": "How long have I been living in my current apartment in Shinjuku?",
+      "view_disjoint": false,
+      "view_overlap": true
+    }
+  ],
+  "prereg": "docs/SELECTION_PROBE_V1_PREREG.md",
+  "snapshot_rows": 30
+}

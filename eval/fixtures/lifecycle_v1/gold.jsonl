@@ -7,6 +7,7 @@
 {"gold_class": "event_only", "memory_id": "M0007", "pattern": "operational"}
 {"gold_class": "episodic", "memory_id": "M0008", "pattern": "experiment_result"}
 {"gold_class": "reject", "memory_id": "M0009", "pattern": "duplicate_exact"}
+{"gold_class": "reject", "memory_id": "M0018", "pattern": "duplicate_normalized"}
 {"gold_class": "episodic", "memory_id": "M0010", "pattern": "failure_context"}
 {"gold_class": "semantic", "memory_id": "M0011", "pattern": "useful_low_appearance"}
 {"gold_class": "episodic", "memory_id": "M0012", "pattern": "temporary_preference"}
@@ -15,7 +16,6 @@
 {"gold_class": "episodic", "memory_id": "M0015", "pattern": "weak_future_intent"}
 {"gold_class": "event_only", "memory_id": "M0016", "pattern": "ack"}
 {"gold_class": "semantic", "memory_id": "M0017", "pattern": "decision_change"}
-{"gold_class": "reject", "memory_id": "M0018", "pattern": "duplicate_normalized"}
 {"gold_class": "semantic", "memory_id": "M0019", "pattern": "valid_repetition"}
 {"gold_class": "semantic", "memory_id": "M0020", "pattern": "important_never_used"}
 {"gold_class": "semantic", "memory_id": "M0021", "pattern": "lesson"}

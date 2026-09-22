@@ -163,3 +163,37 @@ hybrid must justify its extra call explicitly (H-L6).
 - May not claim: general utility on real session tapes, production readiness,
   or "better memory" beyond the fixture; those require the external phase
   (E4-style) after a promoted default.
+
+## Addendum 1 — fixture defect and official re-run (2026-09-22)
+
+**Run 0 (kept for the record).** Fixture `3b9e6383…`: arm B reduction 0.438,
+promotion recall 0.765, precision 0.722, per-probe 17/21; gates H-L1 PASS,
+H-L2 FAIL, H-L3 PASS. Disclosed defect: the planted `duplicate_normalized`
+record (M0018) lived in session S3 while its original (M0008) lives in S2, so
+under the frozen same-session window it was **not testable** (arm B correctly
+did not dedup it). Preserved at
+`eval/results/lifecycle_v1_report/run0_defective/`.
+
+**Fix (fixture only — no policy, rule, class or gate changed).** M0018 was
+moved into S2 immediately after the exact duplicate M0009; S2 sequence numbers
+were renumbered 9..17 (M0009=9, M0018=10, M0010..M0016=11..17). Fixture sha1
+`e1021c201f25cdb2a618a0644b02d59db7e7b8fd`; validator green; the normalized
+duplicate is now detected (`reject`, `duplicate_normalized`, `duplicate_of`
+M0009).
+
+**Official re-run (A/B/D executed once on the corrected fixture).**
+
+| arm | promoted | promotion precision | promotion recall | reduction (received) |
+|---|---:|---:|---:|---:|
+| A | 32 | 0.531 | 1.000 | 0.000 |
+| B | 17 | 0.765 | 0.765 | 0.469 |
+| D | 20 | 0.850 | 1.000 | 0.375 |
+
+- **H-L1 PASS** (0.469 ≥ 0.40); **H-L2 FAIL** (0.765 < 0.93 = 1 − floor);
+  **H-L3 PASS** (0.765 > 0.531); `false_semantic` 14 predicted / 3 wrong
+  (precision error 0.214, FP 0.158); per-probe occurrences 17/21 (0.8095).
+- Misses remain P05/M0012, P07/M0014, P13/M0026, P20/M0029 — all in the
+  `no_durable_signal` fallback, not the `ambiguous` bucket ⇒ the hybrid arm C
+  as specified cannot reach them (hypothesis for lifecycle-v2).
+- **Stop rule applied:** reduction reached but recall beyond the floor ⇒
+  lifecycle stays **shadow-only**; the tape and defaults remain untouched.

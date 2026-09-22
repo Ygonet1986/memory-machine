@@ -8,7 +8,7 @@
 | arm | promoted | promotion precision | promotion recall | active-set reduction (received) |
 |---|---:|---:|---:|---:|
 | A | 32 | 0.531 | 1.000 | 0.000 |
-| B | 17 | 0.765 | 0.765 | 0.469 |
+| B | 18 | 0.722 | 0.765 | 0.438 |
 | D | 20 | 0.850 | 1.000 | 0.375 |
 
 ## Arm B confusion (gold rows × predicted columns)
@@ -18,7 +18,7 @@
 | semantic | 11 | 1 | 1 | 0 |
 | episodic | 2 | 2 | 3 | 0 |
 | event_only | 1 | 0 | 8 | 0 |
-| reject | 0 | 0 | 0 | 3 |
+| reject | 0 | 1 | 0 | 2 |
 
 ## Arm B false-semantic
 
@@ -57,7 +57,7 @@
 - decision: 1/1
 - decision_change: 1/1
 - duplicate_exact: 0/1
-- duplicate_normalized: 0/1
+- duplicate_normalized: 1/1
 - experiment_result: 2/2
 - failure_context: 1/1
 - greeting: 0/1

@@ -419,6 +419,7 @@ tests/test_topics.py::test_delete_topic_removes_dir_and_index
 tests/test_topics.py::test_delete_active_topic_reassigns_active
 tests/test_topics.py::test_delete_last_topic_leaves_empty
 tests/test_topics.py::test_touch_activity_and_most_recent
+tests/test_topics_order.py::test_same_second_topics_order_by_id
 tests/test_trilepsia.py::test_prompt_isolation
 tests/test_trilepsia.py::test_validator_accepts_exact_spans
 tests/test_trilepsia.py::test_validator_rejects_paraphrase_and_bounds
@@ -466,4 +467,4 @@ tests/test_whiteboard.py::test_size_and_consolidation_trigger
 tests/test_whiteboard.py::test_roundtrip
 tests/test_whiteboard.py::test_render
 
-467 tests collected in 0.06s
+468 tests collected in 0.06s

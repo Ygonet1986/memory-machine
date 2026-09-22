@@ -96,3 +96,47 @@ Harness `eval/admission_causal_v1.py`, outputs
 recorded verdicts), proof regenerated, one primary run plus determinism
 rerun, execution record appended, all committed.
 
+
+## Execution record (2026-09-22)
+
+Recorded run on the frozen lab fixture; determinism rerun identical.
+
+| policy | availability | precision | delivered | undue (absent) |
+|---|---:|---:|---:|---:|
+| B baseline | 0.667 | 0.800 | 50 | 0.000 |
+| K candidate | 0.667 | 0.800 | 50 | 0.000 |
+| K-abl | 0.667 | 0.800 | 50 | 0.000 |
+
+Per-scenario availability: `causal_buried` 0.50 / 0.50 / 0.50,
+`causal_chain` 0.50 / 0.50 / 0.50, `factual_control` 1.00 (all),
+`causal_absent` 1.00 (all).
+
+Gates: G1 **false** (0.667 < 0.90); G2 **true**; G3 **false** (no causal
+win); G4 **true**; G5 **true** (no undue retrieval); G6 **true** (vacuously
+- see below); G7 true; `all_pass` **false**.
+
+Findings:
+
+- **Retrieval expansion works; admission rejects its evidence.** In C1-01
+  the relation expansion added the buried rationale R08 to the candidate
+  pool (rank 6, BM25 0.162), and the frozen P3v4 then dropped it: `rare =
+  0.388` passes the 0.30 floor, but `gain = 0.147` against `0.60 x best
+  (0.700) = 0.42` - the **relative gain floor** excludes relation-linked
+  evidence whose lexical score is low. No causal availability is gained
+  (0.50 both scenarios) and precision is unchanged.
+- **The hypothesis "retrieval alone rescues buried evidence" is not
+  supported**: the relation must also inform **admission** (a relation slot
+  or relation-aware gain, as the correction slot did for supersession).
+  This is the same lesson one layer deeper: first ranking vs admission,
+  now retrieval-signal vs admission-signal.
+- G6 passes vacuously: K-abl equals K because expansion only ever adds
+  records in causal cases and the added records are always rejected by the
+  same relative floor; the gating question is not decidable on this fixture.
+- Controls behaved: factual availability 1.00 everywhere, no undue retrieval
+  on the absent scenario (undue_rate 0.000), precision 0.800.
+
+Stop rules applied: G1/G3 failed, nothing changed, nothing re-fitted. The
+named next lab hypothesis: a **relation slot** in admission (structural
+priority for depth-1 `justified_by`/`based_on` evidence on causal queries),
+tested against this same frozen fixture with P3v4 as baseline. Lab-only
+evidence; no production impact.

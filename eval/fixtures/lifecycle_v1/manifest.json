@@ -1,0 +1,28 @@
+{
+  "builder": "eval/gen_lifecycle_fixture.py",
+  "contract": {
+    "classifier_input": "records.jsonl only (memory_id, session, seq, text, tape_type)",
+    "gold_file": "gold.jsonl (never read by rules/prompts)",
+    "probe_order": "after_seq > max(seq of required ids) for ingested probes",
+    "seed_usage": "composition/ordering only; gold is explicit below"
+  },
+  "counts": {
+    "by_class": {
+      "episodic": 7,
+      "event_only": 9,
+      "reject": 3,
+      "semantic": 13
+    },
+    "probes": 20,
+    "records": 32
+  },
+  "files": {
+    "gold.jsonl": "870681fe6f119468d6264409725168a59470ad43",
+    "probes.jsonl": "22d16e271ddb2cfe464502df98b2366e515cdb5e",
+    "records.jsonl": "12ec4044c47cfd282d369395568a58d5019fb87e"
+  },
+  "policy_version": "lifecycle-v1",
+  "seed": 20260922,
+  "sha1": "f566e9bafdca5a7d1ae6bbb831f5f5892d7156f0",
+  "version": 1
+}

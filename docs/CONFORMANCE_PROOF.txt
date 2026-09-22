@@ -283,6 +283,11 @@ tests/test_groups.py::test_group_records_filters_archived
 tests/test_groups.py::test_manifest_roundtrip
 tests/test_groups.py::test_default_capacity_is_500
 tests/test_groups.py::test_group_of_500_then_next_group
+tests/test_lifecycle_fixture.py::test_fixture_is_clean_and_reproducible
+tests/test_lifecycle_fixture.py::test_classifier_input_never_carries_gold_fields
+tests/test_lifecycle_fixture.py::test_probes_are_measured_after_the_required_records
+tests/test_lifecycle_fixture.py::test_hard_cases_are_present
+tests/test_lifecycle_fixture.py::test_regeneration_is_byte_identical
 tests/test_llm.py::test_bare_object
 tests/test_llm.py::test_fenced_json_block
 tests/test_llm.py::test_leading_prose
@@ -467,4 +472,4 @@ tests/test_whiteboard.py::test_size_and_consolidation_trigger
 tests/test_whiteboard.py::test_roundtrip
 tests/test_whiteboard.py::test_render
 
-468 tests collected in 0.06s
+473 tests collected in 0.07s

@@ -104,3 +104,25 @@ within budget), same pattern as the money/temporal rules.
 phrase-case regression check (u3a-22 under W5) stays `ok`.
 
 Nothing promoted; windows OFF.
+
+## Addendum A (2026-09-22) — the two open caveats, inspected
+
+Deterministic prose inspection (`eval/ingestion_caveats_v1.py`), no LLM.
+
+- **u3a-14**: no prose dates exist in the required records; the two event
+  dates are available as **record metadata**, and the payload headers carry
+  them: M0032 `2023-02-26`, M0045 `2023-03-21` (interval **23 days ~= 3
+  weeks**, the gold). The previously unidentified component is therefore the
+  **header date of the second event** - delivered, computable. The
+  `computation_needed` classification stands, with the operation named:
+  interval between two delivered header dates.
+- **u3b-40**: the fixture has **no question-date field and no date token in
+  the question**; the only delivered date is the W1 header `2023-03-20`.
+  The relative `ago` reference date is not available anywhere in the
+  material, so the answer cannot be computed from the payload - an
+  answer-side/harness limitation, not a model failure. `question_date_unavailable`
+  is confirmed by inspection (the earlier automatic flag missed it because the
+  issue month matched the token probe).
+
+Both classifications now carry named, verifiable components. Nothing else in
+the record changes.

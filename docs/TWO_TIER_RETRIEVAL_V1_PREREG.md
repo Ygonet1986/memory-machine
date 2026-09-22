@@ -24,8 +24,9 @@ what is worth searching.
 ## 2. Frozen substrate
 
 - Fixture `eval/fixtures/lifecycle_v1` (sha `e1021c20...`, 32 records, 20
-  probes, 17 required sets, 21 required occurrences); gold read only after each
-  probe's retrieval.
+  probes of which 1 is unrecoverable and unscored (`P19`), 20 required sets,
+  22 required occurrences - 21 scored); gold read only after each probe's
+  retrieval.
 - Projection `eval/results/lifecycle_v1_report/projection` (classes: 14
   semantic + 3 episodic = 17 promoted; 12 event_only; 3 reject).
 - Product BM25 (`memory_machine.retrieval.bm25`, k1=1.5, b=0.75) and product
@@ -110,3 +111,52 @@ Harness `eval/two_tier_retrieval_v1.py`, outputs
 `tests/test_two_tier_retrieval_v1.py`, conformance proof regenerated, one
 primary run plus the determinism rerun, all committed together with this
 document's execution record appended.
+
+## Execution record (2026-09-22)
+
+Pre-run corrections, made before any recorded run existed:
+
+- Fixture counts corrected to 20 probes (19 scored; `P19` unrecoverable), 20
+  required sets, 22 required occurrences (21 scored).
+- T2-B aligned with the frozen v4-B semantics: the always-delivered active
+  candidates **plus** the trigger fallback, deduplicated. A first harness pass
+  that delivered the fallback only (availability 0.143) was discarded and is
+  not a recorded run.
+
+Recorded run: `eval/results/two_tier_v1/report.json` (one primary pass plus the
+in-harness determinism rerun; timing informational).
+
+| arm | availability | precision@k | delivered | found | mean chars | p50 ms | p95 ms |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| T2-A promote_only | 0.809 | 0.436 | 39 | 17 | 151 | 0.036 | 0.059 |
+| T2-B trigger_v4b | 0.952 | 0.476 | 42 | 20 | 160 | 0.097 | 0.149 |
+| **T2-C two_tier_combined** | **1.000** | **0.512** | 41 | 21 | 148 | 0.050 | 0.081 |
+| T2-CRRF fusion | 1.000 | 0.296 | 71 | 21 | 251 | 0.054 | 0.084 |
+| T2-U unfiltered | 1.000 | 0.525 | 40 | 21 | 145 | 0.057 | 0.087 |
+
+Gates: H2T-1 **true**; H2T-2 **false**; H2T-3 true; H2T-4 true; H2T-5 true;
+`all_pass` **false**.
+
+Findings:
+
+- **H2T-1 PASS (the point of the experiment)**: unconditional search reaches
+  availability 1.000 (21/21), above T2-B's frozen 0.952. All four former false
+  discards (P05/M0012, P07/M0014, P13/M0026, P20/M0029) are delivered at rank
+  1. The trigger was the bottleneck; removing it removes the miss class.
+- **H2T-2 FAIL**: precision@k 0.512 < 0.80. The noise sits after rank 1:
+  post-hoc descriptive precision@1 is 18/19 = 0.947 (only P09 has the required
+  memory at rank 2), precision@2 is 0.200, and 20 of 41 deliveries are
+  irrelevant. The frozen 0.50 margin admits weak neighbors.
+- H2T-3 PASS: 148 chars vs the 189 ceiling (1.25 x T2-A). H2T-4 PASS: 0.512 vs
+  T2-U 0.525 - 0.05. The three rejects carry no measurable weight.
+- T2-CRRF is rejected as a path: 71 deliveries, precision 0.296 - fusion buys
+  nothing and adds noise.
+- Declared expectations (section 6) missed and recorded as misses: T2-A
+  availability predicted 0.952, actual 0.809; T2-C precision predicted
+  0.85-0.95, actual 0.512. Expectations were not gates.
+
+Stop rule (section 7) applied: H2T-1 passed and H2T-2 failed, so the line
+stays **shadow-only** and the next hypothesis must bound **candidacy/delivery**
+- the rank-1 evidence is strong and the tail is the cost - without
+reintroducing a trigger. No threshold was re-fit; the 0.80 floor stands as a
+measured miss.

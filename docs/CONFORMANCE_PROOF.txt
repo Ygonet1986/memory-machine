@@ -461,6 +461,7 @@ tests/test_trilepsia.py::test_observation_content_requires_span
 tests/test_trilepsia.py::test_envelope_is_secret_scanned
 tests/test_trilepsia.py::test_schema_change_same_version_is_skipped
 tests/test_trilepsia.py::test_status_counts
+tests/test_two_tier_retrieval_v1.py::test_two_tier_v1_is_deterministic_and_frozen
 tests/test_view_router.py::test_related_views_cooccurrence
 tests/test_view_router.py::test_related_views_excludes_structural_and_selected
 tests/test_view_router.py::test_select_views_llm_parses_and_filters
@@ -494,4 +495,4 @@ tests/test_whiteboard.py::test_size_and_consolidation_trigger
 tests/test_whiteboard.py::test_roundtrip
 tests/test_whiteboard.py::test_render
 
-495 tests collected in 0.07s
+496 tests collected in 0.07s

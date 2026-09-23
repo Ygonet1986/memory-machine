@@ -23,6 +23,8 @@ tests/test_admission_synthetic_v4.py::test_v4_deterministic_and_all_gates_pass
 tests/test_admission_synthetic_v4.py::test_v4_equals_v3_without_an_eligible_correction
 tests/test_agent_index_v1.py::test_fixture_counts_locked
 tests/test_agent_index_v1.py::test_recorded_verdicts_and_scope_limit
+tests/test_agent_map_v1.py::test_recorded_verdicts
+tests/test_agent_map_v1.py::test_map_pointers_present
 tests/test_agents.py::test_parse_annotations
 tests/test_agents.py::test_parse_annotations_clamps_relevance
 tests/test_agents.py::test_parse_annotations_empty
@@ -573,4 +575,4 @@ tests/test_whiteboard.py::test_size_and_consolidation_trigger
 tests/test_whiteboard.py::test_roundtrip
 tests/test_whiteboard.py::test_render
 
-574 tests collected in 0.09s
+576 tests collected in 0.09s

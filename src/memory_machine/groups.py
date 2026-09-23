@@ -49,6 +49,8 @@ class Agent:
     checklist_records: int = 0
     digest: str = ""
     digest_records: int = 0
+    understanding: str = ""
+    understanding_records: int = 0
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -63,6 +65,8 @@ class Agent:
             checklist_records=int(data.get("checklist_records") or 0),
             digest=str(data.get("digest") or ""),
             digest_records=int(data.get("digest_records") or 0),
+            understanding=str(data.get("understanding") or ""),
+            understanding_records=int(data.get("understanding_records") or 0),
         )
 
 

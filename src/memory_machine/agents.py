@@ -48,6 +48,11 @@ class RecallRun:
 AGENT_INSTRUCTIONS = """You are a memory agent ({agent_id}). You watch group {group_id} \
 of the persistent memory tape (records {start}..{end}).
 
+Your current understanding of what these memories are (dynamic; refine it \
+every sweep, do not just repeat it):
+
+{understanding_section}
+
 Your memories (only these; never invent others):
 
 {records}
@@ -56,28 +61,33 @@ Your memories (only these; never invent others):
 
 The shared whiteboard below describes the work happening right now.
 
-Do four things in one response:
+Do five things in one response:
 
-1. Write a short digest (1-2 sentences) of what this group covers, so a router \
+1. Refine your understanding of what these memories are: a compact, evolving \
+description of the group's nature, scope and import (what kind of records \
+these are, which work they serve, how they should be read) - not a list of \
+facts. Keep it stable and sharpen it with what you see.
+
+2. Write a short digest (1-2 sentences) of what this group covers, so a router \
 can decide later whether this group is worth consulting. Keep it topical and \
 stable.
 
-2. Update your checklist of the things you must NOT forget to remind the \
+3. Update your checklist of the things you must NOT forget to remind the \
 assistant about (based on your memories and the current work). Keep it \
 dynamic: drop no-longer-relevant items, sharpen and keep relevant ones, add \
 new ones. Be concise.
 
-3. Identify which of YOUR memories MUST be remembered for the current work \
+4. Identify which of YOUR memories MUST be remembered for the current work \
 and annotate them.
 
-4. Judge, from what you can see, whether YOUR memories are sufficient for the \
+5. Judge, from what you can see, whether YOUR memories are sufficient for the \
 current work: "coverage" is "complete" (they cover what the work needs), \
 "partial" (something relevant is missing) or "uncertain" (you cannot tell), \
 and "missing" lists what is missing (empty when complete).
 
 Return ONLY a JSON object, nothing else:
 
-{{"digest":"<what this group covers>","checklist":["...","..."],"annotations":[{{"memory_id":"M0001","note":"<why this matters now>","relevance":0.0}}],"coverage":"complete","missing":[]}}
+{{"understanding":"<what these memories are>","digest":"<what this group covers>","checklist":["...","..."],"annotations":[{{"memory_id":"M0001","note":"<why this matters now>","relevance":0.0}}],"coverage":"complete","missing":[]}}
 
 Rules:
 - Only annotate memory ids that appear in YOUR list above.
@@ -90,28 +100,38 @@ Rules:
 AGENT_INSTRUCTIONS_NO_CHECKLIST = """You are a memory agent ({agent_id}). You watch group {group_id} \
 of the persistent memory tape (records {start}..{end}).
 
+Your current understanding of what these memories are (dynamic; refine it \
+every sweep, do not just repeat it):
+
+{understanding_section}
+
 Your memories (only these; never invent others):
 
 {records}
 
 The shared whiteboard below describes the work happening right now.
 
-Do three things in one response:
+Do four things in one response:
 
-1. Write a short digest (1-2 sentences) of what this group covers, so a router \
+1. Refine your understanding of what these memories are: a compact, evolving \
+description of the group's nature, scope and import (what kind of records \
+these are, which work they serve, how they should be read) - not a list of \
+facts. Keep it stable and sharpen it with what you see.
+
+2. Write a short digest (1-2 sentences) of what this group covers, so a router \
 can decide later whether this group is worth consulting.
 
-2. Identify which of YOUR memories MUST be remembered for the current work \
+3. Identify which of YOUR memories MUST be remembered for the current work \
 and annotate them.
 
-3. Judge, from what you can see, whether YOUR memories are sufficient for the \
+4. Judge, from what you can see, whether YOUR memories are sufficient for the \
 current work: "coverage" is "complete" (they cover what the work needs), \
 "partial" (something relevant is missing) or "uncertain" (you cannot tell), \
 and "missing" lists what is missing (empty when complete).
 
 Return ONLY a JSON object, nothing else:
 
-{{"digest":"<what this group covers>","annotations":[{{"memory_id":"M0001","note":"<why this matters now>","relevance":0.0}}],"coverage":"complete","missing":[]}}
+{{"understanding":"<what these memories are>","digest":"<what this group covers>","annotations":[{{"memory_id":"M0001","note":"<why this matters now>","relevance":0.0}}],"coverage":"complete","missing":[]}}
 
 Rules:
 - Only annotate memory ids that appear in YOUR list above.
@@ -129,6 +149,10 @@ def agent_system_prompt(
     include_checklist: bool = True,
 ) -> str:
     body = "\n".join(r.text() for r in records) if records else "(no memories in this group)"
+    if agent.understanding:
+        understanding_section = agent.understanding
+    else:
+        understanding_section = "(none yet - write the first one)"
     if not include_checklist:
         return AGENT_INSTRUCTIONS_NO_CHECKLIST.format(
             agent_id=agent.id,
@@ -136,6 +160,7 @@ def agent_system_prompt(
             start=group.start,
             end=group.end,
             records=body,
+            understanding_section=understanding_section,
         )
     if agent.checklist:
         checklist_section = (
@@ -150,6 +175,7 @@ def agent_system_prompt(
         end=group.end,
         records=body,
         checklist_section=checklist_section,
+        understanding_section=understanding_section,
     )
 
 
@@ -196,6 +222,11 @@ def _deterministic_checklist(records: list[MemoryRecord], max_items: int = 8) ->
 def _digest_from_obj(obj: dict[str, Any]) -> str:
     digest = obj.get("digest")
     return digest.strip() if isinstance(digest, str) else ""
+
+
+def _understanding_from_obj(obj: dict[str, Any]) -> str:
+    understanding = obj.get("understanding")
+    return understanding.strip() if isinstance(understanding, str) else ""
 
 
 # ---------------------------------------------------------------- view agents
@@ -404,6 +435,10 @@ def _run_one(
         checklist = _checklist_from_obj(obj) or _deterministic_checklist(records)
         agent.checklist = checklist[:1500]
         agent.checklist_records = len(records)
+    understanding = _understanding_from_obj(obj)
+    if understanding:
+        agent.understanding = understanding[:1200]
+        agent.understanding_records = len(records)
     digest = _digest_from_obj(obj) or deterministic_digest(records)
     agent.digest = digest[:600]
     agent.digest_records = len(records)

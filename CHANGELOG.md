@@ -4,6 +4,14 @@ All notable changes to this project are documented here. The project follows
 [Semantic Versioning](https://semver.org/) for the installable package; the
 manual/whitepaper keeps its own document version.
 
+## [Unreleased]
+
+- **Turn slots (opt-in).** `memory-cli ask` / `memory-cli reply` record both
+  sides of a turn on the tape as `question` and `reply` records, deduped by
+  opencode message id and paired via `derived_from`; the opencode plugin
+  wires them behind `MEMORY_MACHINE_TURN_SLOTS=1` (off by default, so the
+  default write path is unchanged). No record-schema changes.
+
 ## [0.2.0] - 2026-09-22
 
 First packaged release (L1).

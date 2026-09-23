@@ -117,3 +117,54 @@ thin (0.0625 vs 0.015625 + 0.05); and V2's M1 regressed in `linear`/`attract`
 — the adoption delay buys alarm discipline with early prediction accuracy, a
 trade-off not gated in either round. Per §4 this is ground to scale the
 experiment, not a product claim; T3 remains closed and decoupled.
+
+## Errata 1 — M3 computation (2026-09-23)
+
+**Finding (reviewer audit, verified against the published artifacts).** The
+prereg defines detection on broken worlds as **entry into review** (§1) and
+requires censoring when no adoption/detection occurs (§2, caution 2). The
+harness instead computed M3 from the raw error sequence, independent of the
+announcement: 26 worlds (linear 5, const_accel 3, attract 9, oscill 9)
+received M3 < 1.0 with **zero adoptions and zero reviews** in the broken
+episode (e.g. seed `202609260002`, M3 = 0.15).
+
+**Fix (minimal, per the frozen text).** M3 for V2 = first review with
+`t > k_max`; latency = observations from `k_max` to that announcement; no
+announcement -> censored at 1.0. A1/B- keep §3's uniform sustained statistic.
+Nothing else changed. The corrected harness reproduces the first errata
+implementation byte-for-byte; the reference environment is recorded in the
+summary (darwin, Python 3.14.6).
+
+**Artifacts.** Original run preserved at `sim/results/teo_world_v2/`
+(`episodes.jsonl` `f7e9381a...`, `summary.json` `3770d212...`). Corrected run
+at `sim/results/teo_world_v2_errata1/` (`episodes.jsonl` `b3e87248...`,
+`summary.json` `24858f46...`); determinism rerun byte-identical. No world now
+receives M3 credit without an announcement.
+
+**Corrected result (reserved base 20260926).**
+
+| family | M3 c1 -> c3 | M4 c1 -> c3 | M5 c1 -> c3 |
+|---|---:|---:|---:|
+| linear | 0.920 -> 0.709 | 0.000 -> 0.000 | 0.000 -> 1.828 |
+| const_accel | 0.907 -> 0.550 | 0.016 -> 0.062 | 0.031 -> 2.438 |
+| attract | 0.668 -> 0.607 | 0.203 -> 0.000 | 0.000 -> 2.188 |
+| oscill | 0.774 -> 0.677 | 0.453 -> 0.000 | 0.031 -> 2.109 |
+
+Pooled `c3 - c1`: M3 mean -0.1814 (95% CI [-0.2451, -0.1211]), M5 mean +2.1224
+([+1.9219, +2.3126]); M4 per-family guard passes; LOFO sign-stable; B-
+attribution positive -> **`advance = true`**.
+
+**Sensitivity disclosure (exploratory, not preregistered).** The M3 verdict
+depends on how A1/B- detection is defined. Measuring A1/B- by their announced
+event instead of §3's uniform scan gives pooled M3 +0.1737 ([+0.1185,
++0.2307], A1 earlier; advance=false); adding onset attribution (violation must
+start after the break) gives -0.1053 ([-0.1424, -0.0723]; advance=true). The
+recorded reading follows the frozen text (§1 review event for V2; §3 uniform
+scan for A1/B-). **Unifying M3 definitions requires a round-3 prereg**; the
+sensitivity is recorded here so it cannot be lost.
+
+**Reproduction.** Byte-identical reruns on the recording machine; the
+reviewer's local run kept the gate but diverged in hashes — consistent with a
+different Python/libm environment (the harness uses transcendental functions
+and near-tie ordering). Cross-platform byte-identity is not claimed; a pinned
+reproduction environment is a round-3 item.

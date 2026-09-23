@@ -4,6 +4,11 @@
 Spec: docs/TEO_WORLD_V2_PREREG.md (reserved seed base 20260926). Stdlib only,
 deterministic, no LLM. Imports the round-1 harness (sim/ab.py) for worlds,
 fitting and statistics; only the typed consumer and its runner are new.
+
+Errata 1 (2026-09-23): M3 for V2 is the first announced detection after the
+real break — entry into review (prereg §1) — right-censored at 1.0 when no
+review occurs (prereg §2, caution 2). A1/B- keep the §3 uniform sustained
+statistic. Nothing else changed.
 """
 
 from __future__ import annotations
@@ -50,7 +55,7 @@ class V2Consumer:
         self.in_review = False
         self.run = 0
         self.pending: list[tuple[Cand, tuple]] = []
-        self.review_events: list[int] = []
+        self.review_events: list[tuple[int, int]] = []  # (t, obs_count)
         self.adoptions: list[int] = []
         self.reidentified = False
 
@@ -168,7 +173,7 @@ class V2Consumer:
                 self.run += 1
                 if self.run >= ab.W:
                     self.in_review = True
-                    self.review_events.append(len(self.obs))
+                    self.review_events.append((t, len(self.obs)))
                     self.run = 0
                     for c in self.cands:
                         c.counter = 0
@@ -214,24 +219,23 @@ def run_episode_v2(consumer: V2Consumer, world: ab.World, kind: str,
             break
     m3 = None
     if kind == "broken":
+        # Errata 1: M3 is the first announced detection after the real break.
+        # For V2 the announcement is entry into review (prereg §1), not the raw
+        # error sequence; the clock starts at k_max; no announcement -> censored
+        # at 1.0 (prereg §2, caution 2).
         k_max = max(world.kx or 0, world.ky or 0)
-        count = 0
-        run = 0
-        found = None
-        for _, e, t in errors:
-            if t <= k_max:
-                continue
-            count += 1
-            if e > ab.THETA:
-                run += 1
-            else:
-                run = 0
-            if run >= ab.W:
-                found = count / ab.H
+        det_t = None
+        for ev_t, _count in consumer.review_events:
+            if ev_t > k_max:
+                det_t = ev_t
                 break
-        m3 = 1.0 if found is None else found
+        if det_t is None:
+            m3 = 1.0
+        else:
+            n_after = sum(1 for tt, _v in consumer.obs if k_max < tt <= det_t)
+            m3 = n_after / ab.H
     announced = bool(consumer.review_events)
-    trigger_obs = consumer.review_events[0] if consumer.review_events else None
+    trigger_obs = consumer.review_events[0][1] if consumer.review_events else None
     return {
         "m1": m1_mae,
         "m2": m2,
@@ -388,6 +392,8 @@ def main() -> int:
                for arm in ARM_ORDER}
     summary = build_summary_v2(bundles_by_family, rfam, results)
     summary["seed_base"] = base
+    summary["environment"] = {"python": sys.version.split()[0],
+                              "platform": sys.platform}
 
     with open(out / "episodes.jsonl", "w", encoding="utf-8") as fh:
         for arm in ARM_ORDER:
@@ -400,7 +406,7 @@ def main() -> int:
 
     h_e = hashlib.sha256((out / "episodes.jsonl").read_bytes()).hexdigest()
     h_s = hashlib.sha256((out / "summary.json").read_bytes()).hexdigest()
-    lines = ["# teo-world-v2 — execution summary", "",
+    lines = ["# teo-world-v2 — execution summary (Errata 1)", "",
              f"- reserved seed base: {base}",
              f"- episodes.jsonl sha256: `{h_e}`", f"- summary.json sha256: `{h_s}`", "",
              "## Identifiability floor (>= 4 sigma)"]
@@ -445,6 +451,9 @@ def main() -> int:
     lines.append("")
     lines.append("M4 = announced detection = first entry into review (V2) or the "
                  "sustained trigger (A1/B-); per-family guard in summary.json.")
+    lines.append("M3 (Errata 1) = first announced detection after the real break: "
+                 "review entry for V2; the §3 uniform sustained statistic for A1/B-; "
+                 "no announcement -> censored at 1.0.")
     (out / "summary.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     print("\n".join(lines))
     return 0

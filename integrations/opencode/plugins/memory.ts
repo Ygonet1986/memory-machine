@@ -4,6 +4,10 @@ import { tool } from "@opencode-ai/plugin"
 
 const CLI = `${process.env.HOME}/memory-machine/bin/memory-cli`
 const MEM_BASE = join(process.env.HOME!, ".config", "opencode", "memory")
+// Turn slots (tape records for what the user said + what was answered) are
+// opt-in: off by default so the default write path is unchanged. Set
+// MEMORY_MACHINE_TURN_SLOTS=1 to activate (restart opencode afterwards).
+const TURN_SLOTS = process.env.MEMORY_MACHINE_TURN_SLOTS === "1"
 
 function sessionRoot(sessionID: string): string {
   return join(MEM_BASE, "sessions", sessionID)
@@ -76,6 +80,17 @@ export const MemoryPlugin: Plugin = async ({ client }) => {
 
       if (!text) return
 
+      if (TURN_SLOTS) {
+        // Slot 1: what the user said.
+        await runCli(input.sessionID, [
+          "ask",
+          "--text",
+          text,
+          "--message-id",
+          output.message.id || "",
+        ])
+      }
+
       const started = Date.now()
       const out = await runCli(input.sessionID, ["recall", text, "--cross-session"])
       if (!out) return
@@ -117,6 +132,45 @@ export const MemoryPlugin: Plugin = async ({ client }) => {
         text: `## Session memory (recalled)\n${ctx}`,
         synthetic: true,
       } as any)
+    },
+
+    // Slot 2: what was answered. On assistant completion only, and only with
+    // the flag on; dedup by message id happens in the CLI (`reply`).
+    event: async ({ event }) => {
+      if (!TURN_SLOTS) return
+      const e = event as any
+      if (e?.type !== "message.updated") return
+      const info = e?.properties?.info
+      if (!info || info.role !== "assistant") return
+      if (!info.time?.completed || info.error) return
+      if (!info.parentID) return
+      let parts: any[] = []
+      try {
+        const res: any = await (client as any).session.message({
+          path: { id: info.sessionID, messageID: info.id },
+        })
+        parts = res?.data?.parts ?? []
+      } catch {
+        return
+      }
+      const text = parts
+        .filter(
+          (p) =>
+            p?.type === "text" && typeof p.text === "string" && !p.synthetic,
+        )
+        .map((p) => p.text)
+        .join("\n")
+        .trim()
+      if (!text) return
+      await runCli(info.sessionID, [
+        "reply",
+        "--text",
+        text,
+        "--message-id",
+        info.id,
+        "--pair",
+        info.parentID,
+      ])
     },
 
     "experimental.session.compacting": async (input, output) => {

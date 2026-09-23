@@ -163,6 +163,15 @@ def _build_parser() -> argparse.ArgumentParser:
     rem.add_argument("--files", default="", help="comma-separated file paths")
     rem.add_argument("--views", default="", help="comma-separated view tags (e.g. topic/router)")
 
+    ask = sub.add_parser("ask", help="record the user turn on the tape (JSON)")
+    ask.add_argument("--text", required=True, help="what the user said")
+    ask.add_argument("--message-id", default="", help="opencode message id (dedup)")
+
+    rep = sub.add_parser("reply", help="record the assistant reply on the tape (JSON)")
+    rep.add_argument("--text", required=True, help="what was answered")
+    rep.add_argument("--message-id", default="", help="opencode assistant message id (dedup)")
+    rep.add_argument("--pair", default="", help="opencode id of the user message being answered")
+
     sub.add_parser("list", help="list tape records (JSON)")
 
     att = sub.add_parser("attach", help="ingest an attached .txt into the tape as chunk memories (JSON)")
@@ -568,6 +577,19 @@ def cmd_remember(args: argparse.Namespace) -> int:
         return _j({"ok": False, "error": str(e)})
 
 
+def cmd_ask(args: argparse.Namespace) -> int:
+    m = _machine(args)
+    return _j(m.add_turn_slot("question", args.text,
+                              message_id=args.message_id))
+
+
+def cmd_reply(args: argparse.Namespace) -> int:
+    m = _machine(args)
+    return _j(m.add_turn_slot("reply", args.text,
+                              message_id=args.message_id,
+                              pair_message_id=args.pair))
+
+
 def cmd_list(args: argparse.Namespace) -> int:
     m = _machine(args)
     return _j({"ok": True, "records": m.list_records()})
@@ -653,6 +675,8 @@ def main(argv: list[str] | None = None) -> int:
         "recall": cmd_recall,
         "checkpoint": cmd_checkpoint,
         "remember": cmd_remember,
+        "ask": cmd_ask,
+        "reply": cmd_reply,
         "list": cmd_list,
         "attach": cmd_attach,
         "archive": cmd_archive,

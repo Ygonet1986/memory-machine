@@ -45,6 +45,13 @@ To remove it and restore the previous files:
   into `~/.local/bin`).
 - The tape lives under `~/.config/opencode/memory/sessions/<id>/`; the plugin
   rejects `/` worktrees and falls back to the session directory.
+- **Turn slots (opt-in, off by default).** With
+  `MEMORY_MACHINE_TURN_SLOTS=1` the plugin records both sides of every turn
+  on the tape: an `ask` record for the user message and a `reply` record for
+  the assistant's answer, deduped by opencode message id and paired via
+  `derived_from` (`memory-cli ask` / `memory-cli reply`). Off by default: the
+  default write path is unchanged and the active admission window is not
+  disturbed. Restart opencode after changing the flag.
 
 ## Notes
 

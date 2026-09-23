@@ -740,6 +740,33 @@ class Machine:
             "new_agent": created,
         }
 
+    def add_turn_slot(
+        self,
+        slot: str,
+        text: str,
+        *,
+        message_id: str = "",
+        pair_message_id: str = "",
+        save: bool = True,
+    ) -> dict[str, Any]:
+        """Append one turn slot (``question``/``reply``) - see turns.py.
+
+        Opt-in only: the opencode plugin calls this behind
+        ``MEMORY_MACHINE_TURN_SLOTS=1`` (off by default). The question/reply
+        types are not graph-eligible, so no projection runs for them.
+        """
+        from .turns import add_turn_slot as _add_turn_slot
+
+        result = _add_turn_slot(
+            self.tape, self.manifest, slot=slot, text=text,
+            message_id=message_id, pair_message_id=pair_message_id,
+            model=self.config.model,
+        )
+        if save and result.get("ok") and not result.get("deduped"):
+            self.save()
+            self._update_session_meta()
+        return result
+
     def _graph_eligible(self, record: MemoryRecord) -> bool:
         if not self.config.graph_enabled or record.derived_from:
             return False

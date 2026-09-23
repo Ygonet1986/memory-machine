@@ -542,6 +542,13 @@ tests/test_trilepsia.py::test_observation_content_requires_span
 tests/test_trilepsia.py::test_envelope_is_secret_scanned
 tests/test_trilepsia.py::test_schema_change_same_version_is_skipped
 tests/test_trilepsia.py::test_status_counts
+tests/test_turn_slots.py::test_question_slot_written_with_type_and_views
+tests/test_turn_slots.py::test_question_slot_dedupes_by_message_id
+tests/test_turn_slots.py::test_reply_slot_pairs_with_question
+tests/test_turn_slots.py::test_orphan_reply_is_explicit
+tests/test_turn_slots.py::test_secret_like_reply_refused
+tests/test_turn_slots.py::test_unknown_slot_and_empty_text_refused
+tests/test_turn_slots.py::test_summary_is_bounded_and_single_line
 tests/test_two_tier_retrieval_v1.py::test_two_tier_v1_is_deterministic_and_frozen
 tests/test_two_tier_retrieval_v2.py::test_two_tier_v2_is_deterministic_and_frozen
 tests/test_u3a17_selection_miss.py::test_u3a17_required_record_absent_from_payload_and_annotations
@@ -579,4 +586,4 @@ tests/test_whiteboard.py::test_size_and_consolidation_trigger
 tests/test_whiteboard.py::test_roundtrip
 tests/test_whiteboard.py::test_render
 
-580 tests collected in 0.09s
+587 tests collected in 0.09s

@@ -34,6 +34,9 @@ K_PASS1 = 3
 K_BREADTH = 4  # equal-budget breadth control: exactly one extra record
 MAX_DIRECTED = 2
 ARMS = ("G0", "G1", "G2", "G3")
+ANSWER_CASES = ("C01", "C05", "C09")
+ANSWER_ARMS = ("G0", "G1")
+RUNS = 3
 CUE_WORDS = {"when", "much", "amount", "cost", "spend", "total", "price",
              "date", "paid", "pay", "combined", "how", "was", "the", "and"}
 NUM_CUE = re.compile(r"(?i)\bhow much\b|\bamount\b|\bcost\b|\bspend\b|"
@@ -259,10 +262,71 @@ def explore_segment_search() -> dict[str, Any]:
     return readings
 
 
+def answer_stage(cases: list[dict[str, Any]]) -> dict[str, Any]:
+    """Answer addendum (36 calls): same answerer + blind judge, G0 vs G1."""
+    from memory_machine.config import Config
+    from memory_machine.llm import LLMClient
+    from memory_machine.main_chatbot import run_main_chatbot
+    from memory_machine.whiteboard import Whiteboard
+    from e2e_bench import judge
+    from view_router_bench import CountingClient
+    import os
+
+    key = os.environ.get("DEEPSEEK_API_KEY", "").strip()
+    if not key:
+        raise RuntimeError("DEEPSEEK_API_KEY is not set")
+    config = Config()
+    answerer = CountingClient(LLMClient("https://api.deepseek.com", key,
+                                        config.model, retries=1))
+    judge_client = CountingClient(LLMClient("https://api.deepseek.com", key,
+                                            config.model, retries=1))
+    by_id = {case["case_id"]: case for case in cases}
+    entries = []
+    failures = 0
+    for case_id in ANSWER_CASES:
+        case = by_id[case_id]
+        entry = {"case_id": case_id, "kind": case["kind"],
+                 "gold": case["gold"], "arms": {}}
+        for arm in ANSWER_ARMS:
+            delivered = run_arm(case, arm)["delivered"]
+            verdicts = []
+            for _ in range(RUNS):
+                whiteboard = Whiteboard()
+                whiteboard.subject = case["question"]
+                try:
+                    reply, _m, _r = run_main_chatbot(
+                        answerer, whiteboard, case["question"],
+                        extra_context=delivered, temperature=0.0)
+                    verdict, _reason = judge(judge_client, case["question"],
+                                             str(case["gold"]), reply.strip())
+                except Exception as error:
+                    verdict = f"infra_error:{type(error).__name__}"
+                    failures += 1
+                verdicts.append(verdict)
+            entry["arms"][arm] = verdicts
+        entries.append(entry)
+
+    def score(case_id: str, arm: str) -> float:
+        entry = next(e for e in entries if e["case_id"] == case_id)
+        return sum({"correct": 1.0, "partial": 0.5}.get(v, 0.0)
+                   for v in entry["arms"][arm]) / RUNS
+
+    score_g0 = sum(score(cid, "G0") for cid in ANSWER_CASES)
+    score_g1 = sum(score(cid, "G1") for cid in ANSWER_CASES)
+    return {"cases": entries, "score_g0": round(score_g0, 4),
+            "score_g1": round(score_g1, 4),
+            "llm_calls": answerer.calls + judge_client.calls,
+            "failures": failures,
+            "gates": {"A1_answers": score_g1 > score_g0,
+                      "A2_infra": failures <= 0.2 * RUNS * len(ANSWER_ARMS)
+                      * len(ANSWER_CASES)}}
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", default=str(RESULTS))
     parser.add_argument("--no-explore", action="store_true")
+    parser.add_argument("--skip-llm", action="store_true")
     args = parser.parse_args()
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
@@ -272,6 +336,9 @@ def main() -> int:
     report["gates"]["R5_determinism"] = (
         json.dumps(report["rows"], sort_keys=True)
         == json.dumps(second["rows"], sort_keys=True))
+    if not args.skip_llm:
+        report["answer"] = answer_stage(cases)
+        report["gates"].update(report["answer"]["gates"])
     report["all_pass"] = all(report["gates"].values())
     report["prereg"] = "docs/GAP_RECALL_V1_PREREG.md"
     report["scope"] = ("lab-only: mechanism test with distinct-record gaps; "
@@ -297,6 +364,16 @@ def main() -> int:
             f"{row['arms']['G1']['directed_extra']} |")
     lines += ["", f"gates: {json.dumps(report['gates'], sort_keys=True)}",
               f"all_pass: {report['all_pass']}"]
+    if "answer" in report:
+        lines += ["", "| answer case | kind | G0 | G1 |", "|---|---|---|---|"]
+        for entry in report["answer"]["cases"]:
+            lines.append(f"| {entry['case_id']} | {entry['kind']} | "
+                         f"{'/'.join(entry['arms']['G0'])} | "
+                         f"{'/'.join(entry['arms']['G1'])} |")
+        lines += [f"- scores: G0 {report['answer']['score_g0']} vs G1 "
+                  f"{report['answer']['score_g1']} "
+                  f"(calls {report['answer']['llm_calls']}, failures "
+                  f"{report['answer']['failures']})"]
     if "exploratory" in report:
         lines += ["", "exploratory (segment search on frozen fixtures, not gated):",
                   f"{json.dumps(report['exploratory'], sort_keys=True)}"]

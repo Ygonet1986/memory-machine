@@ -22,8 +22,15 @@
 | C14 | control | True | True | True | True | 0 |
 | C15 | control | True | True | True | True | 0 |
 
-gates: {"R1_no_loss": true, "R2_recovery": true, "R3_direction": true, "R4_budget": true, "R5_determinism": true, "R6_audit": true}
+gates: {"A1_answers": true, "A2_infra": true, "R1_no_loss": true, "R2_recovery": true, "R3_direction": true, "R4_budget": true, "R5_determinism": true, "R6_audit": true}
 all_pass: True
+
+| answer case | kind | G0 | G1 |
+|---|---|---|---|
+| C01 | numeral | incorrect/incorrect/incorrect | correct/correct/correct |
+| C05 | date | incorrect/incorrect/incorrect | correct/correct/correct |
+| C09 | components | incorrect/incorrect/partial | correct/correct/correct |
+- scores: G0 0.1667 vs G1 3.0 (calls 36, failures 0)
 
 exploratory (segment search on frozen fixtures, not gated):
 {"money_holdout_v2": {"cases": 12, "directed_found": 4, "w1_found": 4}, "multi_component_holdout_v1": {"cases": 12, "directed_found": 0, "w1_found": 0}}

@@ -1,0 +1,1025 @@
+{
+  "all_pass": false,
+  "answer": {
+    "cases": [
+      {
+        "arms": {
+          "A0": [
+            "incorrect",
+            "incorrect",
+            "incorrect"
+          ],
+          "A1": [
+            "incorrect",
+            "incorrect",
+            "incorrect"
+          ],
+          "A2": [
+            "incorrect",
+            "incorrect",
+            "incorrect"
+          ]
+        },
+        "block": "u3a",
+        "case": 14,
+        "gold": "3 weeks",
+        "question": "How many weeks passed between the time I sold homemade baked goods at the Farmers' Market for the last time and the time I participated in the Spring Fling Market?"
+      },
+      {
+        "arms": {
+          "A0": [
+            "incorrect",
+            "incorrect",
+            "incorrect"
+          ],
+          "A1": [
+            "incorrect",
+            "incorrect",
+            "incorrect"
+          ],
+          "A2": [
+            "partial",
+            "partial",
+            "partial"
+          ]
+        },
+        "block": "u3a",
+        "case": 15,
+        "gold": "I currently own 4 musical instruments. I've had the Fender Stratocaster electric guitar for 5 years, the Yamaha FG800 acoustic guitar for 8 years, the 5-piece Pearl Export drum set for an unspecified amount of time, and the Korg B1 piano for 3 years.",
+        "question": "How many musical instruments do I currently own?"
+      },
+      {
+        "arms": {
+          "A0": [
+            "incorrect",
+            "incorrect",
+            "incorrect"
+          ],
+          "A1": [
+            "incorrect",
+            "incorrect",
+            "incorrect"
+          ],
+          "A2": [
+            "incorrect",
+            "incorrect",
+            "incorrect"
+          ]
+        },
+        "block": "u3a",
+        "case": 18,
+        "gold": "4",
+        "question": "What is the total number of siblings I have?"
+      },
+      {
+        "arms": {
+          "A0": [
+            "incorrect",
+            "incorrect",
+            "incorrect"
+          ],
+          "A1": [
+            "incorrect",
+            "incorrect",
+            "incorrect"
+          ],
+          "A2": [
+            "incorrect",
+            "incorrect",
+            "incorrect"
+          ]
+        },
+        "block": "u3a",
+        "case": 13,
+        "gold": "+49 (0) 62 32 / 14 23 - 0",
+        "question": "I'm planning my trip to Speyer again and I wanted to confirm, what's the phone number of the Speyer tourism board that you provided me earlier?"
+      }
+    ],
+    "failures": 0,
+    "llm_calls": 72,
+    "scores": {
+      "A0": 0.0,
+      "A1": 0.0,
+      "A2": 0.125
+    }
+  },
+  "cases": 27,
+  "consulted_partitions": {
+    "A0": 54,
+    "A1": 27,
+    "A2": 54
+  },
+  "gates": {
+    "G1_no_case_lost": true,
+    "G2_advantage": true,
+    "G3_fewer_calls": false,
+    "G4_answers": true,
+    "G5_determinism": true,
+    "G6_infra": true
+  },
+  "prereg": "docs/AGENT_INDEX_V1_PREREG.md",
+  "routing_coverage": {
+    "A0": 1.0,
+    "A1": 0.5321,
+    "A2": 1.0
+  },
+  "rows": [
+    {
+      "arms": {
+        "A0": {
+          "consulted": [
+            "u3a13-P1",
+            "u3a13-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        },
+        "A1": {
+          "consulted": [
+            "u3a13-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        },
+        "A2": {
+          "consulted": [
+            "u3a13-P1",
+            "u3a13-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        }
+      },
+      "block": "u3a",
+      "case": 13,
+      "required": [
+        "M0037"
+      ]
+    },
+    {
+      "arms": {
+        "A0": {
+          "consulted": [
+            "u3a14-P1",
+            "u3a14-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        },
+        "A1": {
+          "consulted": [
+            "u3a14-P1"
+          ],
+          "covered": false,
+          "routing_coverage": 0.5
+        },
+        "A2": {
+          "consulted": [
+            "u3a14-P1",
+            "u3a14-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        }
+      },
+      "block": "u3a",
+      "case": 14,
+      "required": [
+        "M0032",
+        "M0045"
+      ]
+    },
+    {
+      "arms": {
+        "A0": {
+          "consulted": [
+            "u3a15-P1",
+            "u3a15-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        },
+        "A1": {
+          "consulted": [
+            "u3a15-P1"
+          ],
+          "covered": false,
+          "routing_coverage": 0.6
+        },
+        "A2": {
+          "consulted": [
+            "u3a15-P1",
+            "u3a15-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        }
+      },
+      "block": "u3a",
+      "case": 15,
+      "required": [
+        "M0002",
+        "M0007",
+        "M0009",
+        "M0010",
+        "M0036"
+      ]
+    },
+    {
+      "arms": {
+        "A0": {
+          "consulted": [
+            "u3a17-P1",
+            "u3a17-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        },
+        "A1": {
+          "consulted": [
+            "u3a17-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        },
+        "A2": {
+          "consulted": [
+            "u3a17-P1",
+            "u3a17-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        }
+      },
+      "block": "u3a",
+      "case": 17,
+      "required": [
+        "M0043"
+      ]
+    },
+    {
+      "arms": {
+        "A0": {
+          "consulted": [
+            "u3a18-P1",
+            "u3a18-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        },
+        "A1": {
+          "consulted": [
+            "u3a18-P2"
+          ],
+          "covered": false,
+          "routing_coverage": 0.0
+        },
+        "A2": {
+          "consulted": [
+            "u3a18-P1",
+            "u3a18-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        }
+      },
+      "block": "u3a",
+      "case": 18,
+      "required": [
+        "M0018",
+        "M0022"
+      ]
+    },
+    {
+      "arms": {
+        "A0": {
+          "consulted": [
+            "u3a19-P1",
+            "u3a19-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        },
+        "A1": {
+          "consulted": [
+            "u3a19-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        },
+        "A2": {
+          "consulted": [
+            "u3a19-P1",
+            "u3a19-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        }
+      },
+      "block": "u3a",
+      "case": 19,
+      "required": [
+        "M0031",
+        "M0035"
+      ]
+    },
+    {
+      "arms": {
+        "A0": {
+          "consulted": [
+            "u3a20-P1",
+            "u3a20-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        },
+        "A1": {
+          "consulted": [
+            "u3a20-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        },
+        "A2": {
+          "consulted": [
+            "u3a20-P1",
+            "u3a20-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        }
+      },
+      "block": "u3a",
+      "case": 20,
+      "required": [
+        "M0033"
+      ]
+    },
+    {
+      "arms": {
+        "A0": {
+          "consulted": [
+            "u3a21-P1",
+            "u3a21-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        },
+        "A1": {
+          "consulted": [
+            "u3a21-P1"
+          ],
+          "covered": false,
+          "routing_coverage": 0.6667
+        },
+        "A2": {
+          "consulted": [
+            "u3a21-P1",
+            "u3a21-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        }
+      },
+      "block": "u3a",
+      "case": 21,
+      "required": [
+        "M0006",
+        "M0026",
+        "M0039"
+      ]
+    },
+    {
+      "arms": {
+        "A0": {
+          "consulted": [
+            "u3a22-P1",
+            "u3a22-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        },
+        "A1": {
+          "consulted": [
+            "u3a22-P1"
+          ],
+          "covered": false,
+          "routing_coverage": 0.0
+        },
+        "A2": {
+          "consulted": [
+            "u3a22-P1",
+            "u3a22-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        }
+      },
+      "block": "u3a",
+      "case": 22,
+      "required": [
+        "M0038"
+      ]
+    },
+    {
+      "arms": {
+        "A0": {
+          "consulted": [
+            "u3a23-P1",
+            "u3a23-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        },
+        "A1": {
+          "consulted": [
+            "u3a23-P1"
+          ],
+          "covered": false,
+          "routing_coverage": 0.5
+        },
+        "A2": {
+          "consulted": [
+            "u3a23-P1",
+            "u3a23-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        }
+      },
+      "block": "u3a",
+      "case": 23,
+      "required": [
+        "M0014",
+        "M0022"
+      ]
+    },
+    {
+      "arms": {
+        "A0": {
+          "consulted": [
+            "u3a24-P1",
+            "u3a24-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        },
+        "A1": {
+          "consulted": [
+            "u3a24-P2"
+          ],
+          "covered": false,
+          "routing_coverage": 0.5
+        },
+        "A2": {
+          "consulted": [
+            "u3a24-P1",
+            "u3a24-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        }
+      },
+      "block": "u3a",
+      "case": 24,
+      "required": [
+        "M0012",
+        "M0035"
+      ]
+    },
+    {
+      "arms": {
+        "A0": {
+          "consulted": [
+            "u3a25-P1",
+            "u3a25-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        },
+        "A1": {
+          "consulted": [
+            "u3a25-P1"
+          ],
+          "covered": false,
+          "routing_coverage": 0.0
+        },
+        "A2": {
+          "consulted": [
+            "u3a25-P1",
+            "u3a25-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        }
+      },
+      "block": "u3a",
+      "case": 25,
+      "required": [
+        "M0040"
+      ]
+    },
+    {
+      "arms": {
+        "A0": {
+          "consulted": [
+            "u3a26-P1",
+            "u3a26-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        },
+        "A1": {
+          "consulted": [
+            "u3a26-P1"
+          ],
+          "covered": false,
+          "routing_coverage": 0.5
+        },
+        "A2": {
+          "consulted": [
+            "u3a26-P1",
+            "u3a26-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        }
+      },
+      "block": "u3a",
+      "case": 26,
+      "required": [
+        "M0013",
+        "M0040"
+      ]
+    },
+    {
+      "arms": {
+        "A0": {
+          "consulted": [
+            "u3b27-P1",
+            "u3b27-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        },
+        "A1": {
+          "consulted": [
+            "u3b27-P2"
+          ],
+          "covered": false,
+          "routing_coverage": 0.5
+        },
+        "A2": {
+          "consulted": [
+            "u3b27-P1",
+            "u3b27-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        }
+      },
+      "block": "u3b",
+      "case": 27,
+      "required": [
+        "M0002",
+        "M0011",
+        "M0023",
+        "M0029"
+      ]
+    },
+    {
+      "arms": {
+        "A0": {
+          "consulted": [
+            "u3b28-P1",
+            "u3b28-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        },
+        "A1": {
+          "consulted": [
+            "u3b28-P2"
+          ],
+          "covered": false,
+          "routing_coverage": 0.0
+        },
+        "A2": {
+          "consulted": [
+            "u3b28-P1",
+            "u3b28-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        }
+      },
+      "block": "u3b",
+      "case": 28,
+      "required": [
+        "M0032"
+      ]
+    },
+    {
+      "arms": {
+        "A0": {
+          "consulted": [
+            "u3b29-P1",
+            "u3b29-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        },
+        "A1": {
+          "consulted": [
+            "u3b29-P1"
+          ],
+          "covered": false,
+          "routing_coverage": 0.5
+        },
+        "A2": {
+          "consulted": [
+            "u3b29-P1",
+            "u3b29-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        }
+      },
+      "block": "u3b",
+      "case": 29,
+      "required": [
+        "M0005",
+        "M0021",
+        "M0038",
+        "M0043"
+      ]
+    },
+    {
+      "arms": {
+        "A0": {
+          "consulted": [
+            "u3b30-P1",
+            "u3b30-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        },
+        "A1": {
+          "consulted": [
+            "u3b30-P1"
+          ],
+          "covered": false,
+          "routing_coverage": 0.5
+        },
+        "A2": {
+          "consulted": [
+            "u3b30-P1",
+            "u3b30-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        }
+      },
+      "block": "u3b",
+      "case": 30,
+      "required": [
+        "M0001",
+        "M0024"
+      ]
+    },
+    {
+      "arms": {
+        "A0": {
+          "consulted": [
+            "u3b31-P1",
+            "u3b31-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        },
+        "A1": {
+          "consulted": [
+            "u3b31-P1"
+          ],
+          "covered": false,
+          "routing_coverage": 0.5
+        },
+        "A2": {
+          "consulted": [
+            "u3b31-P1",
+            "u3b31-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        }
+      },
+      "block": "u3b",
+      "case": 31,
+      "required": [
+        "M0013",
+        "M0025",
+        "M0031",
+        "M0034",
+        "M0036",
+        "M0038"
+      ]
+    },
+    {
+      "arms": {
+        "A0": {
+          "consulted": [
+            "u3b32-P1",
+            "u3b32-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        },
+        "A1": {
+          "consulted": [
+            "u3b32-P1"
+          ],
+          "covered": false,
+          "routing_coverage": 0.0
+        },
+        "A2": {
+          "consulted": [
+            "u3b32-P1",
+            "u3b32-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        }
+      },
+      "block": "u3b",
+      "case": 32,
+      "required": [
+        "M0048"
+      ]
+    },
+    {
+      "arms": {
+        "A0": {
+          "consulted": [
+            "u3b33-P1",
+            "u3b33-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        },
+        "A1": {
+          "consulted": [
+            "u3b33-P1"
+          ],
+          "covered": false,
+          "routing_coverage": 0.0
+        },
+        "A2": {
+          "consulted": [
+            "u3b33-P1",
+            "u3b33-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        }
+      },
+      "block": "u3b",
+      "case": 33,
+      "required": [
+        "M0031",
+        "M0046"
+      ]
+    },
+    {
+      "arms": {
+        "A0": {
+          "consulted": [
+            "u3b34-P1",
+            "u3b34-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        },
+        "A1": {
+          "consulted": [
+            "u3b34-P1"
+          ],
+          "covered": false,
+          "routing_coverage": 0.5
+        },
+        "A2": {
+          "consulted": [
+            "u3b34-P1",
+            "u3b34-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        }
+      },
+      "block": "u3b",
+      "case": 34,
+      "required": [
+        "M0010",
+        "M0036"
+      ]
+    },
+    {
+      "arms": {
+        "A0": {
+          "consulted": [
+            "u3b35-P1",
+            "u3b35-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        },
+        "A1": {
+          "consulted": [
+            "u3b35-P1"
+          ],
+          "covered": false,
+          "routing_coverage": 0.5
+        },
+        "A2": {
+          "consulted": [
+            "u3b35-P1",
+            "u3b35-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        }
+      },
+      "block": "u3b",
+      "case": 35,
+      "required": [
+        "M0008",
+        "M0029"
+      ]
+    },
+    {
+      "arms": {
+        "A0": {
+          "consulted": [
+            "u3b36-P1",
+            "u3b36-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        },
+        "A1": {
+          "consulted": [
+            "u3b36-P1"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        },
+        "A2": {
+          "consulted": [
+            "u3b36-P1",
+            "u3b36-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        }
+      },
+      "block": "u3b",
+      "case": 36,
+      "required": [
+        "M0009"
+      ]
+    },
+    {
+      "arms": {
+        "A0": {
+          "consulted": [
+            "u3b37-P1",
+            "u3b37-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        },
+        "A1": {
+          "consulted": [
+            "u3b37-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        },
+        "A2": {
+          "consulted": [
+            "u3b37-P1",
+            "u3b37-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        }
+      },
+      "block": "u3b",
+      "case": 37,
+      "required": [
+        "M0048"
+      ]
+    },
+    {
+      "arms": {
+        "A0": {
+          "consulted": [
+            "u3b38-P1",
+            "u3b38-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        },
+        "A1": {
+          "consulted": [
+            "u3b38-P1"
+          ],
+          "covered": false,
+          "routing_coverage": 0.6
+        },
+        "A2": {
+          "consulted": [
+            "u3b38-P1",
+            "u3b38-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        }
+      },
+      "block": "u3b",
+      "case": 38,
+      "required": [
+        "M0005",
+        "M0011",
+        "M0030",
+        "M0035",
+        "M0044"
+      ]
+    },
+    {
+      "arms": {
+        "A0": {
+          "consulted": [
+            "u3b39-P1",
+            "u3b39-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        },
+        "A1": {
+          "consulted": [
+            "u3b39-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        },
+        "A2": {
+          "consulted": [
+            "u3b39-P1",
+            "u3b39-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        }
+      },
+      "block": "u3b",
+      "case": 39,
+      "required": [
+        "M0027"
+      ]
+    },
+    {
+      "arms": {
+        "A0": {
+          "consulted": [
+            "u3b41-P1",
+            "u3b41-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        },
+        "A1": {
+          "consulted": [
+            "u3b41-P2"
+          ],
+          "covered": false,
+          "routing_coverage": 0.5
+        },
+        "A2": {
+          "consulted": [
+            "u3b41-P1",
+            "u3b41-P2"
+          ],
+          "covered": true,
+          "routing_coverage": 1.0
+        }
+      },
+      "block": "u3b",
+      "case": 41,
+      "required": [
+        "M0010",
+        "M0033"
+      ]
+    }
+  ],
+  "scope_limit": "K=2 artificial partitions per case test the routing mechanism; no real-tape call savings are demonstrated"
+}

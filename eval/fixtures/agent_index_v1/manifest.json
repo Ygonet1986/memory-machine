@@ -1,0 +1,9 @@
+{
+  "a1_miss_cases": 20,
+  "a2_recover_cases": 27,
+  "cases": 27,
+  "cases_sha256": "81aa9b76c202a13a46bc7aecf6222e5e7ae0efad2a35c596b0b93c5faa9ca8bd",
+  "generator": "gen_agent_partitions_v1.py",
+  "generator_version": 1,
+  "partitions_per_case": 2
+}

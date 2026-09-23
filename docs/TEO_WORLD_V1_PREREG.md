@@ -1,8 +1,8 @@
 # teo-world-v1 — pre-registration (flat history vs typed records in a simulated world)
 
-Status: **frozen before execution.** Date: 2026-09-23. Track: Trilepsia thesis
-(owner axis). No execution is authorized by this document; `sim/ab.py` is
-written only in the execution commit (§10).
+Status: **frozen; executed 2026-09-23** (record at the end). Date: 2026-09-23.
+Track: Trilepsia thesis (owner axis). `sim/ab.py` is the execution commit's
+payload (§10).
 
 Relation to the closed lines: E2 closed as `localized repair only`
 (`docs/COMPOSITION_V1.md` §12); the B2 vs B2+ gate closed as **provenance layer
@@ -266,15 +266,72 @@ def next_observation(consumer, grid: tuple[int, ...], h_a: int) -> int:
     ...
 ```
 
-## Appendix B — frozen values (filled at authorization, then immutable)
+## Appendix B — frozen values (authorized 2026-09-23, then immutable)
 
 | item | value |
 |---|---|
 | `T` (episode length), `H` (horizon) | 20 both (frozen; §2) |
-| `theta` (on the normalized error) | 0.05 (from the protocol skeleton, frozen) |
-| `W` | 3 consecutive observations (from the protocol skeleton, frozen) |
-| grid / `H_a` | `[owner: fixed before any run]` |
-| `N` | 64 per family (frozen) |
-| laws, parameter ranges, scale `S` | §2 (frozen) |
-| identifiability floor | verified at the execution commit; failure -> family reported non-identifiable (§2) |
-| noise | `sigma = 1%` of `S` = 0.02 (frozen) |
+| `theta` (on the normalized error) | 0.05 |
+| `W` | 3 consecutive observations |
+| grid / `H_a` | all integer steps `0..20` / `H_a = 20` |
+| observation budget | `B_obs = 7` per episode, both policies |
+| fixed policy Π_fixa | `t = 0, 3, 6, 9, 12, 15, 18` |
+| active policy Π_ativa | first `t = 0`; then the grid time maximizing disagreement between the top-2 candidate models (ties: earliest); same heuristic in every arm |
+| fit window `k_win` | 6 |
+| break index | per axis, uniform in `{6..14}`, independent (`k_x != k_y` allowed); post-break rule re-anchored C0 at `k` (§2) |
+| episodes per world / arm | stable (M4 control) -> break (M3) -> novel (M5) -> repeat of the world's own rule (M5) |
+| M1/M2/M3 operationalization | normalized one-observation-ahead errors (prediction made before each observation); M2 = observation count until `W` consecutive errors `< theta`, right-censored at `B_obs`; M3 = observations after `max(k_x, k_y)` until `W` consecutive errors `> theta`, reported as `latency/H`, right-censored at `1.0` |
+| M5 | `M2(novel) - M2(repeat)` per world; ledger persists across episodes (B only) |
+| `R_fam` | `p95(|x(t) - x(0)|)` over the generated worlds under the frozen Π, `t in 0..H`, computed once before any arm runs and never recomputed |
+| bootstrap | 1000 resamples within family, equal family weights, world-level pairing, seed `20260923`, percentile CI 95% |
+| A2 (diagnostic) | CUSUM slack `theta`, threshold `5*theta`; never feeds A1/B |
+| `N` | 64 per family |
+| noise | `sigma = 1%` of `S` = 0.02 |
+
+#### Execution record — revalidation and authorization (2026-09-23)
+
+- §4 revalidation (§10): E5/answerer-composition closed with `both levers fail ->
+  consolidation (provenance layer), no new mechanism`; the consumer contract
+  relevant to §4 is unchanged and **§4 stands**.
+- Identifiability floor: verified deterministically by the execution run,
+  which reports pass/fail per family (no adjustment afterwards, §2).
+- Authorized execution: `sim/ab.py` (stdlib only), outputs under
+  `sim/results/teo_world_v1/`.
+
+#### Execution record — results (2026-09-23)
+
+Harness `sim/ab.py`, outputs `sim/results/teo_world_v1/`; deterministic
+rerun byte-identical (`episodes.jsonl` sha256 `904ef626...`, `summary.json`
+sha256 `02f862cc...`). A harness smoke run preceded this record; the only
+post-smoke change was M4 faithfulness per §6 ("announced detection" = the
+consumer's trigger, not the raw sustained statistic). Criteria unchanged;
+both readings agreed. Identifiability floor: all four families pass
+(linear 100.0 sigma, const_accel 51.5, attract 4.4, oscill 45.0).
+
+| family | M3 c1 -> c3 | M4 c1 -> c3 | M5 c1 -> c3 (reid B) |
+|---|---:|---:|---:|
+| linear | 0.934 -> 0.734 | 0.016 -> 0.234 (FAIL) | 0.000 -> 0.641 (1.00) |
+| const_accel | 0.894 -> 0.762 | 0.000 -> 0.688 (FAIL) | 0.000 -> 1.469 (1.00) |
+| attract | 0.641 -> 0.615 | 0.172 -> 0.172 | 0.000 -> 0.531 (1.00) |
+| oscill | 0.748 -> 0.761 | 0.438 -> 0.453 | 0.109 -> 0.266 (0.64) |
+
+Pooled c3 - c1: M3 mean -0.0858 (95% CI [-0.1196, -0.0531]), M5 mean +0.6961
+(95% CI [+0.5703, +0.8203]); LOFO keeps both signs for every dropped family;
+B- (B's skeleton with A1's information set) is behaviorally identical to A1
+on every recorded metric, so the attribution check B - B- equals B - A1 and
+is positive on both metrics. M4 fails the per-family guard (linear,
+const_accel): every B false alarm occurs at or before convergence
+(early-commitment churn; `trigger_obs <= M2` in 100% of the flagged stable
+episodes).
+
+**Verdict (frozen §8): `advance = false` — B wins M3 and M5, passes LOFO
+and the B- attribution, but misses the M4 guard; per the frozen falsifier the
+structure is not scaled in this regime. The profile is the result:** typed
+scope/ledger buys detection and transfer, but committing before convergence
+announces changes that never happened.
+
+Secondary (diagnostic, oscill 2x2, M1/M3/M5): c1 0.423/0.748/0.109, c2
+0.833/0.231/0.000, c3 0.433/0.761/0.266, c4 0.889/0.204/-0.031 — the active
+observation policy sharpens detection and destroys prediction accuracy.
+A2 (CUSUM) behaves like A1 on M3/M4 (same predictor) and shows no M5 gain
+(no ledger).

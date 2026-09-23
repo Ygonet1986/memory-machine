@@ -92,4 +92,28 @@ Same M1–M6 as round 1, with two clarifications:
   determinism rerun. Harness debugging on round-1 seeds is disclosed and
   precedes the recorded run.
 
-## Execution record (to be appended after the run)
+## Execution record (2026-09-23, reserved base 20260926)
+
+Harness `sim/ab2.py`; one recorded run plus a byte-identical determinism rerun
+(`episodes.jsonl` sha256 `f7e9381a...`, `summary.json` sha256 `3770d212...`).
+Development happened on round-1 seeds only; the reserved base was used for the
+first time by this run. Identifiability floor: all four families pass.
+
+| family | M3 c1 -> c3 | M4 c1 -> c3 | M5 c1 -> c3 | adopt/rep (V2) | reid |
+|---|---:|---:|---:|---:|---:|
+| linear | 0.920 -> 0.774 | 0.000 -> 0.000 | 0.000 -> 1.828 | 0.64 | 0.641 |
+| const_accel | 0.907 -> 0.723 | 0.016 -> 0.062 | 0.031 -> 2.438 | 0.91 | 0.906 |
+| attract | 0.668 -> 0.748 | 0.203 -> 0.000 | 0.000 -> 2.188 | 0.80 | 0.797 |
+| oscill | 0.774 -> 0.748 | 0.453 -> 0.000 | 0.031 -> 2.109 | 0.59 | 0.594 |
+
+Pooled `c3 - c1`: M3 mean -0.0693 (95% CI [-0.1057, -0.0388]), M5 mean
++2.1224 (95% CI [+1.9219, +2.3126]).
+
+**Verdict (frozen §4): `advance = true`** — M3 win, M5 win, M4 per-family
+guard, LOFO sign-stable, B- attribution positive. Separating candidate from
+adopted hypotheses reduced false alarms while preserving detection and
+transfer, on reserved worlds. Caveats recorded: the `const_accel` M4 margin is
+thin (0.0625 vs 0.015625 + 0.05); and V2's M1 regressed in `linear`/`attract`
+— the adoption delay buys alarm discipline with early prediction accuracy, a
+trade-off not gated in either round. Per §4 this is ground to scale the
+experiment, not a product claim; T3 remains closed and decoupled.

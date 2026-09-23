@@ -1,0 +1,12 @@
+{
+  "allocation": 3600,
+  "cases": 12,
+  "cases_sha256": "93f16dcb64d3180792cc2844690c8744293a74171bc863df032724830460d9c4",
+  "design_checks": {
+    "w1_both": 0,
+    "w4_both": 0,
+    "w6c_both": 12
+  },
+  "generator": "gen_multi_component_holdout_v1.py",
+  "generator_version": 1
+}

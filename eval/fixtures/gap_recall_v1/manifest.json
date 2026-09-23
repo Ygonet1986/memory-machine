@@ -1,0 +1,15 @@
+{
+  "allocation": 3600,
+  "cases": 15,
+  "cases_sha256": "4c2d915ec5bb258ef649c639d5f3ccdc91693c217b0da05a9161fd1e2506e33c",
+  "design_checks": {
+    "control_g0_complete": 3,
+    "control_g1_extra_zero": 3,
+    "g0_incomplete": 12,
+    "g1_complete": 12,
+    "g2_incomplete": 12,
+    "g3_complete": 12
+  },
+  "generator": "gen_gap_recall_v1.py",
+  "generator_version": 1
+}

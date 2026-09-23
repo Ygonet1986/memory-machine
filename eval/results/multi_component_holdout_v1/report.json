@@ -1,0 +1,245 @@
+{
+  "all_pass": true,
+  "answer": {
+    "cases": [
+      {
+        "arms": {
+          "W4": [
+            "incorrect",
+            "incorrect",
+            "incorrect"
+          ],
+          "W6c": [
+            "correct",
+            "correct",
+            "correct"
+          ]
+        },
+        "case_id": "L01",
+        "gold": "$1140"
+      },
+      {
+        "arms": {
+          "W4": [
+            "incorrect",
+            "incorrect",
+            "incorrect"
+          ],
+          "W6c": [
+            "correct",
+            "correct",
+            "correct"
+          ]
+        },
+        "case_id": "L02",
+        "gold": "$1260"
+      },
+      {
+        "arms": {
+          "W4": [
+            "incorrect",
+            "incorrect",
+            "incorrect"
+          ],
+          "W6c": [
+            "correct",
+            "correct",
+            "correct"
+          ]
+        },
+        "case_id": "L03",
+        "gold": "$1380"
+      }
+    ],
+    "failures": 0,
+    "gates": {
+      "M3_answers": true,
+      "M5_infra": true
+    },
+    "llm_calls": 36,
+    "score_w4": 0.0,
+    "score_w6c": 3.0
+  },
+  "gates": {
+    "M1_w6c_both": true,
+    "M2_strict_advantage": true,
+    "M3_answers": true,
+    "M4_budget": true,
+    "M4_determinism": true,
+    "M5_infra": true
+  },
+  "prereg": "docs/MULTI_COMPONENT_HOLDOUT_V1_PREREG.md",
+  "rows": [
+    {
+      "arm": "W4",
+      "both": false,
+      "case_id": "L01",
+      "chars": 3587,
+      "gold": "$1140"
+    },
+    {
+      "arm": "W6c",
+      "both": true,
+      "case_id": "L01",
+      "chars": 277,
+      "gold": "$1140"
+    },
+    {
+      "arm": "W4",
+      "both": false,
+      "case_id": "L02",
+      "chars": 3591,
+      "gold": "$1260"
+    },
+    {
+      "arm": "W6c",
+      "both": true,
+      "case_id": "L02",
+      "chars": 278,
+      "gold": "$1260"
+    },
+    {
+      "arm": "W4",
+      "both": false,
+      "case_id": "L03",
+      "chars": 3578,
+      "gold": "$1380"
+    },
+    {
+      "arm": "W6c",
+      "both": true,
+      "case_id": "L03",
+      "chars": 277,
+      "gold": "$1380"
+    },
+    {
+      "arm": "W4",
+      "both": false,
+      "case_id": "L04",
+      "chars": 3593,
+      "gold": "$1500"
+    },
+    {
+      "arm": "W6c",
+      "both": true,
+      "case_id": "L04",
+      "chars": 277,
+      "gold": "$1500"
+    },
+    {
+      "arm": "W4",
+      "both": false,
+      "case_id": "L05",
+      "chars": 3587,
+      "gold": "$1620"
+    },
+    {
+      "arm": "W6c",
+      "both": true,
+      "case_id": "L05",
+      "chars": 277,
+      "gold": "$1620"
+    },
+    {
+      "arm": "W4",
+      "both": false,
+      "case_id": "L06",
+      "chars": 3591,
+      "gold": "$1740"
+    },
+    {
+      "arm": "W6c",
+      "both": true,
+      "case_id": "L06",
+      "chars": 278,
+      "gold": "$1740"
+    },
+    {
+      "arm": "W4",
+      "both": false,
+      "case_id": "L07",
+      "chars": 3578,
+      "gold": "$1860"
+    },
+    {
+      "arm": "W6c",
+      "both": true,
+      "case_id": "L07",
+      "chars": 278,
+      "gold": "$1860"
+    },
+    {
+      "arm": "W4",
+      "both": false,
+      "case_id": "L08",
+      "chars": 3593,
+      "gold": "$1980"
+    },
+    {
+      "arm": "W6c",
+      "both": true,
+      "case_id": "L08",
+      "chars": 279,
+      "gold": "$1980"
+    },
+    {
+      "arm": "W4",
+      "both": false,
+      "case_id": "L09",
+      "chars": 3588,
+      "gold": "$2100"
+    },
+    {
+      "arm": "W6c",
+      "both": true,
+      "case_id": "L09",
+      "chars": 280,
+      "gold": "$2100"
+    },
+    {
+      "arm": "W4",
+      "both": false,
+      "case_id": "L10",
+      "chars": 3593,
+      "gold": "$2220"
+    },
+    {
+      "arm": "W6c",
+      "both": true,
+      "case_id": "L10",
+      "chars": 282,
+      "gold": "$2220"
+    },
+    {
+      "arm": "W4",
+      "both": false,
+      "case_id": "L11",
+      "chars": 3580,
+      "gold": "$2340"
+    },
+    {
+      "arm": "W6c",
+      "both": true,
+      "case_id": "L11",
+      "chars": 281,
+      "gold": "$2340"
+    },
+    {
+      "arm": "W4",
+      "both": false,
+      "case_id": "L12",
+      "chars": 3595,
+      "gold": "$2460"
+    },
+    {
+      "arm": "W6c",
+      "both": true,
+      "case_id": "L12",
+      "chars": 281,
+      "gold": "$2460"
+    }
+  ],
+  "w4_both": 0,
+  "w6c_both": 12,
+  "w6c_source_sha256": "9b4445616b98268f0870c55c9ade268937f46755bd8f353e777ce2bdf6c67f8b"
+}

@@ -4,7 +4,7 @@ All notable changes to this project are documented here. The project follows
 [Semantic Versioning](https://semver.org/) for the installable package; the
 manual/whitepaper keeps its own document version.
 
-## [Unreleased]
+## [0.2.4] - 2026-09-23
 
 - **Turn slots (opt-in).** `memory-cli ask` / `memory-cli reply` record both
   sides of a turn on the tape as `question` and `reply` records, deduped by
@@ -16,6 +16,9 @@ manual/whitepaper keeps its own document version.
   the agent refines it every sweep (JSON response gains `understanding`) and
   it is persisted on the agent next to digest/checklist, so it survives
   across turns. View agents stay out of scope for v1.
+- Admission-shadow-v2 window restarted from zero (declared under §8):
+  pre-restart logs archived and never counted; rules, schema, candidate and
+  thresholds unchanged.
 
 ## [0.2.0] - 2026-09-22
 

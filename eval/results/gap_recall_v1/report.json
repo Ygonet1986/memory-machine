@@ -1,5 +1,68 @@
 {
   "all_pass": true,
+  "answer": {
+    "cases": [
+      {
+        "arms": {
+          "G0": [
+            "incorrect",
+            "incorrect",
+            "incorrect"
+          ],
+          "G1": [
+            "correct",
+            "correct",
+            "correct"
+          ]
+        },
+        "case_id": "C01",
+        "gold": "$665",
+        "kind": "numeral"
+      },
+      {
+        "arms": {
+          "G0": [
+            "incorrect",
+            "incorrect",
+            "incorrect"
+          ],
+          "G1": [
+            "correct",
+            "correct",
+            "correct"
+          ]
+        },
+        "case_id": "C05",
+        "gold": "2026-10-11",
+        "kind": "date"
+      },
+      {
+        "arms": {
+          "G0": [
+            "incorrect",
+            "incorrect",
+            "partial"
+          ],
+          "G1": [
+            "correct",
+            "correct",
+            "correct"
+          ]
+        },
+        "case_id": "C09",
+        "gold": "$575 and $765",
+        "kind": "components"
+      }
+    ],
+    "failures": 0,
+    "gates": {
+      "A1_answers": true,
+      "A2_infra": true
+    },
+    "llm_calls": 36,
+    "score_g0": 0.1667,
+    "score_g1": 3.0
+  },
   "budget": {
     "control_triggers": 0,
     "directed_extra_total": 12,
@@ -26,6 +89,8 @@
   },
   "gap_cases": 12,
   "gates": {
+    "A1_answers": true,
+    "A2_infra": true,
     "R1_no_loss": true,
     "R2_recovery": true,
     "R3_direction": true,

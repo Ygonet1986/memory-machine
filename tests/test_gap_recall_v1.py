@@ -56,10 +56,23 @@ def test_recorded_verdicts():
                                 "mean_extra_per_case": 0.8}
     assert report["gates"] == {
         "R1_no_loss": True, "R2_recovery": True, "R3_direction": True,
-        "R4_budget": True, "R6_audit": True, "R5_determinism": True}
+        "R4_budget": True, "R6_audit": True, "R5_determinism": True,
+        "A1_answers": True, "A2_infra": True}
     assert report["all_pass"] is True
     assert "lab-only" in report["scope"]
     assert report["exploratory"] == {
         "money_holdout_v2": {"cases": 12, "w1_found": 4, "directed_found": 4},
         "multi_component_holdout_v1": {"cases": 12, "w1_found": 0,
                                        "directed_found": 0}}
+    answer = report["answer"]
+    assert answer["llm_calls"] == 36
+    assert answer["failures"] == 0
+    assert answer["score_g0"] == 0.1667
+    assert answer["score_g1"] == 3.0
+    assert answer["cases"][0]["arms"]["G0"] == ["incorrect"] * 3
+    assert answer["cases"][0]["arms"]["G1"] == ["correct"] * 3
+    assert answer["cases"][1]["arms"]["G0"] == ["incorrect"] * 3
+    assert answer["cases"][1]["arms"]["G1"] == ["correct"] * 3
+    assert answer["cases"][2]["arms"]["G0"] == ["incorrect", "incorrect",
+                                                "partial"]
+    assert answer["cases"][2]["arms"]["G1"] == ["correct"] * 3

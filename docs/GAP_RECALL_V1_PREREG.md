@@ -134,3 +134,23 @@ Answer gate N=3 on three recovered cases (C01 numeral, C05 date, C09
 two-component): same answerer + blind judge, gold fixed, 2 arms (G0 vs G1),
 3 runs = 36 calls, gate A1 score(G1) > score(G0); infra failures <= 20%.
 Presented before execution per the plan.
+
+### Addendum execution record (2026-09-23)
+
+Approved and executed: 36 calls (18 answer + 18 judge), **0 failures**.
+
+| case | kind | G0 verdicts | G1 verdicts |
+|---|---|---|---|
+| C01 | numeral | incorrect x3 | **correct x3** |
+| C05 | date | incorrect x3 | **correct x3** |
+| C09 | components | incorrect x2 + partial x1 | **correct x3** |
+
+Answer scores: G0 **0.1667** vs G1 **3.0**. Gates **A1 and A2 true**;
+R1-R6 unchanged; `all_pass` true.
+
+- The delivery gain **reaches the answers** on all three sampled gap types
+  (value, date, two components): the missing fact was decisive, and the
+  partial G0 run on C09 (one component present) reproduces the
+  "one value arrived, the other didn't" failure class.
+- Scope unchanged: lab-only; no product or economy claim; windows OFF;
+  shadow and track S untouched; nothing promoted.

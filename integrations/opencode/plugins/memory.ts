@@ -80,8 +80,11 @@ export const MemoryPlugin: Plugin = async ({ client }) => {
 
       if (!text) return
 
+      const started = Date.now()
+      const out = await runCli(input.sessionID, ["recall", text, "--cross-session"])
+      // Slot 1: what the user said. Written *after* recall so the turn does
+      // not retrieve itself as a candidate; runs even if recall fails.
       if (TURN_SLOTS) {
-        // Slot 1: what the user said.
         await runCli(input.sessionID, [
           "ask",
           "--text",
@@ -90,9 +93,6 @@ export const MemoryPlugin: Plugin = async ({ client }) => {
           output.message.id || "",
         ])
       }
-
-      const started = Date.now()
-      const out = await runCli(input.sessionID, ["recall", text, "--cross-session"])
       if (!out) return
       let r: any
       try {

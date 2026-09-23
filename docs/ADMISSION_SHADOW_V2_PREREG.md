@@ -141,3 +141,27 @@ counterfactual is evaluated on a lexical substrate that excludes agent-found
 candidates (declared boundary). The judged subsample is the smallest
 supporting sample; diagnostics carry judge noise. Synthetic v4 results are
 context, not evidence. No default changes during this phase.
+
+## Window restart (2026-09-23) — declared under §8
+
+Reason: **turn slots activated** (`MEMORY_MACHINE_TURN_SLOTS=1`, owner
+decision, PRs #51/#52): the product write path now records question+reply
+records on the tape, so the environment the window measures changed. §8
+requires a restart from zero; no rule, threshold, candidate, comparator,
+schema, prompt or default is amended (P3v4 stays frozen at `44c0124`).
+
+Procedure executed:
+
+- Pre-restart logs archived in place as
+  `admission_shadow.prerestart_20260923.jsonl` (two session logs: 47 + 12
+  records). The checker reads only `admission_shadow.jsonl` (`LOG_NAME`), so
+  archived files are never counted.
+- Counting restarts from the first schema-v2 record written after
+  activation. New start: declared 2026-09-23; the first post-restart record
+  marks it exactly.
+- The partial collection is kept as historical artifact; **no outcome
+  inspection was performed** on it. Activation requires an opencode restart
+  (the plugin reads the flag at startup); until then the checker reports
+  `met:false` with zero records.
+- The tape gains `question`/`reply` slots from activation onward; this is
+  part of the restarted window's declared starting state.

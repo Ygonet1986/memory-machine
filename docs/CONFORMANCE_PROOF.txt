@@ -190,6 +190,9 @@ tests/test_evidence_cards.py::test_paraphrase_or_wrong_offsets_invalidate_proven
 tests/test_evidence_cards.py::test_budget_is_respected_including_headers
 tests/test_evidence_cards.py::test_cards_are_deterministic
 tests/test_evidence_cards.py::test_no_scoring_segment_yields_no_card
+tests/test_gap_recall_v1.py::test_fixture_regenerates_byte_identically
+tests/test_gap_recall_v1.py::test_mechanism_contract
+tests/test_gap_recall_v1.py::test_recorded_verdicts
 tests/test_graph.py::test_normalize_name_and_parse_types
 tests/test_graph.py::test_build_creates_projection_with_provenance
 tests/test_graph.py::test_entities_dedupe_by_normalized_name
@@ -576,4 +579,4 @@ tests/test_whiteboard.py::test_size_and_consolidation_trigger
 tests/test_whiteboard.py::test_roundtrip
 tests/test_whiteboard.py::test_render
 
-577 tests collected in 0.09s
+580 tests collected in 0.09s

@@ -1,0 +1,1122 @@
+{
+  "all_pass": true,
+  "budget": {
+    "control_triggers": 0,
+    "directed_extra_total": 12,
+    "max_extra_per_case": 1,
+    "mean_extra_per_case": 0.8
+  },
+  "complete": {
+    "G0": 3,
+    "G1": 15,
+    "G2": 3,
+    "G3": 15
+  },
+  "exploratory": {
+    "money_holdout_v2": {
+      "cases": 12,
+      "directed_found": 4,
+      "w1_found": 4
+    },
+    "multi_component_holdout_v1": {
+      "cases": 12,
+      "directed_found": 0,
+      "w1_found": 0
+    }
+  },
+  "gap_cases": 12,
+  "gates": {
+    "R1_no_loss": true,
+    "R2_recovery": true,
+    "R3_direction": true,
+    "R4_budget": true,
+    "R5_determinism": true,
+    "R6_audit": true
+  },
+  "prereg": "docs/GAP_RECALL_V1_PREREG.md",
+  "recovered": [
+    "C01",
+    "C02",
+    "C03",
+    "C04",
+    "C05",
+    "C06",
+    "C07",
+    "C08",
+    "C09",
+    "C10",
+    "C11",
+    "C12"
+  ],
+  "rows": [
+    {
+      "arms": {
+        "G0": {
+          "audit": [],
+          "complete": false,
+          "consulted": [
+            0,
+            2,
+            3
+          ],
+          "directed_extra": 0,
+          "gaps": [
+            {
+              "kind": "numerals",
+              "missing": 1
+            }
+          ]
+        },
+        "G1": {
+          "audit": [
+            {
+              "complete_after": true,
+              "complete_before": false,
+              "exhausted": false,
+              "gap": [
+                {
+                  "kind": "numerals",
+                  "missing": 1
+                }
+              ],
+              "query": "annual audit vega invoice amount",
+              "records": [
+                "C01-R02"
+              ]
+            }
+          ],
+          "complete": true,
+          "consulted": [
+            0,
+            2,
+            3,
+            1
+          ],
+          "directed_extra": 1,
+          "gaps": []
+        },
+        "G2": {
+          "audit": [],
+          "complete": false,
+          "consulted": [
+            0,
+            2,
+            3,
+            4
+          ],
+          "directed_extra": 0,
+          "gaps": [
+            {
+              "kind": "numerals",
+              "missing": 1
+            }
+          ]
+        },
+        "G3": {
+          "audit": [],
+          "complete": true,
+          "consulted": [
+            0,
+            1
+          ],
+          "directed_extra": 0,
+          "gaps": []
+        }
+      },
+      "case_id": "C01",
+      "kind": "numeral"
+    },
+    {
+      "arms": {
+        "G0": {
+          "audit": [],
+          "complete": false,
+          "consulted": [
+            0,
+            2,
+            3
+          ],
+          "directed_extra": 0,
+          "gaps": [
+            {
+              "kind": "numerals",
+              "missing": 1
+            }
+          ]
+        },
+        "G1": {
+          "audit": [
+            {
+              "complete_after": true,
+              "complete_before": false,
+              "exhausted": false,
+              "gap": [
+                {
+                  "kind": "numerals",
+                  "missing": 1
+                }
+              ],
+              "query": "device fleet orion invoice amount",
+              "records": [
+                "C02-R02"
+              ]
+            }
+          ],
+          "complete": true,
+          "consulted": [
+            0,
+            2,
+            3,
+            1
+          ],
+          "directed_extra": 1,
+          "gaps": []
+        },
+        "G2": {
+          "audit": [],
+          "complete": false,
+          "consulted": [
+            0,
+            2,
+            3,
+            4
+          ],
+          "directed_extra": 0,
+          "gaps": [
+            {
+              "kind": "numerals",
+              "missing": 1
+            }
+          ]
+        },
+        "G3": {
+          "audit": [],
+          "complete": true,
+          "consulted": [
+            0,
+            1
+          ],
+          "directed_extra": 0,
+          "gaps": []
+        }
+      },
+      "case_id": "C02",
+      "kind": "numeral"
+    },
+    {
+      "arms": {
+        "G0": {
+          "audit": [],
+          "complete": false,
+          "consulted": [
+            0,
+            2,
+            3
+          ],
+          "directed_extra": 0,
+          "gaps": [
+            {
+              "kind": "numerals",
+              "missing": 1
+            }
+          ]
+        },
+        "G1": {
+          "audit": [
+            {
+              "complete_after": true,
+              "complete_before": false,
+              "exhausted": false,
+              "gap": [
+                {
+                  "kind": "numerals",
+                  "missing": 1
+                }
+              ],
+              "query": "launch event lyra invoice amount",
+              "records": [
+                "C03-R02"
+              ]
+            }
+          ],
+          "complete": true,
+          "consulted": [
+            0,
+            2,
+            3,
+            1
+          ],
+          "directed_extra": 1,
+          "gaps": []
+        },
+        "G2": {
+          "audit": [],
+          "complete": false,
+          "consulted": [
+            0,
+            2,
+            3,
+            4
+          ],
+          "directed_extra": 0,
+          "gaps": [
+            {
+              "kind": "numerals",
+              "missing": 1
+            }
+          ]
+        },
+        "G3": {
+          "audit": [],
+          "complete": true,
+          "consulted": [
+            0,
+            1
+          ],
+          "directed_extra": 0,
+          "gaps": []
+        }
+      },
+      "case_id": "C03",
+      "kind": "numeral"
+    },
+    {
+      "arms": {
+        "G0": {
+          "audit": [],
+          "complete": false,
+          "consulted": [
+            0,
+            2,
+            3
+          ],
+          "directed_extra": 0,
+          "gaps": [
+            {
+              "kind": "numerals",
+              "missing": 1
+            }
+          ]
+        },
+        "G1": {
+          "audit": [
+            {
+              "complete_after": true,
+              "complete_before": false,
+              "exhausted": false,
+              "gap": [
+                {
+                  "kind": "numerals",
+                  "missing": 1
+                }
+              ],
+              "query": "data migration pavo invoice amount",
+              "records": [
+                "C04-R02"
+              ]
+            }
+          ],
+          "complete": true,
+          "consulted": [
+            0,
+            2,
+            3,
+            1
+          ],
+          "directed_extra": 1,
+          "gaps": []
+        },
+        "G2": {
+          "audit": [],
+          "complete": false,
+          "consulted": [
+            0,
+            2,
+            3,
+            4
+          ],
+          "directed_extra": 0,
+          "gaps": [
+            {
+              "kind": "numerals",
+              "missing": 1
+            }
+          ]
+        },
+        "G3": {
+          "audit": [],
+          "complete": true,
+          "consulted": [
+            0,
+            1
+          ],
+          "directed_extra": 0,
+          "gaps": []
+        }
+      },
+      "case_id": "C04",
+      "kind": "numeral"
+    },
+    {
+      "arms": {
+        "G0": {
+          "audit": [],
+          "complete": false,
+          "consulted": [
+            0,
+            2,
+            3
+          ],
+          "directed_extra": 0,
+          "gaps": [
+            {
+              "kind": "date",
+              "missing": 1
+            }
+          ]
+        },
+        "G1": {
+          "audit": [
+            {
+              "complete_after": true,
+              "complete_before": false,
+              "exhausted": false,
+              "gap": [
+                {
+                  "kind": "date",
+                  "missing": 1
+                }
+              ],
+              "query": "launch event orion payment date",
+              "records": [
+                "C05-R02"
+              ]
+            }
+          ],
+          "complete": true,
+          "consulted": [
+            0,
+            2,
+            3,
+            1
+          ],
+          "directed_extra": 1,
+          "gaps": []
+        },
+        "G2": {
+          "audit": [],
+          "complete": false,
+          "consulted": [
+            0,
+            2,
+            3,
+            4
+          ],
+          "directed_extra": 0,
+          "gaps": [
+            {
+              "kind": "date",
+              "missing": 1
+            }
+          ]
+        },
+        "G3": {
+          "audit": [],
+          "complete": true,
+          "consulted": [
+            0,
+            1
+          ],
+          "directed_extra": 0,
+          "gaps": []
+        }
+      },
+      "case_id": "C05",
+      "kind": "date"
+    },
+    {
+      "arms": {
+        "G0": {
+          "audit": [],
+          "complete": false,
+          "consulted": [
+            0,
+            2,
+            3
+          ],
+          "directed_extra": 0,
+          "gaps": [
+            {
+              "kind": "date",
+              "missing": 1
+            }
+          ]
+        },
+        "G1": {
+          "audit": [
+            {
+              "complete_after": true,
+              "complete_before": false,
+              "exhausted": false,
+              "gap": [
+                {
+                  "kind": "date",
+                  "missing": 1
+                }
+              ],
+              "query": "data migration lyra payment date",
+              "records": [
+                "C06-R02"
+              ]
+            }
+          ],
+          "complete": true,
+          "consulted": [
+            0,
+            2,
+            3,
+            1
+          ],
+          "directed_extra": 1,
+          "gaps": []
+        },
+        "G2": {
+          "audit": [],
+          "complete": false,
+          "consulted": [
+            0,
+            2,
+            3,
+            4
+          ],
+          "directed_extra": 0,
+          "gaps": [
+            {
+              "kind": "date",
+              "missing": 1
+            }
+          ]
+        },
+        "G3": {
+          "audit": [],
+          "complete": true,
+          "consulted": [
+            0,
+            1
+          ],
+          "directed_extra": 0,
+          "gaps": []
+        }
+      },
+      "case_id": "C06",
+      "kind": "date"
+    },
+    {
+      "arms": {
+        "G0": {
+          "audit": [],
+          "complete": false,
+          "consulted": [
+            0,
+            2,
+            3
+          ],
+          "directed_extra": 0,
+          "gaps": [
+            {
+              "kind": "date",
+              "missing": 1
+            }
+          ]
+        },
+        "G1": {
+          "audit": [
+            {
+              "complete_after": true,
+              "complete_before": false,
+              "exhausted": false,
+              "gap": [
+                {
+                  "kind": "date",
+                  "missing": 1
+                }
+              ],
+              "query": "venue booking pavo payment date",
+              "records": [
+                "C07-R02"
+              ]
+            }
+          ],
+          "complete": true,
+          "consulted": [
+            0,
+            2,
+            3,
+            1
+          ],
+          "directed_extra": 1,
+          "gaps": []
+        },
+        "G2": {
+          "audit": [],
+          "complete": false,
+          "consulted": [
+            0,
+            2,
+            3,
+            4
+          ],
+          "directed_extra": 0,
+          "gaps": [
+            {
+              "kind": "date",
+              "missing": 1
+            }
+          ]
+        },
+        "G3": {
+          "audit": [],
+          "complete": true,
+          "consulted": [
+            0,
+            1
+          ],
+          "directed_extra": 0,
+          "gaps": []
+        }
+      },
+      "case_id": "C07",
+      "kind": "date"
+    },
+    {
+      "arms": {
+        "G0": {
+          "audit": [],
+          "complete": false,
+          "consulted": [
+            0,
+            2,
+            3
+          ],
+          "directed_extra": 0,
+          "gaps": [
+            {
+              "kind": "date",
+              "missing": 1
+            }
+          ]
+        },
+        "G1": {
+          "audit": [
+            {
+              "complete_after": true,
+              "complete_before": false,
+              "exhausted": false,
+              "gap": [
+                {
+                  "kind": "date",
+                  "missing": 1
+                }
+              ],
+              "query": "hardware refresh vega payment date",
+              "records": [
+                "C08-R02"
+              ]
+            }
+          ],
+          "complete": true,
+          "consulted": [
+            0,
+            2,
+            3,
+            1
+          ],
+          "directed_extra": 1,
+          "gaps": []
+        },
+        "G2": {
+          "audit": [],
+          "complete": false,
+          "consulted": [
+            0,
+            2,
+            3,
+            4
+          ],
+          "directed_extra": 0,
+          "gaps": [
+            {
+              "kind": "date",
+              "missing": 1
+            }
+          ]
+        },
+        "G3": {
+          "audit": [],
+          "complete": true,
+          "consulted": [
+            0,
+            1
+          ],
+          "directed_extra": 0,
+          "gaps": []
+        }
+      },
+      "case_id": "C08",
+      "kind": "date"
+    },
+    {
+      "arms": {
+        "G0": {
+          "audit": [],
+          "complete": false,
+          "consulted": [
+            0,
+            2,
+            3
+          ],
+          "directed_extra": 0,
+          "gaps": [
+            {
+              "kind": "numerals",
+              "missing": 1
+            }
+          ]
+        },
+        "G1": {
+          "audit": [
+            {
+              "complete_after": true,
+              "complete_before": false,
+              "exhausted": false,
+              "gap": [
+                {
+                  "kind": "numerals",
+                  "missing": 1
+                }
+              ],
+              "query": "device fleet hardware refresh lyra invoice amount",
+              "records": [
+                "C09-R02"
+              ]
+            }
+          ],
+          "complete": true,
+          "consulted": [
+            0,
+            2,
+            3,
+            1
+          ],
+          "directed_extra": 1,
+          "gaps": []
+        },
+        "G2": {
+          "audit": [],
+          "complete": false,
+          "consulted": [
+            0,
+            2,
+            3,
+            4
+          ],
+          "directed_extra": 0,
+          "gaps": [
+            {
+              "kind": "numerals",
+              "missing": 1
+            }
+          ]
+        },
+        "G3": {
+          "audit": [],
+          "complete": true,
+          "consulted": [
+            0,
+            1
+          ],
+          "directed_extra": 0,
+          "gaps": []
+        }
+      },
+      "case_id": "C09",
+      "kind": "components"
+    },
+    {
+      "arms": {
+        "G0": {
+          "audit": [],
+          "complete": false,
+          "consulted": [
+            0,
+            2,
+            3
+          ],
+          "directed_extra": 0,
+          "gaps": [
+            {
+              "kind": "numerals",
+              "missing": 1
+            }
+          ]
+        },
+        "G1": {
+          "audit": [
+            {
+              "complete_after": true,
+              "complete_before": false,
+              "exhausted": false,
+              "gap": [
+                {
+                  "kind": "numerals",
+                  "missing": 1
+                }
+              ],
+              "query": "launch event support contract pavo invoice amount",
+              "records": [
+                "C10-R02"
+              ]
+            }
+          ],
+          "complete": true,
+          "consulted": [
+            0,
+            2,
+            3,
+            1
+          ],
+          "directed_extra": 1,
+          "gaps": []
+        },
+        "G2": {
+          "audit": [],
+          "complete": false,
+          "consulted": [
+            0,
+            2,
+            3,
+            4
+          ],
+          "directed_extra": 0,
+          "gaps": [
+            {
+              "kind": "numerals",
+              "missing": 1
+            }
+          ]
+        },
+        "G3": {
+          "audit": [],
+          "complete": true,
+          "consulted": [
+            0,
+            1
+          ],
+          "directed_extra": 0,
+          "gaps": []
+        }
+      },
+      "case_id": "C10",
+      "kind": "components"
+    },
+    {
+      "arms": {
+        "G0": {
+          "audit": [],
+          "complete": false,
+          "consulted": [
+            0,
+            2,
+            3
+          ],
+          "directed_extra": 0,
+          "gaps": [
+            {
+              "kind": "numerals",
+              "missing": 1
+            }
+          ]
+        },
+        "G1": {
+          "audit": [
+            {
+              "complete_after": true,
+              "complete_before": false,
+              "exhausted": false,
+              "gap": [
+                {
+                  "kind": "numerals",
+                  "missing": 1
+                }
+              ],
+              "query": "data migration training program vega invoice amount",
+              "records": [
+                "C11-R02"
+              ]
+            }
+          ],
+          "complete": true,
+          "consulted": [
+            0,
+            2,
+            3,
+            1
+          ],
+          "directed_extra": 1,
+          "gaps": []
+        },
+        "G2": {
+          "audit": [],
+          "complete": false,
+          "consulted": [
+            0,
+            2,
+            3,
+            4
+          ],
+          "directed_extra": 0,
+          "gaps": [
+            {
+              "kind": "numerals",
+              "missing": 1
+            }
+          ]
+        },
+        "G3": {
+          "audit": [],
+          "complete": true,
+          "consulted": [
+            0,
+            1
+          ],
+          "directed_extra": 0,
+          "gaps": []
+        }
+      },
+      "case_id": "C11",
+      "kind": "components"
+    },
+    {
+      "arms": {
+        "G0": {
+          "audit": [],
+          "complete": false,
+          "consulted": [
+            0,
+            2,
+            3
+          ],
+          "directed_extra": 0,
+          "gaps": [
+            {
+              "kind": "numerals",
+              "missing": 1
+            }
+          ]
+        },
+        "G1": {
+          "audit": [
+            {
+              "complete_after": true,
+              "complete_before": false,
+              "exhausted": false,
+              "gap": [
+                {
+                  "kind": "numerals",
+                  "missing": 1
+                }
+              ],
+              "query": "venue booking annual audit orion invoice amount",
+              "records": [
+                "C12-R02"
+              ]
+            }
+          ],
+          "complete": true,
+          "consulted": [
+            0,
+            2,
+            3,
+            1
+          ],
+          "directed_extra": 1,
+          "gaps": []
+        },
+        "G2": {
+          "audit": [],
+          "complete": false,
+          "consulted": [
+            0,
+            2,
+            3,
+            4
+          ],
+          "directed_extra": 0,
+          "gaps": [
+            {
+              "kind": "numerals",
+              "missing": 1
+            }
+          ]
+        },
+        "G3": {
+          "audit": [],
+          "complete": true,
+          "consulted": [
+            0,
+            1
+          ],
+          "directed_extra": 0,
+          "gaps": []
+        }
+      },
+      "case_id": "C12",
+      "kind": "components"
+    },
+    {
+      "arms": {
+        "G0": {
+          "audit": [],
+          "complete": true,
+          "consulted": [
+            0,
+            1,
+            2
+          ],
+          "directed_extra": 0,
+          "gaps": []
+        },
+        "G1": {
+          "audit": [],
+          "complete": true,
+          "consulted": [
+            0,
+            1,
+            2
+          ],
+          "directed_extra": 0,
+          "gaps": []
+        },
+        "G2": {
+          "audit": [],
+          "complete": true,
+          "consulted": [
+            0,
+            1,
+            2
+          ],
+          "directed_extra": 0,
+          "gaps": []
+        },
+        "G3": {
+          "audit": [],
+          "complete": true,
+          "consulted": [
+            0
+          ],
+          "directed_extra": 0,
+          "gaps": []
+        }
+      },
+      "case_id": "C13",
+      "kind": "control"
+    },
+    {
+      "arms": {
+        "G0": {
+          "audit": [],
+          "complete": true,
+          "consulted": [
+            0,
+            1,
+            2
+          ],
+          "directed_extra": 0,
+          "gaps": []
+        },
+        "G1": {
+          "audit": [],
+          "complete": true,
+          "consulted": [
+            0,
+            1,
+            2
+          ],
+          "directed_extra": 0,
+          "gaps": []
+        },
+        "G2": {
+          "audit": [],
+          "complete": true,
+          "consulted": [
+            0,
+            1,
+            2
+          ],
+          "directed_extra": 0,
+          "gaps": []
+        },
+        "G3": {
+          "audit": [],
+          "complete": true,
+          "consulted": [
+            0
+          ],
+          "directed_extra": 0,
+          "gaps": []
+        }
+      },
+      "case_id": "C14",
+      "kind": "control"
+    },
+    {
+      "arms": {
+        "G0": {
+          "audit": [],
+          "complete": true,
+          "consulted": [
+            0,
+            1,
+            2
+          ],
+          "directed_extra": 0,
+          "gaps": []
+        },
+        "G1": {
+          "audit": [],
+          "complete": true,
+          "consulted": [
+            0,
+            1,
+            2
+          ],
+          "directed_extra": 0,
+          "gaps": []
+        },
+        "G2": {
+          "audit": [],
+          "complete": true,
+          "consulted": [
+            0,
+            1,
+            2
+          ],
+          "directed_extra": 0,
+          "gaps": []
+        },
+        "G3": {
+          "audit": [],
+          "complete": true,
+          "consulted": [
+            0
+          ],
+          "directed_extra": 0,
+          "gaps": []
+        }
+      },
+      "case_id": "C15",
+      "kind": "control"
+    }
+  ],
+  "scope": "lab-only: mechanism test with distinct-record gaps; easy controls must stay at one pass; no product or economy claim; windows OFF; shadow/track S untouched"
+}

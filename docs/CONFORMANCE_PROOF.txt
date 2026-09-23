@@ -26,6 +26,12 @@ tests/test_agent_index_v1.py::test_recorded_verdicts_and_scope_limit
 tests/test_agent_map_v1.py::test_recorded_verdicts
 tests/test_agent_map_v1.py::test_map_pointers_present
 tests/test_agent_map_v2.py::test_recorded_verdicts
+tests/test_agent_understanding.py::test_prompt_has_dynamic_understanding_slot
+tests/test_agent_understanding.py::test_prompt_asks_for_understanding_field
+tests/test_agent_understanding.py::test_run_agents_persists_understanding
+tests/test_agent_understanding.py::test_understanding_kept_when_model_omits_it
+tests/test_agent_understanding.py::test_manifest_roundtrip_preserves_understanding
+tests/test_agent_understanding.py::test_agent_prompt_still_embeds_records
 tests/test_agents.py::test_parse_annotations
 tests/test_agents.py::test_parse_annotations_clamps_relevance
 tests/test_agents.py::test_parse_annotations_empty
@@ -586,4 +592,4 @@ tests/test_whiteboard.py::test_size_and_consolidation_trigger
 tests/test_whiteboard.py::test_roundtrip
 tests/test_whiteboard.py::test_render
 
-587 tests collected in 0.09s
+593 tests collected in 0.09s

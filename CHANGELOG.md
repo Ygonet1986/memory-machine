@@ -11,6 +11,11 @@ manual/whitepaper keeps its own document version.
   opencode message id and paired via `derived_from`; the opencode plugin
   wires them behind `MEMORY_MACHINE_TURN_SLOTS=1` (off by default, so the
   default write path is unchanged). No record-schema changes.
+- **Per-agent dynamic understanding.** Each memory agent's system prompt now
+  opens with a dynamic `understanding` of what its group's memories are;
+  the agent refines it every sweep (JSON response gains `understanding`) and
+  it is persisted on the agent next to digest/checklist, so it survives
+  across turns. View agents stay out of scope for v1.
 
 ## [0.2.0] - 2026-09-22
 

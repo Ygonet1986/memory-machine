@@ -95,3 +95,42 @@ defaults, schema, candidate or thresholds are modified; dual-track holds
 `eval/gap_recall_v1.py`, outputs `eval/results/gap_recall_v1/`, tests
 `tests/test_gap_recall_v1.py`, proof regenerated, execution record appended,
 committed via PR with frozen-before-results history.
+
+## Execution record (2026-09-23) — deterministic phase
+
+15 cases (12 gap + 3 controls), deterministic, **no LLM**.
+
+| reading | result |
+|---|---|
+| complete (all 15) | G0 **3/15** · **G1 15/15** · G2 **3/15** · G3 15/15 |
+| recovered gap cases | **12/12** (C01-C12) |
+| budget | 12 directed queries (1 per gap case), **0 on controls**, mean extra **0.8**, max 1 |
+| gates | **R1-R6 all true**; `all_pass` true |
+
+- **Delivery vs answer, separated**: this phase measures **delivery of the
+  missing facts** only. Answer correctness is **not** tested here (no LLM in
+  v1); it requires the separate addendum below, to be presented and approved
+  before running.
+- **Direction beats equal-budget breadth**: the control that consults one
+  extra record by the same question (G2, k=4) stays at 3/15 - the gain comes
+  from the gap-directed query, not from "looking more".
+- **Audit attributes every recovery** (R6): each of the 12 cases has a
+  directed-query entry crossing incomplete -> complete with the new record
+  id.
+- **Exploratory (not gated), declared in section 6**: naive directed
+  sentence search on the old window-hidden fixtures does **not** reproduce
+  the gains - `money_holdout_v2` 4/12 (W1) vs 4/12 (directed);
+  `multi_component_holdout_v1` 0/12 vs 0/12. That class remains served by
+  the window/stratified mechanisms (prior lines), not by sentence search.
+- **Findings**: a bounded, gap-directed second search recovers the missing
+  fact in every distinct-record gap case with **one extra query**, at
+  **zero** extra cost for easy controls, and with full attribution. Scope
+  stays lab-only: no economy or product claim; windows OFF; shadow and
+  track S untouched; nothing promoted.
+
+## Pending addendum (not yet run; requires approval)
+
+Answer gate N=3 on three recovered cases (C01 numeral, C05 date, C09
+two-component): same answerer + blind judge, gold fixed, 2 arms (G0 vs G1),
+3 runs = 36 calls, gate A1 score(G1) > score(G0); infra failures <= 20%.
+Presented before execution per the plan.

@@ -224,22 +224,25 @@ def evaluate(cases: list[dict[str, Any]]) -> dict[str, Any]:
 
 def explore_segment_search() -> dict[str, Any]:
     """Declared EXPLORATORY: fact hidden by the W1 window in the old frozen
-    fixtures (money_holdout_v2, multi_component_holdout_v1); the directed
-    sentence search appends the best numeral-bearing sentence. Not gated."""
+    fixtures (money_holdout_v2: single target; multi_component_holdout_v1:
+    both components); the directed sentence search appends the best
+    numeral-bearing sentence matching the directed query. Not gated."""
     readings = {}
     for name in ("money_holdout_v2", "multi_component_holdout_v1"):
         fixture = HERE / "fixtures" / name
         cases = [json.loads(line) for line in
                  (fixture / "cases.jsonl").read_text(encoding="utf-8").splitlines()
                  if line.strip()]
-        w1_both = directed_both = 0
+        w1_found = directed_found = 0
         for case in cases:
             record = case["records"][0]
-            value_a, value_b = case["components"]
             room = ALLOCATION - len(record["summary"]) - 1
             window = fact_window(record["why"], case["question"], room)
-            both = f"${value_a}" in window and f"${value_b}" in window
-            w1_both += 1 if both else 0
+            if "components" in case:
+                wanted = [f"${value}" for value in case["components"]]
+            else:
+                wanted = [f"${case['target']}"]
+            w1_found += 1 if all(w in window for w in wanted) else 0
             query = f"{' '.join(entity_terms(case['question']))} invoice amount"
             q_tokens = set(tokenize(query))
             best_sentence, best_score = "", -1
@@ -249,14 +252,10 @@ def explore_segment_search() -> dict[str, Any]:
                 score = len(q_tokens & set(tokenize(sentence)))
                 if score > best_score:
                     best_sentence, best_score = sentence, score
-            if best_sentence:
-                directed = f"{window}\n{best_sentence}"
-            else:
-                directed = window
-            both = f"${value_a}" in directed and f"${value_b}" in directed
-            directed_both += 1 if both else 0
-        readings[name] = {"cases": len(cases), "w1_both": w1_both,
-                          "directed_both": directed_both}
+            directed = f"{window}\n{best_sentence}" if best_sentence else window
+            directed_found += 1 if all(w in directed for w in wanted) else 0
+        readings[name] = {"cases": len(cases), "w1_found": w1_found,
+                          "directed_found": directed_found}
     return readings
 
 

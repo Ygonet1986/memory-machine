@@ -4,6 +4,22 @@ All notable changes to this project are documented here. The project follows
 [Semantic Versioning](https://semver.org/) for the installable package; the
 manual/whitepaper keeps its own document version.
 
+## [0.2.5] - 2026-09-24
+
+- **Companion (experimental surface, opt-in).** The Companion v0 stack: five
+  typed memories (`person_report`, `episode`, `persona`, `story`,
+  `hypothesis`) with provenance fields, supersession with cache invalidation,
+  cascade deletion with ID non-reuse, save-off turns on a temporary clone,
+  the headless engine (agent recall, labeled layers, one reply call, and the
+  used/memories trailer), the app backend and the Companion window
+  (menu bar → **Companion**) with the "what I remember" panel.
+- The scripted §7 demonstration is recorded in
+  `docs/COMPANION_DEMO_V1_PREREG.md`: single run, `all_pass=false`, findings
+  registered (no acceptance claim; nothing promoted).
+- Build: `personas/` is bundled and the Companion modules are declared as
+  hidden imports so the packaged app can approve the persona; template
+  resolution honours the PyInstaller bundle.
+
 ## [0.2.4] - 2026-09-23
 
 - **Turn slots (opt-in).** `memory-cli ask` / `memory-cli reply` record both

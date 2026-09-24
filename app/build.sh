@@ -17,6 +17,9 @@ $PY -m PyInstaller --noconfirm --clean --windowed \
   --icon app/icons/MemoryMachine.icns \
   --osx-bundle-identifier com.memorymachine.app \
   --paths src \
+  --add-data "personas:personas" \
+  --hidden-import app.companion_backend \
+  --hidden-import app.ui.companion_window \
   launcher.py
 
 APP="dist/Memory Machine.app"

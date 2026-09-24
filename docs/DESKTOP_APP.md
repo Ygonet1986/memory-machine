@@ -50,3 +50,15 @@ process (PySide6), packaged as a self-contained `.app`.
   to reopen, open Settings, or quit.
 - Each reply shows **Remembered** memory ids (from the memory agents) and
   **Saved to tape** ids (durable memories the chatbot produced).
+
+### Companion (experimental)
+
+The menu-bar menu has a **Companion** entry: a separate window with an
+original (fictional) character, continuity between sessions and a
+"What I remember" panel. On first open the Lia v1 sheet is shown for
+approval; the panel lists the four conversational memory kinds with
+correct (supersession) and delete (cascade, with the linked-deletion
+disclosure); the "não guardar" toggle runs the turn on a temporary clone
+without writing to the relationship root. The scripted acceptance demo is
+recorded in `docs/COMPANION_DEMO_V1_PREREG.md` (single run, not passed);
+the experiment behind it lives in `docs/COMPANION_V0_CONTRACT.md`.

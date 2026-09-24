@@ -101,6 +101,19 @@ tests/test_companion_extract.py::test_invalid_hypotheses_do_not_write[change3]
 tests/test_companion_extract.py::test_persona_and_story_keep_fictional_origin
 tests/test_companion_extract.py::test_episode_uses_real_turn_and_forged_source_text_is_rejected
 tests/test_companion_extract.py::test_rejects_cross_root_turn_and_wrong_author
+tests/test_companion_save_off.py::test_save_off_uses_old_memory_but_writes_zero_bytes_to_real_root
+tests/test_companion_save_off.py::test_save_off_without_existing_root_never_creates_it
+tests/test_companion_save_off.py::test_save_off_cleans_up_when_turn_fails
+tests/test_companion_save_off.py::test_root_rejects_unsafe_ids[../other]
+tests/test_companion_save_off.py::test_root_rejects_unsafe_ids[a/b]
+tests/test_companion_save_off.py::test_root_rejects_unsafe_ids[.]
+tests/test_companion_save_off.py::test_root_rejects_unsafe_ids[]
+tests/test_companion_save_off.py::test_save_off_rejects_external_config[/tmp/outside]
+tests/test_companion_save_off.py::test_save_off_rejects_external_config[C:\\external\\tape.jsonl]
+tests/test_companion_save_off.py::test_save_off_rejects_external_config[../outside]
+tests/test_companion_save_off.py::test_save_off_rejects_external_config[..\\outside]
+tests/test_companion_save_off.py::test_save_off_rejects_root_symlinks
+tests/test_companion_save_off.py::test_root_rejects_symlink_swapped_in_after_session_created
 tests/test_companion_supersede.py::test_supersede_excludes_old_and_derived_from_search_and_payload
 tests/test_companion_supersede.py::test_supersede_rejects_repeat_and_type_change
 tests/test_component_allocation_v1.py::test_recorded_components_and_gates
@@ -606,4 +619,4 @@ tests/test_whiteboard.py::test_size_and_consolidation_trigger
 tests/test_whiteboard.py::test_roundtrip
 tests/test_whiteboard.py::test_render
 
-607 tests collected in 0.23s
+620 tests collected in 0.21s

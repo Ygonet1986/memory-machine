@@ -13,6 +13,7 @@ and the trailer protocol (used/candidate memories + violations).
 from __future__ import annotations
 
 import json
+import re
 import uuid
 from typing import Any
 
@@ -39,6 +40,15 @@ LAYERS: tuple[tuple[str, str], ...] = (
 )
 LAYER_TYPES = {"person_report", "episode", "story", "hypothesis"}
 DEFAULT_LIFE_BUDGET = 800
+
+STORE_REQUEST_RE = re.compile(
+    r"(?i)\b(guarde|salve|lembre)\b[^.\n]{0,40}\bcomo\s+"
+    r"(nossa|a\s+nossa|uma)\s+hist[óo]ria\b")
+
+
+def _store_request_quote(message: str) -> str:
+    match = STORE_REQUEST_RE.search(message or "")
+    return match.group(0) if match else ""
 
 EPISTEMIC_POLICY = """\
 Regras de memória (obrigatórias):
@@ -296,6 +306,7 @@ class CompanionEngine:
         save_manifest(manifest, store.root / "manifest.json")
         slots = {"question": question, "reply": answer}
         records: list[str] = []
+        accepted_types: list[str] = []
         for slot_name, outcome in slots.items():
             if not outcome.get("ok"):
                 violations.append({
@@ -343,6 +354,27 @@ class CompanionEngine:
                                    "reason": str(error)})
                 continue
             records.append(record.id)
+            accepted_types.append(kind)
+        if "story" not in accepted_types:
+            quote = _store_request_quote(message)
+            question_slot = slots["question"]
+            if quote and question_slot.get("ok"):
+                try:
+                    story = store.add_candidate(
+                        {"type": "story",
+                         "summary": message.strip()[:200],
+                         "quote": quote,
+                         "event_id": f"conv-{turn_id}"},
+                        author=AUTHORS["story"], turn_id=turn_id,
+                        source_text=message,
+                        source_memory_id=question_slot["record"]["id"],
+                    )
+                except ValueError as error:
+                    violations.append({"kind": "rejected_proposal",
+                                       "type": "story",
+                                       "reason": str(error)})
+                else:
+                    records.append(story.id)
         (store.root / "recall_cache.json").unlink(missing_ok=True)
         return {
             "turn_id": turn_id,

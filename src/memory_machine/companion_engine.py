@@ -13,13 +13,17 @@ and the trailer protocol (used/candidate memories + violations).
 from __future__ import annotations
 
 import json
+import uuid
 from typing import Any
 
+from .companion_extract import AUTHORS, COMPANION_TYPES
 from .companion_memory import CompanionMemory
 from .companion_persona import CompanionPersona, render_persona_prompt
 from .companion_session import CompanionSession
 from .config import Config
 from .coordinator import Machine
+from .groups import load_manifest, save_manifest
+from .turns import add_turn_slot
 
 LAYERS: tuple[tuple[str, str], ...] = (
     ("person_report",
@@ -167,16 +171,17 @@ class CompanionEngine:
         return self._client.calls
 
     def reply(self, message: str, *, save: bool = False) -> dict[str, Any]:
-        if save:
-            raise ValueError("saving lands in F3b; run with save=False")
         text = (message or "").strip()
         if not text:
             raise ValueError("empty message")
+        turn_id = uuid.uuid4().hex[:12]
         return self.session.run_turn(
-            lambda store: self._turn(store, text), save=False
+            lambda store: self._turn(store, text, turn_id, save=save),
+            save=save,
         )
 
-    def _turn(self, store: CompanionMemory, message: str) -> dict[str, Any]:
+    def _turn(self, store: CompanionMemory, message: str, turn_id: str, *,
+              save: bool) -> dict[str, Any]:
         persona = CompanionPersona(store.root).load()
         if persona is None:
             raise ValueError("no approved persona in this root; create it first")
@@ -215,6 +220,10 @@ class CompanionEngine:
             violations.append({"kind": "unknown_used", "ids": unknown})
         used_records = [_brief(records[memory_id])
                         for memory_id in used if memory_id in provided]
+        saved = None
+        if save:
+            saved = self._commit(store, message, reply, proposed, turn_id,
+                                 violations)
         return {
             "reply": reply,
             "used": used_records,
@@ -223,4 +232,82 @@ class CompanionEngine:
             "proposed": proposed,
             "violations": violations,
             "calls": self._client.calls,
+            "saved": saved,
+        }
+
+    def _commit(self, store: CompanionMemory, message: str, reply: str,
+                proposed: list[dict], turn_id: str,
+                violations: list[dict]) -> dict[str, Any]:
+        """Write turn slots and the validated candidate memories (F3b).
+
+        Slots are written first (source ``companion#<turn>``); candidates are
+        then validated against their literal source before any record is
+        appended. Invalid proposals are skipped and recorded, never written.
+        """
+        manifest = load_manifest(store.root / "manifest.json")
+        question = add_turn_slot(
+            store.tape, manifest, slot="question", text=message,
+            message_id=turn_id, namespace="companion",
+        )
+        answer = add_turn_slot(
+            store.tape, manifest, slot="reply", text=reply,
+            message_id=f"{turn_id}-r", pair_message_id=turn_id,
+            namespace="companion",
+        )
+        save_manifest(manifest, store.root / "manifest.json")
+        slots = {"question": question, "reply": answer}
+        records: list[str] = []
+        for slot_name, outcome in slots.items():
+            if not outcome.get("ok"):
+                violations.append({
+                    "kind": "slot_failed", "slot": slot_name,
+                    "reason": str(outcome.get("error") or "unknown"),
+                })
+        source_slots = {
+            "person": ("question", turn_id, message),
+            "lia": ("reply", f"{turn_id}-r", reply),
+        }
+        for proposal in proposed:
+            kind = str(proposal.get("type") or "")
+            if kind == "persona":
+                violations.append({"kind": "rejected_proposal", "type": kind,
+                                   "reason": "persona is approved out of band"})
+                continue
+            if kind not in COMPANION_TYPES:
+                violations.append({"kind": "rejected_proposal", "type": kind,
+                                   "reason": "unknown Companion memory type"})
+                continue
+            source_name = str(proposal.get("source") or "person")
+            if kind == "person_report" and source_name != "person":
+                violations.append({"kind": "rejected_proposal", "type": kind,
+                                   "reason": "person_report must quote the person"})
+                continue
+            if source_name not in source_slots:
+                violations.append({"kind": "rejected_proposal", "type": kind,
+                                   "reason": f"unknown source {source_name!r}"})
+                continue
+            slot_name, suffix, slot_text = source_slots[source_name]
+            slot = slots[slot_name]
+            if not slot.get("ok"):
+                violations.append({"kind": "rejected_proposal", "type": kind,
+                                   "reason": f"source slot {slot_name} was not written"})
+                continue
+            try:
+                record = store.add_candidate(
+                    proposal, author=AUTHORS[kind], turn_id=suffix,
+                    source_text=slot_text,
+                    source_memory_id=slot["record"]["id"],
+                    event_time=str(proposal.get("event_time") or ""),
+                )
+            except ValueError as error:
+                violations.append({"kind": "rejected_proposal", "type": kind,
+                                   "reason": str(error)})
+                continue
+            records.append(record.id)
+        (store.root / "recall_cache.json").unlink(missing_ok=True)
+        return {
+            "turn_id": turn_id,
+            "question_slot": question.get("record", {}).get("id", ""),
+            "reply_slot": answer.get("record", {}).get("id", ""),
+            "records": records,
         }

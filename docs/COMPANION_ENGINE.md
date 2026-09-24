@@ -1,6 +1,6 @@
 # Companion engine (headless)
 
-Status: F3a implemented; F3b (turn slots + eligible extraction) follows.
+Status: F3a + F3b implemented (recall, layers, reply, writes, save-off).
 Contract: `docs/COMPANION_V0_CONTRACT.md`. Nothing here touches the measured
 opencode path, the admission-shadow-v2 window or product defaults.
 
@@ -39,12 +39,34 @@ opencode path, the admission-shadow-v2 window or product defaults.
    reply. Candidate memories pass through untouched in F3a; F3b validates and
    commits them.
 
-Return value: `{reply, used, provided, dropped, proposed, violations, calls}`.
-A recall hit is not automatically a used memory: only `used` counts.
+Return value: `{reply, used, provided, dropped, proposed, violations, calls,
+saved}`. A recall hit is not automatically a used memory: only `used` counts.
+
+## Saving (F3b)
+
+With `save=True` the same turn also writes, after the reply is produced:
+
+- **Turn slots**: `question` (the person's message) and `reply` (the clean
+  reply) with sources `companion#<turn_id>` and `companion#<turn_id>-r`,
+  paired via `derived_from`. They are the interaction/provenance layer and do
+  not enter the typed recall surface.
+- **Eligible extraction**: each proposed memory must carry a literal `quote`
+  from its declared source. Source policy: `person_report` only quotes the
+  person's message; `episode`, `story` and `hypothesis` may quote the person
+  or the character (`"source": "person" | "lia"`); `persona` never comes from
+  a conversation. Every candidate goes through `CompanionMemory.add_candidate`
+  (kind whitelist, author, bounds, hypothesis confidence/review, secret scan);
+  rejected proposals are skipped and recorded in `violations`, never written.
+- **Cache hygiene**: `recall_cache.json` is removed after writes so the next
+  turn recalls fresh state.
+
+With `save=False` the whole turn (recall agents, whiteboard, extraction)
+runs on the disposable clone: the canonical root receives zero bytes.
 
 ## Non-goals
 
-- No writes in F3a (`save=True` raises until F3b).
 - No cross-root or cross-session search; no web/personal-data ingestion.
 - No shadow admission, no change to `opencode` defaults; the frozen window is
   checked only under its own stopping rule.
+- The engine does not rewrite a reply when the trailer is violated (v0);
+  violations are measured in the F5 evaluation.

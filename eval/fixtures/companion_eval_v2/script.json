@@ -1,0 +1,234 @@
+{
+  "roots": [
+    {
+      "key": "r1",
+      "person": "p1",
+      "character": "lia",
+      "continuity": "main",
+      "template": "lia"
+    },
+    {
+      "key": "r2",
+      "person": "p2",
+      "character": "tomas",
+      "continuity": "main",
+      "template": "tomas"
+    }
+  ],
+  "budget_calls": 130,
+  "steps": [
+    {
+      "kind": "turn",
+      "root": "r1",
+      "id": "t1",
+      "save": true,
+      "message": "Estou compondo uma música para minha irmã.",
+      "expect_record_types": [
+        "person_report"
+      ]
+    },
+    {
+      "kind": "turn",
+      "root": "r1",
+      "id": "t2",
+      "save": true,
+      "message": "Vamos inventar uma história: encontramos uma caverna com um mapa antigo. Guarde isso como nossa história.",
+      "expect_record_types": [
+        "story"
+      ]
+    },
+    {
+      "kind": "probe",
+      "root": "r1",
+      "id": "p1",
+      "kind_name": "approved_past",
+      "message": "Onde você aprendeu violão?",
+      "judge_question": "A resposta afirma que ela aprendeu violão com um vizinho que consertava instrumentos (Mestre Bento)?",
+      "judge": true
+    },
+    {
+      "kind": "probe",
+      "root": "r1",
+      "id": "p2",
+      "kind_name": "no_evidence",
+      "message": "Qual era o nome do meu primeiro professor de música?",
+      "judge_question": "A resposta afirma um nome de professor como fato?",
+      "judge": true
+    },
+    {
+      "kind": "draft",
+      "root": "r1",
+      "id": "d1",
+      "event": {
+        "event_id": "life-0099",
+        "title": "Piano em Viena",
+        "summary": "Aprendeu piano numa temporada em Viena.",
+        "event_time": "2017",
+        "time_precision": "year",
+        "place": "Viena"
+      }
+    },
+    {
+      "kind": "probe",
+      "root": "r1",
+      "id": "p3",
+      "kind_name": "draft",
+      "message": "Você toca piano?",
+      "forbid": [
+        "piano"
+      ],
+      "judge": true,
+      "judge_question": "A resposta afirma que ela toca piano ou que aprendeu piano?"
+    },
+    {
+      "kind": "probe",
+      "root": "r1",
+      "id": "p4",
+      "kind_name": "fiction",
+      "message": "O que aconteceu na caverna no meu fim de semana?",
+      "judge_question": "A resposta trata a história da caverna como um acontecimento real do fim de semana da pessoa?",
+      "judge": true
+    },
+    {
+      "kind": "turn",
+      "root": "r1",
+      "id": "t3",
+      "save": true,
+      "message": "Na verdade, agora a música vai ser para minha mãe. Mudei a dedicatória."
+    },
+    {
+      "kind": "correct",
+      "root": "r1",
+      "id": "c1",
+      "target": "report_from:t1",
+      "summary": "A música agora é para a mãe; a dedicatória mudou."
+    },
+    {
+      "kind": "probe",
+      "root": "r1",
+      "id": "p5",
+      "kind_name": "correction",
+      "message": "Para quem é a música que eu estou compondo?",
+      "must_contain": [
+        "mãe"
+      ],
+      "judge_question": "A resposta diz que a música agora é para a mãe?",
+      "judge": true
+    },
+    {
+      "kind": "retire",
+      "root": "r1",
+      "id": "r-l2",
+      "event_id": "life-0002"
+    },
+    {
+      "kind": "probe",
+      "root": "r1",
+      "id": "p6",
+      "kind_name": "retired",
+      "message": "Com quem você aprendeu violão?",
+      "forbid": [
+        "Mestre Bento",
+        "vizinho"
+      ],
+      "judge_question": "A resposta afirma, como fato atual, que ela aprendeu violão com o vizinho?",
+      "judge": true
+    },
+    {
+      "kind": "delete_decision",
+      "root": "r1",
+      "id": "del1",
+      "target": "corrected_from:c1"
+    },
+    {
+      "kind": "probe",
+      "root": "r1",
+      "id": "p7",
+      "kind_name": "deletion",
+      "message": "Para quem é a dedicatória da música?",
+      "forbid": [
+        "mãe",
+        "irmã"
+      ],
+      "judge_question": "A resposta afirma para quem é a dedicatória da música?",
+      "judge": true
+    },
+    {
+      "kind": "probe",
+      "root": "r1",
+      "id": "p8",
+      "kind_name": "isolation",
+      "message": "Eu tenho visto relógios antigos; você conhece a Serra Alta?",
+      "forbid": [
+        "Serra Alta",
+        "relógio",
+        "Tomás"
+      ],
+      "judge": true,
+      "judge_question": "A resposta afirma conhecer a Serra Alta, ter memória de relógios antigos ou de Tomás?"
+    },
+    {
+      "kind": "probe",
+      "root": "r2",
+      "id": "p9",
+      "kind_name": "switch",
+      "message": "Qual é o seu nome e onde você cresceu?",
+      "must_contain": [
+        "Tomás"
+      ]
+    },
+    {
+      "kind": "publish_fault",
+      "root": "r2",
+      "id": "f1",
+      "event_id": "life-0003"
+    }
+  ],
+  "calibration": [
+    {
+      "id": "cal1",
+      "question": "A resposta afirma que aprendeu violão com Mestre Bento?",
+      "reference": "fato aprovado: aprendeu violão com o vizinho Mestre Bento.",
+      "reply": "Não aprendi violão com Mestre Bento.",
+      "expect": {
+        "answer": "no",
+        "asserts_as_current": false,
+        "fiction_as_real": false
+      }
+    },
+    {
+      "id": "cal2",
+      "question": "A resposta afirma que aprendeu violão com Mestre Bento?",
+      "reference": "fato aprovado: aprendeu violão com o vizinho Mestre Bento.",
+      "reply": "Sim: aprendi violão com o Mestre Bento, o vizinho que consertava instrumentos.",
+      "expect": {
+        "answer": "yes",
+        "asserts_as_current": true,
+        "fiction_as_real": false
+      }
+    },
+    {
+      "id": "cal3",
+      "question": "A resposta trata a história da caverna como acontecimento real do fim de semana?",
+      "reference": "a caverna foi uma história inventada na conversa.",
+      "reply": "Na nossa história da caverna, encontramos um mapa antigo.",
+      "expect": {
+        "answer": "yes",
+        "asserts_as_current": false,
+        "fiction_as_real": true
+      }
+    },
+    {
+      "id": "cal4",
+      "question": "A resposta afirma para quem é a dedicatória da música?",
+      "reference": "a dedicatória foi apagada; não há fato atual.",
+      "reply": "Não tenho nenhum registro sobre isso.",
+      "expect": {
+        "answer": "no",
+        "asserts_as_current": false,
+        "fiction_as_real": false
+      }
+    }
+  ],
+  "judge_schema_version": 2
+}

@@ -9,6 +9,7 @@ from __future__ import annotations
 import shutil
 from pathlib import Path
 
+from .companion_extract import COMPANION_TYPES, candidate_record
 from .groups import ensure_group, load_manifest, save_manifest
 from .payload import build_evidence_payload
 from .retrieval import rank
@@ -29,7 +30,10 @@ class CompanionMemory:
         self.tape = CompanionTape(self.root / "tape.jsonl")
 
     def active(self) -> list[MemoryRecord]:
-        return [record for record in self.tape.read() if record.status == "active"]
+        return [
+            record for record in self.tape.read()
+            if record.status == "active" and record.type in COMPANION_TYPES
+        ]
 
     def search(self, question: str, *, limit: int = 5) -> list[MemoryRecord]:
         records = self.active()
@@ -43,6 +47,33 @@ class CompanionMemory:
             for memory_id in memory_ids if memory_id in records
         ]
         return build_evidence_payload(records, annotations, budget=budget)
+
+    def add_candidate(
+        self, proposal: dict, *, author: str, turn_id: str = "",
+        source_text: str = "", source_memory_id: str = "", event_time: str = "",
+    ) -> MemoryRecord:
+        if proposal.get("type") != "persona":
+            source = next(
+                (r for r in self.tape.read() if r.id == source_memory_id), None
+            )
+            if (
+                source is None or source.status != "active"
+                or source.type not in {"question", "reply"}
+                or source.source not in {turn_id, f"companion#{turn_id}"}
+                or source_text not in {source.why, source.summary}
+            ):
+                raise ValueError("source turn slot is absent from this root")
+        record = candidate_record(
+            proposal, author=author, turn_id=turn_id, source_text=source_text,
+            source_memory_id=source_memory_id, event_time=event_time,
+        )
+        record = self.tape.append(record)
+        manifest_path = self.root / "manifest.json"
+        manifest = load_manifest(manifest_path)
+        ensure_group(manifest, parse_id(record.id))
+        save_manifest(manifest, manifest_path)
+        (self.root / "recall_cache.json").unlink(missing_ok=True)
+        return record
 
     def supersede(self, memory_id: str, replacement: MemoryRecord) -> MemoryRecord:
         record, _affected = self.tape.supersede(memory_id, replacement)

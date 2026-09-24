@@ -511,6 +511,7 @@ tests/test_tape.py::test_set_status
 tests/test_tape.py::test_status_default_active
 tests/test_tape.py::test_source_fields_absent_by_default
 tests/test_tape.py::test_source_fields_round_trip
+tests/test_tape.py::test_companion_provenance_fields_round_trip
 tests/test_tape.py::test_old_line_stays_byte_equivalent_invariance
 tests/test_tape_immutability.py::test_status_change_preserves_every_factual_field
 tests/test_tape_immutability.py::test_correction_is_a_new_record_and_old_content_is_intact
@@ -592,4 +593,4 @@ tests/test_whiteboard.py::test_size_and_consolidation_trigger
 tests/test_whiteboard.py::test_roundtrip
 tests/test_whiteboard.py::test_render
 
-593 tests collected in 0.09s
+594 tests collected in 0.21s

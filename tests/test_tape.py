@@ -90,6 +90,9 @@ def test_source_fields_absent_by_default():
     d = rec.to_dict()
     assert "source_document" not in d
     assert "source_span" not in d
+    assert "origin" not in d
+    assert "author" not in d
+    assert "event_time" not in d
 
 
 def test_source_fields_round_trip():
@@ -105,6 +108,22 @@ def test_source_fields_round_trip():
     assert restored == rec
     assert restored.to_dict()["source_span"] == [1800, 2300]
     assert restored.to_dict()["source_document"] == "manual.txt#abc123"
+
+
+def test_companion_provenance_fields_round_trip(tmp_path):
+    tape = Tape(tmp_path / "tape.jsonl")
+    written = tape.append(MemoryRecord(
+        type="person_report",
+        summary="Composing a song for my sister",
+        origin={"kind": "turn", "turn_ids": ["user-42"]},
+        author="person",
+        event_time="2026-09-23T17:00:00+00:00",
+    ))
+    loaded = tape.read()[0]
+    assert loaded == written
+    assert loaded.to_dict()["origin"] == {"kind": "turn", "turn_ids": ["user-42"]}
+    assert loaded.to_dict()["author"] == "person"
+    assert loaded.to_dict()["event_time"] == "2026-09-23T17:00:00+00:00"
 
 
 def test_old_line_stays_byte_equivalent_invariance(tmp_path):

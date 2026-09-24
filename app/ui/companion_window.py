@@ -134,7 +134,11 @@ class CompanionWindow(QMainWindow):
         self.delete_btn.clicked.connect(self._delete)
         self.refresh_btn = QPushButton("Atualizar")
         self.refresh_btn.clicked.connect(self._refresh_memories)
-        for button in (self.correct_btn, self.delete_btn, self.refresh_btn):
+        self.creator_btn = QPushButton("Personagens…")
+        self.creator_btn.setToolTip("Criador: galeria, ficha, vida sintética")
+        self.creator_btn.clicked.connect(self._open_creator)
+        for button in (self.correct_btn, self.delete_btn, self.refresh_btn,
+                       self.creator_btn):
             buttons.addWidget(button)
         right_layout.addLayout(buttons)
         hint = QLabel(
@@ -174,6 +178,13 @@ class CompanionWindow(QMainWindow):
             f"<ul style='margin:6px 0 0 16px;color:#9fb2c8;font-size:12px'>{bio}</ul>"
         )
         self.approve_btn.setVisible(False)
+
+    def _open_creator(self) -> None:
+        from ..companion_creator_backend import CreatorBackend
+        from .creator_dialog import CreatorDialog
+
+        CreatorDialog(CreatorBackend(), self).exec()
+        self._refresh_memories()
 
     def _approve(self) -> None:
         result = self._backend.approve_persona()

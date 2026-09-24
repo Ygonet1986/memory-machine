@@ -187,7 +187,7 @@ class Tape:
         return records[-1] if records else None
 
     def max_id_num(self) -> int:
-        best = self._highwater()
+        best = 0
         for rec in self._read_all():
             if rec.id:
                 try:

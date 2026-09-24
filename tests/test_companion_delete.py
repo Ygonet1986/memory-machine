@@ -45,10 +45,16 @@ def test_delete_cascade_removes_descendants_and_prevents_id_reuse(tmp_path):
 
 def test_delete_rollup_preserves_unrelated_source(tmp_path):
     memory = CompanionMemory(tmp_path)
-    a = memory.tape.append(MemoryRecord(type="person_report", summary="a"))
+    turn = memory.tape.append(MemoryRecord(
+        type="question", summary="secret about a", source="companion#u1",
+    ))
+    a = memory.tape.append(MemoryRecord(
+        type="person_report", summary="a", derived_from=[turn.id],
+    ))
     b = memory.tape.append(MemoryRecord(type="person_report", summary="b"))
     rollup = memory.tape.append(MemoryRecord(
         type="memory", summary="a and b", derived_from=[a.id, b.id],
     ))
-    assert set(memory.delete(a.id)) == {a.id, rollup.id}
+    assert set(memory.delete(a.id)) == {turn.id, a.id, rollup.id}
     assert [r.id for r in memory.tape.read()] == [b.id]
+    assert all("secret" not in r.summary for r in memory.search("secret"))

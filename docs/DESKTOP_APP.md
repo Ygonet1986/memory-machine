@@ -62,3 +62,11 @@ disclosure); the "não guardar" toggle runs the turn on a temporary clone
 without writing to the relationship root. The scripted acceptance demo is
 recorded in `docs/COMPANION_DEMO_V1_PREREG.md` (single run, not passed);
 the experiment behind it lives in `docs/COMPANION_V0_CONTRACT.md`.
+
+The same menu has a **Personagens** entry (also a button in the Companion
+window): the creator gallery lists relationships, creates characters from
+the repository templates (or copies one without inheriting conversations),
+edits the synthetic life through structured event forms, generates a life
+draft with the model (one call per request), shows revision diffs and
+retires published events with an impact preview. Nothing is published
+without an explicit approval act.

@@ -4,6 +4,24 @@ All notable changes to this project are documented here. The project follows
 [Semantic Versioning](https://semver.org/) for the installable package; the
 manual/whitepaper keeps its own document version.
 
+## [0.3.0] - 2026-09-24
+
+- **Companion: multiple characters with synthetic lives.** Versioned life
+  documents (draft/history/current), a per-root publication transaction with
+  recovery, no-forged-turn `story` admission (batch supersession, ID
+  non-reuse), labeled recall ("Passado ficcional da personagem (aprovado)"
+  with its own budget), corrections, retirement and deletion with explicit
+  impact decisions, save-off with zero canonical bytes, cross-root isolation
+  and AI life generation (one LLM call per request, two per approval flow,
+  drafts only). Creator backend + "Personagens" dialog in the app.
+- **Evaluations.** `companion-eval-v1`/`v2` are recorded as failed historical
+  lines (check-design defects); `companion-eval-v3` passed all gates
+  (G0-G11) in the lab: calibrated judge, per-step isolation, correction,
+  retirement, deletion, fiction separation, no invention, character switch,
+  budget, deterministic story trigger and publication-fault recovery.
+  Lab scope only; not a pilot result and no readiness claim.
+- No changes to opencode paths, admission-shadow-v2 or product defaults.
+
 ## [0.2.6] - 2026-09-24
 
 - **Companion is reachable from the main window**: a `Companion` button in the

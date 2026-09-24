@@ -34,6 +34,16 @@ def main() -> int:
     companion_action.triggered.connect(open_companion)
     menu.addAction(companion_action)
 
+    def open_creator() -> None:
+        from .companion_creator_backend import CreatorBackend
+        from .ui.creator_dialog import CreatorDialog
+
+        CreatorDialog(CreatorBackend()).exec()
+
+    creator_action = QAction("Personagens", menu)
+    creator_action.triggered.connect(open_creator)
+    menu.addAction(creator_action)
+
     settings_action = QAction("Settings", menu)
     settings_action.triggered.connect(window._open_settings)
     quit_action = QAction("Quit", menu)

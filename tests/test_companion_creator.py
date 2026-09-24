@@ -138,8 +138,9 @@ def test_mid_failure_recovers_to_a_consistent_state(tmp_path, monkeypatch):
 
     def flaky_replace(src, dst):
         if (not state["fired"]
-                and str(dst).endswith("synthetic_life/current.json")
-                and STAGING_NAME in str(src)):
+                and Path(dst).name == "current.json"
+                and Path(dst).parent == creator.life_dir
+                and Path(src).parent.name == STAGING_NAME):
             state["fired"] = True
             raise OSError("boom")
         return real_replace(src, dst)

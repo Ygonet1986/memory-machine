@@ -113,6 +113,11 @@ tests/test_companion_persona.py::test_reject_invalid_sheet[bio-value7]
 tests/test_companion_persona.py::test_reject_invalid_sheet[values-value8]
 tests/test_companion_persona.py::test_reject_invalid_sheet[boundaries-value9]
 tests/test_companion_persona.py::test_reject_extra_fields_and_secrets_without_echo
+tests/test_companion_persona_root.py::test_create_idempotent_and_private_history
+tests/test_companion_persona_root.py::test_revise_supersedes_v1_and_recall_uses_only_v2
+tests/test_companion_persona_root.py::test_growth_and_shrink_keep_only_current_facts
+tests/test_companion_persona_root.py::test_secret_rejected_before_any_root_write
+tests/test_companion_persona_root.py::test_roots_with_colliding_ids_do_not_leak
 tests/test_companion_save_off.py::test_save_off_uses_old_memory_but_writes_zero_bytes_to_real_root
 tests/test_companion_save_off.py::test_save_off_without_existing_root_never_creates_it
 tests/test_companion_save_off.py::test_save_off_cleans_up_when_turn_fails
@@ -631,4 +636,4 @@ tests/test_whiteboard.py::test_size_and_consolidation_trigger
 tests/test_whiteboard.py::test_roundtrip
 tests/test_whiteboard.py::test_render
 
-632 tests collected in 0.24s
+637 tests collected in 0.22s

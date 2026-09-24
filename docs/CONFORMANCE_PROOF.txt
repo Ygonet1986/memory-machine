@@ -143,6 +143,8 @@ tests/test_companion_engine_writes.py::test_no_store_request_no_story
 tests/test_companion_engine_writes.py::test_trailer_story_takes_precedence_over_trigger
 tests/test_companion_eval_v1.py::test_fixture_hash_matches_manifest
 tests/test_companion_eval_v1.py::test_recorded_verdicts
+tests/test_companion_eval_v2.py::test_fixture_hash_matches_manifest
+tests/test_companion_eval_v2.py::test_recorded_verdicts
 tests/test_companion_extract.py::test_report_has_turn_provenance_and_cascades_with_source
 tests/test_companion_extract.py::test_hypothesis_remains_tentative_and_requires_review
 tests/test_companion_extract.py::test_invalid_hypotheses_do_not_write[change0]
@@ -718,4 +720,4 @@ tests/test_whiteboard.py::test_size_and_consolidation_trigger
 tests/test_whiteboard.py::test_roundtrip
 tests/test_whiteboard.py::test_render
 
-719 tests collected in 0.11s
+721 tests collected in 0.10s

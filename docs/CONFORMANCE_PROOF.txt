@@ -142,6 +142,12 @@ tests/test_companion_extract.py::test_invalid_hypotheses_do_not_write[change3]
 tests/test_companion_extract.py::test_persona_and_story_keep_fictional_origin
 tests/test_companion_extract.py::test_episode_uses_real_turn_and_forged_source_text_is_rejected
 tests/test_companion_extract.py::test_rejects_cross_root_turn_and_wrong_author
+tests/test_companion_gallery.py::test_list_templates_and_relationships
+tests/test_companion_gallery.py::test_timeline_is_time_ordered
+tests/test_companion_gallery.py::test_diff_reports_added_changed_removed
+tests/test_companion_gallery.py::test_retire_event_supersedes_and_leaves_recall
+tests/test_companion_gallery.py::test_deletion_impact_lists_derivations_and_mentions
+tests/test_companion_gallery.py::test_copy_relationship_inherits_no_conversations
 tests/test_companion_life.py::test_lia_template_is_valid_and_approved
 tests/test_companion_life.py::test_tomas_template_is_valid_and_approved
 tests/test_companion_life.py::test_draft_needs_no_approval_act_and_small_size
@@ -697,4 +703,4 @@ tests/test_whiteboard.py::test_size_and_consolidation_trigger
 tests/test_whiteboard.py::test_roundtrip
 tests/test_whiteboard.py::test_render
 
-698 tests collected in 0.11s
+704 tests collected in 0.11s

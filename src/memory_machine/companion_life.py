@@ -105,6 +105,12 @@ def _partial_key(event_time: str) -> tuple[int, int, int] | None:
     return (int(year), int(month or 0), int(day or 0))
 
 
+def time_sort_key(event_time: str) -> tuple[int, int, int]:
+    """Sortable key for partial dates; unknown times sort last."""
+    key = _partial_key(event_time or "")
+    return key if key is not None else (9999, 12, 31)
+
+
 def _check_time(event_time: str, precision: str, label: str) -> str:
     if precision == "unknown":
         if event_time:

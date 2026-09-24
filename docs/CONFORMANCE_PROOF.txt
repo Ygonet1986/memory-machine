@@ -138,6 +138,8 @@ tests/test_companion_engine_writes.py::test_episode_may_quote_lia
 tests/test_companion_engine_writes.py::test_persona_proposal_rejected
 tests/test_companion_engine_writes.py::test_invalid_quote_skipped_but_slots_written
 tests/test_companion_engine_writes.py::test_unknown_type_rejected
+tests/test_companion_eval_v1.py::test_fixture_hash_matches_manifest
+tests/test_companion_eval_v1.py::test_recorded_verdicts
 tests/test_companion_extract.py::test_report_has_turn_provenance_and_cascades_with_source
 tests/test_companion_extract.py::test_hypothesis_remains_tentative_and_requires_review
 tests/test_companion_extract.py::test_invalid_hypotheses_do_not_write[change0]
@@ -708,4 +710,4 @@ tests/test_whiteboard.py::test_size_and_consolidation_trigger
 tests/test_whiteboard.py::test_roundtrip
 tests/test_whiteboard.py::test_render
 
-709 tests collected in 0.12s
+711 tests collected in 0.11s

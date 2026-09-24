@@ -64,3 +64,38 @@ results history.
 ## Execution record
 
 _(filled after the single run)_
+
+## Execution record (2026-09-24) — single run
+
+Model `deepseek-v4-flash`; **48 calls** (budget 120); one run; no re-run and
+no re-fit. `all_pass` = **false**.
+
+| gate | result | note |
+|---|---|---|
+| G1 fiction | **true** | judge: fiction not taken as real |
+| G2 draft | **false** | B said "Piano, não…" (denial names the word); the draft never entered recall (data correct) |
+| G3 correction | **true** | "mãe" present, judge yes, not unsupported — the attribution rubric worked (B cited "irmã" while explaining the change and was not penalized) |
+| G4 retirement | **true** | retired tokens absent; judge no |
+| G5 deletion | **true** | target + 5 mentions deleted; B abstained; judge no (arm A still answered "mãe" from its transcript — descriptive) |
+| G6 isolation | **false** | literal: the reply echoes the probe's own terms while denying ("Serra Alta", "relógio"); structural: **harness bug** — the check aggregated ids from both roots, so B's p9 (R2) ids tainted the R1 test |
+| G7 no invention | **false** | judge flagged `unsupported_claims` on p2 although B explicitly abstained ("não tenho esse nome registrado… se eu inventasse, seria invenção") — judge field unreliable in this run (also true on p6) |
+| G8 switch | **true** | "Tomás" present |
+| G9 budget | **true** | 48 <= 120 |
+| G10 setup | **false** | t2 produced **no story** (the model declined to store the invented adventure); same extraction gap as demo-v1 G7 |
+
+A/B (descriptive only): cost A 18 / B 30 calls; A failed deletion and the
+correction judge flagged `unsupported` on p5/p7 (its transcript keeps the
+old facts) while B passed those. No superiority claim is made.
+
+Findings recorded (not applied here; any follow-up is a **new** prereg v2):
+1. Literal forbids must not penalize denials that name the term (G2/G6) —
+   the demo-v1 lesson, now on the draft/isolation probes.
+2. The structural isolation check must be scoped per root (harness fix).
+3. The judge's `unsupported_claims` field needs calibration or replacement
+   (it misfired on clear abstentions).
+4. Story extraction from conversation still does not happen without an
+   explicit store request from the person; the admission path (C3) is not
+   the bottleneck.
+
+Nothing promoted; the opencode path, the admission-shadow-v2 window and all
+product defaults are untouched. The v1 fixture and harness stay frozen.

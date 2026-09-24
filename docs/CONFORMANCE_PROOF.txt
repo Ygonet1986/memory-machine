@@ -92,6 +92,16 @@ tests/test_backend.py::test_full_app_cycle_integration
 tests/test_backend.py::test_remove_all_documents
 tests/test_companion_delete.py::test_delete_cascade_removes_descendants_and_prevents_id_reuse
 tests/test_companion_delete.py::test_delete_rollup_preserves_unrelated_source
+tests/test_companion_engine.py::test_engine_layers_trailer_and_used
+tests/test_companion_engine.py::test_persona_cards_are_not_provided
+tests/test_companion_engine.py::test_unknown_used_is_a_violation
+tests/test_companion_engine.py::test_missing_trailer_is_a_violation
+tests/test_companion_engine.py::test_proposed_memories_pass_through
+tests/test_companion_engine.py::test_save_off_writes_zero_bytes_to_real_root
+tests/test_companion_engine.py::test_budget_drops_extra_cards
+tests/test_companion_engine.py::test_missing_persona_fails
+tests/test_companion_engine.py::test_save_true_lands_in_f3b
+tests/test_companion_engine.py::test_deterministic_output
 tests/test_companion_extract.py::test_report_has_turn_provenance_and_cascades_with_source
 tests/test_companion_extract.py::test_hypothesis_remains_tentative_and_requires_review
 tests/test_companion_extract.py::test_invalid_hypotheses_do_not_write[change0]
@@ -636,4 +646,4 @@ tests/test_whiteboard.py::test_size_and_consolidation_trigger
 tests/test_whiteboard.py::test_roundtrip
 tests/test_whiteboard.py::test_render
 
-637 tests collected in 0.22s
+647 tests collected in 0.10s

@@ -727,4 +727,4 @@ tests/test_whiteboard.py::test_size_and_consolidation_trigger
 tests/test_whiteboard.py::test_roundtrip
 tests/test_whiteboard.py::test_render
 
-728 tests collected in 0.11s
+728 tests collected in 0.10s

@@ -41,3 +41,29 @@ prereg.
 ## Execution record
 
 _(filled after the single run)_
+
+## Execution record (2026-09-24) — single run
+
+Model `deepseek-v4-flash`; **56 calls** (budget 130); one run; no re-fit.
+`all_pass` = **true**; every gate G0-G11 passed.
+
+| gate | result |
+|---|---|
+| G0 judge (4/4 calibration) | **true** (cal3 now a true fiction-mixing pair) |
+| G1 fiction / G2 draft / G3 correction | **true** |
+| G4 retirement / G5 deletion | **true** |
+| G6 isolation (judge + per-step membership + cross-summary) | **true** |
+| G7 no invention / G8 switch | **true** |
+| G9 budget (56 <= 130) | **true** |
+| G10 setup (report + story via the deterministic trigger) | **true** |
+| G11 publication fault (journal + recovery) | **true** |
+
+A/B (descriptive, no superiority claim): cost A 20 / B 32 calls. The judged
+probes show arm B correct on correction/retirement/deletion/fiction while
+arm A kept answering the old dedication from its transcript on p7.
+
+Scope: this validates the evaluated scenarios in the lab (multi-character
+isolation, labeled recall, corrections, retirement, deletion with explicit
+decision, save-off and publication-fault recovery). It is not a pilot
+result and promotes nothing; opencode, the admission-shadow-v2 window and
+all product defaults are untouched.

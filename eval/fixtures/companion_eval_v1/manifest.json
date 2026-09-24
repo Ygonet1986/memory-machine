@@ -1,0 +1,5 @@
+{
+  "script": "companion_eval_v1/script.json",
+  "script_sha256": "5ddf71cd8442a57de05981e3cb79ebca6f0e8b53fc0d9871979c03233503b10b",
+  "steps": 16
+}

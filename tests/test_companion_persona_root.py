@@ -23,7 +23,7 @@ def test_create_idempotent_and_private_history(tmp_path):
     assert [r.id for r in persona.create(sheet())] == [r.id for r in created]
     assert (root / "tape.jsonl").read_bytes() == before
     assert persona.load() == sheet()
-    assert json.loads((root / "persona/history/v1.json").read_text()) == sheet()
+    assert json.loads((root / "persona/history/v1.json").read_text(encoding="utf-8")) == sheet()
     assert all(r.author == "joint" and r.origin["version"] == "v1" for r in created)
     with pytest.raises(ValueError):
         persona.create({**sheet(), "voice": "different"})
@@ -42,7 +42,7 @@ def test_revise_supersedes_v1_and_recall_uses_only_v2(tmp_path):
     assert len(persona.facts()) == 3
     assert persona.memory.search("Novo fato um")[0].summary == "Novo fato um"
     assert all(r.id not in {item.id for item in old} for r in persona.memory.active())
-    assert json.loads((persona.persona_dir / "history/v1.json").read_text()) == sheet()
+    assert json.loads((persona.persona_dir / "history/v1.json").read_text(encoding="utf-8")) == sheet()
     assert (persona.persona_dir / "history/v2.json").exists()
     assert persona.memory.evidence([old[0].id]) == []
 
@@ -80,4 +80,4 @@ def test_roots_with_colliding_ids_do_not_leak(tmp_path):
     a.revise({"bio": ["Somente A", "Outra A", "Terceira A"]})
     assert b.load()["version"] == 1
     assert not b.memory.search("Somente A")
-    assert "Somente A" not in (b.root / "tape.jsonl").read_text()
+    assert "Somente A" not in (b.root / "tape.jsonl").read_text(encoding="utf-8")

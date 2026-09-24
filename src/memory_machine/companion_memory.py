@@ -17,10 +17,17 @@ from .tape import MemoryRecord, Tape, parse_id
 from .whiteboard import Annotation
 
 
+class CompanionTape(Tape):
+    """Root-local ID allocation while leaving legacy Tape allocation untouched."""
+
+    def max_id_num(self) -> int:
+        return max(super().max_id_num(), self._highwater())
+
+
 class CompanionMemory:
     def __init__(self, root: Path):
         self.root = Path(root)
-        self.tape = Tape(self.root / "tape.jsonl")
+        self.tape = CompanionTape(self.root / "tape.jsonl")
 
     def active(self) -> list[MemoryRecord]:
         return [record for record in self.tape.read() if record.status == "active"]

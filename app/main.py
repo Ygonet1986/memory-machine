@@ -28,17 +28,7 @@ def main() -> int:
     new_topic_action = QAction("New topic", menu)
     new_topic_action.triggered.connect(lambda: (window.showNormal(), window._new_topic()))
 
-    companion_holder: list = []
-
-    def open_companion() -> None:
-        if not companion_holder:
-            from .companion_backend import CompanionBackend
-            from .ui.companion_window import CompanionWindow
-
-            companion_holder.append(CompanionWindow(CompanionBackend()))
-        companion = companion_holder[0]
-        companion.showNormal()
-        companion.raise_()
+    from .companion_launcher import open_companion
 
     companion_action = QAction("Companion", menu)
     companion_action.triggered.connect(open_companion)

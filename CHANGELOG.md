@@ -4,6 +4,13 @@ All notable changes to this project are documented here. The project follows
 [Semantic Versioning](https://semver.org/) for the installable package; the
 manual/whitepaper keeps its own document version.
 
+## [0.2.6] - 2026-09-24
+
+- **Companion is reachable from the main window**: a `Companion` button in the
+  toolbar row and a ⌘⇧C shortcut open the same cached window as the menu-bar
+  entry (shared `app.companion_launcher`). No memory behavior or default
+  changes.
+
 ## [0.2.5] - 2026-09-24
 
 - **Companion (experimental surface, opt-in).** The Companion v0 stack: five

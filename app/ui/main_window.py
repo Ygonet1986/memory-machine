@@ -6,6 +6,7 @@ import html
 from typing import Any
 
 from PySide6.QtCore import Qt, QThread, Signal
+from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QCheckBox,
     QComboBox,
@@ -88,6 +89,8 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Memory Machine")
         self.resize(760, 640)
         self._build_ui()
+        QShortcut(QKeySequence("Ctrl+Shift+C"), self,
+                  activated=self._open_companion)
         self._refresh_topics()
         self._refresh_status()
 
@@ -192,6 +195,11 @@ class MainWindow(QMainWindow):
         self.graph_btn = QPushButton("Graph")
         self.graph_btn.setToolTip("Graph Memory viewer: entities, paths, provenance and review")
         self.graph_btn.clicked.connect(self._open_graph)
+        self.companion_btn = QPushButton("Companion")
+        self.companion_btn.setToolTip(
+            "Open the Companion window (fictional character with relationship memory)"
+        )
+        self.companion_btn.clicked.connect(self._open_companion)
         self.web_check = QCheckBox("Web search")
         self.web_check.setToolTip("Search the web for this message (does not touch memory)")
         row.addWidget(self.settings_btn)
@@ -199,6 +207,7 @@ class MainWindow(QMainWindow):
         row.addWidget(self.clear_docs_btn)
         row.addWidget(self.memory_btn)
         row.addWidget(self.graph_btn)
+        row.addWidget(self.companion_btn)
         row.addWidget(self.web_check)
         row.addStretch(1)
         self.send_btn = QPushButton("Send")
@@ -400,6 +409,11 @@ class MainWindow(QMainWindow):
     def _open_tape(self) -> None:
         TapeDialog(self._backend, self).exec()
         self._refresh_status()
+
+    def _open_companion(self) -> None:
+        from ..companion_launcher import open_companion
+
+        open_companion()
 
     def _open_graph(self) -> None:
         GraphDialog(self._backend, self).exec()

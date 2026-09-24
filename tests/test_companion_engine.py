@@ -99,7 +99,7 @@ def test_engine_layers_trailer_and_used(tmp_path):
     user = text(messages, "user")
     assert "Relatos da pessoa" in user
     assert "Episódios de conversas reais" in user
-    assert "Histórias imaginadas (ficção; nunca fatos da vida real)" in user
+    assert "Histórias imaginadas em conversa (ficção; nunca fatos da vida real)" in user
     assert "Hipóteses tentativas" in user
     assert "Personagem: Lia" in text(messages, "system")
     assert "Regras de memória" in text(messages, "system")

@@ -21,9 +21,13 @@ opencode path, the admission-shadow-v2 window or product defaults.
    as named sections with provenance:
    - Relatos da pessoa (declarações; não são verificação independente)
    - Episódios de conversas reais
-   - Histórias imaginadas (ficção; nunca fatos da vida real)
+   - Passado ficcional da personagem (aprovado) — synthetic-life events
+   - Histórias imaginadas em conversa (ficção; nunca fatos da vida real)
    - Hipóteses tentativas (podem estar erradas; não são fatos)
-   A `budget` (default 2000 chars, at least one card) bounds the context;
+   The general `budget` (default 2000 chars, at least one card) bounds the
+   context; synthetic-life cards have their **own** budget (default 800)
+   and are capped independently (C4), so approved biography never crowds
+   out the relationship memory.
    dropped ids are reported.
 4. **Persona prompt**: `render_persona_prompt(sheet)` from the approved root
    sheet, plus the epistemic policy (only cite provided ids; fiction stays

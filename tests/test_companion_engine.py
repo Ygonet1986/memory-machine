@@ -147,8 +147,13 @@ def test_save_off_writes_zero_bytes_to_real_root(tmp_path):
     session, _ids = _setup(tmp_path)
     before = {str(path.relative_to(session.root)): path.read_bytes()
               for path in session.root.rglob("*") if path.is_file()}
-    client = FakeClient(_handler('ok\n{"used": [], "memories": []}'))
-    CompanionEngine(session, client).reply("oi")
+    proposal = {"type": "person_report", "summary": "tema novo",
+                "quote": "oi", "source": "person"}
+    client = FakeClient(_handler(
+        'ok\n{"used": [], "memories": [' + json.dumps(proposal) + ']}'
+    ))
+    result = CompanionEngine(session, client).reply("oi")
+    assert result["saved"] is None
     after = {str(path.relative_to(session.root)): path.read_bytes()
              for path in session.root.rglob("*") if path.is_file()}
     assert after == before
@@ -168,14 +173,6 @@ def test_missing_persona_fails(tmp_path):
     client = FakeClient(_handler("nunca chamado"))
     with pytest.raises(ValueError, match="no approved persona"):
         CompanionEngine(session, client).reply("oi")
-    assert client.calls == []
-
-
-def test_save_true_lands_in_f3b(tmp_path):
-    session, _ids = _setup(tmp_path)
-    client = FakeClient(_handler('ok\n{"used": [], "memories": []}'))
-    with pytest.raises(ValueError, match="F3b"):
-        CompanionEngine(session, client).reply("oi", save=True)
     assert client.calls == []
 
 

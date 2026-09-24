@@ -32,8 +32,8 @@ def slot_summary(text: str, limit: int = SUMMARY_LIMIT) -> str:
     return flat[: limit - 1] + "…"
 
 
-def slot_source(message_id: str) -> str:
-    return f"opencode#{message_id}" if message_id else ""
+def slot_source(message_id: str, namespace: str = "opencode") -> str:
+    return f"{namespace}#{message_id}" if message_id else ""
 
 
 def _find_by_source(tape: Tape, source: str) -> MemoryRecord | None:
@@ -54,27 +54,30 @@ def add_turn_slot(
     message_id: str = "",
     pair_message_id: str = "",
     model: str = "",
+    namespace: str = "opencode",
 ) -> dict[str, Any]:
     """Append one turn slot (``question`` or ``reply``) to the tape.
 
-    Deduped by ``source``: the same opencode message id never produces two
-    records. A ``reply`` whose paired question is already on the tape gets
-    ``derived_from=[question id]``; an orphan reply is allowed and explicit.
-    Secret-like content refuses the write (same gate as every record).
+    Deduped by ``source``: the same message id never produces two records.
+    ``namespace`` selects the source prefix (``opencode`` for the plugin,
+    ``companion`` for the Companion engine). A ``reply`` whose paired
+    question is already on the tape gets ``derived_from=[question id]``; an
+    orphan reply is allowed and explicit. Secret-like content refuses the
+    write (same gate as every record).
     """
     if slot not in SLOT_TYPES:
         return {"ok": False, "error": f"unknown slot type: {slot!r}"}
     body = (text or "").strip()
     if not body:
         return {"ok": False, "error": "empty slot text"}
-    source = slot_source(message_id)
+    source = slot_source(message_id, namespace)
     existing = _find_by_source(tape, source)
     if existing is not None:
         return {"ok": True, "deduped": True, "slot": slot,
                 "record": existing.to_dict()}
     derived: list[str] = []
     if slot == "reply" and pair_message_id:
-        question = _find_by_source(tape, slot_source(pair_message_id))
+        question = _find_by_source(tape, slot_source(pair_message_id, namespace))
         if question is not None:
             derived.append(question.id)
     record = MemoryRecord(type=slot, summary=slot_summary(body), why=body,

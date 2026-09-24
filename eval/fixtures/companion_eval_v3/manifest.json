@@ -1,0 +1,6 @@
+{
+  "judge_schema_version": 2,
+  "script": "companion_eval_v3/script.json",
+  "script_sha256": "8aeefa4462a0da4212d2eec5898ac2995def07ccebd788067fa0e55f5c93540a",
+  "steps": 17
+}

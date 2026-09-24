@@ -223,3 +223,31 @@ def copy_relationship(base: Path, person_id: str, source_character: str,
         published = admit_life(target, self_id=self_id,
                                continuity_id=continuity)
     return {"ok": True, "root": str(target), "published": published}
+
+
+def create_from_template(base: Path, person_id: str, character_id: str,
+                         slug: str, *, continuity: str = "main",
+                         repo_root: Path | None = None,
+                         approved_by: str = "owner") -> dict[str, Any]:
+    """Create a brand-new relationship from a repository template (no JSON)."""
+    repo = Path(repo_root) if repo_root is not None else Path(__file__).resolve().parents[2]
+    personas = repo / "personas"
+    persona_path = personas / slug / "v1.json"
+    life_path = personas / slug / "life" / "v1.json"
+    if not persona_path.exists() or not life_path.exists():
+        raise ValueError(f"unknown template: {slug}")
+    target = CompanionSession(base, person_id, character_id, continuity).root
+    if target.exists():
+        raise ValueError("target relationship already exists")
+
+    from .companion_persona import CompanionPersona
+
+    sheet = json.loads(persona_path.read_text(encoding="utf-8"))
+    CompanionPersona(target).create(sheet)
+    life = json.loads(life_path.read_text(encoding="utf-8"))
+    life["approved_at"] = datetime.now(timezone.utc).isoformat()
+    life["approved_by"] = approved_by
+    creator = CompanionCreator(target, self_id=slug, continuity_id=continuity)
+    creator.approve(life)
+    published = admit_life(target, self_id=slug, continuity_id=continuity)
+    return {"ok": True, "root": str(target), "published": published}

@@ -24,9 +24,11 @@ from memory_machine.companion_gallery import (
     list_templates,
     retire_event,
 )
+from memory_machine.companion_generation import generate_draft
 from memory_machine.companion_life_admission import (
     publish_life, recover_publication,
 )
+from memory_machine.llm import LLMClient
 from memory_machine.companion_persona import CompanionPersona
 from memory_machine.companion_session import CompanionSession
 
@@ -40,10 +42,19 @@ class CreatorBackend:
                  repo_root: str | Path | None = None,
                  client: Any = None) -> None:
         settings = load_settings()
+        self._settings = settings
         self._base = Path(base if base is not None
                           else settings["memory_root"]).expanduser()
         self._repo = Path(repo_root) if repo_root is not None else TEMPLATES
         self._client = client
+        self._generations: dict[tuple[str, str, str], int] = {}
+
+    def _llm(self) -> Any:
+        if self._client is None:
+            settings = self._settings
+            self._client = LLMClient(
+                settings["base_url"], settings["api_key"], settings["model"])
+        return self._client
 
     # ---------------------------------------------------------- listings
 
@@ -191,14 +202,53 @@ class CreatorBackend:
         self._recover(person, character, continuity)
         root = self.root_of(person, character, continuity)
         stamped = json.loads(json.dumps(doc))
+        now = datetime.now(timezone.utc).isoformat()
         stamped["status"] = "approved"
-        stamped["approved_at"] = datetime.now(timezone.utc).isoformat()
+        stamped["approved_at"] = now
         stamped["approved_by"] = approved_by
+        for event in stamped.get("events") or []:
+            if event.get("status") == "draft":
+                event["status"] = "approved"
+                event["approved_at"] = now
+                event["approved_by"] = approved_by
         try:
-            return publish_life(root, stamped, self_id=self._self_id(root),
-                                continuity_id=continuity)
+            result = publish_life(root, stamped, self_id=self._self_id(root),
+                                  continuity_id=continuity)
         except ValueError as error:
             return {"ok": False, "error": str(error)}
+        self._generations.pop((person, character, continuity), None)
+        return result
+
+    def generate_life(self, person: str, character: str, *,
+                      continuity: str = "main", count: int = 8,
+                      seed: str = "") -> dict[str, Any]:
+        """Propose a life draft with one LLM call (max two per flow)."""
+        self._recover(person, character, continuity)
+        root = self.root_of(person, character, continuity)
+        persona = CompanionPersona(root).load()
+        if persona is None:
+            return {"ok": False, "error": "relationship has no approved persona"}
+        key = (person, character, continuity)
+        used = self._generations.get(key, 0)
+        if used >= 2:
+            return {"ok": False,
+                    "error": "generation budget exhausted (2 per approval flow)"}
+        self_id = self._self_id(root)
+        creator = CompanionCreator(root, self_id=self_id)
+        current = creator.load_current()
+        model = str(self._settings.get("model") or "")
+        try:
+            draft = generate_draft(self._llm(), persona, current,
+                                   self_id=self_id, continuity_id=continuity,
+                                   model=model, seed=seed)
+        except ValueError as error:
+            return {"ok": False, "error": str(error)}
+        saved = creator.save_draft(draft)
+        self._generations[key] = used + 1
+        recorded_seed = draft["events"][0]["provenance"]["seed"]
+        return {"ok": True, "events": saved["events"],
+                "life_version": draft["life_version"], "model": model,
+                "seed": recorded_seed, "generations_used": used + 1}
 
     def retire(self, person: str, character: str, event_id: str, *,
                continuity: str = "main") -> dict[str, Any]:

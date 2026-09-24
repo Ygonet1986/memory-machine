@@ -162,6 +162,11 @@ tests/test_companion_gallery.py::test_diff_reports_added_changed_removed
 tests/test_companion_gallery.py::test_retire_event_supersedes_and_leaves_recall
 tests/test_companion_gallery.py::test_deletion_impact_lists_derivations_and_mentions
 tests/test_companion_gallery.py::test_copy_relationship_inherits_no_conversations
+tests/test_companion_generation.py::test_generate_draft_validates_and_records_provenance
+tests/test_companion_generation.py::test_generate_draft_rejects_bad_output
+tests/test_companion_generation.py::test_backend_generation_budget_draft_and_approval
+tests/test_companion_generation.py::test_backend_generation_requires_persona
+tests/test_companion_generation.py::test_generated_draft_can_be_saved_and_reloaded
 tests/test_companion_life.py::test_lia_template_is_valid_and_approved
 tests/test_companion_life.py::test_tomas_template_is_valid_and_approved
 tests/test_companion_life.py::test_draft_needs_no_approval_act_and_small_size
@@ -722,4 +727,4 @@ tests/test_whiteboard.py::test_size_and_consolidation_trigger
 tests/test_whiteboard.py::test_roundtrip
 tests/test_whiteboard.py::test_render
 
-723 tests collected in 0.11s
+728 tests collected in 0.11s

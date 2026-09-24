@@ -136,6 +136,7 @@ class CreatorDialog(QDialog):
         life_layout.addLayout(life_row)
         action_row = QHBoxLayout()
         for label, handler in (
+            ("Gerar vida (IA)…", self._generate_life),
             ("Salvar rascunho", self._save_draft),
             ("Diferenças…", self._show_diff),
             ("Aprovar versão e publicar", self._approve_version),
@@ -328,6 +329,27 @@ class CreatorDialog(QDialog):
         self._refresh_life()
 
     # --------------------------------------------------------- publishing
+
+    def _generate_life(self) -> None:
+        if not self._character:
+            return
+        confirm = QMessageBox.question(
+            self, "Gerar vida (IA)",
+            "Gerar uma proposta de vida com 1 chamada de modelo? Ela vira "
+            "rascunho; nada é publicado sem a tua aprovação explícita.",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No)
+        if confirm != QMessageBox.StandardButton.Yes:
+            return
+        result = self._backend.generate_life(self._person, self._character)
+        if not result.get("ok"):
+            QMessageBox.warning(self, "Gerar vida", str(result.get("error")))
+            return
+        self._refresh_life()
+        QMessageBox.information(
+            self, "Gerar vida",
+            f"Rascunho v{result['life_version']} com {result['events']} eventos "
+            f"(geração {result['generations_used']}/2).")
 
     def _save_draft(self) -> None:
         if self._draft is None:

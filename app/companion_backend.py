@@ -9,6 +9,7 @@ turn through ``CompanionEngine``. Kept Qt-free so CI can test it headlessly.
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -21,7 +22,17 @@ from memory_machine.tape import MemoryRecord
 
 from .settings import load_settings
 
-TEMPLATE = Path(__file__).resolve().parents[1] / "personas" / "lia" / "v1.json"
+
+def template_path() -> Path:
+    """Resolve the Lia v1 template inside a PyInstaller bundle or the repo."""
+    frozen = getattr(sys, "_MEIPASS", "")
+    if frozen:
+        candidate = Path(frozen) / "personas" / "lia" / "v1.json"
+        if candidate.exists():
+            return candidate
+    return Path(__file__).resolve().parents[1] / "personas" / "lia" / "v1.json"
+
+
 CHAT_TYPES = ("person_report", "episode", "story", "hypothesis")
 
 
@@ -80,7 +91,7 @@ class CompanionBackend:
         return self._persona().load()
 
     def approve_persona(self, template: str | Path | None = None) -> dict[str, Any]:
-        path = Path(template) if template is not None else TEMPLATE
+        path = Path(template) if template is not None else template_path()
         try:
             sheet = json.loads(Path(path).read_text(encoding="utf-8"))
             records = self._persona().create(sheet)

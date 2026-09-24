@@ -142,6 +142,18 @@ def test_turn_saves_then_save_off_keeps_bytes(tmp_path, monkeypatch):
     assert after == before
 
 
+def test_template_path_honours_frozen_bundle(tmp_path, monkeypatch):
+    fake = tmp_path / "personas" / "lia" / "v1.json"
+    fake.parent.mkdir(parents=True)
+    fake.write_text("{}", encoding="utf-8")
+    monkeypatch.setattr(companion_mod.sys, "_MEIPASS", str(tmp_path),
+                        raising=False)
+    assert companion_mod.template_path() == fake
+    monkeypatch.delattr(companion_mod.sys, "_MEIPASS", raising=False)
+    assert companion_mod.template_path().name == "v1.json"
+    assert companion_mod.template_path().parent.name == "lia"
+
+
 def test_turn_without_persona_is_an_error(tmp_path, monkeypatch):
     backend = _setup(tmp_path, monkeypatch, _handler("nunca"))
     result = backend.turn("oi", save=True)

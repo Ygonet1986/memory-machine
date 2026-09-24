@@ -159,3 +159,10 @@ def test_turn_without_persona_is_an_error(tmp_path, monkeypatch):
     result = backend.turn("oi", save=True)
     assert result["ok"] is False
     assert "persona" in result["error"]
+
+
+def test_companion_launcher_imports_without_qt():
+    import importlib
+
+    module = importlib.import_module("app.companion_launcher")
+    assert callable(module.open_companion)

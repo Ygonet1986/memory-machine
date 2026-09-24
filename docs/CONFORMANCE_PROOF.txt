@@ -122,6 +122,11 @@ tests/test_companion_engine.py::test_save_off_writes_zero_bytes_to_real_root
 tests/test_companion_engine.py::test_budget_drops_extra_cards
 tests/test_companion_engine.py::test_missing_persona_fails
 tests/test_companion_engine.py::test_deterministic_output
+tests/test_companion_engine_life.py::test_life_and_improvised_story_have_separate_labels
+tests/test_companion_engine_life.py::test_policy_states_approved_character_past
+tests/test_companion_engine_life.py::test_used_life_event_is_real
+tests/test_companion_engine_life.py::test_life_budget_is_separate
+tests/test_companion_engine_life.py::test_cross_root_id_collisions_stay_separate
 tests/test_companion_engine_writes.py::test_save_writes_slots_and_extraction
 tests/test_companion_engine_writes.py::test_person_report_must_quote_person
 tests/test_companion_engine_writes.py::test_episode_may_quote_lia
@@ -692,4 +697,4 @@ tests/test_whiteboard.py::test_size_and_consolidation_trigger
 tests/test_whiteboard.py::test_roundtrip
 tests/test_whiteboard.py::test_render
 
-693 tests collected in 0.10s
+698 tests collected in 0.11s

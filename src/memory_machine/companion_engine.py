@@ -25,19 +25,26 @@ from .coordinator import Machine
 from .groups import load_manifest, save_manifest
 from .turns import add_turn_slot
 
+LIFE_KIND = "synthetic_life_event"
+LIFE_LAYER = "Passado ficcional da personagem (aprovado)"
+IMPROV_LAYER = "Histórias imaginadas em conversa (ficção; nunca fatos da vida real)"
+
 LAYERS: tuple[tuple[str, str], ...] = (
     ("person_report",
      "Relatos da pessoa (declarações; não são verificação independente)"),
     ("episode", "Episódios de conversas reais"),
-    ("story", "Histórias imaginadas (ficção; nunca fatos da vida real)"),
+    ("life", LIFE_LAYER),
+    ("story", IMPROV_LAYER),
     ("hypothesis", "Hipóteses tentativas (podem estar erradas; não são fatos)"),
 )
-LAYER_TYPES = {kind for kind, _label in LAYERS}
+LAYER_TYPES = {"person_report", "episode", "story", "hypothesis"}
+DEFAULT_LIFE_BUDGET = 800
 
 EPISTEMIC_POLICY = """\
 Regras de memória (obrigatórias):
 - Mencione o passado apenas quando houver memória com id fornecido no contexto; nunca invente eventos compartilhados.
 - Ficção continua ficção; histórias imaginadas nunca são fatos da vida real da pessoa.
+- O passado da personagem vem de eventos aprovados (Passado ficcional): conte como história dela, nunca como experiência da pessoa.
 - Hipóteses são tentativas: apresente-as como possibilidade, nunca como fato; se a pessoa corrigir, aceite.
 - Se a memória necessária não estiver no contexto, pergunte ou diga que não lembra; não preencha lacunas.
 - Respeite pausas e a autonomia da pessoa; sem culpa, cobrança ou exclusividade.
@@ -104,7 +111,14 @@ def _extract_trailer(content: str) -> tuple[str, list[str], list[dict], bool]:
     return clean, used, memories, True
 
 
-def _cap_cards(cards: list[dict], budget: int) -> tuple[list[dict], list[str]]:
+def _layer_key(record: Any) -> str:
+    """Synthetic-life events get their own labeled layer (C4)."""
+    if record.type == "story" and (record.origin or {}).get("kind") == LIFE_KIND:
+        return "life"
+    return record.type
+
+
+def _cap_list(cards: list[dict], budget: int) -> tuple[list[dict], list[str]]:
     kept: list[dict] = []
     dropped: list[str] = []
     used = 0
@@ -118,27 +132,49 @@ def _cap_cards(cards: list[dict], budget: int) -> tuple[list[dict], list[str]]:
     return kept, dropped
 
 
+def _cap_cards(cards: list[dict], records: dict[str, Any], budget: int,
+               life_budget: int) -> tuple[list[dict], list[str]]:
+    """Cap synthetic life with its own budget; the rest keeps the general one."""
+    life: list[dict] = []
+    rest: list[dict] = []
+    for card in cards:
+        record = records.get(str(card.get("memory_id") or ""))
+        if record is not None and _layer_key(record) == "life":
+            life.append(card)
+        else:
+            rest.append(card)
+    kept_life, dropped_life = _cap_list(life, life_budget)
+    kept_rest, dropped_rest = _cap_list(rest, budget)
+    kept_ids = {id(card) for card in kept_life + kept_rest}
+    kept = [card for card in cards if id(card) in kept_ids]
+    return kept, dropped_life + dropped_rest
+
+
 def render_layers(cards: list[dict], records: dict[str, Any]) -> str:
     """Render labeled, provenance-carrying layers for the conversation call."""
-    by_type: dict[str, list[tuple[dict, Any]]] = {}
+    by_key: dict[str, list[tuple[dict, Any]]] = {}
     for card in cards:
         record = records.get(str(card.get("memory_id") or ""))
         if record is None or record.type not in LAYER_TYPES:
             continue
-        by_type.setdefault(record.type, []).append((card, record))
+        by_key.setdefault(_layer_key(record), []).append((card, record))
     sections: list[str] = []
-    for kind, label in LAYERS:
-        items = by_type.get(kind) or []
+    for key, label in LAYERS:
+        items = by_key.get(key) or []
         if not items:
             continue
         lines = [f"### {label}"]
         for card, record in items:
             origin = dict(record.origin or {})
-            reference = str(origin.get("kind") or "?")
-            if origin.get("version"):
-                reference += f":{origin['version']}"
-            if origin.get("event_id"):
-                reference += f":{origin['event_id']}"
+            if key == "life":
+                reference = (f"vida aprovada v{origin.get('life_version', '?')}"
+                             f" · {origin.get('event_id', '?')}")
+            else:
+                reference = str(origin.get("kind") or "?")
+                if origin.get("version"):
+                    reference += f":{origin['version']}"
+                if origin.get("event_id"):
+                    reference += f":{origin['event_id']}"
             lines.append(f"- [{record.id}] {record.summary} (fonte: {reference})")
             note = str(card.get("note") or "").strip()
             if note:
@@ -160,10 +196,12 @@ class CompanionEngine:
     """One headless turn: recall -> labeled context -> one reply call."""
 
     def __init__(self, session: CompanionSession, client: Any, *,
-                 budget: int = 2000, temperature: float = 0.0):
+                 budget: int = 2000, life_budget: int = DEFAULT_LIFE_BUDGET,
+                 temperature: float = 0.0):
         self.session = session
         self._client = _CountingClient(client)
         self.budget = max(0, int(budget))
+        self.life_budget = max(0, int(life_budget))
         self.temperature = float(temperature)
 
     @property
@@ -199,7 +237,8 @@ class CompanionEngine:
             if (records.get(str(card.get("memory_id") or "")) is not None
                 and records[str(card.get("memory_id"))].type in LAYER_TYPES)
         ]
-        cards, dropped = _cap_cards(cards, self.budget)
+        cards, dropped = _cap_cards(cards, records, self.budget,
+                                    self.life_budget)
         provided = [str(card.get("memory_id")) for card in cards]
         layers = render_layers(cards, records)
         messages = [

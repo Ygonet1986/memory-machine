@@ -138,6 +138,33 @@ class Tape:
     def exists(self) -> bool:
         return self.path.exists()
 
+    @property
+    def highwater_path(self) -> Path:
+        return self.path.with_name(self.path.name + ".highwater")
+
+    def _highwater(self) -> int:
+        try:
+            return max(0, int(self.highwater_path.read_text(encoding="ascii").strip()))
+        except (OSError, ValueError):
+            return 0
+
+    def _reserve_highwater(self, value: int) -> None:
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        temp_path: Path | None = None
+        try:
+            with tempfile.NamedTemporaryFile(
+                mode="w", encoding="ascii", dir=self.path.parent,
+                prefix=f".{self.highwater_path.name}.", delete=False,
+            ) as fh:
+                temp_path = Path(fh.name)
+                fh.write(f"{value}\n")
+                fh.flush()
+                os.fsync(fh.fileno())
+            os.replace(temp_path, self.highwater_path)
+        finally:
+            if temp_path is not None:
+                temp_path.unlink(missing_ok=True)
+
     def _read_all(self) -> list[MemoryRecord]:
         if not self.path.exists():
             return []
@@ -267,6 +294,37 @@ class Tape:
         if removed:
             self._rewrite(kept)
         return removed
+
+    def delete_cascade(self, memory_id: str) -> list[str]:
+        """Erase a record, source turns, derivatives and dependent corrections.
+
+        The local high-water mark reserves removed IDs before replacing the
+        tape; a future append cannot attach a stale reference to a reused ID.
+        Legacy single-record delete remains unchanged.
+        """
+        records = self._read_all()
+        if not any(record.id == memory_id for record in records):
+            return []
+        by_id = {record.id: record for record in records}
+        removed = {memory_id}
+        while True:
+            children = {
+                record.id for record in records
+                if removed.intersection(record.derived_from) or record.supersedes in removed
+            }
+            source_turns = {
+                parent_id
+                for record in records if record.id in removed
+                for parent_id in record.derived_from
+                if parent_id in by_id and by_id[parent_id].type in {"question", "reply"}
+            }
+            expanded = children | source_turns
+            if expanded.issubset(removed):
+                break
+            removed.update(expanded)
+        self._reserve_highwater(self.max_id_num())
+        self._rewrite_atomic([record for record in records if record.id not in removed])
+        return sorted(removed)
 
     def set_status(self, memory_id: str, status: str) -> bool:
         """Set a record's status (active/archived/superseded). Returns True if found."""

@@ -6,6 +6,7 @@ cross-session search or the active admission-shadow instrumentation.
 
 from __future__ import annotations
 
+import shutil
 from pathlib import Path
 
 from .groups import ensure_group, load_manifest, save_manifest
@@ -15,10 +16,17 @@ from .tape import MemoryRecord, Tape, parse_id
 from .whiteboard import Annotation
 
 
+class CompanionTape(Tape):
+    """Root-local ID allocation while leaving legacy Tape allocation untouched."""
+
+    def max_id_num(self) -> int:
+        return max(super().max_id_num(), self._highwater())
+
+
 class CompanionMemory:
     def __init__(self, root: Path):
         self.root = Path(root)
-        self.tape = Tape(self.root / "tape.jsonl")
+        self.tape = CompanionTape(self.root / "tape.jsonl")
 
     def active(self) -> list[MemoryRecord]:
         return [record for record in self.tape.read() if record.status == "active"]
@@ -41,13 +49,26 @@ class CompanionMemory:
         self._invalidate_derived_state(record.id)
         return record
 
-    def _invalidate_derived_state(self, new_id: str) -> None:
-        for name in ("recall_cache.json", "whiteboard.json", "context.json"):
+    def delete(self, memory_id: str) -> list[str]:
+        removed = self.tape.delete_cascade(memory_id)
+        if removed:
+            self._invalidate_derived_state()
+        return removed
+
+    def _invalidate_derived_state(self, new_id: str = "") -> None:
+        for name in ("recall_cache.json", "whiteboard.json", "context.json",
+                     "session.json"):
             (self.root / name).unlink(missing_ok=True)
+        # The Companion owns this root; discard derived graph data for a clean
+        # rebuild from active tape records if graph support is added later.
+        graph_path = self.root / "graph"
+        if graph_path.is_dir():
+            shutil.rmtree(graph_path)
 
         manifest_path = self.root / "manifest.json"
         manifest = load_manifest(manifest_path)
-        ensure_group(manifest, parse_id(new_id))
+        if new_id:
+            ensure_group(manifest, parse_id(new_id))
         for agent in manifest.agents:
             agent.checklist = agent.digest = agent.understanding = ""
             agent.checklist_records = agent.digest_records = agent.understanding_records = 0

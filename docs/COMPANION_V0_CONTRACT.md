@@ -109,6 +109,12 @@ deleted or superseded data. A root-local monotonic high-water mark prevents
 reuse of a deleted ID. A test deletes a source after rollup, reloads from
 disk, recalls, searches and rehydrates to prove non-resurrection.
 
+Deleting an extracted memory also removes its source turn slot and other
+records derived from that turn. This deliberately erases more than the one
+selected memory when a turn contains several facts; the UI must disclose the
+linked deletion. The normal Companion recall surface selects the five typed
+memories, while turn slots remain the interaction/provenance layer.
+
 Deleting a whole relationship removes its complete root, including
 continuity-specific state. This is a separate, explicit user action.
 

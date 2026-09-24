@@ -9,7 +9,7 @@ from __future__ import annotations
 import shutil
 from pathlib import Path
 
-from .companion_extract import candidate_record
+from .companion_extract import COMPANION_TYPES, candidate_record
 from .groups import ensure_group, load_manifest, save_manifest
 from .payload import build_evidence_payload
 from .retrieval import rank
@@ -30,7 +30,10 @@ class CompanionMemory:
         self.tape = CompanionTape(self.root / "tape.jsonl")
 
     def active(self) -> list[MemoryRecord]:
-        return [record for record in self.tape.read() if record.status == "active"]
+        return [
+            record for record in self.tape.read()
+            if record.status == "active" and record.type in COMPANION_TYPES
+        ]
 
     def search(self, question: str, *, limit: int = 5) -> list[MemoryRecord]:
         records = self.active()

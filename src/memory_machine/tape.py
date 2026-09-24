@@ -296,7 +296,7 @@ class Tape:
         return removed
 
     def delete_cascade(self, memory_id: str) -> list[str]:
-        """Erase a record, transitive derivatives and dependent corrections.
+        """Erase a record, source turns, derivatives and dependent corrections.
 
         The local high-water mark reserves removed IDs before replacing the
         tape; a future append cannot attach a stale reference to a reused ID.
@@ -305,15 +305,23 @@ class Tape:
         records = self._read_all()
         if not any(record.id == memory_id for record in records):
             return []
+        by_id = {record.id: record for record in records}
         removed = {memory_id}
         while True:
             children = {
                 record.id for record in records
                 if removed.intersection(record.derived_from) or record.supersedes in removed
             }
-            if children.issubset(removed):
+            source_turns = {
+                parent_id
+                for record in records if record.id in removed
+                for parent_id in record.derived_from
+                if parent_id in by_id and by_id[parent_id].type in {"question", "reply"}
+            }
+            expanded = children | source_turns
+            if expanded.issubset(removed):
                 break
-            removed.update(children)
+            removed.update(expanded)
         self._reserve_highwater(self.max_id_num())
         self._rewrite_atomic([record for record in records if record.id not in removed])
         return sorted(removed)

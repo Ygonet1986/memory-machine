@@ -70,7 +70,7 @@ class CompanionCreator:
         return json.loads(path.read_text(encoding="utf-8"))
 
     @staticmethod
-    def _write_json(path: Path, value: dict[str, Any]) -> None:
+    def write_json_atomic(path: Path, value: dict[str, Any]) -> None:
         """Atomic single-file write (fsync + replace)."""
         path.parent.mkdir(parents=True, exist_ok=True)
         temp_path: Path | None = None
@@ -103,7 +103,7 @@ class CompanionCreator:
         if normalized["status"] != "draft":
             raise ValueError("the creator draft must have status 'draft'")
         self._recover()
-        self._write_json(self.draft_path, normalized)
+        self.write_json_atomic(self.draft_path, normalized)
         return {"ok": True, "events": len(normalized["events"]),
                 "path": str(self.draft_path)}
 
@@ -167,9 +167,9 @@ class CompanionCreator:
         if staging.exists():
             shutil.rmtree(staging)
         staging.mkdir(parents=True)
-        self._write_json(staging / "current.json", normalized)
-        self._write_json(staging / f"history_v{version}.json", normalized)
-        self._write_json(self.journal_path, {"life_version": version})
+        self.write_json_atomic(staging / "current.json", normalized)
+        self.write_json_atomic(staging / f"history_v{version}.json", normalized)
+        self.write_json_atomic(self.journal_path, {"life_version": version})
         self._apply_transaction(version)
         self.clear_draft()
         return {"ok": True, "idempotent": False, "life_version": version,

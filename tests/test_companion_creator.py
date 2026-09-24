@@ -164,21 +164,21 @@ def test_recover_handles_journal_states(tmp_path):
     creator.approve(_template())
     staged = creator.staging_path
     staged.mkdir(parents=True)
-    creator._write_json(staged / "current.json",
+    creator.write_json_atomic(staged / "current.json",
                         _as_version(_template(), 2))
-    creator._write_json(staged / "history_v2.json",
+    creator.write_json_atomic(staged / "history_v2.json",
                         _as_version(_template(), 2))
-    creator._write_json(creator.journal_path, {"life_version": 2})
+    creator.write_json_atomic(creator.journal_path, {"life_version": 2})
 
     assert creator.recover()["recovered"] is True
     assert creator.load_current()["life_version"] == 2
     assert creator.history_versions() == [1, 2]
 
-    creator._write_json(creator.journal_path, {"life_version": 2})
+    creator.write_json_atomic(creator.journal_path, {"life_version": 2})
     assert creator.recover()["recovered"] is True
     assert not creator.journal_path.exists()
 
-    creator._write_json(creator.journal_path, {"life_version": 9})
+    creator.write_json_atomic(creator.journal_path, {"life_version": 9})
     with pytest.raises(RuntimeError, match="unrecoverable"):
         creator.recover()
 

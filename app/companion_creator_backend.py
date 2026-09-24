@@ -8,6 +8,7 @@ validation, transactions and publication stay in the core modules.
 from __future__ import annotations
 
 import json
+import unicodedata
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -23,7 +24,9 @@ from memory_machine.companion_gallery import (
     list_templates,
     retire_event,
 )
-from memory_machine.companion_life_admission import admit_life
+from memory_machine.companion_life_admission import (
+    publish_life, recover_publication,
+)
 from memory_machine.companion_persona import CompanionPersona
 from memory_machine.companion_session import CompanionSession
 
@@ -55,6 +58,34 @@ class CreatorBackend:
         return CompanionSession(self._base, person, character,
                                 continuity).root
 
+    def _self_id(self, root: Path) -> str:
+        life = root / "synthetic_life" / "current.json"
+        if life.exists():
+            try:
+                doc = json.loads(life.read_text(encoding="utf-8"))
+                people = {person["id"] for person in doc["world"]["people"]}
+                for event in doc["events"]:
+                    for item in event["participants"]:
+                        if item["id"] not in people:
+                            return str(item["id"])
+            except (OSError, KeyError, TypeError, json.JSONDecodeError):
+                pass
+        sheet = CompanionPersona(root).load()
+        if sheet is not None:
+            candidate = unicodedata.normalize("NFKD", sheet["name"]) \
+                .encode("ascii", "ignore").decode().lower()
+            if any(row["slug"] == candidate for row in self.templates()):
+                return candidate
+        return "lia"
+
+    def _recover(self, person: str, character: str,
+                 continuity: str = "main") -> dict[str, Any]:
+        root = self.root_of(person, character, continuity)
+        if not (root / "synthetic_life").is_dir():
+            return {"recovered": False}
+        return recover_publication(root, self_id=self._self_id(root),
+                                   continuity_id=continuity)
+
     # ------------------------------------------------------------ create
 
     def create(self, person: str, character: str, slug: str, *,
@@ -81,11 +112,12 @@ class CreatorBackend:
 
     def open(self, person: str, character: str, *,
              continuity: str = "main") -> dict[str, Any]:
+        self._recover(person, character, continuity)
         root = self.root_of(person, character, continuity)
         persona = CompanionPersona(root).load()
         if persona is None:
             return {"ok": False, "error": "relationship has no approved persona"}
-        creator = CompanionCreator(root)
+        creator = CompanionCreator(root, self_id=self._self_id(root))
         current = creator.load_current()
         draft = creator.load_draft()
         return {
@@ -102,7 +134,9 @@ class CreatorBackend:
 
     def timeline(self, person: str, character: str, *,
                  continuity: str = "main") -> dict[str, Any]:
-        creator = CompanionCreator(self.root_of(person, character, continuity))
+        self._recover(person, character, continuity)
+        root = self.root_of(person, character, continuity)
+        creator = CompanionCreator(root, self_id=self._self_id(root))
         doc = creator.load_draft() or creator.load_current()
         if doc is None:
             return {"ok": False, "error": "no life document"}
@@ -111,7 +145,9 @@ class CreatorBackend:
 
     def diff(self, person: str, character: str, *,
              continuity: str = "main") -> dict[str, Any]:
-        creator = CompanionCreator(self.root_of(person, character, continuity))
+        self._recover(person, character, continuity)
+        root = self.root_of(person, character, continuity)
+        creator = CompanionCreator(root, self_id=self._self_id(root))
         current = creator.load_current()
         draft = creator.load_draft()
         if current is None or draft is None:
@@ -123,7 +159,9 @@ class CreatorBackend:
 
     def draft(self, person: str, character: str, *,
               continuity: str = "main") -> dict[str, Any]:
-        creator = CompanionCreator(self.root_of(person, character, continuity))
+        self._recover(person, character, continuity)
+        root = self.root_of(person, character, continuity)
+        creator = CompanionCreator(root, self_id=self._self_id(root))
         draft = creator.load_draft()
         if draft is None:
             current = creator.load_current()
@@ -140,7 +178,8 @@ class CreatorBackend:
 
     def save_draft(self, person: str, character: str, doc: dict[str, Any],
                    *, continuity: str = "main") -> dict[str, Any]:
-        creator = CompanionCreator(self.root_of(person, character, continuity))
+        root = self.root_of(person, character, continuity)
+        creator = CompanionCreator(root, self_id=self._self_id(root))
         try:
             return creator.save_draft(doc)
         except ValueError as error:
@@ -149,30 +188,31 @@ class CreatorBackend:
     def approve(self, person: str, character: str, doc: dict[str, Any], *,
                 continuity: str = "main",
                 approved_by: str = "owner") -> dict[str, Any]:
+        self._recover(person, character, continuity)
         root = self.root_of(person, character, continuity)
-        creator = CompanionCreator(root)
         stamped = json.loads(json.dumps(doc))
         stamped["status"] = "approved"
         stamped["approved_at"] = datetime.now(timezone.utc).isoformat()
         stamped["approved_by"] = approved_by
         try:
-            result = creator.approve(stamped)
+            return publish_life(root, stamped, self_id=self._self_id(root),
+                                continuity_id=continuity)
         except ValueError as error:
             return {"ok": False, "error": str(error)}
-        published = admit_life(root)
-        result["published"] = published
-        return result
 
     def retire(self, person: str, character: str, event_id: str, *,
                continuity: str = "main") -> dict[str, Any]:
+        self._recover(person, character, continuity)
+        root = self.root_of(person, character, continuity)
         try:
-            return retire_event(self.root_of(person, character, continuity),
-                                event_id)
+            return retire_event(root, event_id, self_id=self._self_id(root),
+                                continuity_id=continuity)
         except ValueError as error:
             return {"ok": False, "error": str(error)}
 
     def impact(self, person: str, character: str, event_id: str, *,
                continuity: str = "main") -> dict[str, Any]:
+        self._recover(person, character, continuity)
         try:
             return deletion_impact(self.root_of(person, character, continuity),
                                    event_id)

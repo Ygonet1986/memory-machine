@@ -9,6 +9,7 @@ so a reload can never resurrect a retired version.
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from typing import Any
 
@@ -97,3 +98,67 @@ def admit_life(root: Path, *, self_id: str = "lia",
         "superseded": sorted(stale),
         "skipped": sorted(skipped),
     }
+
+
+PUBLICATION_JOURNAL = "publication.json"
+
+
+def _journal_path(root: Path) -> Path:
+    return Path(root) / "synthetic_life" / PUBLICATION_JOURNAL
+
+
+def publish_life(root: Path, doc: dict[str, Any] | None = None, *,
+                 self_id: str = "lia", continuity_id: str = "main") -> dict[str, Any]:
+    """Approve a life version **and** admit it in one recoverable operation.
+
+    A publication journal (carrying the document) is written first; the
+    snapshot approval and the tape admission are both idempotent, so a crash
+    between them is repaired by ``recover_publication``. A failure never
+    leaves the root claiming a version whose events are missing.
+    """
+    root = Path(root)
+    creator = CompanionCreator(root, self_id=self_id,
+                               continuity_id=continuity_id)
+    if doc is None:
+        doc = creator.load_draft()
+        if doc is None:
+            raise ValueError("no life document to publish")
+    normalized = creator._validated(doc)
+    if normalized["status"] != "approved":
+        raise ValueError("only an approved life version can be published")
+    creator.write_json_atomic(_journal_path(root), {"document": normalized})
+    return _finish_publication(root, creator, self_id, continuity_id,
+                               recovered=False)
+
+
+def _finish_publication(root: Path, creator: CompanionCreator, self_id: str,
+                        continuity_id: str, *, recovered: bool) -> dict[str, Any]:
+    journal = _journal_path(root)
+    payload = json.loads(journal.read_text(encoding="utf-8"))
+    document = payload["document"]
+    approved = creator.approve(document)
+    published = admit_life(root, self_id=self_id,
+                           continuity_id=continuity_id)
+    journal.unlink(missing_ok=True)
+    return {
+        "ok": True,
+        "recovered": recovered,
+        "idempotent": bool(approved.get("idempotent"))
+        and bool(published.get("idempotent")),
+        "life_version": int(document["life_version"]),
+        "approved": approved,
+        "published": published,
+    }
+
+
+def recover_publication(root: Path, *, self_id: str = "lia",
+                        continuity_id: str = "main") -> dict[str, Any]:
+    """Complete a publication interrupted between approval and admission."""
+    root = Path(root)
+    journal = _journal_path(root)
+    if not journal.exists():
+        return {"ok": True, "recovered": False}
+    creator = CompanionCreator(root, self_id=self_id,
+                               continuity_id=continuity_id)
+    return _finish_publication(root, creator, self_id, continuity_id,
+                               recovered=True)

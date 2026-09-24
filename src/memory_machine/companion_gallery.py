@@ -17,7 +17,7 @@ from typing import Any
 
 from .companion_creator import CompanionCreator
 from .companion_life import time_sort_key, validate_life
-from .companion_life_admission import admit_life
+from .companion_life_admission import publish_life
 from .companion_memory import CompanionMemory
 from .companion_session import CompanionSession
 
@@ -154,11 +154,11 @@ def retire_event(root: Path, event_id: str, *, self_id: str = "lia",
             event["approved_by"] = ""
     updated["approved_at"] = datetime.now(timezone.utc).isoformat()
     updated["approved_by"] = approved_by
-    creator.approve(updated)
-    published = admit_life(root, self_id=self_id,
-                           continuity_id=continuity_id)
+    result = publish_life(root, updated, self_id=self_id,
+                          continuity_id=continuity_id)
     return {"ok": True, "retired": event_id,
-            "life_version": updated["life_version"], "published": published}
+            "life_version": updated["life_version"],
+            "published": result["published"]}
 
 
 def deletion_impact(root: Path, event_id: str, *, self_id: str = "lia",
@@ -219,9 +219,11 @@ def copy_relationship(base: Path, person_id: str, source_character: str,
         dst_path.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(src_path, dst_path)
     published: dict[str, Any] | None = None
-    if publish and (target / "synthetic_life" / "current.json").exists():
-        published = admit_life(target, self_id=self_id,
-                               continuity_id=continuity)
+    life_current = target / "synthetic_life" / "current.json"
+    if publish and life_current.exists():
+        document = json.loads(life_current.read_text(encoding="utf-8"))
+        published = publish_life(target, document, self_id=self_id,
+                                 continuity_id=continuity)["published"]
     return {"ok": True, "root": str(target), "published": published}
 
 
@@ -247,7 +249,5 @@ def create_from_template(base: Path, person_id: str, character_id: str,
     life = json.loads(life_path.read_text(encoding="utf-8"))
     life["approved_at"] = datetime.now(timezone.utc).isoformat()
     life["approved_by"] = approved_by
-    creator = CompanionCreator(target, self_id=slug, continuity_id=continuity)
-    creator.approve(life)
-    published = admit_life(target, self_id=slug, continuity_id=continuity)
-    return {"ok": True, "root": str(target), "published": published}
+    result = publish_life(target, life, self_id=slug, continuity_id=continuity)
+    return {"ok": True, "root": str(target), "published": result["published"]}

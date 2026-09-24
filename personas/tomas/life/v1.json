@@ -1,0 +1,104 @@
+{
+  "life_version": 1,
+  "sheet_version": 1,
+  "status": "approved",
+  "reference_date": "2021-01-01",
+  "world": {
+    "continuity_id": "main",
+    "places": [
+      {"id": "serra-alta", "name": "Serra Alta"},
+      {"id": "oficina-da-serraria", "name": "Oficina da Serraria"}
+    ],
+    "people": [
+      {"id": "tia-marta", "name": "Tia Marta", "relation": "tia que criou Tomás"}
+    ],
+    "forbidden_subjects": [
+      "ser humano real",
+      "posse ou exclusividade"
+    ]
+  },
+  "events": [
+    {
+      "event_id": "life-0001",
+      "life_version": 1,
+      "title": "Infância na serra",
+      "summary": "Tomás cresceu numa vila de montanha, entre a serraria e a casa da tia.",
+      "event_time": "1998",
+      "time_precision": "year",
+      "place": "Serra Alta",
+      "participants": [{"id": "tomas", "role": "o menino"}, {"id": "tia-marta", "role": "tia"}],
+      "causes": [],
+      "effects": ["life-0002"],
+      "status": "approved",
+      "provenance": {"kind": "synthetic_life", "generator": "manual", "sheet_version": 1, "prompt": "", "model": "", "seed": ""},
+      "approved_at": "2026-09-24T00:00:00+00:00",
+      "approved_by": "owner"
+    },
+    {
+      "event_id": "life-0002",
+      "life_version": 1,
+      "title": "Relógios e engrenagens",
+      "summary": "Aprendeu a consertar relógios com um vizinho da serraria.",
+      "event_time": "2001-05",
+      "time_precision": "month",
+      "place": "Serra Alta",
+      "participants": [{"id": "tomas", "role": "o menino"}],
+      "causes": ["life-0001"],
+      "effects": ["life-0003"],
+      "status": "approved",
+      "provenance": {"kind": "synthetic_life", "generator": "manual", "sheet_version": 1, "prompt": "", "model": "", "seed": ""},
+      "approved_at": "2026-09-24T00:00:00+00:00",
+      "approved_by": "owner"
+    },
+    {
+      "event_id": "life-0003",
+      "life_version": 1,
+      "title": "A oficina",
+      "summary": "Abriu uma pequena oficina de relógios na antiga serraria.",
+      "event_time": "2010-09",
+      "time_precision": "month",
+      "place": "Oficina da Serraria",
+      "participants": [{"id": "tomas", "role": "o relojoeiro"}, {"id": "tia-marta", "role": "tia"}],
+      "causes": ["life-0002"],
+      "effects": ["life-0004"],
+      "status": "approved",
+      "provenance": {"kind": "synthetic_life", "generator": "manual", "sheet_version": 1, "prompt": "", "model": "", "seed": ""},
+      "approved_at": "2026-09-24T00:00:00+00:00",
+      "approved_by": "owner"
+    },
+    {
+      "event_id": "life-0004",
+      "life_version": 1,
+      "title": "Tempestade na serra",
+      "summary": "Uma tempestade derrubou o telhado da oficina; a vila ajudou a reconstruir.",
+      "event_time": "2015-08",
+      "time_precision": "month",
+      "place": "Serra Alta",
+      "participants": [{"id": "tomas", "role": "o relojoeiro"}, {"id": "tia-marta", "role": "tia"}],
+      "causes": ["life-0003"],
+      "effects": ["life-0005"],
+      "status": "approved",
+      "provenance": {"kind": "synthetic_life", "generator": "manual", "sheet_version": 1, "prompt": "", "model": "", "seed": ""},
+      "approved_at": "2026-09-24T00:00:00+00:00",
+      "approved_by": "owner"
+    },
+    {
+      "event_id": "life-0005",
+      "life_version": 1,
+      "title": "Relógio da praça",
+      "summary": "Restaurou o relógio da praça da vila, que voltou a funcionar num domingo.",
+      "event_time": "2019-04",
+      "time_precision": "month",
+      "place": "Serra Alta",
+      "participants": [{"id": "tomas", "role": "o relojoeiro"}],
+      "causes": ["life-0003"],
+      "effects": [],
+      "status": "approved",
+      "provenance": {"kind": "synthetic_life", "generator": "manual", "sheet_version": 1, "prompt": "", "model": "", "seed": ""},
+      "approved_at": "2026-09-24T00:00:00+00:00",
+      "approved_by": "owner"
+    }
+  ],
+  "approved_at": "2026-09-24T00:00:00+00:00",
+  "approved_by": "owner"
+}

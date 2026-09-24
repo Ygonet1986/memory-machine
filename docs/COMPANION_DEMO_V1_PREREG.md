@@ -67,3 +67,43 @@ the frozen-before-results history.
 ## Execution record
 
 _(filled after the single run)_
+
+## Execution record (2026-09-24) — single run
+
+Model `deepseek-v4-flash`; **18 calls** (budget 40); one run; no re-run and no
+re-fit after seeing results.
+
+| gate | result |
+|---|---|
+| G1 fiction | true (vacuously — see G7) |
+| G2 deletion | **false** |
+| G3 correction | **false** |
+| G4 isolation | **false** |
+| G5 trailer | true |
+| G6 budget | true |
+| G7 extraction | **false** |
+| `all_pass` | **false** |
+
+Findings (data vs operational check):
+
+1. **Extraction**: t1 wrote `person_report` M0007; t6 wrote **no `story`** (the
+   model proposed none), so G7 failed and G1 passed vacuously — the vacuity
+   guard did its job.
+2. **Correction worked in the data** (M0007 `superseded`, M0016 `active`; t5
+   cited M0016) but **G3 failed operationally**: t5's reply mentions "irmã"
+   while explaining the change ("antes era para sua irmã"); the forbid-token
+   check treats any mention as failure.
+3. **Deletion is chain-scoped, not semantic**: the cascade removed exactly the
+   corrected chain (M0016); M0015 (a sibling report created in t4) kept the
+   dedication alive and t8 recalled it.
+4. **Isolation is structurally clean** (no cross-root ids in any `provided`
+   or `used`), but G4 failed operationally because the reply names
+   "astronomia" while denying knowledge ("não tenho nenhuma memória sobre
+   astronomia").
+5. G5 (trailer hygiene) and G6 (18 <= 40 calls) passed in every turn.
+
+Recorded consequences (not applied here): forbid-token checks need
+disambiguation for denial/acknowledgement; deletion of a fact needs
+semantic-sibling handling or explicit bulk delete; story extraction needs a
+dedicated trigger or a scripted story proposal. Any follow-up is a **new
+prereg** (v2); this script is not re-run as confirmation.

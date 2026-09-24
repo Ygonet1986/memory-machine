@@ -148,3 +148,12 @@ evidence of general superiority. Pilot and packaging follow F5.
 Each PR must pass the repository's required checks before merge. The frozen
 shadow run is checked only under its own stopping rule; Companion results
 cannot be used to promote an admission policy.
+
+## 7. Synthetic life (C-track)
+
+`docs/COMPANION_LIFE_V1_CONTRACT.md` extends this contract: approved
+synthetic-life events are `story` records with
+`origin.kind="synthetic_life_event"`, written through a separate, explicitly
+approved admission path (never by forging conversation turns), versioned per
+continuity and labeled apart from improvised fiction. Until that contract's
+code lands, the behavior described in this document is unchanged.

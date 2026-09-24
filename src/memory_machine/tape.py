@@ -9,7 +9,9 @@ expressed by a later record referencing the old one, never by mutating it.
 from __future__ import annotations
 
 import json
+import os
 import re
+import tempfile
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
@@ -63,6 +65,7 @@ class MemoryRecord:
     origin: dict[str, Any] = field(default_factory=dict)
     author: str = ""
     event_time: str = ""
+    supersedes: str = ""
 
     def to_dict(self) -> dict[str, Any]:
         d: dict[str, Any] = {
@@ -89,6 +92,8 @@ class MemoryRecord:
             d["author"] = self.author
         if self.event_time:
             d["event_time"] = self.event_time
+        if self.supersedes:
+            d["supersedes"] = self.supersedes
         return d
 
     @classmethod
@@ -115,6 +120,7 @@ class MemoryRecord:
             origin=dict(data.get("origin") or {}),
             author=str(data.get("author") or ""),
             event_time=str(data.get("event_time") or ""),
+            supersedes=str(data.get("supersedes") or ""),
         )
 
     def text(self) -> str:
@@ -188,6 +194,59 @@ class Tape:
             "".join(json.dumps(r.to_dict(), ensure_ascii=False) + "\n" for r in records),
             encoding="utf-8",
         )
+
+    def _rewrite_atomic(self, records: list[MemoryRecord]) -> None:
+        """Replace the tape in one step for Companion administrative operations."""
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        temp_path: Path | None = None
+        try:
+            with tempfile.NamedTemporaryFile(
+                mode="w", encoding="utf-8", dir=self.path.parent,
+                prefix=f".{self.path.name}.", delete=False,
+            ) as fh:
+                temp_path = Path(fh.name)
+                for record in records:
+                    fh.write(json.dumps(record.to_dict(), ensure_ascii=False) + "\n")
+                fh.flush()
+                os.fsync(fh.fileno())
+            os.replace(temp_path, self.path)
+        finally:
+            if temp_path is not None:
+                temp_path.unlink(missing_ok=True)
+
+    def supersede(self, memory_id: str, replacement: MemoryRecord) -> tuple[MemoryRecord, list[str]]:
+        """Add a correction and deactivate its source and derived descendants.
+
+        This explicit operation is called by Companion; legacy append/status
+        operations retain their existing behavior.
+        """
+        records = self._read_all()
+        previous = next((r for r in records if r.id == memory_id), None)
+        if previous is None or previous.status not in {"active", "archived"}:
+            raise ValueError(f"no eligible memory to supersede: {memory_id}")
+        if replacement.id or replacement.supersedes or memory_id in replacement.derived_from:
+            raise ValueError("replacement must be a fresh record with a separate supersession edge")
+        if replacement.type != previous.type:
+            raise ValueError("a correction preserves the record kind")
+        replacement.id = format_id(self.max_id_num() + 1)
+        replacement.supersedes = memory_id
+        if not replacement.created_at:
+            replacement.created_at = datetime.now(timezone.utc).isoformat()
+        for view in default_views(replacement):
+            if view not in replacement.views:
+                replacement.views.append(view)
+        assert_clean(replacement.text())
+        affected = {memory_id}
+        while True:
+            new = {r.id for r in records if affected.intersection(r.derived_from)}
+            if new.issubset(affected):
+                break
+            affected.update(new)
+        for record in records:
+            if record.id in affected:
+                record.status = "superseded"
+        self._rewrite_atomic([*records, replacement])
+        return replacement, sorted(affected)
 
     def delete(self, memory_id: str) -> bool:
         """Remove a record by id. Returns True if it existed."""

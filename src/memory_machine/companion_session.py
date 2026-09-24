@@ -6,7 +6,7 @@ import json
 import re
 import shutil
 import tempfile
-from pathlib import Path
+from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Callable, TypeVar
 
 from .companion_memory import CompanionMemory
@@ -55,9 +55,13 @@ def _check_local_files(root: Path) -> None:
         configured = config.get(key)
         if configured is None:
             continue
-        if not isinstance(configured, str) or Path(configured).is_absolute():
+        if not isinstance(configured, str):
             raise ValueError(f"Companion {key} must stay inside its root")
-        if ".." in Path(configured).parts:
+        posix_path = PurePosixPath(configured)
+        windows_path = PureWindowsPath(configured)
+        if posix_path.root or windows_path.root or windows_path.drive:
+            raise ValueError(f"Companion {key} must stay inside its root")
+        if ".." in posix_path.parts or ".." in windows_path.parts:
             raise ValueError(f"Companion {key} must stay inside its root")
 
 

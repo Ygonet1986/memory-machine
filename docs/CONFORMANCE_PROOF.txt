@@ -108,7 +108,11 @@ tests/test_companion_save_off.py::test_root_rejects_unsafe_ids[../other]
 tests/test_companion_save_off.py::test_root_rejects_unsafe_ids[a/b]
 tests/test_companion_save_off.py::test_root_rejects_unsafe_ids[.]
 tests/test_companion_save_off.py::test_root_rejects_unsafe_ids[]
-tests/test_companion_save_off.py::test_save_off_rejects_root_symlinks_and_external_config
+tests/test_companion_save_off.py::test_save_off_rejects_external_config[/tmp/outside]
+tests/test_companion_save_off.py::test_save_off_rejects_external_config[C:\\external\\tape.jsonl]
+tests/test_companion_save_off.py::test_save_off_rejects_external_config[../outside]
+tests/test_companion_save_off.py::test_save_off_rejects_external_config[..\\outside]
+tests/test_companion_save_off.py::test_save_off_rejects_root_symlinks
 tests/test_companion_save_off.py::test_root_rejects_symlink_swapped_in_after_session_created
 tests/test_companion_supersede.py::test_supersede_excludes_old_and_derived_from_search_and_payload
 tests/test_companion_supersede.py::test_supersede_rejects_repeat_and_type_change
@@ -615,4 +619,4 @@ tests/test_whiteboard.py::test_size_and_consolidation_trigger
 tests/test_whiteboard.py::test_roundtrip
 tests/test_whiteboard.py::test_render
 
-616 tests collected in 0.19s
+620 tests collected in 0.21s

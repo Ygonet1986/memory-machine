@@ -72,13 +72,20 @@ def test_root_rejects_unsafe_ids(tmp_path, person_id):
         CompanionSession(tmp_path, person_id, "lia", "main")
 
 
-def test_save_off_rejects_root_symlinks_and_external_config(tmp_path):
+@pytest.mark.parametrize("external", [
+    "/tmp/outside", "C:\\external\\tape.jsonl", "../outside", "..\\outside",
+])
+def test_save_off_rejects_external_config(tmp_path, external):
     session = CompanionSession(tmp_path, "person-d", "lia", "main")
     session.root.mkdir(parents=True)
-    (session.root / "config.json").write_text(json.dumps({"tape_path": "/tmp/outside"}))
+    (session.root / "config.json").write_text(json.dumps({"tape_path": external}))
     with pytest.raises(ValueError, match="inside its root"):
         session.run_turn(lambda store: None, save=False)
-    (session.root / "config.json").unlink()
+
+
+def test_save_off_rejects_root_symlinks(tmp_path):
+    session = CompanionSession(tmp_path, "person-d", "lia", "main")
+    session.root.mkdir(parents=True)
     (session.root / "linked").symlink_to(tmp_path, target_is_directory=True)
     with pytest.raises(ValueError, match="symlink"):
         session.run_turn(lambda store: None, save=False)

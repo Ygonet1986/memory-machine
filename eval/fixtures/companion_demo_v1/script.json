@@ -1,0 +1,97 @@
+{
+  "persona": "personas/lia/v1.json",
+  "model": "deepseek-v4-flash",
+  "budget_calls": 40,
+  "steps": [
+    {
+      "kind": "turn",
+      "id": "t1",
+      "session": 1,
+      "message": "Estou compondo uma música para minha irmã.",
+      "save": true,
+      "expect_record_types": ["person_report"]
+    },
+    {
+      "kind": "turn",
+      "id": "t2",
+      "session": 1,
+      "message": "A melodia começa devagar e depois abre num refrão.",
+      "save": true
+    },
+    {
+      "kind": "turn",
+      "id": "t3",
+      "session": 2,
+      "message": "Você lembra o que eu estava compondo?",
+      "save": true,
+      "must_contain": ["música"],
+      "expect_used": true
+    },
+    {
+      "kind": "turn",
+      "id": "t4",
+      "session": 2,
+      "message": "Na verdade, agora a música vai ser para minha mãe. Mudei a dedicatória.",
+      "save": true
+    },
+    {
+      "kind": "correct",
+      "id": "c1",
+      "after": "t4",
+      "target": "report_from:t1",
+      "summary": "A música agora é para a mãe; a dedicatória mudou."
+    },
+    {
+      "kind": "turn",
+      "id": "t5",
+      "session": 3,
+      "message": "Para quem é a música que eu estou compondo?",
+      "save": true,
+      "must_contain": ["mãe"],
+      "must_not_contain": ["irmã"],
+      "expect_used": true
+    },
+    {
+      "kind": "turn",
+      "id": "t6",
+      "session": 3,
+      "message": "Vamos inventar uma aventura: encontramos uma biblioteca escondida numa ilha.",
+      "save": true,
+      "expect_record_types": ["story"]
+    },
+    {
+      "kind": "turn",
+      "id": "t7",
+      "session": 3,
+      "message": "O que você sabe sobre o meu fim de semana?",
+      "save": true,
+      "must_not_contain": ["biblioteca", "ilha"]
+    },
+    {
+      "kind": "delete",
+      "id": "d1",
+      "after": "t7",
+      "target": "corrected_from:c1"
+    },
+    {
+      "kind": "turn",
+      "id": "t8",
+      "session": 4,
+      "message": "O que você lembra sobre a dedicatória da música?",
+      "save": true,
+      "must_not_contain": ["mãe", "irmã"]
+    },
+    {
+      "kind": "isolation",
+      "id": "i1",
+      "other": {
+        "person": "demo-outro",
+        "character": "lia",
+        "continuity": "main",
+        "report": "gosta de astronomia e observa estrelas"
+      },
+      "message": "Eu gosto de astronomia?",
+      "must_not_contain": ["astronomia"]
+    }
+  ]
+}

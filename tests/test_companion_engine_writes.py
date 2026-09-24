@@ -110,3 +110,54 @@ def test_unknown_type_rejected(tmp_path):
     result = CompanionEngine(session, client).reply(MESSAGE, save=True)
     assert result["violations"][0]["kind"] == "rejected_proposal"
     assert result["saved"]["records"] == []
+
+
+def test_store_request_writes_story(tmp_path):
+    session, _ids = _setup(tmp_path)
+    message = ("Vamos inventar uma aventura: uma caverna com um mapa. "
+               "Guarde isso como nossa história.")
+    client = FakeClient(_handler(_reply([])))
+    result = CompanionEngine(session, client).reply(message, save=True)
+
+    saved = result["saved"]
+    tape = CompanionMemory(session.root).tape
+    stories = [record for record in tape.read()
+               if record.type == "story"
+               and record.derived_from == [saved["question_slot"]]]
+    assert len(stories) == 1
+    story = stories[0]
+    assert (story.origin or {}).get("kind") == "story_event"
+    assert story.origin["event_id"] == f"conv-{saved['turn_id']}"
+    assert "Guarde isso como nossa história" in story.origin["quote"]
+    assert saved["records"] == [story.id]
+
+
+def test_no_store_request_no_story(tmp_path):
+    session, _ids = _setup(tmp_path)
+    client = FakeClient(_handler(_reply([])))
+    result = CompanionEngine(session, client).reply(MESSAGE, save=True)
+    tape = CompanionMemory(session.root).tape
+    question_slot = result["saved"]["question_slot"]
+    assert not [record for record in tape.read()
+                if record.type == "story"
+                and record.derived_from == [question_slot]]
+    assert result["saved"]["records"] == []
+
+
+def test_trailer_story_takes_precedence_over_trigger(tmp_path):
+    session, _ids = _setup(tmp_path)
+    proposal = {"type": "story", "summary": "caverna guardada",
+                "quote": "Guarde isso como nossa história.", "event_id": "e9",
+                "source": "person"}
+    message = ("Vamos inventar uma caverna. "
+               "Guarde isso como nossa história.")
+    client = FakeClient(_handler(_reply([proposal])))
+    result = CompanionEngine(session, client).reply(message, save=True)
+    tape = CompanionMemory(session.root).tape
+    question_slot = result["saved"]["question_slot"]
+    stories = [record for record in tape.read()
+               if record.type == "story"
+               and record.derived_from == [question_slot]]
+    assert len(stories) == 1
+    assert stories[0].origin["event_id"] == "e9"
+    assert result["saved"]["records"] == [stories[0].id]

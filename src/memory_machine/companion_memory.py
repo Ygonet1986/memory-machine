@@ -86,6 +86,10 @@ class CompanionMemory:
             self._invalidate_derived_state()
         return removed
 
+    def invalidate_derived_state(self) -> None:
+        """Drop caches/agents/graph state derived from the tape (public)."""
+        self._invalidate_derived_state()
+
     def _invalidate_derived_state(self, new_id: str = "") -> None:
         for name in ("recall_cache.json", "whiteboard.json", "context.json",
                      "session.json"):

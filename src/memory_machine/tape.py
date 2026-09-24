@@ -15,7 +15,7 @@ import tempfile
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterable
 
 from .secrets import assert_clean
 
@@ -294,6 +294,46 @@ class Tape:
         if removed:
             self._rewrite(kept)
         return removed
+
+    def publish_batch(
+        self,
+        records: list[MemoryRecord],
+        *,
+        supersede: Iterable[str] = (),
+    ) -> list[MemoryRecord]:
+        """Append several new records and deactivate others in one rewrite.
+
+        Companion-facing (synthetic-life admission): IDs are assigned past the
+        current maximum, every record passes the secret gate, and a single
+        atomic rewrite keeps the tape consistent even for a whole version.
+        Unknown ``supersede`` ids raise before anything is written.
+        """
+        existing = self._read_all()
+        by_id = {record.id: record for record in existing}
+        supersede_ids = list(dict.fromkeys(supersede))
+        for memory_id in supersede_ids:
+            if memory_id not in by_id:
+                raise ValueError(f"unknown id to supersede: {memory_id}")
+        if not records and not supersede_ids:
+            return []
+        prepared: list[MemoryRecord] = []
+        next_num = self.max_id_num() + 1
+        for record in records:
+            if record.id:
+                raise ValueError("batch records must be fresh (no id)")
+            record.id = format_id(next_num)
+            next_num += 1
+            if not record.created_at:
+                record.created_at = datetime.now(timezone.utc).isoformat()
+            for view in default_views(record):
+                if view not in record.views:
+                    record.views.append(view)
+            assert_clean(record.text())
+            prepared.append(record)
+        for memory_id in supersede_ids:
+            by_id[memory_id].status = "superseded"
+        self._rewrite_atomic([*existing, *prepared])
+        return prepared
 
     def delete_cascade(self, memory_id: str) -> list[str]:
         """Erase a record, source turns, derivatives and dependent corrections.

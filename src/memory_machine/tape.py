@@ -60,6 +60,9 @@ class MemoryRecord:
     source_span: tuple[int, int] = ()
     source_document: str = ""
     trilepsia: dict[str, Any] = field(default_factory=dict)
+    origin: dict[str, Any] = field(default_factory=dict)
+    author: str = ""
+    event_time: str = ""
 
     def to_dict(self) -> dict[str, Any]:
         d: dict[str, Any] = {
@@ -80,6 +83,12 @@ class MemoryRecord:
             d["source_span"] = [int(self.source_span[0]), int(self.source_span[1])]
         if self.trilepsia:
             d["trilepsia"] = self.trilepsia
+        if self.origin:
+            d["origin"] = self.origin
+        if self.author:
+            d["author"] = self.author
+        if self.event_time:
+            d["event_time"] = self.event_time
         return d
 
     @classmethod
@@ -103,6 +112,9 @@ class MemoryRecord:
             source_span=span,
             source_document=str(data.get("source_document") or ""),
             trilepsia=dict(data.get("trilepsia") or {}),
+            origin=dict(data.get("origin") or {}),
+            author=str(data.get("author") or ""),
+            event_time=str(data.get("event_time") or ""),
         )
 
     def text(self) -> str:

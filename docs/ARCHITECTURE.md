@@ -22,7 +22,7 @@ much, too late, or the wrong remembrance.
 | Layer | Artifact | Role |
 |---|---|---|
 | Tape | `tape.jsonl` (per root) | Append-only truth: stable ids (`M0001`…), status (`active/archived/superseded`), types, provenance (`source`, `derived_from`, `supersedes`, optional `origin`/`author`/`event_time`), rebuildable views. |
-| Groups & agents | `manifest.json` | Contiguous groups; one memory agent per group; new groups as the tape grows. |
+| Groups & agents | `manifest.json` | Contiguous groups; one memory agent per group; new groups as the tape grows; each agent keeps a digest, a checklist and a dynamic `understanding` of its memories, refreshed every sweep. |
 | Whiteboard | `whiteboard.json` | Bounded working memory: subject, understanding (metacognition), checklist, annotations; attention state. |
 | Views / graph | `views`, `graph/` | Rebuildable projections over the tape (`time/…`, `type/…`, `source/…`, `topic/…`); never a factual source themselves. |
 | Retrieval / payload / delivery | `retrieval.py`, `payload.py`, `context.py` | BM25 default (optional embeddings), evidence payload under a character budget, delivery windows. |
@@ -132,8 +132,10 @@ snippet), agent index/map and gap-recall (all lab-only with declared scope).
 
 ## 8. Defaults, flags and invariants
 
-- Off by default: `evidence_payload_window`, `graph_enabled`, router
-  (`opt-in` after external benchmarks: agents > BM25 > router).
+- Off by default: `evidence_payload_window`, `graph_enabled`,
+  `agent_history_messages` (the agents' conversation window; 0 = prompts
+  byte-identical), router (`opt-in` after external benchmarks: agents > BM25
+  > router).
 - Opt-in env flags: `MEMORY_MACHINE_ADMISSION_SHADOW` (window), 
   `MEMORY_MACHINE_TURN_SLOTS` (paired slots; the owner has it set and an
   opencode restart is pending for it to take effect).

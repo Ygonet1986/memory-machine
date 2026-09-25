@@ -45,6 +45,28 @@ def _find_by_source(tape: Tape, source: str) -> MemoryRecord | None:
     return None
 
 
+def render_recent_turns(tape: Tape, limit: int = 10,
+                        max_chars: int = 400) -> str:
+    """The last ``limit`` turn slots as a short conversation block.
+
+    Off by default everywhere (the caller decides); used to let memory agents
+    follow the conversation when ``agent_history_messages`` is enabled.
+    """
+    if limit <= 0:
+        return ""
+    slots = [record for record in tape.read()
+             if record.type in SLOT_TYPES]
+    recent = slots[-limit:]
+    lines: list[str] = []
+    for record in recent:
+        who = "Pessoa" if record.type == "question" else "Assistente"
+        text = " ".join(record.why.split())
+        if len(text) > max_chars:
+            text = text[: max_chars - 1] + "…"
+        lines.append(f"{who}: {text}")
+    return "\n".join(lines)
+
+
 def add_turn_slot(
     tape: Tape,
     manifest: Manifest,

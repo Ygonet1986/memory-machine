@@ -348,7 +348,17 @@ class Machine:
             temperature=temperature,
             max_workers=max_workers,
             include_checklist=include_checklist,
+            history=self._agent_history(),
         )
+
+    def _agent_history(self) -> str:
+        """Opt-in conversation window for the agents (off by default)."""
+        limit = int(getattr(self.config, "agent_history_messages", 0) or 0)
+        if limit <= 0:
+            return ""
+        from .turns import render_recent_turns
+
+        return render_recent_turns(self.tape, limit)
 
     def _merge_by_dimension(self, run: RecallRun) -> list[Any]:
         """Merge annotations into the board of the dimension that produced them.
@@ -610,6 +620,7 @@ class Machine:
                 views=plan.selected_views,
                 per_dimension=cfg.whiteboard_mode == "dimension",
                 temperature=temperature, max_workers=max_workers,
+                history=self._agent_history(),
             )
         else:
             ids, mode = self._plan_ids(plan)
@@ -650,6 +661,7 @@ class Machine:
                     views=expanded.selected_views,
                     per_dimension=cfg.whiteboard_mode == "dimension",
                     temperature=temperature, max_workers=max_workers,
+                    history=self._agent_history(),
                 )
             else:
                 ids2, mode2 = self._plan_ids(expanded)

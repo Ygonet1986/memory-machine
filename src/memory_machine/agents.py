@@ -179,8 +179,11 @@ def agent_system_prompt(
     )
 
 
-def agent_user_prompt(whiteboard: Whiteboard) -> str:
-    return "## Whiteboard\n\n" + whiteboard.render(include_annotations=False)
+def agent_user_prompt(whiteboard: Whiteboard, history: str = "") -> str:
+    prompt = "## Whiteboard\n\n" + whiteboard.render(include_annotations=False)
+    if history:
+        prompt += "\n\n## Conversa recente\n\n" + history
+    return prompt
 
 
 def _annotations_from_obj(obj: dict[str, Any], agent_id: str) -> list[Annotation]:
@@ -316,10 +319,11 @@ def _run_view_one(
     view_agent: Any,
     *,
     temperature: float,
+    history: str = "",
 ) -> tuple[list[Annotation], CoverageSignal]:
     messages = [
         {"role": "system", "content": view_agent_prompt(view, records, view_agent)},
-        {"role": "user", "content": agent_user_prompt(board)},
+        {"role": "user", "content": agent_user_prompt(board, history)},
     ]
     content = client.complete(messages, temperature=temperature)
     obj = extract_json_object(content)
@@ -345,6 +349,7 @@ def run_view_agents(
     temperature: float = 0.0,
     max_workers: int | None = None,
     on_error: str = "skip",
+    history: str = "",
 ) -> RecallRun:
     """Dispatch one perspective agent per selected view, in parallel.
 
@@ -375,7 +380,8 @@ def run_view_agents(
     ) -> tuple[list[Annotation], CoverageSignal]:
         view, records, view_agent, board = item
         return _run_view_one(
-            view, records, board, client, view_agent, temperature=temperature
+            view, records, board, client, view_agent,
+            temperature=temperature, history=history,
         )
 
     run = RecallRun()
@@ -419,6 +425,7 @@ def _run_one(
     *,
     temperature: float,
     include_checklist: bool = True,
+    history: str = "",
 ) -> tuple[list[Annotation], CoverageSignal]:
     messages = [
         {
@@ -427,7 +434,7 @@ def _run_one(
                 agent, group, records, include_checklist=include_checklist
             ),
         },
-        {"role": "user", "content": agent_user_prompt(whiteboard)},
+        {"role": "user", "content": agent_user_prompt(whiteboard, history)},
     ]
     content = client.complete(messages, temperature=temperature)
     obj = extract_json_object(content)
@@ -458,6 +465,7 @@ def run_agents(
     max_workers: int | None = None,
     on_error: str = "skip",
     include_checklist: bool = True,
+    history: str = "",
 ) -> RecallRun:
     """Dispatch one LLM call per (group, agent) pair, in parallel.
 
@@ -499,6 +507,7 @@ def run_agents(
             client,
             temperature=temperature,
             include_checklist=include_checklist,
+            history=history,
         )
 
     run = RecallRun()

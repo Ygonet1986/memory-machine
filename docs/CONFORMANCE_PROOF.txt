@@ -21,6 +21,12 @@ tests/test_admission_synthetic_v3.py::test_v3_deterministic_and_recorded_verdict
 tests/test_admission_synthetic_v3.py::test_v3_differs_from_v2_only_by_removal_and_cap
 tests/test_admission_synthetic_v4.py::test_v4_deterministic_and_all_gates_pass
 tests/test_admission_synthetic_v4.py::test_v4_equals_v3_without_an_eligible_correction
+tests/test_agent_history.py::test_config_defaults_off_and_clamps
+tests/test_agent_history.py::test_render_recent_turns_keeps_the_last_and_truncates
+tests/test_agent_history.py::test_agent_user_prompt_default_is_byte_identical
+tests/test_agent_history.py::test_run_agents_receives_history
+tests/test_agent_history.py::test_no_history_no_section
+tests/test_agent_history.py::test_machine_history_is_off_by_default_and_on_when_configured
 tests/test_agent_index_v1.py::test_fixture_counts_locked
 tests/test_agent_index_v1.py::test_recorded_verdicts_and_scope_limit
 tests/test_agent_map_v1.py::test_recorded_verdicts
@@ -727,4 +733,4 @@ tests/test_whiteboard.py::test_size_and_consolidation_trigger
 tests/test_whiteboard.py::test_roundtrip
 tests/test_whiteboard.py::test_render
 
-728 tests collected in 0.10s
+734 tests collected in 0.11s

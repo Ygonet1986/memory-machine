@@ -12,6 +12,7 @@ import json
 import re
 from typing import Any
 
+from .llm import extract_json_object
 from .tape import MemoryRecord
 from .whiteboard import Whiteboard
 
@@ -82,6 +83,57 @@ If nothing durable was produced, omit the JSON entirely. Never include API \
 keys or secrets."""
 
 
+OBSERVER_SYSTEM = """\
+You are the conversation observer of a long-running assistant. You never
+answer the user. You keep the conversation's understanding: what is being
+worked on, what was decided, open threads, corrections and what the next
+answer must respect. Keep the understanding compact (<= 1200 characters) and
+give short, concrete guidance for the answerer.
+
+Return ONLY a JSON object:
+{"understanding": "<compact state of the conversation>", "guidance": ["...", "..."]}
+"""
+
+
+def observer_pass(client: Any, whiteboard: Whiteboard, conversation: str,
+                  task: str, previous_understanding: str = "", *,
+                  temperature: float = 0.0) -> tuple[str, list[str]]:
+    """One observer call: refresh the conversation understanding + guidance."""
+    prompt = (
+        "[Understanding atual]\n" + (previous_understanding or "(vazio)") +
+        "\n\n[Conversa]\n" + (conversation or "(vazia)") +
+        "\n\n[Quadro]\n" + whiteboard.render(include_annotations=False) +
+        "\n\n[Tarefa]\n" + task)
+    try:
+        content = _complete(client, [
+            {"role": "system", "content": OBSERVER_SYSTEM},
+            {"role": "user", "content": prompt},
+        ], temperature)
+    except Exception:
+        return previous_understanding, []
+    obj = extract_json_object(content)
+    understanding = str(obj.get("understanding") or "").strip()
+    raw_guidance = obj.get("guidance")
+    guidance: list[str] = []
+    if isinstance(raw_guidance, list):
+        guidance = [str(item).strip() for item in raw_guidance
+                    if str(item).strip()]
+    elif isinstance(raw_guidance, str) and raw_guidance.strip():
+        guidance = [raw_guidance.strip()]
+    if not understanding:
+        understanding = previous_understanding
+    return understanding[:1200], guidance[:8]
+
+
+def _complete(client: Any, messages: list[dict[str, str]],
+              temperature: float) -> str:
+    cwr = getattr(client, "complete_with_reasoning", None)
+    if cwr is not None:
+        content, _reasoning = cwr(messages, temperature=temperature)
+        return content
+    return client.complete(messages, temperature=temperature)
+
+
 def main_user_prompt(
     whiteboard: Whiteboard,
     task: str,
@@ -91,10 +143,13 @@ def main_user_prompt(
     evidence_label: str = "External context",
     temporal_instruction: bool = False,
     whiteboard_budget: int = 0,
+    observer_guidance: str = "",
 ) -> str:
     parts = []
     if history:
         parts.append(history)
+    if observer_guidance:
+        parts.append("## Observador da conversa\n\n" + observer_guidance)
     board = whiteboard.render()
     if whiteboard_budget > 0 and len(board) > whiteboard_budget:
         board = board[: max(0, whiteboard_budget - 14)] + "\n… (trimmed)"
@@ -154,6 +209,7 @@ def run_main_chatbot(
     temperature: float = 0.0,
     on_token: Any = None,
     whiteboard_budget: int = 0,
+    observer_guidance: str = "",
 ) -> tuple[str, list[MemoryRecord], str]:
     """Run the main chatbot. Returns ``(reply, durable_memories, reasoning)``.
 
@@ -178,6 +234,7 @@ def run_main_chatbot(
                 ),
                 temporal_instruction=temporal_instruction,
                 whiteboard_budget=whiteboard_budget,
+                observer_guidance=observer_guidance,
             ),
         },
     ]

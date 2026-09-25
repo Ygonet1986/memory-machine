@@ -50,7 +50,13 @@ much, too late, or the wrong remembrance.
 
 **Project chat (CLI/app).** Agents read the whiteboard in parallel → reminders
 (annotations) → payload + whiteboard go to the chatbot → durable memories
-appended to the tape. The chatbot's context follows one budget rule
+appended to the tape. **Two agents serve the conversation**
+(`answerer_observer`, default on): a conversation **observer** watches the
+dialogue, keeps a compact `understanding` of it (persisted in
+`context.json`, refreshed every turn, compacted by the existing
+context-consolidation on overflow) and hands short **guidance** to the
+answerer; both "discuss" the next answer through that guidance before the
+single answerer call writes the reply. The chatbot's context follows one budget rule
 (`answerer_history_messages`, default 10): the last ten turns (plus the
 consolidated summary, each side capped) get priority inside
 `whiteboard_budget`; the **whole whiteboard** fills the remainder and is
@@ -141,7 +147,8 @@ snippet), agent index/map and gap-recall (all lab-only with declared scope).
 - On by default since v0.3.1: `agent_history_messages` = 10 (the agents'
   conversation window; set 0 to disable) and, since v0.3.2,
   `answerer_history_messages` = 10 (the chatbot's whiteboard/history split;
-  set 0 to disable). Off by default:
+  set 0 to disable) and `answerer_observer` = true (observer + answerer for
+  the conversation; set false for the single-call path). Off by default:
   `evidence_payload_window`, `graph_enabled`, router (`opt-in` after
   external benchmarks: agents > BM25 > router).
 - Opt-in env flags: `MEMORY_MACHINE_ADMISSION_SHADOW` (window), 

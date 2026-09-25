@@ -63,6 +63,11 @@ tests/test_answerer_context.py::test_render_recent_keeps_summary_and_last_turns_
 tests/test_answerer_context.py::test_render_recent_caps_each_side_and_total
 tests/test_answerer_context.py::test_main_user_prompt_budget_trims_the_board_only_when_set
 tests/test_answerer_context.py::test_coordinator_uses_the_last_messages_and_bounds_the_board
+tests/test_answerer_observer.py::test_observer_pass_parses_understanding_and_guidance
+tests/test_answerer_observer.py::test_observer_pass_keeps_previous_on_bad_output
+tests/test_answerer_observer.py::test_answerer_prompt_includes_observer_guidance
+tests/test_answerer_observer.py::test_observer_guides_the_answerer_and_persists_understanding
+tests/test_answerer_observer.py::test_observer_can_be_disabled
 tests/test_app_graph.py::test_graph_settings_default_to_off
 tests/test_app_graph.py::test_backend_maps_graph_settings_to_config
 tests/test_app_graph.py::test_backend_maps_recall_modes_exactly_like_cli
@@ -738,4 +743,4 @@ tests/test_whiteboard.py::test_size_and_consolidation_trigger
 tests/test_whiteboard.py::test_roundtrip
 tests/test_whiteboard.py::test_render
 
-739 tests collected in 0.11s
+744 tests collected in 0.11s

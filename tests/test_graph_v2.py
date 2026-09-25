@@ -72,6 +72,8 @@ def _machine(tmp_path, mode, **flags):
     tape = Tape(tmp_path / "tape.jsonl")
     tape.append(MemoryRecord(type="decision", summary="Kalak crossed", why=""))
     tape.append(MemoryRecord(type="lesson", summary="Kalak knows the user", why=""))
+    tape.append(MemoryRecord(type="lesson", summary="the user likes petronante",
+                             why=""))
     return machine
 
 

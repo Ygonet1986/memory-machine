@@ -1,6 +1,6 @@
 # Memory Machine — current architecture and status
 
-Date: 2026-09-25 · Package **v0.3.4** · Research program **v1** (frozen
+Date: 2026-09-25 · Package **v0.3.5** · Research program **v1** (frozen
 ledger) + active **admission-shadow-v2** window + **Companion** track
 (lab-validated, pilot not started).
 
@@ -149,7 +149,7 @@ snippet), agent index/map and gap-recall (all lab-only with declared scope).
   `answerer_history_messages` = 10 (the chatbot's whiteboard/history split;
   set 0 to disable) and `answerer_observer` = true (observer + answerer for
   the conversation; set false for the single-call path). On by default
-  since v0.3.4: the persistent graph (`graph_enabled = true`), including
+  since v0.3.5: the persistent graph (`graph_enabled = true`), including
   conversation turns (`graph_conversation_enabled = true`), recalled in
   `augment` mode — the guard promoted in P0–P5 (`augment_guarded`) stays
   available but filters association-only evidence, so it is opt-in for
@@ -166,10 +166,10 @@ snippet), agent index/map and gap-recall (all lab-only with declared scope).
 
 ## 9. Versioning and operations
 
-- Package `0.3.4` (SemVer); research program `v1`; app/DMG `0.3.4`
+- Package `0.3.5` (SemVer); research program `v1`; app/DMG `0.3.5`
   (Info.plist stamped from `memory_machine.__version__`). Tags: v0.2.x line
   and the v0.3.x line.
-- Tests: 747 (`python3 -m pytest -q`), ruff on `src/tests/scripts`, CI
+- Tests: 751 (`python3 -m pytest -q`), ruff on `src/tests/scripts`, CI
   6 required checks (ubuntu/macos/windows × py3.11/3.14) + non-blocking
   audit and scientific workflows. Evidence retention: releases + repo
   (`docs/EVIDENCE_RETENTION.md`).
@@ -186,7 +186,7 @@ snippet), agent index/map and gap-recall (all lab-only with declared scope).
 | Frozen results | `PAPER.md`, `RESULTS.md`, `FINDINGS.md`, closure docs (`*_CLOSURE.md`), pre-registrations (`*_PREREG.md`), evaluation records |
 | Historical | `ADMISSION_SHADOW_V1.md` + stopping rule + pause, `HISTORY_REWRITE_2026-09-22.md`, `AUDIT_OSS_V1.md`, `PUBLICATION_PREFLIGHT.md` |
 
-Next gates on the table: the owner's real use of the v0.3.4 app, the
+Next gates on the table: the owner's real use of the v0.3.5 app, the
 opencode restart for turn slots, and — only if pursued — a pilot with its
 own consent/provenance/retention contract (public pilot remains out of
 scope).

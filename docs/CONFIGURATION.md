@@ -5,9 +5,10 @@
 | Key | Default | Meaning |
 |-----|---------|---------|
 | `capacity` | 500 | memories per group (per agent) |
-| `graph_enabled` | `false` | write-time graph extraction (opt-in) |
+| `graph_enabled` | `true` | write-time graph extraction; with `graph_conversation_enabled` it also projects saved conversation turns |
 | `graph_batch_size` / `graph_batch_max_chars` | 8 / 12000 | extraction batching limits |
-| `graph_recall_mode` | `off` | graph recall: `off` / `augment` / `augment_guarded` / `only` |
+| `graph_conversation_enabled` | `true` | project `question`/`reply`/`memory`/`entity_definition` records into the graph (deduped turns are not re-extracted) |
+| `graph_recall_mode` | `augment` | graph recall: `off` / `augment` / `augment_guarded` / `only`. The promoted guard (`augment_guarded`, floor 0.80 + cap 3) filters association-only evidence (e.g. "Lia → jardim → Nina" without lexical overlap); use it when overload protection matters more than associative reach. |
 | `graph_augment_min_score` / `graph_augment_max_items` | 0.80 / 3 | guarded augmentation: score floor and cap |
 | `graph_augment_hub_degree` | 20 | guarded traversal: stop-expanding degree (generic `graph_hub_degree` overrides) |
 | `graph_augment_question_gate` / `min_cov` | `false` / 0.30 | optional question veto over graph-only evidence (calibrated, pending the miss slice) |

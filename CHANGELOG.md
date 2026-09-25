@@ -4,14 +4,14 @@ All notable changes to this project are documented here. The project follows
 [Semantic Versioning](https://semver.org/) for the installable package; the
 manual/whitepaper keeps its own document version.
 
-## [Unreleased]
+## [0.3.1] - 2026-09-25
 
-- **Agent conversation window (opt-in, off by default).**
+- **Agent conversation window, now active by default (10).**
   `agent_history_messages` (0-50) appends the last N turn slots
   ("Pessoa:"/"Assistente:") to the memory agents' user prompt so their
-  digests/checklists/`understanding` follow the conversation. With 0 the
-  prompts are byte-identical; enabling it on the measured path requires an
-  archived-window restart under §8.
+  digests, checklists and dynamic `understanding` follow the conversation.
+  Set 0 to keep prompts byte-identical. Activation was declared with an
+  archived-window restart under admission-shadow-v2 §8.
 
 ## [0.3.0] - 2026-09-24
 

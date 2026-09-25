@@ -165,3 +165,22 @@ Procedure executed:
   `met:false` with zero records.
 - The tape gains `question`/`reply` slots from activation onward; this is
   part of the restarted window's declared starting state.
+
+## Window restart (2026-09-25) — declared under §8 (agent conversation window)
+
+Reason: the memory agents' conversation window became **active by default**
+(`agent_history_messages = 10`, v0.3.1): agent user prompts now include the
+last ten turn slots, so the measured recall environment changed. Same
+procedure as the 2026-09-23 restart.
+
+- Pre-restart logs archived in place as
+  `admission_shadow.prerestart_20260925.jsonl` (29 records from the session),
+  never counted by the checker; earlier archives remain historical.
+- Counting restarts from the first schema-v2 record after activation; the
+  new starting state includes the conversation window and the (still
+  pending) turn-slot activation on the opencode side. The effective content
+  of the window appears once turn slots are being written (opencode
+  restart).
+- No rule, threshold, candidate, comparator, schema, prompt template or
+  default of the *admission experiment* is amended; P3v4 stays frozen at
+  `44c0124`.

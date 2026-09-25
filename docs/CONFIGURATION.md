@@ -30,7 +30,7 @@
 | `view_dimension_mode` | `off` | `auto` = dimension-aware plan (semantic/temporal/structural) with intersection |
 | `view_prune` | `none` | `subject` = drop broad `subject/*` views when a topic matched |
 | `agent_mode` | `group` | `view` = one perspective agent per selected view |
-| `agent_history_messages` | `0` (off) | 1-50 = append the last N turn slots ("Pessoa:"/"Assistente:") to every memory agent's user prompt so the agents follow the conversation. **Off by default**: with 0 the prompts are byte-identical. Enabling it in the measured path changes recall prompts and therefore requires an archived-window restart (admission-shadow-v2 §8), like turn slots. |
+| `agent_history_messages` | `10` | 0-50 = append the last N turn slots ("Pessoa:"/"Assistente:") to every memory agent's user prompt so the agents follow the conversation. Active by default since v0.3.1 (declared with an archived-window restart under admission-shadow-v2 §8); set `0` to keep prompts byte-identical. |
 | `whiteboard_mode` | `single` | `dimension` = one working board per dimension |
 | `attention_mode` | `off` | persistent attention prior: `prior` / `context` / `state` |
 | `attention_decay` / `boost` / `found_boost` | 0.6 / 0.8 / 0.3 | attention decay and saturation boosts |
@@ -53,8 +53,9 @@ Together with the per-agent `understanding` field (which the agent refines
 every sweep and which is already persisted in the manifest), the agents'
 metacognition then tracks the live conversation instead of only the
 whiteboard. Requirements: turn slots present on the tape (the opencode
-plugin flag or the Companion engine writes them). Leave it at 0 while the
-admission window runs — prompts are frozen there.
+plugin flag or the Companion engine writes them), so the effective content
+appears after the opencode restart that loads the slot flag. Set `0` to
+disable in a root where prompts must stay frozen.
 
 ### Admission shadow instrumentation (opt-in)
 

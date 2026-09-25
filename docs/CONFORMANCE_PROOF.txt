@@ -247,7 +247,7 @@ tests/test_config.py::test_non_int_values_fall_back
 tests/test_config.py::test_base_url_trailing_slash_removed
 tests/test_config.py::test_validate_flags_bad_base_url
 tests/test_config.py::test_from_dict_ignores_unknown_keys
-tests/test_config.py::test_graph_defaults_are_off_and_consistent
+tests/test_config.py::test_graph_defaults_are_on_and_consistent
 tests/test_config.py::test_graph_config_clamps_and_normalizes
 tests/test_config.py::test_experimental_defaults_are_off
 tests/test_consolidate.py::test_deterministic_consolidation_persists_and_shrinks
@@ -286,7 +286,7 @@ tests/test_dimension_boards.py::test_boards_do_not_count_toward_primary_consolid
 tests/test_dimension_boards.py::test_legacy_whiteboard_without_boards_loads
 tests/test_document_defaults.py::test_projection_failure_does_not_block_ingestion
 tests/test_document_defaults.py::test_enable_graph_false_makes_no_llm_calls
-tests/test_document_defaults.py::test_default_recall_never_touches_the_graph
+tests/test_document_defaults.py::test_disabled_graph_recall_never_touches_the_graph
 tests/test_document_defaults.py::test_reingestion_preserves_previous_chunk_bytes
 tests/test_document_ingest.py::test_txt_becomes_tape_plus_document_plus_graph
 tests/test_document_ingest.py::test_provenance_reaches_graph_mention_and_evidence
@@ -363,6 +363,9 @@ tests/test_graph.py::test_status_reports_pending_for_tag
 tests/test_graph.py::test_build_never_writes_to_the_tape
 tests/test_graph.py::test_store_files_are_append_only_jsonl
 tests/test_graph.py::test_cli_graph_status_defaults_to_recorded_extractor
+tests/test_graph_conversation.py::test_turns_feed_persistent_associative_graph_and_recall
+tests/test_graph_conversation.py::test_conversation_graph_can_be_disabled_explicitly
+tests/test_graph_conversation.py::test_default_graph_agent_puts_linked_memory_on_whiteboard
 tests/test_graph_extract.py::test_simple_entity
 tests/test_graph_extract.py::test_two_entities_and_relation
 tests/test_graph_extract.py::test_event_agent_action_object
@@ -743,4 +746,4 @@ tests/test_whiteboard.py::test_size_and_consolidation_trigger
 tests/test_whiteboard.py::test_roundtrip
 tests/test_whiteboard.py::test_render
 
-744 tests collected in 0.11s
+747 tests collected in 0.11s

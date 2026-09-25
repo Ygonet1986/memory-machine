@@ -28,11 +28,14 @@ def _slots(tmp_path, pairs: int = 6) -> Tape:
     return tape
 
 
-def test_config_defaults_off_and_clamps():
-    assert Config().agent_history_messages == 0
+def test_config_default_is_ten_and_clamps():
+    assert Config().agent_history_messages == 10
     config = Config(agent_history_messages=7)
     config.validate()
     assert config.agent_history_messages == 7
+    config = Config(agent_history_messages=0)
+    config.validate()
+    assert config.agent_history_messages == 0
     config = Config(agent_history_messages=999)
     config.validate()
     assert config.agent_history_messages == 50
@@ -100,16 +103,16 @@ def test_no_history_no_section(tmp_path):
     assert seen and "## Conversa recente" not in seen[0]
 
 
-def test_machine_history_is_off_by_default_and_on_when_configured(tmp_path):
+def test_machine_history_defaults_on_and_can_be_disabled(tmp_path):
     machine = Machine(tmp_path)
     assert machine._agent_history() == ""
     add_turn_slot(machine.tape, machine.manifest, slot="question",
                   text="pergunta", message_id="q1")
     add_turn_slot(machine.tape, machine.manifest, slot="reply",
                   text="resposta", message_id="r1", pair_message_id="q1")
-    assert machine._agent_history() == ""
-
-    enabled = Machine(tmp_path, config=Config(agent_history_messages=10))
-    block = enabled._agent_history()
+    block = machine._agent_history()
     assert "Pessoa: pergunta" in block
     assert "Assistente: resposta" in block
+
+    disabled = Machine(tmp_path, config=Config(agent_history_messages=0))
+    assert disabled._agent_history() == ""

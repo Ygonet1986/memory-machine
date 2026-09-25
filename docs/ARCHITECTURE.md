@@ -132,10 +132,10 @@ snippet), agent index/map and gap-recall (all lab-only with declared scope).
 
 ## 8. Defaults, flags and invariants
 
-- Off by default: `evidence_payload_window`, `graph_enabled`,
-  `agent_history_messages` (the agents' conversation window; 0 = prompts
-  byte-identical), router (`opt-in` after external benchmarks: agents > BM25
-  > router).
+- On by default since v0.3.1: `agent_history_messages` = 10 (the agents'
+  conversation window; set 0 to disable). Off by default:
+  `evidence_payload_window`, `graph_enabled`, router (`opt-in` after
+  external benchmarks: agents > BM25 > router).
 - Opt-in env flags: `MEMORY_MACHINE_ADMISSION_SHADOW` (window), 
   `MEMORY_MACHINE_TURN_SLOTS` (paired slots; the owner has it set and an
   opencode restart is pending for it to take effect).

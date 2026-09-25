@@ -48,7 +48,7 @@ class Config:
     view_dimension_mode: str = "off"
     view_prune: str = "none"
     agent_mode: str = "group"
-    agent_history_messages: int = 0
+    agent_history_messages: int = 10
     whiteboard_mode: str = "single"
     attention_mode: str = "off"
     attention_decay: float = 0.6

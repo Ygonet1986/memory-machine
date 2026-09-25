@@ -4,6 +4,16 @@ All notable changes to this project are documented here. The project follows
 [Semantic Versioning](https://semver.org/) for the installable package; the
 manual/whitepaper keeps its own document version.
 
+## [0.3.3] - 2026-09-25
+
+- **Two conversation agents (observer + answerer).** The observer watches
+  the dialogue, refreshes a compact conversation `understanding`
+  (persisted in `context.json`; the existing context consolidation compacts
+  it on overflow) and gives short guidance; the answerer writes the reply
+  with that guidance ("both discuss the answer"). One extra LLM call per
+  chatbot turn; `answerer_observer = false` restores the single-call path.
+  Recall/agents and the admission window are untouched.
+
 ## [0.3.2] - 2026-09-25
 
 - **Answerer context rule: whole whiteboard + last 10 messages under one

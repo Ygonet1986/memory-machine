@@ -32,6 +32,7 @@
 | `agent_mode` | `group` | `view` = one perspective agent per selected view |
 | `agent_history_messages` | `10` | 0-50 = append the last N turn slots ("Pessoa:"/"Assistente:") to every memory agent's user prompt so the agents follow the conversation. Active by default since v0.3.1 (declared with an archived-window restart under admission-shadow-v2 §8); set `0` to keep prompts byte-identical. |
 | `whiteboard_mode` | `single` | `dimension` = one working board per dimension |
+| `answerer_observer` | `true` | The conversation is served by **two agents**: the observer (one call) refreshes a compact conversation `understanding` (persisted) and gives short guidance; the answerer then writes with that guidance. Set `false` for the single-call path. Add ~1 LLM call per chatbot turn; recall/agents and the admission window are untouched. |
 | `answerer_history_messages` | `10` | The conversation agent's context rule: the last N turns (summary + turns, each side capped at 320 chars) have priority inside `whiteboard_budget`; the whiteboard fills the remainder and is trimmed at that remainder, never below a 800-char floor. Set `0` to give the whole budget back to the whiteboard. Only affects the chatbot turn (CLI/app); recall/agents and the admission window are untouched. |
 | `attention_mode` | `off` | persistent attention prior: `prior` / `context` / `state` |
 | `attention_decay` / `boost` / `found_boost` | 0.6 / 0.8 / 0.3 | attention decay and saturation boosts |

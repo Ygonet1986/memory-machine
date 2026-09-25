@@ -58,10 +58,12 @@ class ChatContext:
     summary: str = ""
     turns: list[Turn] = field(default_factory=list)
     consolidated_from: str = ""
+    understanding: str = ""
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "summary": self.summary,
+            "understanding": self.understanding,
             "turns": [t.to_dict() for t in self.turns],
             "consolidated_from": self.consolidated_from,
         }
@@ -72,6 +74,7 @@ class ChatContext:
             summary=str(data.get("summary") or ""),
             turns=[Turn.from_dict(t) for t in (data.get("turns") or [])],
             consolidated_from=str(data.get("consolidated_from") or ""),
+            understanding=str(data.get("understanding") or ""),
         )
 
     def render(self) -> str:

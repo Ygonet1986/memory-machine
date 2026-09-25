@@ -50,6 +50,7 @@ class Config:
     agent_mode: str = "group"
     agent_history_messages: int = 10
     answerer_history_messages: int = 10
+    answerer_observer: bool = True
     whiteboard_mode: str = "single"
     attention_mode: str = "off"
     attention_decay: float = 0.6
@@ -148,6 +149,7 @@ class Config:
             0, min(50, _int(self.agent_history_messages, 10)))
         self.answerer_history_messages = max(
             0, min(50, _int(self.answerer_history_messages, 10)))
+        self.answerer_observer = bool(self.answerer_observer)
         self.whiteboard_mode = (
             self.whiteboard_mode if self.whiteboard_mode in {"single", "dimension"} else "single"
         )

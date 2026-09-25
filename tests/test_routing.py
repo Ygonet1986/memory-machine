@@ -17,7 +17,7 @@ from fakes import FakeClient, text
 
 
 def _machine(tmp_path, handler, **cfg):
-    return Machine(tmp_path, config=Config(capacity=10, **cfg), client=FakeClient(handler))
+    return Machine(tmp_path, config=Config(capacity=10, graph_enabled=False, **cfg), client=FakeClient(handler))
 
 
 # ------------------------------------------------------------------ dimensions

@@ -140,7 +140,7 @@ def test_recall_router_llm_mode(tmp_path):
 
     m = Machine(
         tmp_path,
-        config=Config(capacity=2, router_top_k=1, router_enabled=True, router_mode="llm"),
+        config=Config(capacity=2, router_top_k=1, router_enabled=True, router_mode="llm", graph_enabled=False),
         client=FakeClient(handler),
     )
     for s in [

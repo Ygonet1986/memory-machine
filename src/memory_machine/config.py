@@ -63,10 +63,11 @@ class Config:
     evidence_payload_budget: int = 4000
     evidence_payload_min_item: int = 200
     evidence_payload_window: bool = False
-    graph_enabled: bool = False
+    graph_enabled: bool = True
+    graph_conversation_enabled: bool = True
     graph_path: str = "graph"
     graph_extract_types: str = "decision,lesson,preference,bugfix,build"
-    graph_recall_mode: str = "off"
+    graph_recall_mode: str = "augment"
     graph_depth: int = 2
     graph_top_k: int = 8
     graph_confidence_auto: float = 0.90
@@ -180,6 +181,7 @@ class Config:
         self.evidence_payload_min_item = max(0, _int(self.evidence_payload_min_item, 200))
         self.evidence_payload_window = bool(self.evidence_payload_window)
         self.graph_enabled = bool(self.graph_enabled)
+        self.graph_conversation_enabled = bool(self.graph_conversation_enabled)
         self.graph_path = (self.graph_path or "graph").strip() or "graph"
         self.graph_extract_types = ",".join(
             t.strip().lower()

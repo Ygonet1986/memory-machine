@@ -305,6 +305,16 @@ class CompanionEngine:
         )
         save_manifest(manifest, store.root / "manifest.json")
         slots = {"question": question, "reply": answer}
+        config = Config.load(store.root)
+        if config.graph_enabled and config.graph_conversation_enabled:
+            from .tape import MemoryRecord
+
+            machine = Machine(store.root, config=config, client=self._client)
+            machine._graph_after_appends([
+                MemoryRecord.from_dict(outcome["record"])
+                for outcome in slots.values()
+                if outcome.get("ok") and not outcome.get("deduped")
+            ])
         records: list[str] = []
         accepted_types: list[str] = []
         for slot_name, outcome in slots.items():

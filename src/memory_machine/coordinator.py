@@ -767,7 +767,7 @@ class Machine:
 
         Opt-in only: the opencode plugin calls this behind
         ``MEMORY_MACHINE_TURN_SLOTS=1`` (off by default). The question/reply
-        types are not graph-eligible, so no projection runs for them.
+        types are graph-eligible only when conversation graph extraction is enabled.
         """
         from .turns import add_turn_slot as _add_turn_slot
 
@@ -776,13 +776,21 @@ class Machine:
             message_id=message_id, pair_message_id=pair_message_id,
             model=self.config.model,
         )
+        if result.get("ok") and not result.get("deduped"):
+            self._graph_after_append(MemoryRecord.from_dict(result["record"]))
         if save and result.get("ok") and not result.get("deduped"):
             self.save()
             self._update_session_meta()
         return result
 
     def _graph_eligible(self, record: MemoryRecord) -> bool:
-        if not self.config.graph_enabled or record.derived_from:
+        if not self.config.graph_enabled:
+            return False
+        if self.config.graph_conversation_enabled and record.type in {
+            "question", "reply", "memory", "entity_definition",
+        }:
+            return True
+        if record.derived_from:
             return False
         from .graph import parse_types
 
@@ -1024,6 +1032,7 @@ class Machine:
                 saved.append(turn_rec.to_dict())
                 if turn_created:
                     new_agents += 1
+                self._graph_after_append(turn_rec)
             except SecretError:
                 skipped_secrets += 1
 

@@ -38,8 +38,14 @@ assistant is the long-term application.
 
 ## How this connects to the current phase
 
-The public `v0.2.2` release closes the publication. The active phase,
-`admission-shadow-v1`, collects real usage signals under a frozen stopping
-rule (`docs/ADMISSION_SHADOW_STOPPING_RULE.md`) so the next admission policy
-can be pre-registered against uncontaminated data. Project memory is the
-first environment where those signals will be meaningful.
+The publication is closed and the app ships at `v0.3.0`, which also carries
+the **Companion** surface (characters with synthetic lives; lab-validated,
+pilot not started). The active measurement is `admission-shadow-v2`: the
+window restarted from zero under §8 when turn slots were activated, the
+pre-restart logs are archived and never counted, and only the coverage-only
+checker runs until the frozen stop rule reaches `met:true`. Project memory
+remains the first environment where those signals become meaningful; the
+personal-assistant progression above is still gated on the consent,
+provenance and retention contract described in step 3.
+
+Current architecture and status: [`ARCHITECTURE.md`](ARCHITECTURE.md).

@@ -30,6 +30,13 @@ views and graph projections), **discovery** (agents over the tape) and
 measures one layer at a time and records refutations; the open bottleneck is
 admission, instrumented before any policy change (see below).
 
+The same core now also powers a **Companion** surface (v0.3.0): fictional
+characters with versioned synthetic lives, memory isolated per relationship,
+labeled recall of approved fiction, explicit corrections/retirement/deletion
+and save-off. Lab-validated (evaluation v3, all gates), not a pilot claim —
+the current architecture and status live in
+[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
 ## Install / run
 
 No dependencies. Python 3.11+.
@@ -79,6 +86,13 @@ memory-cli recall "which database did we choose?" --cross-session
   delivers *what it says* under a character budget (recall-local, never
   persisted). The open research question is admission: which candidates deserve
   those characters.
+- **Turn slots** — what the person said and what was answered as paired tape
+  records (`question`/`reply`), deduped and provenance-linked; opt-in via the
+  opencode plugin flag.
+- **Companion layer** — persona sheets, synthetic-life documents (validated,
+  versioned, published atomically), a turn engine with labeled layers and a
+  `used`/`memories` trailer, a creator (gallery, timeline, diff, retire with
+  impact, AI life proposals) and the desktop window.
 
 ## Research status and versioning
 
@@ -89,13 +103,21 @@ memory-cli recall "which database did we choose?" --cross-session
   evidence-complete temporal reasoning (H5'). Refuted: the memory-aware prompt
   (H4), multi-session aggregation as the bottleneck (H5), the
   temporal-computation prompt once timestamps were correct (H6a).
-- **Package version:** **0.2.1** — Semantic Versioning for the installable
+- **Package version:** **0.3.0** — Semantic Versioning for the installable
   package (see `CHANGELOG.md`). The "v1" of the research program and the
   package version are different axes: the code is deliberately `0.x` while the
   research phase is v1.
-- **Current focus:** admission control. `docs/ADMISSION_SHADOW_V1.md` describes
-  the opt-in shadow instrumentation that collects signals on real tapes before
-  any policy is frozen.
+- **Companion track (C0–C7, lab):** multiple characters with versioned
+  synthetic lives, atomic publication with recovery, labeled recall,
+  corrections/retirement/deletion with explicit impact decisions, save-off and
+  AI life proposals. Evaluation v3 passed every gate in the lab
+  (`docs/COMPANION_EVAL_V3_PREREG.md`); v1/v2 stay recorded as failed
+  historical lines. Nothing promoted.
+- **Current focus:** admission control. The active window is
+  `admission-shadow-v2` (`docs/ADMISSION_SHADOW_V2_PREREG.md`), restarted
+  under §8 when turn slots were activated; pre-restart logs are archived and
+  never counted. Only the coverage-only checker runs until `met:true`
+  (`docs/ADMISSION_SHADOW_PAUSE.md` is the paused v1 history).
 
 Detailed measurements moved to `docs/FINDINGS.md`; the paper is the
 authoritative narrative.
@@ -103,7 +125,7 @@ authoritative narrative.
 ## Tests and evaluation
 
 ```bash
-python3 -m pytest -q                 # full suite (500+ tests)
+python3 -m pytest -q                 # full suite (728 tests)
 python3 -m ruff check src tests scripts
 python3 eval/gen_fixture.py --records 300 --out /tmp/mm-fixture
 python3 eval/bench.py /tmp/mm-fixture
@@ -117,13 +139,22 @@ evaluation is a separate, non-required workflow.
 
 ## Docs
 
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — current architecture and
+  status (the authoritative "where are we now").
 - [SPEC.md](SPEC.md) — formal specification.
 - [docs/PAPER.md](docs/PAPER.md), [docs/RESULTS.md](docs/RESULTS.md) — the
   paper draft and generated result tables; [docs/RELATED_WORK.md](docs/RELATED_WORK.md).
 - [docs/CLI.md](docs/CLI.md) — full CLI reference.
 - [docs/CONFIGURATION.md](docs/CONFIGURATION.md) — every `config.json` key.
-- [docs/ADMISSION_SHADOW_V1.md](docs/ADMISSION_SHADOW_V1.md) — admission
-  instrumentation (opt-in) and its privacy model.
+- [docs/ADMISSION_SHADOW_V2_PREREG.md](docs/ADMISSION_SHADOW_V2_PREREG.md) —
+  the active admission window (frozen rules, restart under §8);
+  [docs/ADMISSION_SHADOW_V1.md](docs/ADMISSION_SHADOW_V1.md) is the paused
+  v1 history and its privacy model.
+- Companion: [docs/COMPANION_V0_CONTRACT.md](docs/COMPANION_V0_CONTRACT.md),
+  [docs/COMPANION_LIFE_V1_CONTRACT.md](docs/COMPANION_LIFE_V1_CONTRACT.md),
+  [docs/COMPANION_MULTI_CHARACTER_PLAN.md](docs/COMPANION_MULTI_CHARACTER_PLAN.md),
+  [docs/COMPANION_ENGINE.md](docs/COMPANION_ENGINE.md),
+  [docs/COMPANION_EVAL_V3_PREREG.md](docs/COMPANION_EVAL_V3_PREREG.md).
 - [docs/DESKTOP_APP.md](docs/DESKTOP_APP.md) — macOS app (install, build).
 - [docs/GRAPH_USAGE.md](docs/GRAPH_USAGE.md) — graph projection usage.
 - [docs/DOC_GRAPH.md](docs/DOC_GRAPH.md) — the operational document graph.

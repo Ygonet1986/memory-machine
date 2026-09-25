@@ -4,6 +4,10 @@
 
 **Draft for arXiv (v1.0, September 2026)**
 
+> Snapshot note (2026-09-24): the contents below are the frozen
+> v1.0 record. Current architecture, the Companion track and the
+> active admission window live in docs/ARCHITECTURE.md.
+
 ---
 
 ## Abstract

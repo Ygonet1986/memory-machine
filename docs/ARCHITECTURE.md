@@ -1,6 +1,6 @@
 # Memory Machine — current architecture and status
 
-Date: 2026-09-25 · Package **v0.3.5** · Research program **v1** (frozen
+Date: 2026-09-25 · Package **v0.3.6** · Research program **v1** (frozen
 ledger) + active **admission-shadow-v2** window + **Companion** track
 (lab-validated, pilot not started).
 
@@ -151,10 +151,13 @@ snippet), agent index/map and gap-recall (all lab-only with declared scope).
   the conversation; set false for the single-call path). On by default
   since v0.3.5: the persistent graph (`graph_enabled = true`), including
   conversation turns (`graph_conversation_enabled = true`), recalled in
-  `augment` mode — the guard promoted in P0–P5 (`augment_guarded`) stays
-  available but filters association-only evidence, so it is opt-in for
-  conversations. Off by default: `evidence_payload_window`, router
-  (`opt-in` after external benchmarks: agents > BM25 > router).
+  `augment_conversation` mode — the P0–P5 promoted guard (floor 0.80,
+  cap 3, hub-capped traversal) plus a **bounded association rescue**
+  (association-only `related_to` paths re-admitted above 0.60, cap 2;
+  gates C1–C5 in `GRAPH_CONVERSATION_GUARD_V1_PREREG.md`). `augment_guarded`
+  (no rescue) and `augment` (no guards) remain opt-in. Off by default:
+  `evidence_payload_window`, router (`opt-in` after external benchmarks:
+  agents > BM25 > router).
 - Opt-in env flags: `MEMORY_MACHINE_ADMISSION_SHADOW` (window), 
   `MEMORY_MACHINE_TURN_SLOTS` (paired slots; the owner has it set and an
   opencode restart is pending for it to take effect).
@@ -166,10 +169,10 @@ snippet), agent index/map and gap-recall (all lab-only with declared scope).
 
 ## 9. Versioning and operations
 
-- Package `0.3.5` (SemVer); research program `v1`; app/DMG `0.3.5`
+- Package `0.3.6` (SemVer); research program `v1`; app/DMG `0.3.6`
   (Info.plist stamped from `memory_machine.__version__`). Tags: v0.2.x line
   and the v0.3.x line.
-- Tests: 751 (`python3 -m pytest -q`), ruff on `src/tests/scripts`, CI
+- Tests: 758 (`python3 -m pytest -q`), ruff on `src/tests/scripts`, CI
   6 required checks (ubuntu/macos/windows × py3.11/3.14) + non-blocking
   audit and scientific workflows. Evidence retention: releases + repo
   (`docs/EVIDENCE_RETENTION.md`).
@@ -186,7 +189,7 @@ snippet), agent index/map and gap-recall (all lab-only with declared scope).
 | Frozen results | `PAPER.md`, `RESULTS.md`, `FINDINGS.md`, closure docs (`*_CLOSURE.md`), pre-registrations (`*_PREREG.md`), evaluation records |
 | Historical | `ADMISSION_SHADOW_V1.md` + stopping rule + pause, `HISTORY_REWRITE_2026-09-22.md`, `AUDIT_OSS_V1.md`, `PUBLICATION_PREFLIGHT.md` |
 
-Next gates on the table: the owner's real use of the v0.3.5 app, the
+Next gates on the table: the owner's real use of the v0.3.6 app, the
 opencode restart for turn slots, and — only if pursued — a pilot with its
 own consent/provenance/retention contract (public pilot remains out of
 scope).

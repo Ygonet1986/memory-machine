@@ -184,3 +184,21 @@ procedure as the 2026-09-23 restart.
 - No rule, threshold, candidate, comparator, schema, prompt template or
   default of the *admission experiment* is amended; P3v4 stays frozen at
   `44c0124`.
+
+## Window restart (2026-09-25, second) — declared under §8 (conversation graph)
+
+Reason: the persistent graph became **active by default** (v0.3.4:
+`graph_enabled = true`, `graph_conversation_enabled = true`,
+`graph_recall_mode = "augment"`), adding graph annotations/evidence to the
+measured recall path and extraction calls on the turn-slot write path.
+
+- Pre-restart logs archived in place as
+  `admission_shadow.prerestart_20260925_graph.jsonl` (8 records), never
+  counted; counting restarts from the first schema-v2 record after the
+  change.
+- No rule, threshold, candidate, comparator or schema of the *admission
+  experiment* is amended; P3v4 stays frozen at `44c0124`.
+- The P0–P5 promoted guard (`augment_guarded`) was **not** adopted as the
+  conversation default: its score floor filters association-only evidence
+  (fails the conversation graph's own association case). A conversation-aware
+  guard would require its own pre-registered evaluation.

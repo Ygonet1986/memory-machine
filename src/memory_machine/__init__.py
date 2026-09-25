@@ -1,3 +1,3 @@
 """Memory Machine — persistent memory tape with memory agents and a whiteboard."""
 
-__version__ = "0.3.3"
+__version__ = "0.3.4"

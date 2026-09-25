@@ -4,6 +4,22 @@ All notable changes to this project are documented here. The project follows
 [Semantic Versioning](https://semver.org/) for the installable package; the
 manual/whitepaper keeps its own document version.
 
+## [0.3.4] - 2026-09-25
+
+- **Persistent conversation graph (two memories, one whiteboard).** Saved
+  turns (`question`/`reply`), the chat's `memory` records and
+  `entity_definition` descriptions are projected into the persistent graph
+  (associative `related_to` edges carry the tape memory id; they are
+  navigation hints, not facts). Recall combines graph and agent annotations
+  under the same whiteboard budget; inactive tape records are dropped.
+  Defaults: `graph_enabled = true`, `graph_conversation_enabled = true`,
+  `graph_recall_mode = "augment"`. The P0--P5 promoted guard
+  (`augment_guarded`, score floor 0.80 + cap 3) stays available but filters
+  association-only evidence, so it is opt-in for conversations. Deduped
+  turns are not re-extracted; extraction failures never roll back the tape.
+- Activation was declared with an archived-window restart under
+  admission-shadow-v2 §8 (pre-restart logs archived, never counted).
+
 ## [0.3.3] - 2026-09-25
 
 - **Two conversation agents (observer + answerer).** The observer watches

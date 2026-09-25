@@ -38,7 +38,7 @@ assistant is the long-term application.
 
 ## How this connects to the current phase
 
-The publication is closed and the app ships at `v0.3.0`, which also carries
+The publication is closed and the app ships at `v0.3.3`, which also carries
 the **Companion** surface (characters with synthetic lives; lab-validated,
 pilot not started). The active measurement is `admission-shadow-v2`: the
 window restarted from zero under §8 when turn slots were activated, the

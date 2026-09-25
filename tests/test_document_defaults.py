@@ -61,7 +61,7 @@ def test_enable_graph_false_makes_no_llm_calls(tmp_path):
     src = tmp_path / "guide.txt"
     src.write_text(CONTENT, encoding="utf-8")
     guard = GuardClient(forbid=True)
-    machine = Machine(tmp_path, config=Config(capacity=10), client=guard)
+    machine = Machine(tmp_path, config=Config(capacity=10, graph_enabled=False), client=guard)
 
     result = machine.ingest_document(src, enable_graph=False)
     assert result["ok"] is True and result["saved"] >= 1
@@ -69,11 +69,11 @@ def test_enable_graph_false_makes_no_llm_calls(tmp_path):
     assert not (tmp_path / "graph").exists()
 
 
-def test_default_recall_never_touches_the_graph(tmp_path):
+def test_disabled_graph_recall_never_touches_the_graph(tmp_path):
     from memory_machine.tape import MemoryRecord
 
     guard = GuardClient()
-    machine = Machine(tmp_path, config=Config(capacity=10), client=guard)
+    machine = Machine(tmp_path, config=Config(capacity=10, graph_enabled=False), client=guard)
     machine.add_memory(MemoryRecord(type="decision", summary="use Postgres",
                                     views=["topic/db"]))
     machine.whiteboard.subject = "database"

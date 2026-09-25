@@ -7,7 +7,7 @@ from fakes import FakeClient, text
 
 def _machine(tmp_path, handler):
     client = FakeClient(handler)
-    cfg = Config(capacity=3, router_enabled=False)
+    cfg = Config(capacity=3, router_enabled=False, graph_enabled=False)
     return Machine(tmp_path, config=cfg, client=client)
 
 

@@ -54,6 +54,21 @@ vague.
 - If the record has nothing worth extracting, return \
 {{"entities":[],"events":[],"relations":[]}}."""
 
+GRAPH_CONVERSATION_PROMPT = """You are the memory graph agent. Read ONE saved \
+conversation turn or entity description and return ONLY a JSON object:
+{{"entities":[{{"ref":"e1","name":"Lia","type":"person"}},{{"ref":"e2","name":"jardim","type":"concept"}}],"events":[],"relations":[{{"source":"e1","relation":"related_to","target":"e2","confidence":0.8}}],"mentions":["e1","e2"]}}
+
+Extract named people, places, objects, and recurring concepts. For an \
+entity_definition record, its summary is the entity's name and its why is \
+the person's description: connect that entity to concepts in the description. \
+Connect entities that the turn discusses together with related_to even if \
+the person does not assert a factual relationship. Use a more specific short \
+verb only when useful. These links are associative paths for finding memories, \
+not verified facts. Do not add entities or associations absent from this turn. \
+Use local refs e1/e2; entity types are person|object|place|organization|concept|event|action|unknown. \
+Include confidence from 0 to 1 per entity/relation. Return empty arrays if \
+there is nothing to connect."""
+
 GRAPH_BATCH_PROMPT = """You extract a small knowledge graph from SEVERAL \
 memory records of a persistent project tape. The records are the only source: \
 never invent facts, entities or relations they do not state.
@@ -249,7 +264,11 @@ class GraphExtractor:
 
     def extract(self, record: Any) -> Extraction:
         messages = [
-            {"role": "system", "content": GRAPH_EXTRACT_PROMPT},
+            {"role": "system", "content": (
+                GRAPH_CONVERSATION_PROMPT if record.type in {
+                    "question", "reply", "memory", "entity_definition",
+                } else GRAPH_EXTRACT_PROMPT
+            )},
             {"role": "user", "content": self.memory_text(record)},
         ]
         try:

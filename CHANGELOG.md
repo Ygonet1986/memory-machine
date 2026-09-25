@@ -12,6 +12,18 @@ manual/whitepaper keeps its own document version.
   the lab (`docs/GRAPH_CONVERSATION_GUARD_V1_PREREG.md`, gates C1-C5);
   opt-in-unwired - adopting it as a default requires a new §8 restart.
 
+## [0.3.6] - 2026-09-25
+
+- **Association rescue adopted as the conversation default.**
+  `graph_recall_mode = "augment_conversation"`: the P0--P5 promoted guard
+  (floor 0.80, cap 3, hub-capped traversal) plus a bounded rescue of
+  association-only path evidence (`related_to` paths above
+  `graph_conversation_min_score` = 0.60, up to
+  `graph_conversation_max_items` = 2; `augment_guarded` gates the rescue
+  off, `augment` disables the guards). Validated in the lab (gates C1--C5,
+  links 3/3 vs 0/3, zero hub noise) and declared with an archived-window
+  restart under admission-shadow-v2 §8.
+
 ## [0.3.5] - 2026-09-25
 
 - **Graph projection hygiene and dimension-mode merge.** Before each recall

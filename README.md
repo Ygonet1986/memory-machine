@@ -35,10 +35,11 @@ conversation and is read by the memory agents) and the persistent **graph**
 (entities and connections extracted from those same records, each edge
 carrying the id of its tape memory). Graph links are navigation hints, not
 verified facts; only active tape records can become annotations or evidence.
-Both default on (`graph_recall_mode="augment"`), with the P0–P5 guarded mode
-available when overload protection matters more than associative reach.
+Both default on (`graph_recall_mode="augment_conversation"`): the P0–P5
+guarded traversal plus a bounded association rescue, so lexical-overlap-free
+links ("Lia → jardim → Nina") come back without letting hub noise in.
 
-The same core now also powers a **Companion** surface (v0.3.5): fictional
+The same core now also powers a **Companion** surface (v0.3.6): fictional
 characters with versioned synthetic lives, memory isolated per relationship,
 labeled recall of approved fiction, explicit corrections/retirement/deletion
 and save-off. The conversation itself is served by two agents (an observer
@@ -113,7 +114,7 @@ memory-cli recall "which database did we choose?" --cross-session
   evidence-complete temporal reasoning (H5'). Refuted: the memory-aware prompt
   (H4), multi-session aggregation as the bottleneck (H5), the
   temporal-computation prompt once timestamps were correct (H6a).
-- **Package version:** **0.3.5** — Semantic Versioning for the installable
+- **Package version:** **0.3.6** — Semantic Versioning for the installable
   package (see `CHANGELOG.md`). The "v1" of the research program and the
   package version are different axes: the code is deliberately `0.x` while the
   research phase is v1.
@@ -135,7 +136,7 @@ authoritative narrative.
 ## Tests and evaluation
 
 ```bash
-python3 -m pytest -q                 # full suite (751 tests)
+python3 -m pytest -q                 # full suite (758 tests)
 python3 -m ruff check src tests scripts
 python3 eval/gen_fixture.py --records 300 --out /tmp/mm-fixture
 python3 eval/bench.py /tmp/mm-fixture

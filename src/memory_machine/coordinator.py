@@ -1170,9 +1170,13 @@ class Machine:
                 question, client, views=views, temperature=temperature, max_workers=max_workers
             )
             raw_annotations = run.annotations
-            if graph_mode in {"augment", "augment_guarded"}:
-                guarded = graph_mode == "augment_guarded"
-                graph_result = self._graph_recall(question, guard=guarded)
+            if graph_mode in {"augment", "augment_guarded",
+                              "augment_conversation"}:
+                guarded = graph_mode in {"augment_guarded",
+                                         "augment_conversation"}
+                rescue = graph_mode == "augment_conversation"
+                graph_result = self._graph_recall(question, guard=guarded,
+                                                  rescue=rescue)
                 graph_annotations = self._graph_annotations(
                     graph_result,
                     weight=self.config.graph_augment_weight if guarded else 1.0,
@@ -1297,17 +1301,25 @@ class Machine:
         if not self.config.graph_enabled:
             return "off"
         mode = self.config.graph_recall_mode
-        return mode if mode in {"augment", "augment_guarded", "only"} else "off"
+        return mode if mode in {
+            "augment", "augment_guarded", "augment_conversation",
+            "only"} else "off"
 
-    def _graph_recall(self, question: str, *, guard: bool = False) -> Any:
+    def _graph_recall(self, question: str, *, guard: bool = False,
+                      rescue: bool = False) -> Any:
         """Run graph-side recall; never raises, returns None when unavailable.
 
         With ``guard`` the evidence passes admission control (score floor and
         a small cap) before it can compete for the single global budget.
+        With ``rescue`` (conversation default) association-only path evidence
+        cut by the floor is re-admitted above a lower declared floor and a
+        small extra cap; hub expansion stays capped.
         """
         try:
             from .graph import GraphStore
-            from .graph_recall import GraphRecall, guard_evidence, question_gate
+            from .graph_recall import (
+                GraphRecall, conversation_rescue, guard_evidence, question_gate,
+            )
 
             store = GraphStore(resolve_path(self.root, self.config.graph_path))
             if not store.exists():
@@ -1328,11 +1340,24 @@ class Machine:
             )
             result = recall.recall(question)
             if guard:
+                unguarded = list(result.evidence)
                 result.evidence = guard_evidence(
                     result.evidence,
                     min_score=self.config.graph_augment_min_score,
                     max_items=self.config.graph_augment_max_items,
                 )
+                if rescue:
+                    kept = {item.memory_id for item in result.evidence}
+                    result.evidence = [
+                        *result.evidence,
+                        *[item for item in conversation_rescue(
+                            [entry for entry in unguarded
+                             if entry.memory_id not in kept],
+                            index,
+                            min_score=self.config.graph_conversation_min_score,
+                            max_items=self.config.graph_conversation_max_items,
+                        )],
+                    ]
                 if self.config.graph_augment_question_gate:
                     records = {record.id: record for record in self.tape.read()}
                     result.evidence = question_gate(

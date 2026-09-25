@@ -214,3 +214,16 @@ mode — both change measured recall behavior.
   counted; counting restarts from the first schema-v2 record after the fix.
 - No rule, threshold, candidate, comparator or schema of the *admission
   experiment* is amended; P3v4 stays frozen at `44c0124`.
+
+## Window restart (2026-09-25, fourth) — declared under §8 (association rescue default)
+
+Reason: `graph_recall_mode = "augment_conversation"` became the default
+(v0.3.6): the graph recall path now also re-admits association-only path
+evidence under a bounded rescue, changing measured recall behavior.
+
+- Pre-restart logs archived in place as
+  `admission_shadow.prerestart_20260925_rescue.jsonl` (2 records), never
+  counted; counting restarts from the first schema-v2 record after the
+  change.
+- No promoted guard constant (0.80/3, hub 20), P3v4, candidate,
+  comparator or schema of the admission experiment is amended.

@@ -73,3 +73,17 @@ is deterministic. Scope: mechanism validated in the lab; the rescue remains
 unwired/opt-in, and adopting it as the conversation default needs a new §8
 restart plus a release (owner decision). Nothing promoted; the window, the
 product defaults and the promoted guard constants are untouched.
+
+## Adoption record (2026-09-25)
+
+The owner adopted the validated rescue as the conversation default:
+`graph_recall_mode = "augment_conversation"` (guarded traversal + rescue,
+floor 0.60 / cap 2 as validated; no re-fit). `augment_guarded` keeps the
+rescue off and `augment` keeps all guards off. Declared with an archived
+restart of the admission-shadow-v2 window (4th restart of the day; 2
+pre-restart records archived as
+`admission_shadow.prerestart_20260925_rescue.jsonl`, never counted).
+Nothing in the promoted guard constants, P3v4 or the experiment rules was
+amended. Adoption is a product default inside the dual-track; real
+validation of the combined behavior still requires measured use (the
+restarted window and, later, a real pilot).

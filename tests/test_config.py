@@ -38,7 +38,7 @@ def test_graph_defaults_are_on_and_consistent():
     cfg = Config()
     assert cfg.graph_enabled is True
     assert cfg.graph_conversation_enabled is True
-    assert cfg.graph_recall_mode == "augment"
+    assert cfg.graph_recall_mode == "augment_conversation"
     assert cfg.graph_depth == 2
     assert cfg.graph_confidence_hypothesis <= cfg.graph_confidence_auto
     assert cfg.document_graph_enabled is True

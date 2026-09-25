@@ -67,7 +67,7 @@ class Config:
     graph_conversation_enabled: bool = True
     graph_path: str = "graph"
     graph_extract_types: str = "decision,lesson,preference,bugfix,build"
-    graph_recall_mode: str = "augment"
+    graph_recall_mode: str = "augment_conversation"
     graph_depth: int = 2
     graph_top_k: int = 8
     graph_confidence_auto: float = 0.90
@@ -80,6 +80,8 @@ class Config:
     graph_augment_min_score: float = 0.80
     graph_augment_max_items: int = 3
     graph_augment_weight: float = 1.0
+    graph_conversation_min_score: float = 0.60
+    graph_conversation_max_items: int = 2
     graph_augment_question_gate: bool = False
     graph_augment_question_min_cov: float = 0.30
     graph_resolver_candidates: int = 10
@@ -190,7 +192,9 @@ class Config:
         )
         self.graph_recall_mode = (
             self.graph_recall_mode
-            if self.graph_recall_mode in {"off", "augment", "augment_guarded", "only"}
+            if self.graph_recall_mode in {
+                "off", "augment", "augment_guarded", "augment_conversation",
+                "only"}
             else "off"
         )
         self.graph_depth = max(1, min(4, _int(self.graph_depth, 2)))
@@ -213,6 +217,8 @@ class Config:
         self.graph_augment_hub_degree = max(0, _int(self.graph_augment_hub_degree, 20))
         self.graph_augment_max_items = max(0, _int(self.graph_augment_max_items, 3))
         self.graph_augment_question_gate = bool(self.graph_augment_question_gate)
+        self.graph_conversation_max_items = max(
+            0, _int(self.graph_conversation_max_items, 2))
         self.graph_resolver_candidates = max(1, _int(self.graph_resolver_candidates, 10))
         self.document_graph_enabled = bool(self.document_graph_enabled)
         self.document_structure_level = (

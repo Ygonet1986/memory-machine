@@ -8,7 +8,8 @@
 | `graph_enabled` | `true` | write-time graph extraction; with `graph_conversation_enabled` it also projects saved conversation turns |
 | `graph_batch_size` / `graph_batch_max_chars` | 8 / 12000 | extraction batching limits |
 | `graph_conversation_enabled` | `true` | project `question`/`reply`/`memory`/`entity_definition` records into the graph (deduped turns are not re-extracted) |
-| `graph_recall_mode` | `augment` | graph recall: `off` / `augment` / `augment_guarded` / `only`. The promoted guard (`augment_guarded`, floor 0.80 + cap 3) filters association-only evidence (e.g. "Lia → jardim → Nina" without lexical overlap); use it when overload protection matters more than associative reach. |
+| `graph_recall_mode` | `augment_conversation` | graph recall: `off` / `augment` / `augment_guarded` / `augment_conversation` / `only`. The default = the promoted guard (floor 0.80 + cap 3, hub-capped traversal) **plus a bounded association rescue**: path evidence whose relations are all `related_to` is re-admitted above `graph_conversation_min_score` up to `graph_conversation_max_items` (validated in the lab, gates C1–C5). `augment_guarded` gates the rescue off; `augment` disables all guards. |
+| `graph_conversation_min_score` / `graph_conversation_max_items` | 0.60 / 2 | association rescue floor and extra item cap (declared in `GRAPH_CONVERSATION_GUARD_V1_PREREG.md`) |
 | `graph_augment_min_score` / `graph_augment_max_items` | 0.80 / 3 | guarded augmentation: score floor and cap |
 | `graph_augment_hub_degree` | 20 | guarded traversal: stop-expanding degree (generic `graph_hub_degree` overrides) |
 | `graph_augment_question_gate` / `min_cov` | `false` / 0.30 | optional question veto over graph-only evidence (calibrated, pending the miss slice) |

@@ -389,6 +389,41 @@ def guard_evidence(
     return items[:max_items] if max_items > 0 else items
 
 
+def conversation_rescue(
+    evidence: list[GraphEvidence],
+    index: Any,
+    *,
+    min_score: float = 0.60,
+    max_items: int = 2,
+) -> list[GraphEvidence]:
+    """Candidate (unwired): re-admit association-only evidence cut by the guard.
+
+    The promoted guard's score floor (0.80) removes path evidence whose only
+    support is ``related_to`` association - exactly the cross-turn value of
+    the conversation graph. This rescue re-admits such items above a lower
+    declared floor, bounded by a small item cap; every path must consist of
+    ``related_to`` relations only. Not used by any default.
+    """
+    out: list[GraphEvidence] = []
+    for item in evidence:
+        if len(out) >= max_items:
+            break
+        if item.via != "path" or item.score < min_score or not item.paths:
+            continue
+        association = True
+        for path in item.paths:
+            for relation_id in path.relations:
+                relation = index.relations.get(relation_id)
+                if relation is None or relation.relation != "related_to":
+                    association = False
+                    break
+            if not association:
+                break
+        if association:
+            out.append(item)
+    return out
+
+
 def describe_evidence(
     evidence: GraphEvidence,
     index: GraphIndex,

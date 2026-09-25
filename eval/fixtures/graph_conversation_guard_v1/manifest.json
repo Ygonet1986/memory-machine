@@ -1,0 +1,6 @@
+{
+  "association_cases": 3,
+  "cases_sha256": "05b9af5be8f7304ae30bc4291171e33c7389b2e53144da5bdeaa801076617ce3",
+  "fixture": "graph_conversation_guard_v1/cases.json",
+  "hub_cases": 1
+}

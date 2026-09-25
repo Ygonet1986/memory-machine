@@ -4,6 +4,14 @@ All notable changes to this project are documented here. The project follows
 [Semantic Versioning](https://semver.org/) for the installable package; the
 manual/whitepaper keeps its own document version.
 
+## [Unreleased]
+
+- **Conversation guard candidate (unwired).** `conversation_rescue` in
+  `graph_recall.py` re-admits association-only path evidence cut by the
+  promoted guard (floor 0.60, cap 2, `related_to`-only paths). Validated in
+  the lab (`docs/GRAPH_CONVERSATION_GUARD_V1_PREREG.md`, gates C1-C5);
+  opt-in-unwired - adopting it as a default requires a new §8 restart.
+
 ## [0.3.5] - 2026-09-25
 
 - **Graph projection hygiene and dimension-mode merge.** Before each recall

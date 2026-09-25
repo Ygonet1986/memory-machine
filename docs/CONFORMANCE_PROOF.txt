@@ -58,6 +58,11 @@ tests/test_annotation_coverage_v1.py::test_u3a17_row
 tests/test_annotation_coverage_v1.py::test_recompute_when_snapshots_present
 tests/test_annotation_union_v2.py::test_recorded_verdicts
 tests/test_annotation_union_v2.py::test_excerpt_limit_explains_u3a17
+tests/test_answerer_context.py::test_split_gives_history_priority_and_a_whiteboard_floor
+tests/test_answerer_context.py::test_render_recent_keeps_summary_and_last_turns_only
+tests/test_answerer_context.py::test_render_recent_caps_each_side_and_total
+tests/test_answerer_context.py::test_main_user_prompt_budget_trims_the_board_only_when_set
+tests/test_answerer_context.py::test_coordinator_uses_the_last_messages_and_bounds_the_board
 tests/test_app_graph.py::test_graph_settings_default_to_off
 tests/test_app_graph.py::test_backend_maps_graph_settings_to_config
 tests/test_app_graph.py::test_backend_maps_recall_modes_exactly_like_cli
@@ -733,4 +738,4 @@ tests/test_whiteboard.py::test_size_and_consolidation_trigger
 tests/test_whiteboard.py::test_roundtrip
 tests/test_whiteboard.py::test_render
 
-734 tests collected in 0.11s
+739 tests collected in 0.11s

@@ -50,7 +50,13 @@ much, too late, or the wrong remembrance.
 
 **Project chat (CLI/app).** Agents read the whiteboard in parallel → reminders
 (annotations) → payload + whiteboard go to the chatbot → durable memories
-appended to the tape.
+appended to the tape. The chatbot's context follows one budget rule
+(`answerer_history_messages`, default 10): the last ten turns (plus the
+consolidated summary, each side capped) get priority inside
+`whiteboard_budget`; the **whole whiteboard** fills the remainder and is
+trimmed only at that remainder, with an 800-char floor. Set the count to 0
+to return the entire budget to the whiteboard. This applies to the chatbot
+turn only — recall, agents and the admission window are untouched.
 
 **opencode sessions.** On every user message the plugin runs `memory-cli
 recall` (agents + whiteboard + cross-session hits) and injects the recalled
@@ -133,7 +139,9 @@ snippet), agent index/map and gap-recall (all lab-only with declared scope).
 ## 8. Defaults, flags and invariants
 
 - On by default since v0.3.1: `agent_history_messages` = 10 (the agents'
-  conversation window; set 0 to disable). Off by default:
+  conversation window; set 0 to disable) and, since v0.3.2,
+  `answerer_history_messages` = 10 (the chatbot's whiteboard/history split;
+  set 0 to disable). Off by default:
   `evidence_payload_window`, `graph_enabled`, router (`opt-in` after
   external benchmarks: agents > BM25 > router).
 - Opt-in env flags: `MEMORY_MACHINE_ADMISSION_SHADOW` (window), 

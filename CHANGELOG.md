@@ -4,6 +4,16 @@ All notable changes to this project are documented here. The project follows
 [Semantic Versioning](https://semver.org/) for the installable package; the
 manual/whitepaper keeps its own document version.
 
+## [0.3.2] - 2026-09-25
+
+- **Answerer context rule: whole whiteboard + last 10 messages under one
+  budget.** The conversation agent (CLI/app chatbot) now receives the last
+  `answerer_history_messages` turns (10 by default; consolidated summary
+  included, each side capped at 320 chars) with priority inside
+  `whiteboard_budget`; the whiteboard fills the remainder and is trimmed at
+  that remainder (800-char floor). Set 0 to return the whole budget to the
+  whiteboard. Recall/agents and the admission window are unaffected.
+
 ## [0.3.1] - 2026-09-25
 
 - **Agent conversation window, now active by default (10).**

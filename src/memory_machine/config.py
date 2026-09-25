@@ -49,6 +49,7 @@ class Config:
     view_prune: str = "none"
     agent_mode: str = "group"
     agent_history_messages: int = 10
+    answerer_history_messages: int = 10
     whiteboard_mode: str = "single"
     attention_mode: str = "off"
     attention_decay: float = 0.6
@@ -144,7 +145,9 @@ class Config:
         self.view_prune = self.view_prune if self.view_prune in {"none", "subject"} else "none"
         self.agent_mode = self.agent_mode if self.agent_mode in {"group", "view"} else "group"
         self.agent_history_messages = max(
-            0, min(50, _int(self.agent_history_messages, 0)))
+            0, min(50, _int(self.agent_history_messages, 10)))
+        self.answerer_history_messages = max(
+            0, min(50, _int(self.answerer_history_messages, 10)))
         self.whiteboard_mode = (
             self.whiteboard_mode if self.whiteboard_mode in {"single", "dimension"} else "single"
         )

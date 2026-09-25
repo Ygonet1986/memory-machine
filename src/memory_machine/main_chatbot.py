@@ -90,11 +90,15 @@ def main_user_prompt(
     *,
     evidence_label: str = "External context",
     temporal_instruction: bool = False,
+    whiteboard_budget: int = 0,
 ) -> str:
     parts = []
     if history:
         parts.append(history)
-    parts.append("## Whiteboard\n\n" + whiteboard.render())
+    board = whiteboard.render()
+    if whiteboard_budget > 0 and len(board) > whiteboard_budget:
+        board = board[: max(0, whiteboard_budget - 14)] + "\n… (trimmed)"
+    parts.append("## Whiteboard\n\n" + board)
     if extra_context:
         parts.append(f"## {evidence_label}\n\n" + extra_context)
     if temporal_instruction:
@@ -149,6 +153,7 @@ def run_main_chatbot(
     temporal_instruction: bool = False,
     temperature: float = 0.0,
     on_token: Any = None,
+    whiteboard_budget: int = 0,
 ) -> tuple[str, list[MemoryRecord], str]:
     """Run the main chatbot. Returns ``(reply, durable_memories, reasoning)``.
 
@@ -172,6 +177,7 @@ def run_main_chatbot(
                     "Recalled memory evidence" if memory_aware else "External context"
                 ),
                 temporal_instruction=temporal_instruction,
+                whiteboard_budget=whiteboard_budget,
             ),
         },
     ]

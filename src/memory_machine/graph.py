@@ -580,6 +580,61 @@ class GraphIndex:
         self.out_edges.setdefault(relation.source, []).append(relation)
         self.in_edges.setdefault(relation.target, []).append(relation)
 
+    def prune_to_active(self, active_ids: set[str]) -> dict[str, int]:
+        """Drop projections whose evidence exists only in inactive records.
+
+        Read-time filter (the store stays append-only): superseded/deleted
+        records cannot route traversal to active memories through entities or
+        relations whose evidence died with them. Returns removed counts.
+        """
+        def alive(obj: Any) -> bool:
+            candidates = {str(getattr(obj, "memory_id", "") or "")}
+            candidates.update(str(item.get("memory_id") or "")
+                              for item in getattr(obj, "evidence", ()) or ())
+            return bool((candidates - {""}) & active_ids)
+
+        surviving_relations = {rid: rel for rid, rel in self.relations.items()
+                               if alive(rel)}
+        endpoints = {node for rel in surviving_relations.values()
+                     for node in (rel.source, rel.target)}
+        mentioned = {eid for eid, mems in self.entity_memories.items()
+                     if mems & active_ids}
+        surviving_entities = {eid: ent for eid, ent in self.entities.items()
+                              if eid in endpoints or eid in mentioned}
+        surviving_relations = {
+            rid: rel for rid, rel in surviving_relations.items()
+            if rel.source in surviving_entities
+            and rel.target in surviving_entities}
+        removed = {
+            "entities": len(self.entities) - len(surviving_entities),
+            "relations": len(self.relations) - len(surviving_relations),
+        }
+        self.entities = surviving_entities
+        self.relations = surviving_relations
+        self.by_norm = {}
+        for entity in self.entities.values():
+            self.by_norm.setdefault(normalize_name(entity.name), entity.id)
+        self.out_edges = {}
+        self.in_edges = {}
+        for relation in self.relations.values():
+            self.out_edges.setdefault(relation.source, []).append(relation)
+            self.in_edges.setdefault(relation.target, []).append(relation)
+        self.memory_entities = {
+            mid: {eid for eid in ents if eid in self.entities}
+            for mid, ents in self.memory_entities.items() if mid in active_ids}
+        self.memory_entities = {mid: ents for mid, ents
+                                in self.memory_entities.items() if ents}
+        self.entity_memories = {
+            eid: {mid for mid in mems if mid in active_ids}
+            for eid, mems in self.entity_memories.items()
+            if eid in self.entities}
+        self.entity_memories = {eid: mems for eid, mems
+                                in self.entity_memories.items() if mems}
+        self.mention_confidence = {
+            key: value for key, value in self.mention_confidence.items()
+            if key[0] in active_ids and key[1] in self.entities}
+        return removed
+
     def resolve(self, name: str) -> str:
         key = normalize_name(name)
         entity_id = self.by_norm.get(key) or self.alias_map.get(key) or ""

@@ -404,6 +404,10 @@ tests/test_graph_hooks.py::test_rollup_record_is_not_extracted
 tests/test_graph_hooks.py::test_event_projects_into_event_entity_and_edges
 tests/test_graph_hooks.py::test_rebuild_converges_with_write_time
 tests/test_graph_hooks.py::test_resolver_hypothesis_and_alias_merge_at_projection_level
+tests/test_graph_projection_hygiene.py::test_dead_evidence_cannot_bridge_to_active_memories
+tests/test_graph_projection_hygiene.py::test_pruning_is_read_only_and_idempotent
+tests/test_graph_projection_hygiene.py::test_dimension_mode_receives_graph_annotations
+tests/test_graph_projection_hygiene.py::test_prune_to_active_unit
 tests/test_graph_recall.py::test_query_resolution_ignores_unknown_words
 tests/test_graph_recall.py::test_unknown_entity_returns_empty
 tests/test_graph_recall.py::test_alias_resolves_entity
@@ -746,4 +750,4 @@ tests/test_whiteboard.py::test_size_and_consolidation_trigger
 tests/test_whiteboard.py::test_roundtrip
 tests/test_whiteboard.py::test_render
 
-747 tests collected in 0.11s
+751 tests collected in 0.11s

@@ -202,3 +202,15 @@ measured recall path and extraction calls on the turn-slot write path.
   conversation default: its score floor filters association-only evidence
   (fails the conversation graph's own association case). A conversation-aware
   guard would require its own pre-registered evaluation.
+
+## Window restart (2026-09-25, third) — declared under §8 (graph hygiene)
+
+Reason: the graph recall path now prunes its index to the tape's active
+records before traversal (v0.3.5) and merges graph annotations in dimension
+mode — both change measured recall behavior.
+
+- Pre-restart logs archived in place as
+  `admission_shadow.prerestart_20260925_hygiene.jsonl` (1 record), never
+  counted; counting restarts from the first schema-v2 record after the fix.
+- No rule, threshold, candidate, comparator or schema of the *admission
+  experiment* is amended; P3v4 stays frozen at `44c0124`.

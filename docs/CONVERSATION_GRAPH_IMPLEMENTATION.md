@@ -153,11 +153,10 @@ Se o tamanho serializado do quadro exceder `consolidate_threshold`, o fluxo
 preexistente chama `consolidate_whiteboard()` após unir as anotações. A
 consolidação reduz o quadro; não significa apagar o `tape.jsonl` ou o grafo.
 
-**Limite importante:** no modo `whiteboard_mode="dimension"`, o código atual
-usa `_merge_by_dimension(run)` em vez de `raw_annotations`, portanto essa
-ramificação não inclui as anotações do grafo no quadro da mesma maneira que
-o modo padrão `single`. O comportamento para quadros por dimensão precisa
-ser corrigido e testado separadamente.
+**Modo dimension (corrigido em v0.3.5):** `_merge_by_dimension` agora recebe
+também as anotações do grafo (`_merge_by_dimension(run, graph_annotations)`);
+evidências do grafo (sem prefixo `view:`) entram no quadro semântico. Coberto
+por `tests/test_graph_projection_hygiene.py::test_dimension_mode_receives_graph_annotations`.
 
 ## 8. Testes e revisão
 
@@ -183,8 +182,13 @@ relações produzidas por um modelo real: os testes usam `FakeClient`.
 
 ## 9. Trabalho pendente, sem afirmar que já foi feito
 
-- Garantir que correções, supersede e exclusões na fita retirem ou refaçam
-  conexões antigas no grafo; testar que nada removido volta no recall.
+- ~~Garantir que correções, supersede e exclusões na fita retirem ou refaçam
+  conexões antigas no grafo; testar que nada removido volta no recall.~~
+  **Feito em v0.3.5:** poda em tempo de leitura (`GraphIndex.prune_to_active`):
+  a travessia só usa entidades com menção ativa e relações cuja memória de
+  origem está ativa; o store segue append-only. Testes de ponte morta,
+  leitura sem escrita e idempotência em
+  `tests/test_graph_projection_hygiene.py`.
 - Dar ao lote de conversas o mesmo contrato associativo do prompt individual.
 - Integrar as anotações do grafo ao quadro em modo `dimension`.
 - Oferecer criação e revisão de `entity_definition` na CLI/UI e testes de

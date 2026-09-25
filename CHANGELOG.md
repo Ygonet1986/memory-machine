@@ -4,6 +4,16 @@ All notable changes to this project are documented here. The project follows
 [Semantic Versioning](https://semver.org/) for the installable package; the
 manual/whitepaper keeps its own document version.
 
+## [0.3.5] - 2026-09-25
+
+- **Graph projection hygiene and dimension-mode merge.** Before each recall
+  the graph index is pruned to the tape's active records: entities without an
+  active mention and relations whose originating memory is inactive or absent
+  no longer route traversal (the store stays append-only). Dimension
+  whiteboards now receive the graph annotations (semantic board). Fixes the
+  two gaps declared in `CONVERSATION_GRAPH_IMPLEMENTATION.md` §7/§9.
+  Declared with an archived-window restart under admission-shadow-v2 §8.
+
 ## [0.3.4] - 2026-09-25
 
 - **Persistent conversation graph (two memories, one whiteboard).** Saved

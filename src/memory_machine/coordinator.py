@@ -362,15 +362,17 @@ class Machine:
 
         return render_recent_turns(self.tape, limit)
 
-    def _merge_by_dimension(self, run: RecallRun) -> list[Any]:
+    def _merge_by_dimension(self, run: RecallRun,
+                            extra: list[Any] | None = None) -> list[Any]:
         """Merge annotations into the board of the dimension that produced them.
 
         View agents carry ``view:<name>`` as agent id, so each dimension keeps
         its own working memory; the primary board receives the union for
-        backward compatibility.
+        backward compatibility. ``extra`` carries annotations that do not
+        belong to a view agent (graph evidence routes to the semantic board).
         """
         groups: dict[str, list[Any]] = {}
-        for annotation in run.annotations:
+        for annotation in [*run.annotations, *(extra or [])]:
             agent_id = annotation.agent_id or ""
             view = agent_id.split(":", 1)[1] if agent_id.startswith("view:") else ""
             dimension = (dimension_of(view) if view else None) or "semantic"
@@ -1182,7 +1184,7 @@ class Machine:
             plan.consulted_ids = []
             plan.level1_ids = []
         if self.config.whiteboard_mode == "dimension":
-            kept = self._merge_by_dimension(run)
+            kept = self._merge_by_dimension(run, graph_annotations)
         else:
             kept = merge_annotations(
                 self.whiteboard,
@@ -1310,11 +1312,15 @@ class Machine:
             store = GraphStore(resolve_path(self.root, self.config.graph_path))
             if not store.exists():
                 return None
+            index = store.index()
+            index.prune_to_active({
+                record.id for record in self.tape.read()
+                if record.status == "active"})
             hub_degree = self.config.graph_hub_degree
             if guard and not hub_degree:
                 hub_degree = self.config.graph_augment_hub_degree
             recall = GraphRecall(
-                store.index(),
+                index,
                 embedder=self._embedder(),
                 depth=self.config.graph_depth,
                 top_k=self.config.graph_top_k,

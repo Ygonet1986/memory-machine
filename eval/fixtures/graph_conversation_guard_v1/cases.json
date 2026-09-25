@@ -1,0 +1,272 @@
+{
+  "promoted": {
+    "min_score": 0.8,
+    "max_items": 3
+  },
+  "candidate": {
+    "min_score": 0.6,
+    "max_items": 2
+  },
+  "hub_degree": 2,
+  "depth": 3,
+  "association_cases": [
+    {
+      "id": "A1",
+      "question": "Lia",
+      "records": [
+        "Lia cuida do jardim",
+        "Nina desenhou a praça",
+        "O jardim cerca a praça"
+      ],
+      "entities": [
+        [
+          "E1",
+          "Lia",
+          "person",
+          "M0001"
+        ],
+        [
+          "E2",
+          "jardim",
+          "place",
+          "M0001"
+        ],
+        [
+          "E3",
+          "Nina",
+          "person",
+          "M0002"
+        ],
+        [
+          "E4",
+          "praça",
+          "place",
+          "M0002"
+        ]
+      ],
+      "relations": [
+        [
+          "E1",
+          "related_to",
+          "E2",
+          "M0001",
+          0.9
+        ],
+        [
+          "E2",
+          "related_to",
+          "E4",
+          "M0003",
+          0.9
+        ],
+        [
+          "E3",
+          "related_to",
+          "E4",
+          "M0002",
+          0.9
+        ]
+      ],
+      "linked": "M0002"
+    },
+    {
+      "id": "A2",
+      "question": "Ravi",
+      "records": [
+        "Ravi grava o ateliê",
+        "Bia pintou o filme",
+        "O ateliê inspirou o filme"
+      ],
+      "entities": [
+        [
+          "E1",
+          "Ravi",
+          "person",
+          "M0001"
+        ],
+        [
+          "E2",
+          "ateliê",
+          "place",
+          "M0001"
+        ],
+        [
+          "E3",
+          "Bia",
+          "person",
+          "M0002"
+        ],
+        [
+          "E4",
+          "filme",
+          "object",
+          "M0002"
+        ]
+      ],
+      "relations": [
+        [
+          "E1",
+          "related_to",
+          "E2",
+          "M0001",
+          0.9
+        ],
+        [
+          "E2",
+          "related_to",
+          "E4",
+          "M0003",
+          0.9
+        ],
+        [
+          "E3",
+          "related_to",
+          "E4",
+          "M0002",
+          0.9
+        ]
+      ],
+      "linked": "M0002"
+    },
+    {
+      "id": "A3",
+      "question": "Téo",
+      "records": [
+        "Téo ensaia a peça",
+        "Ana desenhou o cenário",
+        "A peça estreia no cenário"
+      ],
+      "entities": [
+        [
+          "E1",
+          "Téo",
+          "person",
+          "M0001"
+        ],
+        [
+          "E2",
+          "peça",
+          "object",
+          "M0001"
+        ],
+        [
+          "E3",
+          "Ana",
+          "person",
+          "M0002"
+        ],
+        [
+          "E4",
+          "cenário",
+          "object",
+          "M0002"
+        ],
+        [
+          "E5",
+          "bairro",
+          "place",
+          "M0002"
+        ]
+      ],
+      "relations": [
+        [
+          "E1",
+          "related_to",
+          "E2",
+          "M0001",
+          0.9
+        ],
+        [
+          "E2",
+          "related_to",
+          "E4",
+          "M0003",
+          0.9
+        ],
+        [
+          "E3",
+          "related_to",
+          "E4",
+          "M0002",
+          0.9
+        ],
+        [
+          "E3",
+          "related_to",
+          "E5",
+          "M0002",
+          0.4
+        ]
+      ],
+      "linked": "M0002"
+    }
+  ],
+  "hub_cases": [
+    {
+      "id": "H1",
+      "question": "Kalak",
+      "records": [
+        "Kalak crossed the rock",
+        "Kalak knows the user",
+        "the user likes petronante"
+      ],
+      "entities": [
+        [
+          "E1",
+          "Kalak",
+          "person",
+          "M0001"
+        ],
+        [
+          "E2",
+          "rochedo",
+          "place",
+          "M0001"
+        ],
+        [
+          "E3",
+          "petronante",
+          "creature",
+          "M0002"
+        ],
+        [
+          "E4",
+          "user",
+          "person",
+          "M0002"
+        ]
+      ],
+      "relations": [
+        [
+          "E1",
+          "cross",
+          "E2",
+          "M0001",
+          0.9
+        ],
+        [
+          "E1",
+          "knows",
+          "E4",
+          "M0002",
+          0.8
+        ],
+        [
+          "E4",
+          "found",
+          "E3",
+          "M0002",
+          0.8
+        ],
+        [
+          "E4",
+          "likes",
+          "E3",
+          "M0003",
+          0.7
+        ]
+      ],
+      "noise": "M0003"
+    }
+  ]
+}

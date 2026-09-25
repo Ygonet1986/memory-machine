@@ -366,6 +366,10 @@ tests/test_graph.py::test_cli_graph_status_defaults_to_recorded_extractor
 tests/test_graph_conversation.py::test_turns_feed_persistent_associative_graph_and_recall
 tests/test_graph_conversation.py::test_conversation_graph_can_be_disabled_explicitly
 tests/test_graph_conversation.py::test_default_graph_agent_puts_linked_memory_on_whiteboard
+tests/test_graph_conversation_guard_v1.py::test_fixture_hash_matches_manifest
+tests/test_graph_conversation_guard_v1.py::test_recorded_verdicts
+tests/test_graph_conversation_guard_v1.py::test_rescue_admits_association_only_above_floor
+tests/test_graph_conversation_guard_v1.py::test_rescue_cap_bounds_the_extra_items
 tests/test_graph_extract.py::test_simple_entity
 tests/test_graph_extract.py::test_two_entities_and_relation
 tests/test_graph_extract.py::test_event_agent_action_object
@@ -750,4 +754,4 @@ tests/test_whiteboard.py::test_size_and_consolidation_trigger
 tests/test_whiteboard.py::test_roundtrip
 tests/test_whiteboard.py::test_render
 
-751 tests collected in 0.11s
+755 tests collected in 0.11s

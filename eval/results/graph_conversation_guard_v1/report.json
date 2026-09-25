@@ -1,0 +1,97 @@
+{
+  "all_pass": true,
+  "fixture_sha256": "05b9af5be8f7304ae30bc4291171e33c7389b2e53144da5bdeaa801076617ce3",
+  "gates": {
+    "C1_candidate_recovers_links": true,
+    "C2_beats_promoted": true,
+    "C3_noise_bounded": true,
+    "C4_determinism": true,
+    "C5_bounded_rescue": true
+  },
+  "linked": {
+    "candidate": 3,
+    "plain": 3,
+    "promoted": 0
+  },
+  "noise": {
+    "candidate": 0,
+    "plain": 1,
+    "promoted": 0
+  },
+  "prereg": "docs/GRAPH_CONVERSATION_GUARD_V1_PREREG.md",
+  "rows": [
+    {
+      "candidate": [
+        "M0001",
+        "M0002",
+        "M0003"
+      ],
+      "capped_count": 3,
+      "id": "A1",
+      "plain": [
+        "M0001",
+        "M0002",
+        "M0003"
+      ],
+      "promoted": [
+        "M0001"
+      ],
+      "question": "Lia"
+    },
+    {
+      "candidate": [
+        "M0001",
+        "M0002",
+        "M0003"
+      ],
+      "capped_count": 3,
+      "id": "A2",
+      "plain": [
+        "M0001",
+        "M0002",
+        "M0003"
+      ],
+      "promoted": [
+        "M0001"
+      ],
+      "question": "Ravi"
+    },
+    {
+      "candidate": [
+        "M0001",
+        "M0002",
+        "M0003"
+      ],
+      "capped_count": 3,
+      "id": "A3",
+      "plain": [
+        "M0001",
+        "M0002",
+        "M0003"
+      ],
+      "promoted": [
+        "M0001"
+      ],
+      "question": "Téo"
+    },
+    {
+      "candidate": [
+        "M0001",
+        "M0002"
+      ],
+      "capped_count": 2,
+      "id": "H1",
+      "plain": [
+        "M0001",
+        "M0002",
+        "M0003"
+      ],
+      "promoted": [
+        "M0001",
+        "M0002"
+      ],
+      "question": "Kalak"
+    }
+  ],
+  "scope": "lab mechanism test; the rescue is opt-in-unwired; adopting it as a conversation default needs a new §8 restart"
+}

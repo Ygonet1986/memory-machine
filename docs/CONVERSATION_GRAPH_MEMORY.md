@@ -23,9 +23,13 @@ tentativas da projeção. Turnos deduplicados não são reprocessados.
 Na recuperação, os agentes usuais examinam a fita. O agente do grafo parte
 das entidades encontradas na pergunta, percorre até `graph_depth` conexões
 (default: 2) e propõe anotações `agent_id="graph"` com os IDs de origem. Em
-`graph_recall_mode="augment_guarded"` (default), as evidências do grafo
-passam por um filtro de score e quantidade; depois as duas listas são
-combinadas por ID e passam juntas pelo orçamento do quadro branco. Apenas registros ativos
+`graph_recall_mode="augment"` (default), as duas listas são combinadas por ID
+e passam juntas pelo orçamento do quadro branco. O guard promovido no fecho
+P0–P5 (`augment_guarded`, piso de score 0.80 + cap 3) fica disponível como
+opt-in, mas **filtra evidência de associação sem sobreposição lexical** —
+exatamente o caso "Lia → jardim → Nina" quando a segunda fala não repete as
+palavras da pergunta. Usar guarded para conversas exige antes um guard
+próprio para associações, com pré-registro e medição. Apenas registros ativos
 da fita podem entrar nas anotações e no payload; a resposta é fundamentada
 nos registros recuperados, não nas arestas tomadas isoladamente.
 Se o quadro branco ultrapassar `consolidate_threshold`, o fluxo de recall

@@ -16,6 +16,8 @@ from pathlib import Path
 from typing import Any
 
 DEFAULT_MAX_SUMMARY = 4000
+ANSWERER_TURN_CAP = 320
+ANSWERER_WHITEBOARD_FLOOR = 800
 
 CONTEXT_CONSOLIDATOR_PROMPT = """You are the context consolidator for the main \
 assistant. Below is the assistant's recent conversation history with a user \
@@ -85,6 +87,48 @@ class ChatContext:
 
     def total_chars(self) -> int:
         return len(self.summary) + self.turns_chars()
+
+    def render_recent(self, limit: int = 10, *,
+                      turn_cap: int = ANSWERER_TURN_CAP,
+                      max_chars: int = 0) -> str:
+        """The answerer's conversation block: summary + the last ``limit`` turns.
+
+        Each side of a turn is trimmed to ``turn_cap`` characters; when
+        ``max_chars`` is set the block keeps its most recent tail.
+        """
+        if limit <= 0:
+            return ""
+        parts: list[str] = []
+        if self.summary:
+            parts.append("## Prior context (consolidated)\n" + self.summary)
+        for turn in self.turns[-limit:]:
+            task = " ".join(turn.task.split())
+            reply = " ".join(turn.reply.split())
+            if turn_cap > 0:
+                if len(task) > turn_cap:
+                    task = task[: turn_cap - 1] + "…"
+                if len(reply) > turn_cap:
+                    reply = reply[: turn_cap - 1] + "…"
+            parts.append(f"Task: {task}\nReply: {reply}")
+        block = "\n\n".join(parts)
+        if max_chars > 0 and len(block) > max_chars:
+            block = "…" + block[-(max_chars - 1):]
+        return block
+
+
+def split_answerer_budget(total: int, history_chars: int, *,
+                          floor: int = ANSWERER_WHITEBOARD_FLOOR
+                          ) -> tuple[int, int]:
+    """Return ``(history_cap, whiteboard_budget)`` for the answerer context.
+
+    The conversation block has priority inside ``total``; the whiteboard fills
+    whatever remains, never below ``floor`` (or ``total`` when it is smaller).
+    """
+    total = max(0, int(total))
+    floor = min(max(0, int(floor)), total)
+    history_cap = max(0, total - floor)
+    whiteboard = max(floor, total - max(0, int(history_chars)))
+    return history_cap, whiteboard
 
 
 def load_context(path: Path) -> ChatContext:

@@ -30,6 +30,7 @@ from .context import (
 )
 from .groups import Manifest, add_memory, load_manifest, save_manifest
 from .llm import LLMClient, LLMError
+from .context import split_answerer_budget
 from .main_chatbot import memory_from_spec, run_main_chatbot
 from .metacognition import update_metacognition
 from .payload import build_evidence_payload, payload_as_context, payload_chars
@@ -945,7 +946,10 @@ class Machine:
             )
             consolidated = True
 
-        history = self.context.render()
+        history = self.context.render_recent(
+            int(getattr(self.config, "answerer_history_messages", 10) or 0))
+        _, board_budget = split_answerer_budget(
+            self.config.whiteboard_budget, len(history))
         reply, memories, reasoning = run_main_chatbot(
             client,
             self.whiteboard,
@@ -954,6 +958,7 @@ class Machine:
             extra_context=extra_context,
             temperature=temperature,
             on_token=on_token,
+            whiteboard_budget=board_budget,
         )
 
         update_metacognition(
